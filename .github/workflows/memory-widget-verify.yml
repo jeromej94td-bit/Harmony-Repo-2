@@ -48,6 +48,19 @@ jobs:
         if: success()
         run: gradle :app:testDebugUnitTest --tests 'com.example.widget.MemoryWidget*Test' --stacktrace
 
+      - name: Create ephemeral debug keystore
+        if: success()
+        run: >-
+          keytool -genkeypair -v
+          -keystore debug.keystore
+          -storepass android
+          -alias androiddebugkey
+          -keypass android
+          -dname "CN=Android Debug,O=Android,C=US"
+          -keyalg RSA
+          -keysize 2048
+          -validity 10000
+
       - name: Assemble debug APK
         if: success()
         run: gradle :app:assembleDebug --stacktrace
