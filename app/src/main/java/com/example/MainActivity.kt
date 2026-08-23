@@ -12,7 +12,9 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,6 +118,8 @@ fun HarmonyApp(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val isImeVisible = WindowInsets.isImeVisible
     val memoryRepository = remember(context.applicationContext) {
         RoomMemoryRepository(HarmonyDatabase.getInstance(context.applicationContext))
     }
@@ -196,6 +201,9 @@ fun HarmonyApp(
             }
             memoryState.pendingDeleteEntryIds.isNotEmpty() -> {
                 memoryViewModel.dismissPermanentDelete()
+            }
+            memoryState.editorMode != null && isImeVisible -> {
+                keyboardController?.hide()
             }
             memoryState.editorMode != null -> {
                 memoryViewModel.closeEditor()
