@@ -209,6 +209,7 @@ class MemoryWidgetProvider : AppWidgetProvider() {
 
             when (entry.kind) {
                 MemoryEntryKind.NOTE -> bindNote(views, index, entry)
+                MemoryEntryKind.LIST -> bindNote(views, index, entry.copy(body = null))
                 MemoryEntryKind.LINK -> bindLink(
                     context,
                     views,
