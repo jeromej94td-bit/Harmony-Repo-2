@@ -18,6 +18,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,6 +89,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -107,6 +109,7 @@ import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyTeal
 import com.example.ui.theme.HarmonyText
+import com.example.R
 import com.example.ui.theme.topicAccentColor
 import com.example.data.model.QuestionPack
 import coil.compose.AsyncImage
@@ -124,6 +127,7 @@ fun HarmonyTopBar(
     partnerAvatarPath: String? = null,
     onProfileClick: () -> Unit,
     onRefresh: () -> Unit = {},
+    showMemoryMark: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -134,16 +138,30 @@ fun HarmonyTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "HARMONY",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 3.sp,
-            style = MaterialTheme.typography.titleLarge.copy(
-                brush = Brush.horizontalGradient(listOf(HarmonyPink, HarmonyPurple))
-            ),
-            modifier = Modifier.testTag("brand_title")
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "HARMONY",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 3.sp,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    brush = Brush.horizontalGradient(listOf(HarmonyPink, HarmonyPurple))
+                ),
+                modifier = Modifier.testTag("brand_title")
+            )
+            if (showMemoryMark) {
+                Spacer(Modifier.width(8.dp))
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_full),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .testTag("memory_topbar_logo")
+                )
+            }
+        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically
