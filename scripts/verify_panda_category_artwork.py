@@ -74,17 +74,13 @@ require('"nie" -> PandaArtworkIcon(' in visuals, 'nie category no longer uses Pa
 require('drawableRes = R.drawable.panda_never_harmony' in visuals, 'nie category is not wired to panda_never_harmony')
 require('animationLabel = "never_panda"' in visuals, 'never panda animation label changed')
 
-# Preserve the approved slow tilt + breathing + glow motion exactly.
+# Preserve the approved slow tilt + breathing + glow motion exactly. The implementation
+# uses the shared optionalVisualMotion helper now, so lock the complete calls rather than
+# the old named-argument spelling that existed before the animation-control refactor.
 for snippet, message in (
-    ('initialValue = -1.6f', 'premium panda tilt start changed'),
-    ('targetValue = 1.6f', 'premium panda tilt end changed'),
-    ('durationMillis = 11_000', 'premium panda slow tilt duration changed'),
-    ('initialValue = 0.985f', 'premium panda breathing minimum changed'),
-    ('targetValue = 1.025f', 'premium panda breathing maximum changed'),
-    ('durationMillis = 3_200', 'premium panda breathing duration changed'),
-    ('initialValue = 0.44f', 'premium panda glow minimum changed'),
-    ('targetValue = 0.88f', 'premium panda glow maximum changed'),
-    ('durationMillis = 2_400', 'premium panda glow duration changed'),
+    ('optionalVisualMotion(animationEnabled, -1.6f, 1.6f, 11_000, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "${animationLabel}_tilt")', 'premium panda tilt motion changed'),
+    ('optionalVisualMotion(animationEnabled, 0.985f, 1.025f, 3_200, FastOutSlowInEasing, RepeatMode.Reverse, 1f, "${animationLabel}_breathe")', 'premium panda breathing motion changed'),
+    ('optionalVisualMotion(animationEnabled, 0.44f, 0.88f, 2_400, FastOutSlowInEasing, RepeatMode.Reverse, 0.68f, "${animationLabel}_glow")', 'premium panda glow motion changed'),
     ('rotationZ = tilt', 'premium panda tilt application changed'),
     ('scaleX = breathe', 'premium panda horizontal breathing changed'),
     ('scaleY = breathe', 'premium panda vertical breathing changed'),

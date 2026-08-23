@@ -110,6 +110,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun HarmonyApp(
     viewModel: HarmonyViewModel,
@@ -133,6 +134,7 @@ fun HarmonyApp(
     val memoryState by memoryViewModel.uiState.collectAsStateWithLifecycle()
     var isIntrospectionOpen by remember { mutableStateOf(false) }
     var isPandaEitherOrOpen by remember { mutableStateOf(false) }
+    var isPandaExitConfirmOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(memoryWidgetOpenRequest) {
         val request = memoryWidgetOpenRequest ?: return@LaunchedEffect
@@ -163,6 +165,7 @@ fun HarmonyApp(
     fun openPack(packId: String) {
         if (packId == PANDA_EITHER_OR_PACK_ID) {
             isPandaEitherOrOpen = true
+            isPandaExitConfirmOpen = false
         } else {
             viewModel.startPack(packId)
         }
@@ -179,10 +182,10 @@ fun HarmonyApp(
     BackHandler(enabled = canHandleBack) {
         when {
             isIntrospectionOpen -> {
-                isIntrospectionOpen = false
+                // IntrospectionExperienceScreen handles back so it can show its own leave dialog.
             }
             isPandaEitherOrOpen -> {
-                isPandaEitherOrOpen = false
+                isPandaExitConfirmOpen = true
             }
             isQuizActive -> {
                 if (uiState.isExitConfirmOpen) {
@@ -419,7 +422,7 @@ fun HarmonyApp(
                         onPickAnswer = { optText -> viewModel.pickAnswer(optText) },
                         onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
                         onNextStep = { viewModel.nextStep() },
-                        onAskExit = { viewModel.askExitRun() },
+                        onAskExit = { viewModel.previousStep() },
                         onCloseExitConfirm = { viewModel.closeExitConfirm() },
                         onCloseRunner = { viewModel.closeRunner() },
                         onOpenOwnAnswerDialog = { idx, mode -> viewModel.openOwnAnswerDialog(idx, mode) },
@@ -463,7 +466,50 @@ fun HarmonyApp(
                         onSaveAnswer = { questionIndex, userChoice, partnerChoice ->
                             viewModel.saveEitherOrAnswer(questionIndex, userChoice, partnerChoice)
                         },
-                        onExit = { isPandaEitherOrOpen = false }
+                        onExit = {
+                            isPandaExitConfirmOpen = false
+                            isPandaEitherOrOpen = false
+                        }
+                    )
+                }
+
+                if (isPandaExitConfirmOpen) {
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest = { isPandaExitConfirmOpen = false },
+                        title = {
+                            androidx.compose.material3.Text(
+                                com.example.util.LanguageManager.tr("Spiel verlassen?", uiState.appLanguage)
+                            )
+                        },
+                        text = {
+                            androidx.compose.material3.Text(
+                                com.example.util.LanguageManager.tr(
+                                    "Möchtet ihr das Spiel wirklich verlassen?",
+                                    uiState.appLanguage
+                                )
+                            )
+                        },
+                        confirmButton = {
+                            androidx.compose.material3.TextButton(
+                                onClick = {
+                                    isPandaExitConfirmOpen = false
+                                    isPandaEitherOrOpen = false
+                                }
+                            ) {
+                                androidx.compose.material3.Text(
+                                    com.example.util.LanguageManager.tr("Verlassen", uiState.appLanguage)
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            androidx.compose.material3.TextButton(
+                                onClick = { isPandaExitConfirmOpen = false }
+                            ) {
+                                androidx.compose.material3.Text(
+                                    com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage)
+                                )
+                            }
+                        }
                     )
                 }
             }
