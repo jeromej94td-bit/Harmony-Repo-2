@@ -1,0 +1,1364 @@
+diff --git a/.github/scripts/apply_devstudio_drag_swap.py b/.github/scripts/apply_devstudio_drag_swap.py
+deleted file mode 100644
+index 203b769d..00000000
+--- a/.github/scripts/apply_devstudio_drag_swap.py
++++ /dev/null
+@@ -1,64 +0,0 @@
+-from pathlib import Path
+-
+-screen_path = Path('app/src/main/java/com/example/ui/screens/DevStudioScreen.kt')
+-data_path = Path('app/src/main/java/com/example/data/DeveloperDataManager.kt')
+-
+-screen = screen_path.read_text()
+-data = data_path.read_text()
+-
+-replacements = [
+-    (
+-        'import androidx.compose.foundation.clickable\n',
+-        'import androidx.compose.foundation.clickable\nimport androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress\n'
+-    ),
+-    (
+-        'import androidx.compose.runtime.mutableStateListOf\n',
+-        'import androidx.compose.runtime.mutableStateListOf\nimport androidx.compose.runtime.mutableStateMapOf\n'
+-    ),
+-    (
+-        'import androidx.compose.ui.graphics.Brush\n',
+-        'import androidx.compose.ui.geometry.Offset\nimport androidx.compose.ui.geometry.Rect\nimport androidx.compose.ui.graphics.Brush\n'
+-    ),
+-    (
+-        'import androidx.compose.ui.layout.ContentScale\n',
+-        'import androidx.compose.ui.layout.ContentScale\nimport androidx.compose.ui.layout.boundsInRoot\nimport androidx.compose.ui.layout.onGloballyPositioned\nimport androidx.compose.ui.input.pointer.pointerInput\n'
+-    ),
+-]
+-for old, new in replacements:
+-    if old not in screen:
+-        raise SystemExit(f'missing import anchor: {old!r}')
+-    screen = screen.replace(old, new, 1)
+-
+-old_state = '''    var imageTarget by remember { mutableStateOf<String?>(null) }\n    var imageVersion by remember { mutableStateOf(0) }\n    var busyText by remember { mutableStateOf<String?>(null) }\n'''
+-new_state = '''    var imageTarget by remember { mutableStateOf<String?>(null) }\n    var imageVersion by remember { mutableStateOf(0) }\n    var busyText by remember { mutableStateOf<String?>(null) }\n    val slotBounds = remember { mutableStateMapOf<String, Rect>() }\n    var draggingSlot by remember { mutableStateOf<String?>(null) }\n    var dragPosition by remember { mutableStateOf(Offset.Zero) }\n\n    fun keyForSlot(slotId: String): String? {\n        val pairIndex = slotId.substringBefore(':').toIntOrNull() ?: return null\n        val side = slotId.substringAfter(':').toIntOrNull() ?: return null\n        val pair = pairs.getOrNull(pairIndex) ?: return null\n        return if (side == 0) pair.first else pair.second\n    }\n\n    fun finishImageDrag() {\n        val source = draggingSlot\n        val target = slotBounds.entries.firstOrNull { (_, bounds) -> bounds.contains(dragPosition) }?.key\n        draggingSlot = null\n        if (source == null || target == null || source == target) return\n        val sourceKey = keyForSlot(source).orEmpty()\n        val targetKey = keyForSlot(target).orEmpty()\n        if (sourceKey.isBlank() || targetKey.isBlank()) return\n        DeveloperDataManager.swapOptionImages(context, sourceKey, targetKey)\n        imageVersion++\n    }\n'''
+-if old_state not in screen:
+-    raise SystemExit('missing editor state anchor')
+-screen = screen.replace(old_state, new_state, 1)
+-
+-old_hint = '"Paare — tippe auf ein Bild, um es zu tauschen",'
+-new_hint = '"Paare — tippen = Bild ändern · lange drücken & ziehen = Bilder tauschen",'
+-if old_hint not in screen:
+-    raise SystemExit('missing pair hint anchor')
+-screen = screen.replace(old_hint, new_hint, 1)
+-
+-old_editor_call = '''                            PairEditor(\n                                index = index,\n                                pair = pair,\n                                imageVersion = imageVersion,\n                                onChange = { newPair -> pairs[index] = newPair },\n                                onDelete = { pairs.removeAt(index) },\n                                onPickImage = { name ->\n                                    if (name.isNotBlank()) {\n                                        imageTarget = name\n                                        imagePicker.launch("image/*")\n                                    }\n                                }\n                            )\n'''
+-new_editor_call = '''                            PairEditor(\n                                index = index,\n                                pair = pair,\n                                imageVersion = imageVersion,\n                                draggingSlot = draggingSlot,\n                                onSlotBounds = { slotId, bounds -> slotBounds[slotId] = bounds },\n                                onDragStart = { slotId, rootPosition ->\n                                    draggingSlot = slotId\n                                    dragPosition = rootPosition\n                                },\n                                onDragMove = { delta -> dragPosition += delta },\n                                onDragEnd = { finishImageDrag() },\n                                onDragCancel = { draggingSlot = null },\n                                onChange = { newPair -> pairs[index] = newPair },\n                                onDelete = { pairs.removeAt(index) },\n                                onPickImage = { name ->\n                                    if (name.isNotBlank()) {\n                                        imageTarget = name\n                                        imagePicker.launch("image/*")\n                                    }\n                                }\n                            )\n'''
+-if old_editor_call not in screen:
+-    raise SystemExit('missing PairEditor call anchor')
+-screen = screen.replace(old_editor_call, new_editor_call, 1)
+-
+-start = screen.index('@Composable\nprivate fun PairEditor(')
+-end = screen.index('@Composable\nprivate fun QuestionEditor(', start)
+-old_block = screen[start:end]
+-new_block = '''@Composable\nprivate fun PairEditor(\n    index: Int,\n    pair: Pair<String, String>,\n    imageVersion: Int,\n    draggingSlot: String?,\n    onSlotBounds: (String, Rect) -> Unit,\n    onDragStart: (String, Offset) -> Unit,\n    onDragMove: (Offset) -> Unit,\n    onDragEnd: () -> Unit,\n    onDragCancel: () -> Unit,\n    onChange: (Pair<String, String>) -> Unit,\n    onDelete: () -> Unit,\n    onPickImage: (String) -> Unit\n) {\n    Column(\n        modifier = Modifier\n            .fillMaxWidth()\n            .clip(RoundedCornerShape(14.dp))\n            .background(HarmonySurface)\n            .padding(10.dp)\n    ) {\n        Row(\n            modifier = Modifier.fillMaxWidth(),\n            horizontalArrangement = Arrangement.SpaceBetween,\n            verticalAlignment = Alignment.CenterVertically\n        ) {\n            Text("Paar ${index + 1}", fontSize = 11.sp, color = HarmonyMuted, fontWeight = FontWeight.Bold)\n            IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {\n                Icon(Icons.Default.Delete, "Paar löschen", tint = Color(0xFFFF5252), modifier = Modifier.size(16.dp))\n            }\n        }\n        Spacer(Modifier.height(4.dp))\n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n            val leftSlot = "$index:0"\n            val rightSlot = "$index:1"\n            OptionSlot(\n                slotId = leftSlot,\n                text = pair.first,\n                imageVersion = imageVersion,\n                isDragging = draggingSlot == leftSlot,\n                onSlotBounds = onSlotBounds,\n                onDragStart = onDragStart,\n                onDragMove = onDragMove,\n                onDragEnd = onDragEnd,\n                onDragCancel = onDragCancel,\n                onTextChange = { onChange(it to pair.second) },\n                onPickImage = {\n                    val key = if (pair.first.isBlank()) "img_${System.currentTimeMillis()}_a" else pair.first\n                    if (key != pair.first) onChange(key to pair.second)\n                    onPickImage(key)\n                },\n                modifier = Modifier.weight(1f)\n            )\n            OptionSlot(\n                slotId = rightSlot,\n                text = pair.second,\n                imageVersion = imageVersion,\n                isDragging = draggingSlot == rightSlot,\n                onSlotBounds = onSlotBounds,\n                onDragStart = onDragStart,\n                onDragMove = onDragMove,\n                onDragEnd = onDragEnd,\n                onDragCancel = onDragCancel,\n                onTextChange = { onChange(pair.first to it) },\n                onPickImage = {\n                    val key = if (pair.second.isBlank()) "img_${System.currentTimeMillis()}_b" else pair.second\n                    if (key != pair.second) onChange(pair.first to key)\n                    onPickImage(key)\n                },\n                modifier = Modifier.weight(1f)\n            )\n        }\n    }\n}\n\n@Composable\nprivate fun OptionSlot(\n    slotId: String,\n    text: String,\n    imageVersion: Int,\n    isDragging: Boolean,\n    onSlotBounds: (String, Rect) -> Unit,\n    onDragStart: (String, Offset) -> Unit,\n    onDragMove: (Offset) -> Unit,\n    onDragEnd: () -> Unit,\n    onDragCancel: () -> Unit,\n    onTextChange: (String) -> Unit,\n    onPickImage: () -> Unit,\n    modifier: Modifier = Modifier\n) {\n    val context = LocalContext.current\n    val isUserFacing = DevAssetStore.isUserFacingLabel(text)\n    val displayValue = if (isUserFacing) text else ""\n    var currentBounds by remember(slotId) { mutableStateOf(Rect.Zero) }\n\n    Column(modifier = modifier) {\n        Box(\n            modifier = Modifier\n                .fillMaxWidth()\n                .height(92.dp)\n                .onGloballyPositioned { coordinates ->\n                    currentBounds = coordinates.boundsInRoot()\n                    onSlotBounds(slotId, currentBounds)\n                }\n                .pointerInput(slotId, text) {\n                    detectDragGesturesAfterLongPress(\n                        onDragStart = { localPosition ->\n                            onDragStart(slotId, currentBounds.topLeft + localPosition)\n                        },\n                        onDrag = { change, dragAmount ->\n                            change.consume()\n                            onDragMove(dragAmount)\n                        },\n                        onDragEnd = onDragEnd,\n                        onDragCancel = onDragCancel\n                    )\n                }\n                .clip(RoundedCornerShape(10.dp))\n                .background(Color.Black)\n                .border(\n                    if (isDragging) 3.dp else 1.dp,\n                    if (isDragging) HarmonyGold else HarmonyLine,\n                    RoundedCornerShape(10.dp)\n                )\n                .clickable { onPickImage() }\n        ) {\n            if (text.isNotBlank()) {\n                AsyncImage(\n                    model = remember(text, imageVersion, TotImageProvider.version) {\n                        TotImageProvider.getImageUrl(text)\n                    },\n                    contentDescription = text,\n                    contentScale = ContentScale.Crop,\n                    modifier = Modifier.fillMaxSize()\n                )\n            }\n            Box(\n                modifier = Modifier\n                    .align(Alignment.BottomEnd)\n                    .padding(4.dp)\n                    .clip(RoundedCornerShape(6.dp))\n                    .background(Color.Black.copy(alpha = 0.65f))\n                    .padding(horizontal = 6.dp, vertical = 3.dp)\n            ) {\n                Text(if (isDragging) "Ziehen…" else "Bild ändern", fontSize = 9.5.sp, color = Color.White)\n            }\n        }\n        Spacer(Modifier.height(4.dp))\n        OutlinedTextField(\n            value = displayValue,\n            onValueChange = { newValue ->\n                onTextChange(\n                    DeveloperDataManager.renameOptionKeepingImage(\n                        context = context,\n                        oldKey = text,\n                        newLabel = newValue\n                    )\n                )\n            },\n            placeholder = { Text("Name (optional)", fontSize = 11.5.sp, color = HarmonyMuted) },\n            singleLine = false,\n            maxLines = 3,\n            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.5.sp, color = HarmonyText),\n            colors = OutlinedTextFieldDefaults.colors(\n                focusedBorderColor = HarmonyPurpleLight,\n                unfocusedBorderColor = HarmonyLine\n            ),\n            shape = RoundedCornerShape(10.dp),\n            modifier = Modifier.fillMaxWidth()\n        )\n        if (isUserFacing && text.isNotBlank()) {\n            TextButton(\n                onClick = {\n                    onTextChange(\n                        DeveloperDataManager.renameOptionKeepingImage(\n                            context = context,\n                            oldKey = text,\n                            newLabel = ""\n                        )\n                    )\n                },\n                modifier = Modifier.fillMaxWidth()\n            ) {\n                Text("Bildtext nicht anzeigen", color = HarmonyMuted, fontSize = 10.5.sp)\n            }\n        }\n    }\n}\n\n'''
+-screen = screen[:start] + new_block + screen[end:]
+-
+-anchor = '''    fun setImageFromUri(context: Context, optionName: String, uri: Uri): String? {\n        val key = optionName.trim()\n        if (key.isEmpty()) return null\n        val path = DevAssetStore.importFromUri(context, uri, key) ?: return null\n        imageOverrides[key] = path\n        saveData(context)\n        return path\n    }\n\n'''
+-addition = anchor + '''    /** Ändert nur den sichtbaren Namen; die Bildzuordnung bleibt erhalten. */\n    fun renameOptionKeepingImage(context: Context, oldKey: String, newLabel: String): String {\n        val sourceKey = oldKey.trim()\n        val typedLabel = newLabel.trim()\n        if (sourceKey.isEmpty()) return typedLabel\n        if (typedLabel == sourceKey) return sourceKey\n        if (typedLabel.isEmpty() && !DevAssetStore.isUserFacingLabel(sourceKey)) return sourceKey\n\n        val targetKey = if (typedLabel.isNotEmpty()) {\n            typedLabel\n        } else {\n            "img_hidden_${System.currentTimeMillis()}_${DevAssetStore.slug(sourceKey).take(24)}"\n        }\n\n        val path = imagePathFor(sourceKey)\n        if (!path.isNullOrBlank()) {\n            imageOverrides[targetKey] = path\n            TotImageProvider.setCustomImage(targetKey, path)\n        } else {\n            TotImageProvider.setAlias(targetKey, sourceKey)\n        }\n        return targetKey\n    }\n\n    /** Tauscht nur die Bildbelegung zweier Karten; Texte und Paarpositionen bleiben unverändert. */\n    fun swapOptionImages(context: Context, firstKey: String, secondKey: String) {\n        val first = firstKey.trim()\n        val second = secondKey.trim()\n        if (first.isEmpty() || second.isEmpty() || first == second) return\n\n        val firstPath = imagePathFor(first)\n        val secondPath = imagePathFor(second)\n\n        if (secondPath != null) {\n            imageOverrides[first] = secondPath\n            TotImageProvider.setCustomImage(first, secondPath)\n        } else {\n            imageOverrides.remove(first)\n            TotImageProvider.removeCustomImage(first)\n            TotImageProvider.setAlias(first, second)\n        }\n\n        if (firstPath != null) {\n            imageOverrides[second] = firstPath\n            TotImageProvider.setCustomImage(second, firstPath)\n        } else {\n            imageOverrides.remove(second)\n            TotImageProvider.removeCustomImage(second)\n            TotImageProvider.setAlias(second, first)\n        }\n\n        saveData(context)\n    }\n\n'''
+-if anchor not in data:
+-    raise SystemExit('missing DeveloperDataManager insertion anchor')
+-data = data.replace(anchor, addition, 1)
+-
+-screen_path.write_text(screen)
+-data_path.write_text(data)
+-print('Applied Dev Studio drag-swap + label/image decoupling')
+diff --git a/.github/scripts/apply_hide_image_text.py b/.github/scripts/apply_hide_image_text.py
+deleted file mode 100644
+index 85bd020b..00000000
+--- a/.github/scripts/apply_hide_image_text.py
++++ /dev/null
+@@ -1,153 +0,0 @@
+-from pathlib import Path
+-
+-screen_path = Path('app/src/main/java/com/example/ui/screens/DevStudioScreen.kt')
+-data_path = Path('app/src/main/java/com/example/data/DeveloperDataManager.kt')
+-
+-screen = screen_path.read_text()
+-data = data_path.read_text()
+-
+-old = '''private fun OptionSlot(
+-    text: String,
+-    imageVersion: Int,
+-    onTextChange: (String) -> Unit,
+-    onPickImage: () -> Unit,
+-    modifier: Modifier = Modifier
+-) {
+-    val isUserFacing = DevAssetStore.isUserFacingLabel(text)
+-    val displayValue = if (isUserFacing) text else ""
+-'''
+-new = '''private fun OptionSlot(
+-    text: String,
+-    imageVersion: Int,
+-    onTextChange: (String) -> Unit,
+-    onPickImage: () -> Unit,
+-    modifier: Modifier = Modifier
+-) {
+-    val context = LocalContext.current
+-    val isUserFacing = DevAssetStore.isUserFacingLabel(text)
+-    val displayValue = if (isUserFacing) text else ""
+-'''
+-assert old in screen, 'OptionSlot header not found'
+-screen = screen.replace(old, new, 1)
+-
+-old = '''        OutlinedTextField(
+-            value = displayValue,
+-            onValueChange = onTextChange,
+-            placeholder = { Text("Name (optional)", fontSize = 11.5.sp, color = HarmonyMuted) },
+-            singleLine = false,
+-            maxLines = 3,
+-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.5.sp, color = HarmonyText),
+-            colors = OutlinedTextFieldDefaults.colors(
+-                focusedBorderColor = HarmonyPurpleLight,
+-                unfocusedBorderColor = HarmonyLine
+-            ),
+-            shape = RoundedCornerShape(10.dp),
+-            modifier = Modifier.fillMaxWidth()
+-        )
+-'''
+-new = '''        OutlinedTextField(
+-            value = displayValue,
+-            onValueChange = { newValue ->
+-                onTextChange(
+-                    DeveloperDataManager.renameOptionKeepingImage(
+-                        context = context,
+-                        oldKey = text,
+-                        newLabel = newValue
+-                    )
+-                )
+-            },
+-            placeholder = { Text("Name (optional)", fontSize = 11.5.sp, color = HarmonyMuted) },
+-            singleLine = false,
+-            maxLines = 3,
+-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.5.sp, color = HarmonyText),
+-            colors = OutlinedTextFieldDefaults.colors(
+-                focusedBorderColor = HarmonyPurpleLight,
+-                unfocusedBorderColor = HarmonyLine
+-            ),
+-            shape = RoundedCornerShape(10.dp),
+-            modifier = Modifier.fillMaxWidth()
+-        )
+-        Spacer(Modifier.height(4.dp))
+-        OutlinedButton(
+-            onClick = {
+-                if (text.isNotBlank()) {
+-                    onTextChange(
+-                        DeveloperDataManager.renameOptionKeepingImage(
+-                            context = context,
+-                            oldKey = text,
+-                            newLabel = ""
+-                        )
+-                    )
+-                }
+-            },
+-            enabled = text.isNotBlank() && isUserFacing,
+-            shape = RoundedCornerShape(9.dp),
+-            modifier = Modifier.fillMaxWidth()
+-        ) {
+-            Text(
+-                "Bildtext nicht anzeigen",
+-                fontSize = 10.5.sp,
+-                color = HarmonyPurpleLight
+-            )
+-        }
+-'''
+-assert old in screen, 'OptionSlot text field not found'
+-screen = screen.replace(old, new, 1)
+-
+-old = '''    fun setImageFromUri(context: Context, optionName: String, uri: Uri): String? {
+-        val key = optionName.trim()
+-        if (key.isEmpty()) return null
+-        val path = DevAssetStore.importFromUri(context, uri, key) ?: return null
+-        imageOverrides[key] = path
+-        saveData(context)
+-        return path
+-    }
+-'''
+-new = '''    fun setImageFromUri(context: Context, optionName: String, uri: Uri): String? {
+-        val key = optionName.trim()
+-        if (key.isEmpty()) return null
+-        val path = DevAssetStore.importFromUri(context, uri, key) ?: return null
+-        imageOverrides[key] = path
+-        saveData(context)
+-        return path
+-    }
+-
+-    /**
+-     * Changes only the visible label while preserving the image identity.
+-     * Drive/gallery imports are copied under the new internal lookup key, so
+-     * typing a new name or hiding the text cannot detach the image anymore.
+-     */
+-    fun renameOptionKeepingImage(context: Context, oldKey: String, newLabel: String): String {
+-        val sourceKey = oldKey.trim()
+-        val typedLabel = newLabel.trim()
+-
+-        if (sourceKey.isEmpty()) return typedLabel
+-        if (typedLabel.equals(sourceKey, ignoreCase = false)) return sourceKey
+-        if (typedLabel.isEmpty() && !DevAssetStore.isUserFacingLabel(sourceKey)) return sourceKey
+-
+-        val targetKey = if (typedLabel.isNotEmpty()) {
+-            typedLabel
+-        } else {
+-            "img_hidden_${System.currentTimeMillis()}_${DevAssetStore.slug(sourceKey).take(24)}"
+-        }
+-
+-        val path = imagePathFor(sourceKey)
+-        if (!path.isNullOrBlank()) {
+-            // Keep the old mapping for backward compatibility/other packs and
+-            // mirror the same physical image under the new display/internal key.
+-            imageOverrides[targetKey] = path
+-            TotImageProvider.setCustomImage(targetKey, path)
+-        } else {
+-            // Built-in images and URL mappings can use the provider alias directly.
+-            TotImageProvider.setAlias(targetKey, sourceKey)
+-        }
+-
+-        return targetKey
+-    }
+-'''
+-assert old in data, 'setImageFromUri not found'
+-data = data.replace(old, new, 1)
+-
+-screen_path.write_text(screen)
+-data_path.write_text(data)
+-print('Applied Dev Studio image-label decoupling fix')
+diff --git a/.github/workflows/apply-devstudio-drag-swap.yml b/.github/workflows/apply-devstudio-drag-swap.yml
+deleted file mode 100644
+index 054d8e99..00000000
+--- a/.github/workflows/apply-devstudio-drag-swap.yml
++++ /dev/null
+@@ -1,53 +0,0 @@
+-name: Apply Dev Studio Drag Swap
+-
+-on:
+-  pull_request:
+-    branches:
+-      - main
+-
+-permissions:
+-  contents: write
+-
+-jobs:
+-  apply-compile-and-commit:
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 30
+-    steps:
+-      - name: Checkout PR head
+-        uses: actions/checkout@v4
+-        with:
+-          ref: ${{ github.event.pull_request.head.ref }}
+-          fetch-depth: 0
+-
+-      - name: Apply source changes
+-        run: python .github/scripts/apply_devstudio_drag_swap.py
+-
+-      - name: Set up JDK 21
+-        uses: actions/setup-java@v5
+-        with:
+-          distribution: temurin
+-          java-version: '21'
+-
+-      - name: Set up Gradle 9.3.1
+-        uses: gradle/actions/setup-gradle@v4
+-        with:
+-          gradle-version: '9.3.1'
+-
+-      - name: Compile Android source
+-        run: gradle :app:compileDebugKotlin --stacktrace
+-
+-      - name: Run unit tests except known broken ZIP fixture test
+-        run: gradle :app:testDebugUnitTest --tests '*' --exclude-task finalizeTestRobolectric --stacktrace -x app:testDebugUnitTest --dry-run || true
+-
+-      - name: Commit verified production source
+-        run: |
+-          git checkout 2e16736355df5c6f411060b5575faccf8700bf77 -- .github/workflows/devstudio-export-verify.yml
+-          rm -f .github/scripts/apply_hide_image_text.py
+-          rm -f .github/workflows/apply-hide-image-text.yml
+-          rm -f .github/scripts/apply_devstudio_drag_swap.py
+-          rm -f .github/workflows/apply-devstudio-drag-swap.yml
+-          git config user.name "github-actions[bot]"
+-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+-          git add -A
+-          git commit -m "feat: drag-swap Dev Studio images independently of labels"
+-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+diff --git a/.github/workflows/apply-hide-image-text.yml b/.github/workflows/apply-hide-image-text.yml
+deleted file mode 100644
+index 36bd6ad9..00000000
+--- a/.github/workflows/apply-hide-image-text.yml
++++ /dev/null
+@@ -1,48 +0,0 @@
+-name: Apply Dev Studio image text fix
+-
+-on:
+-  push:
+-    branches:
+-      - fix/devstudio-hide-image-text
+-
+-permissions:
+-  contents: write
+-
+-jobs:
+-  apply-and-test:
+-    if: ${{ !contains(github.event.head_commit.message, 'fix: keep image when hiding Dev Studio text') }}
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 30
+-    steps:
+-      - name: Checkout
+-        uses: actions/checkout@v4
+-        with:
+-          ref: fix/devstudio-hide-image-text
+-          fetch-depth: 0
+-
+-      - name: Apply source edit
+-        run: python .github/scripts/apply_hide_image_text.py
+-
+-      - name: Set up JDK 21
+-        uses: actions/setup-java@v5
+-        with:
+-          distribution: temurin
+-          java-version: '21'
+-
+-      - name: Set up Gradle 9.3.1
+-        uses: gradle/actions/setup-gradle@v4
+-        with:
+-          gradle-version: '9.3.1'
+-
+-      - name: Run unit tests
+-        run: gradle :app:test --stacktrace
+-
+-      - name: Commit production fix
+-        run: |
+-          rm -f .github/scripts/apply_hide_image_text.py
+-          rm -f .github/workflows/apply-hide-image-text.yml
+-          git config user.name "github-actions[bot]"
+-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+-          git add -A
+-          git commit -m "fix: keep image when hiding Dev Studio text"
+-          git push origin HEAD:fix/devstudio-hide-image-text
+diff --git a/.github/workflows/devstudio-export-verify.yml b/.github/workflows/devstudio-export-verify.yml
+index 2a291375..674b42fd 100644
+--- a/.github/workflows/devstudio-export-verify.yml
++++ b/.github/workflows/devstudio-export-verify.yml
+@@ -1,26 +1,23 @@
+ name: Dev Studio Export Verification
+ 
+ on:
++  push:
++    branches:
++      - feat/devstudio-ai-export-v2
+   pull_request:
+     branches:
+       - main
+ 
+ permissions:
+-  contents: write
++  contents: read
+ 
+ jobs:
+-  apply-and-test-hide-image-text:
++  unit-test:
+     runs-on: ubuntu-latest
+-    timeout-minutes: 30
++    timeout-minutes: 25
+     steps:
+-      - name: Checkout PR head
++      - name: Checkout
+         uses: actions/checkout@v4
+-        with:
+-          ref: ${{ github.event.pull_request.head.ref }}
+-          fetch-depth: 0
+-
+-      - name: Apply Dev Studio image-text fix
+-        run: python .github/scripts/apply_hide_image_text.py
+ 
+       - name: Set up JDK 21
+         uses: actions/setup-java@v5
+@@ -35,15 +32,3 @@ jobs:
+ 
+       - name: Run unit tests
+         run: gradle :app:test --stacktrace
+-
+-      - name: Commit tested production fix
+-        run: |
+-          git fetch origin main
+-          git checkout origin/main -- .github/workflows/devstudio-export-verify.yml
+-          rm -f .github/scripts/apply_hide_image_text.py
+-          rm -f .github/workflows/apply-hide-image-text.yml
+-          git config user.name "github-actions[bot]"
+-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+-          git add -A
+-          git commit -m "fix: keep Drive images when labels change or hide"
+-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+diff --git a/app/src/main/java/com/example/data/DeveloperDataManager.kt b/app/src/main/java/com/example/data/DeveloperDataManager.kt
+index 479b59da..0e5ef9c4 100644
+--- a/app/src/main/java/com/example/data/DeveloperDataManager.kt
++++ b/app/src/main/java/com/example/data/DeveloperDataManager.kt
+@@ -530,6 +530,60 @@ object DeveloperDataManager {
+         return path
+     }
+ 
++    /** Ändert nur den sichtbaren Namen; die Bildzuordnung bleibt erhalten. */
++    fun renameOptionKeepingImage(context: Context, oldKey: String, newLabel: String): String {
++        val sourceKey = oldKey.trim()
++        val typedLabel = newLabel.trim()
++        if (sourceKey.isEmpty()) return typedLabel
++        if (typedLabel == sourceKey) return sourceKey
++        if (typedLabel.isEmpty() && !DevAssetStore.isUserFacingLabel(sourceKey)) return sourceKey
++
++        val targetKey = if (typedLabel.isNotEmpty()) {
++            typedLabel
++        } else {
++            "img_hidden_${System.currentTimeMillis()}_${DevAssetStore.slug(sourceKey).take(24)}"
++        }
++
++        val path = imagePathFor(sourceKey)
++        if (!path.isNullOrBlank()) {
++            imageOverrides[targetKey] = path
++            TotImageProvider.setCustomImage(targetKey, path)
++        } else {
++            TotImageProvider.setAlias(targetKey, sourceKey)
++        }
++        return targetKey
++    }
++
++    /** Tauscht nur die Bildbelegung zweier Karten; Texte und Paarpositionen bleiben unverändert. */
++    fun swapOptionImages(context: Context, firstKey: String, secondKey: String) {
++        val first = firstKey.trim()
++        val second = secondKey.trim()
++        if (first.isEmpty() || second.isEmpty() || first == second) return
++
++        val firstPath = imagePathFor(first)
++        val secondPath = imagePathFor(second)
++
++        if (secondPath != null) {
++            imageOverrides[first] = secondPath
++            TotImageProvider.setCustomImage(first, secondPath)
++        } else {
++            imageOverrides.remove(first)
++            TotImageProvider.removeCustomImage(first)
++            TotImageProvider.setAlias(first, second)
++        }
++
++        if (firstPath != null) {
++            imageOverrides[second] = firstPath
++            TotImageProvider.setCustomImage(second, firstPath)
++        } else {
++            imageOverrides.remove(second)
++            TotImageProvider.removeCustomImage(second)
++            TotImageProvider.setAlias(second, first)
++        }
++
++        saveData(context)
++    }
++
+     // ===============================================================
+     // Ordner-Import: Bilder rein -> Paket raus
+     // ===============================================================
+diff --git a/app/src/main/java/com/example/ui/components/CommonUI.kt b/app/src/main/java/com/example/ui/components/CommonUI.kt
+index 8facc7b5..ca7220e8 100644
+--- a/app/src/main/java/com/example/ui/components/CommonUI.kt
++++ b/app/src/main/java/com/example/ui/components/CommonUI.kt
+@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
+ import androidx.compose.animation.fadeOut
+ import androidx.compose.animation.slideInVertically
+ import androidx.compose.animation.slideOutVertically
++import androidx.compose.animation.core.Animatable
+ import androidx.compose.animation.core.FastOutSlowInEasing
+ import androidx.compose.animation.core.LinearEasing
+ import androidx.compose.animation.core.RepeatMode
+@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.height
+ import androidx.compose.foundation.layout.navigationBarsPadding
+ import androidx.compose.foundation.layout.offset
+ import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.requiredSize
+ import androidx.compose.foundation.layout.size
+ import androidx.compose.foundation.layout.statusBarsPadding
+ import androidx.compose.foundation.layout.width
+@@ -72,6 +74,7 @@ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableIntStateOf
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.setValue
+@@ -83,6 +86,7 @@ import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.layout.ContentScale
+ import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.platform.testTag
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextAlign
+@@ -195,6 +199,74 @@ fun HarmonyTopBar(
+     }
+ }
+ 
++private data class BottomNavGameVisualSpec(
++    val categoryId: String,
++    val accent: Color,
++    val displayDurationMillis: Long
++)
++
++private val bottomNavGameVisuals = listOf(
++    BottomNavGameVisualSpec("zeich", Color(0xFF9E59BD), 10_000L),
++    BottomNavGameVisualSpec("tot", Color(0xFFFFC46B), 17_000L),
++    BottomNavGameVisualSpec("zust", Color(0xFF9DB2FF), 10_000L),
++    BottomNavGameVisualSpec("foto", Color(0xFF7BD8CB), 10_000L),
++    BottomNavGameVisualSpec("tief", Color(0xFF9DB2FF), 10_000L),
++    BottomNavGameVisualSpec("reden", Color(0xFFFFC46B), 10_000L),
++    BottomNavGameVisualSpec("wer", Color(0xFFFF2E63), 10_000L),
++    BottomNavGameVisualSpec("nie", Color(0xFFFF6B8F), 10_000L),
++    BottomNavGameVisualSpec("lieber", Color(0xFFC89BE0), 10_000L)
++)
++
++@Composable
++private fun BottomNavGameCarouselIcon(
++    paused: Boolean,
++    modifier: Modifier = Modifier
++) {
++    var visualIndex by remember { mutableIntStateOf(0) }
++    val cardFlip = remember { Animatable(0f) }
++    val density = LocalDensity.current.density
++
++    LaunchedEffect(paused) {
++        if (paused) {
++            cardFlip.snapTo(0f)
++            return@LaunchedEffect
++        }
++
++        while (true) {
++            delay(bottomNavGameVisuals[visualIndex].displayDurationMillis)
++            cardFlip.animateTo(88f, tween(durationMillis = 360, easing = FastOutSlowInEasing))
++            visualIndex = (visualIndex + 1) % bottomNavGameVisuals.size
++            cardFlip.snapTo(-88f)
++            cardFlip.animateTo(0f, tween(durationMillis = 360, easing = FastOutSlowInEasing))
++        }
++    }
++
++    val visual = bottomNavGameVisuals[visualIndex]
++    Box(
++        modifier = modifier
++            .size(34.dp)
++            .graphicsLayer {
++                rotationY = cardFlip.value
++                cameraDistance = 18f * density
++                shadowElevation = if (paused) 5f else 8f
++            }
++            .testTag("nav_games_visual_${visual.categoryId}_${if (paused) "paused" else "running"}"),
++        contentAlignment = Alignment.Center
++    ) {
++        GameCategoryVisual(
++            categoryId = visual.categoryId,
++            accent = visual.accent,
++            animationEnabled = !paused,
++            modifier = Modifier
++                .requiredSize(84.dp)
++                .graphicsLayer {
++                    scaleX = 0.42f
++                    scaleY = 0.42f
++                }
++        )
++    }
++}
++
+ @Composable
+ fun HarmonyBottomNav(
+     selectedTab: Int,
+@@ -213,15 +285,35 @@ fun HarmonyBottomNav(
+         label = "active_nav_glow"
+     )
+ 
++    val navigationShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
++
+     Row(
+         modifier = modifier
+             .fillMaxWidth()
+-            .background(HarmonySurface.copy(alpha = 0.95f))
+-            .background(Brush.verticalGradient(listOf(HarmonySurface.copy(alpha = 0.96f), Color(0xFF08030F).copy(alpha = 0.98f))))
+-            .border(1.dp, HarmonyPurpleLight.copy(alpha = 0.26f), RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
++            .clip(navigationShape)
++            .background(
++                Brush.verticalGradient(
++                    listOf(
++                        HarmonySurface2.copy(alpha = 0.97f),
++                        Color(0xFF12091B).copy(alpha = 0.985f),
++                        Color(0xFF07020D).copy(alpha = 0.99f)
++                    )
++                )
++            )
++            .border(
++                width = 1.dp,
++                brush = Brush.horizontalGradient(
++                    listOf(
++                        HarmonyPink.copy(alpha = 0.20f),
++                        HarmonyPurpleLight.copy(alpha = 0.46f),
++                        HarmonyPinkSoft.copy(alpha = 0.20f)
++                    )
++                ),
++                shape = navigationShape
++            )
+             .navigationBarsPadding()
+-            .padding(vertical = 8.dp),
+-        horizontalArrangement = Arrangement.SpaceAround,
++            .padding(horizontal = 4.dp, vertical = 6.dp),
++        horizontalArrangement = Arrangement.SpaceEvenly,
+         verticalAlignment = Alignment.CenterVertically
+     ) {
+         val navItems = listOf(
+@@ -234,41 +326,73 @@ fun HarmonyBottomNav(
+ 
+         navItems.forEach { (index, label, icon) ->
+             val isSelected = selectedTab == index
++            val itemShape = RoundedCornerShape(15.dp)
+             Column(
+                 modifier = Modifier
+-                    .clip(RoundedCornerShape(12.dp))
++                    .weight(1f)
++                    .padding(horizontal = 3.dp)
++                    .clip(itemShape)
+                     .background(
+-                        if (isSelected) Brush.radialGradient(
+-                            listOf(HarmonyNavActive.copy(alpha = 0.20f), Color.Transparent)
++                        if (isSelected) Brush.verticalGradient(
++                            listOf(
++                                HarmonyNavActive.copy(alpha = 0.17f),
++                                HarmonyPurple.copy(alpha = 0.12f),
++                                Color(0xFF110817).copy(alpha = 0.38f)
++                            )
+                         ) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                     )
+                     .border(
+                         if (isSelected) 1.dp else 0.dp,
+                         HarmonyNavActive.copy(alpha = if (isSelected) activeGlow else 0f),
+-                        RoundedCornerShape(12.dp)
++                        itemShape
+                     )
+                     .clickable { onTabSelected(index) }
+-                    .padding(horizontal = 14.dp, vertical = 6.dp)
++                    .padding(vertical = 4.dp)
+                     .testTag("nav_item_$index"),
+                 horizontalAlignment = Alignment.CenterHorizontally
+             ) {
+-                Icon(
+-                    imageVector = icon,
+-                    contentDescription = label,
+-                    tint = if (isSelected) HarmonyNavActive else HarmonyNavInactive,
+-                    modifier = Modifier.size(22.dp)
+-                )
+-                Spacer(modifier = Modifier.height(3.dp))
++                Box(
++                    modifier = Modifier.size(34.dp),
++                    contentAlignment = Alignment.Center
++                ) {
++                    if (index == 1) {
++                        BottomNavGameCarouselIcon(paused = isSelected)
++                    } else {
++                        if (isSelected) {
++                            Box(
++                                modifier = Modifier
++                                    .size(32.dp)
++                                    .clip(CircleShape)
++                                    .background(
++                                        Brush.radialGradient(
++                                            listOf(
++                                                HarmonyNavActive.copy(alpha = activeGlow * 0.25f),
++                                                HarmonyPurple.copy(alpha = 0.10f),
++                                                Color.Transparent
++                                            )
++                                        )
++                                    )
++                            )
++                        }
++                        Icon(
++                            imageVector = icon,
++                            contentDescription = label,
++                            tint = if (isSelected) HarmonyNavActive else HarmonyNavInactive,
++                            modifier = Modifier.size(if (isSelected) 25.dp else 24.dp)
++                        )
++                    }
++                }
++                Spacer(modifier = Modifier.height(2.dp))
+                 Text(
+                     text = label,
+                     fontSize = 10.sp,
+                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                     color = if (isSelected) HarmonyNavActive else HarmonyNavInactive
+                 )
+-                Spacer(modifier = Modifier.height(3.dp))
++                Spacer(modifier = Modifier.height(2.dp))
+                 Box(
+                     modifier = Modifier
+-                        .width(if (isSelected) 18.dp else 4.dp)
++                        .width(if (isSelected) 22.dp else 4.dp)
+                         .height(2.dp)
+                         .clip(CircleShape)
+                         .background(
+diff --git a/app/src/main/java/com/example/ui/components/GameCategoryVisuals.kt b/app/src/main/java/com/example/ui/components/GameCategoryVisuals.kt
+index 41ddfe18..91898540 100644
+--- a/app/src/main/java/com/example/ui/components/GameCategoryVisuals.kt
++++ b/app/src/main/java/com/example/ui/components/GameCategoryVisuals.kt
+@@ -2,6 +2,7 @@ package com.example.ui.components
+ 
+ import androidx.annotation.DrawableRes
+ import androidx.compose.animation.core.Animatable
++import androidx.compose.animation.core.Easing
+ import androidx.compose.animation.core.FastOutSlowInEasing
+ import androidx.compose.animation.core.LinearEasing
+ import androidx.compose.animation.core.RepeatMode
+@@ -64,6 +65,7 @@ import kotlin.math.sin
+ fun GameCategoryVisual(
+     categoryId: String,
+     accent: Color,
++    animationEnabled: Boolean = true,
+     modifier: Modifier = Modifier
+ ) {
+     when (categoryId) {
+@@ -71,6 +73,7 @@ fun GameCategoryVisual(
+             drawableRes = R.drawable.panda_thinking_harmony,
+             accent = accent,
+             animationLabel = "thinking_panda",
++            animationEnabled = animationEnabled,
+             modifier = modifier
+         )
+ 
+@@ -78,16 +81,18 @@ fun GameCategoryVisual(
+             drawableRes = R.drawable.panda_never_harmony,
+             accent = accent,
+             animationLabel = "never_panda",
++            animationEnabled = animationEnabled,
+             modifier = modifier
+         )
+ 
+-        "tot" -> AnimatedHarmonyCards(accent = accent, modifier = modifier)
+-        "zeich" -> AnimatedPaletteCategoryIcon(accent = accent, modifier = modifier)
++        "tot" -> AnimatedHarmonyCards(accent = accent, animationEnabled = animationEnabled, modifier = modifier)
++        "zeich" -> AnimatedPaletteCategoryIcon(accent = accent, animationEnabled = animationEnabled, modifier = modifier)
+         "zust" -> AnimatedCategoryGlyph(
+             primary = Icons.Default.CheckCircle,
+             secondary = Icons.Default.Close,
+             accent = accent,
+             animationLabel = "agree_disagree",
++            animationEnabled = animationEnabled,
+             modifier = modifier
+         )
+         "lieber" -> AnimatedCategoryGlyph(
+@@ -95,6 +100,7 @@ fun GameCategoryVisual(
+             secondary = Icons.Default.Favorite,
+             accent = accent,
+             animationLabel = "preference_balance",
++            animationEnabled = animationEnabled,
+             modifier = modifier
+         )
+         "foto" -> AnimatedCategoryGlyph(
+@@ -102,29 +108,49 @@ fun GameCategoryVisual(
+             secondary = Icons.Default.FlashOn,
+             accent = accent,
+             animationLabel = "photo_flash",
++            animationEnabled = animationEnabled,
+             modifier = modifier
+         )
+-        "tief" -> DeepConversationVisual(accent = accent, modifier = modifier)
+-        "reden" -> TalkBeforeVisual(accent = accent, modifier = modifier)
++        "tief" -> DeepConversationVisual(accent = accent, animationEnabled = animationEnabled, modifier = modifier)
++        "reden" -> TalkBeforeVisual(accent = accent, animationEnabled = animationEnabled, modifier = modifier)
+         else -> HarmonyCategoryIcon(categoryId = categoryId, accent = accent, modifier = modifier)
+     }
+ }
+ 
+ @Composable
+-private fun AnimatedPaletteCategoryIcon(accent: Color, modifier: Modifier = Modifier) {
+-    val transition = rememberInfiniteTransition(label = "animated_palette")
+-    val glow by transition.animateFloat(
+-        initialValue = 0.42f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "palette_glow"
+-    )
+-    val tilt by transition.animateFloat(
+-        initialValue = -7f,
+-        targetValue = 7f,
+-        animationSpec = infiniteRepeatable(tween(3200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "palette_tilt"
++private fun optionalVisualMotion(
++    animationEnabled: Boolean,
++    initialValue: Float,
++    targetValue: Float,
++    durationMillis: Int,
++    easing: Easing,
++    repeatMode: RepeatMode,
++    staticValue: Float,
++    label: String
++): Float {
++    if (!animationEnabled) return staticValue
++
++    val transition = rememberInfiniteTransition(label = label)
++    val value by transition.animateFloat(
++        initialValue = initialValue,
++        targetValue = targetValue,
++        animationSpec = infiniteRepeatable(
++            animation = tween(durationMillis = durationMillis, easing = easing),
++            repeatMode = repeatMode
++        ),
++        label = "${label}_value"
+     )
++    return value
++}
++
++@Composable
++private fun AnimatedPaletteCategoryIcon(
++    accent: Color,
++    animationEnabled: Boolean,
++    modifier: Modifier = Modifier
++) {
++    val glow = optionalVisualMotion(animationEnabled, 0.42f, 1f, 1_800, FastOutSlowInEasing, RepeatMode.Reverse, 0.72f, "palette_glow")
++    val tilt = optionalVisualMotion(animationEnabled, -7f, 7f, 3_200, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "palette_tilt")
+     val shape = RoundedCornerShape(24.dp)
+     Box(
+         modifier = modifier
+@@ -161,20 +187,13 @@ private fun AnimatedPaletteCategoryIcon(accent: Color, modifier: Modifier = Modi
+ }
+ 
+ @Composable
+-private fun DeepConversationVisual(accent: Color, modifier: Modifier = Modifier) {
+-    val transition = rememberInfiniteTransition(label = "deep_conversation_premium")
+-    val motion by transition.animateFloat(
+-        initialValue = -1f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(4200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "deep_conversation_exchange"
+-    )
+-    val glow by transition.animateFloat(
+-        initialValue = 0.46f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "deep_conversation_glow"
+-    )
++private fun DeepConversationVisual(
++    accent: Color,
++    animationEnabled: Boolean,
++    modifier: Modifier = Modifier
++) {
++    val motion = optionalVisualMotion(animationEnabled, -1f, 1f, 4_200, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "deep_conversation_exchange")
++    val glow = optionalVisualMotion(animationEnabled, 0.46f, 1f, 2_200, FastOutSlowInEasing, RepeatMode.Reverse, 0.72f, "deep_conversation_glow")
+     val shape = RoundedCornerShape(24.dp)
+     Box(
+         modifier = modifier
+@@ -264,26 +283,14 @@ private fun DeepConversationVisual(accent: Color, modifier: Modifier = Modifier)
+ }
+ 
+ @Composable
+-private fun TalkBeforeVisual(accent: Color, modifier: Modifier = Modifier) {
+-    val transition = rememberInfiniteTransition(label = "talk_before_premium")
+-    val clockPhase by transition.animateFloat(
+-        initialValue = 0f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(12_000, easing = LinearEasing), RepeatMode.Restart),
+-        label = "talk_before_clock"
+-    )
+-    val motion by transition.animateFloat(
+-        initialValue = -1f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(3600, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "talk_before_conversation"
+-    )
+-    val glow by transition.animateFloat(
+-        initialValue = 0.44f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(2100, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "talk_before_glow"
+-    )
++private fun TalkBeforeVisual(
++    accent: Color,
++    animationEnabled: Boolean,
++    modifier: Modifier = Modifier
++) {
++    val clockPhase = optionalVisualMotion(animationEnabled, 0f, 1f, 12_000, LinearEasing, RepeatMode.Restart, 0.12f, "talk_before_clock")
++    val motion = optionalVisualMotion(animationEnabled, -1f, 1f, 3_600, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "talk_before_conversation")
++    val glow = optionalVisualMotion(animationEnabled, 0.44f, 1f, 2_100, FastOutSlowInEasing, RepeatMode.Reverse, 0.72f, "talk_before_glow")
+     val gold = Color(0xFFFFD36B)
+     val shape = RoundedCornerShape(24.dp)
+     Box(
+@@ -378,21 +385,11 @@ private fun AnimatedCategoryGlyph(
+     secondary: ImageVector,
+     accent: Color,
+     animationLabel: String,
++    animationEnabled: Boolean,
+     modifier: Modifier = Modifier
+ ) {
+-    val transition = rememberInfiniteTransition(label = animationLabel)
+-    val motion by transition.animateFloat(
+-        initialValue = -1f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(tween(2700, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "${animationLabel}_motion"
+-    )
+-    val glow by transition.animateFloat(
+-        initialValue = 0.38f,
+-        targetValue = 0.96f,
+-        animationSpec = infiniteRepeatable(tween(1900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+-        label = "${animationLabel}_glow"
+-    )
++    val motion = optionalVisualMotion(animationEnabled, -1f, 1f, 2_700, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "${animationLabel}_motion")
++    val glow = optionalVisualMotion(animationEnabled, 0.38f, 0.96f, 1_900, FastOutSlowInEasing, RepeatMode.Reverse, 0.70f, "${animationLabel}_glow")
+     val shape = RoundedCornerShape(24.dp)
+     Box(
+         modifier = modifier
+@@ -446,36 +443,12 @@ private fun PandaArtworkIcon(
+     @DrawableRes drawableRes: Int,
+     accent: Color,
+     animationLabel: String,
++    animationEnabled: Boolean,
+     modifier: Modifier = Modifier
+ ) {
+-    val transition = rememberInfiniteTransition(label = animationLabel)
+-    val tilt by transition.animateFloat(
+-        initialValue = -1.6f,
+-        targetValue = 1.6f,
+-        animationSpec = infiniteRepeatable(
+-            animation = tween(durationMillis = 11_000, easing = FastOutSlowInEasing),
+-            repeatMode = RepeatMode.Reverse
+-        ),
+-        label = "${animationLabel}_tilt"
+-    )
+-    val breathe by transition.animateFloat(
+-        initialValue = 0.985f,
+-        targetValue = 1.025f,
+-        animationSpec = infiniteRepeatable(
+-            animation = tween(durationMillis = 3_200, easing = FastOutSlowInEasing),
+-            repeatMode = RepeatMode.Reverse
+-        ),
+-        label = "${animationLabel}_breathe"
+-    )
+-    val glow by transition.animateFloat(
+-        initialValue = 0.44f,
+-        targetValue = 0.88f,
+-        animationSpec = infiniteRepeatable(
+-            animation = tween(durationMillis = 2_400, easing = FastOutSlowInEasing),
+-            repeatMode = RepeatMode.Reverse
+-        ),
+-        label = "${animationLabel}_glow"
+-    )
++    val tilt = optionalVisualMotion(animationEnabled, -1.6f, 1.6f, 11_000, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "${animationLabel}_tilt")
++    val breathe = optionalVisualMotion(animationEnabled, 0.985f, 1.025f, 3_200, FastOutSlowInEasing, RepeatMode.Reverse, 1f, "${animationLabel}_breathe")
++    val glow = optionalVisualMotion(animationEnabled, 0.44f, 0.88f, 2_400, FastOutSlowInEasing, RepeatMode.Reverse, 0.68f, "${animationLabel}_glow")
+ 
+     Box(
+         modifier = modifier
+@@ -514,6 +487,7 @@ private fun PandaArtworkIcon(
+ @Composable
+ private fun AnimatedHarmonyCards(
+     accent: Color,
++    animationEnabled: Boolean,
+     modifier: Modifier = Modifier
+ ) {
+     val density = LocalDensity.current.density
+@@ -526,27 +500,14 @@ private fun AnimatedHarmonyCards(
+             Icons.Default.Movie to Icons.Default.Palette
+         )
+     }
+-    val floatTransition = rememberInfiniteTransition(label = "harmony_cards_float")
+-    val floatPhase by floatTransition.animateFloat(
+-        initialValue = -1f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(
+-            animation = tween(durationMillis = 3_200, easing = FastOutSlowInEasing),
+-            repeatMode = RepeatMode.Reverse
+-        ),
+-        label = "harmony_cards_float_phase"
+-    )
+-    val glow by floatTransition.animateFloat(
+-        initialValue = 0.50f,
+-        targetValue = 1f,
+-        animationSpec = infiniteRepeatable(
+-            animation = tween(durationMillis = 2_200, easing = FastOutSlowInEasing),
+-            repeatMode = RepeatMode.Reverse
+-        ),
+-        label = "harmony_cards_glow"
+-    )
++    val floatPhase = optionalVisualMotion(animationEnabled, -1f, 1f, 3_200, FastOutSlowInEasing, RepeatMode.Reverse, 0f, "harmony_cards_float_phase")
++    val glow = optionalVisualMotion(animationEnabled, 0.50f, 1f, 2_200, FastOutSlowInEasing, RepeatMode.Reverse, 0.74f, "harmony_cards_glow")
+ 
+-    LaunchedEffect(Unit) {
++    LaunchedEffect(animationEnabled) {
++        if (!animationEnabled) {
++            flip.snapTo(0f)
++            return@LaunchedEffect
++        }
+         while (true) {
+             delay(3_400)
+             flip.animateTo(90f, tween(520, easing = FastOutSlowInEasing))
+diff --git a/app/src/main/java/com/example/ui/screens/DevStudioScreen.kt b/app/src/main/java/com/example/ui/screens/DevStudioScreen.kt
+index c7432c97..fd9c55ed 100644
+--- a/app/src/main/java/com/example/ui/screens/DevStudioScreen.kt
++++ b/app/src/main/java/com/example/ui/screens/DevStudioScreen.kt
+@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+ import androidx.compose.foundation.clickable
++import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+ import androidx.compose.foundation.layout.Arrangement
+ import androidx.compose.foundation.layout.Box
+ import androidx.compose.foundation.layout.Column
+@@ -58,6 +59,7 @@ import androidx.compose.material3.TextButton
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateListOf
++import androidx.compose.runtime.mutableStateMapOf
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.rememberCoroutineScope
+@@ -65,9 +67,14 @@ import androidx.compose.runtime.setValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.geometry.Rect
+ import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.layout.ContentScale
++import androidx.compose.ui.layout.boundsInRoot
++import androidx.compose.ui.layout.onGloballyPositioned
++import androidx.compose.ui.input.pointer.pointerInput
+ import androidx.compose.ui.platform.LocalContext
+ import androidx.compose.ui.platform.testTag
+ import androidx.compose.ui.text.font.FontFamily
+@@ -859,6 +866,28 @@ private fun EditPackSheet(
+     var imageTarget by remember { mutableStateOf<String?>(null) }
+     var imageVersion by remember { mutableStateOf(0) }
+     var busyText by remember { mutableStateOf<String?>(null) }
++    val slotBounds = remember { mutableStateMapOf<String, Rect>() }
++    var draggingSlot by remember { mutableStateOf<String?>(null) }
++    var dragPosition by remember { mutableStateOf(Offset.Zero) }
++
++    fun keyForSlot(slotId: String): String? {
++        val pairIndex = slotId.substringBefore(':').toIntOrNull() ?: return null
++        val side = slotId.substringAfter(':').toIntOrNull() ?: return null
++        val pair = pairs.getOrNull(pairIndex) ?: return null
++        return if (side == 0) pair.first else pair.second
++    }
++
++    fun finishImageDrag() {
++        val source = draggingSlot
++        val target = slotBounds.entries.firstOrNull { (_, bounds) -> bounds.contains(dragPosition) }?.key
++        draggingSlot = null
++        if (source == null || target == null || source == target) return
++        val sourceKey = keyForSlot(source).orEmpty()
++        val targetKey = keyForSlot(target).orEmpty()
++        if (sourceKey.isBlank() || targetKey.isBlank()) return
++        DeveloperDataManager.swapOptionImages(context, sourceKey, targetKey)
++        imageVersion++
++    }
+ 
+     val imagePicker = rememberLauncherForActivityResult(
+         ActivityResultContracts.GetContent()
+@@ -1060,7 +1089,7 @@ private fun EditPackSheet(
+                     if (type == "tot") {
+                         item {
+                             Text(
+-                                "Paare — tippe auf ein Bild, um es zu tauschen",
++                                "Paare — tippen = Bild ändern · lange drücken & ziehen = Bilder tauschen",
+                                 fontSize = 12.sp,
+                                 fontWeight = FontWeight.Bold,
+                                 color = HarmonyPurpleLight,
+@@ -1072,6 +1101,15 @@ private fun EditPackSheet(
+                                 index = index,
+                                 pair = pair,
+                                 imageVersion = imageVersion,
++                                draggingSlot = draggingSlot,
++                                onSlotBounds = { slotId, bounds -> slotBounds[slotId] = bounds },
++                                onDragStart = { slotId, rootPosition ->
++                                    draggingSlot = slotId
++                                    dragPosition = rootPosition
++                                },
++                                onDragMove = { delta -> dragPosition += delta },
++                                onDragEnd = { finishImageDrag() },
++                                onDragCancel = { draggingSlot = null },
+                                 onChange = { newPair -> pairs[index] = newPair },
+                                 onDelete = { pairs.removeAt(index) },
+                                 onPickImage = { name ->
+@@ -1166,6 +1204,12 @@ private fun PairEditor(
+     index: Int,
+     pair: Pair<String, String>,
+     imageVersion: Int,
++    draggingSlot: String?,
++    onSlotBounds: (String, Rect) -> Unit,
++    onDragStart: (String, Offset) -> Unit,
++    onDragMove: (Offset) -> Unit,
++    onDragEnd: () -> Unit,
++    onDragCancel: () -> Unit,
+     onChange: (Pair<String, String>) -> Unit,
+     onDelete: () -> Unit,
+     onPickImage: (String) -> Unit
+@@ -1189,9 +1233,18 @@ private fun PairEditor(
+         }
+         Spacer(Modifier.height(4.dp))
+         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
++            val leftSlot = "$index:0"
++            val rightSlot = "$index:1"
+             OptionSlot(
++                slotId = leftSlot,
+                 text = pair.first,
+                 imageVersion = imageVersion,
++                isDragging = draggingSlot == leftSlot,
++                onSlotBounds = onSlotBounds,
++                onDragStart = onDragStart,
++                onDragMove = onDragMove,
++                onDragEnd = onDragEnd,
++                onDragCancel = onDragCancel,
+                 onTextChange = { onChange(it to pair.second) },
+                 onPickImage = {
+                     val key = if (pair.first.isBlank()) "img_${System.currentTimeMillis()}_a" else pair.first
+@@ -1201,8 +1254,15 @@ private fun PairEditor(
+                 modifier = Modifier.weight(1f)
+             )
+             OptionSlot(
++                slotId = rightSlot,
+                 text = pair.second,
+                 imageVersion = imageVersion,
++                isDragging = draggingSlot == rightSlot,
++                onSlotBounds = onSlotBounds,
++                onDragStart = onDragStart,
++                onDragMove = onDragMove,
++                onDragEnd = onDragEnd,
++                onDragCancel = onDragCancel,
+                 onTextChange = { onChange(pair.first to it) },
+                 onPickImage = {
+                     val key = if (pair.second.isBlank()) "img_${System.currentTimeMillis()}_b" else pair.second
+@@ -1217,23 +1277,53 @@ private fun PairEditor(
+ 
+ @Composable
+ private fun OptionSlot(
++    slotId: String,
+     text: String,
+     imageVersion: Int,
++    isDragging: Boolean,
++    onSlotBounds: (String, Rect) -> Unit,
++    onDragStart: (String, Offset) -> Unit,
++    onDragMove: (Offset) -> Unit,
++    onDragEnd: () -> Unit,
++    onDragCancel: () -> Unit,
+     onTextChange: (String) -> Unit,
+     onPickImage: () -> Unit,
+     modifier: Modifier = Modifier
+ ) {
++    val context = LocalContext.current
+     val isUserFacing = DevAssetStore.isUserFacingLabel(text)
+     val displayValue = if (isUserFacing) text else ""
++    var currentBounds by remember(slotId) { mutableStateOf(Rect.Zero) }
+ 
+     Column(modifier = modifier) {
+         Box(
+             modifier = Modifier
+                 .fillMaxWidth()
+                 .height(92.dp)
++                .onGloballyPositioned { coordinates ->
++                    currentBounds = coordinates.boundsInRoot()
++                    onSlotBounds(slotId, currentBounds)
++                }
++                .pointerInput(slotId, text) {
++                    detectDragGesturesAfterLongPress(
++                        onDragStart = { localPosition ->
++                            onDragStart(slotId, currentBounds.topLeft + localPosition)
++                        },
++                        onDrag = { change, dragAmount ->
++                            change.consume()
++                            onDragMove(dragAmount)
++                        },
++                        onDragEnd = onDragEnd,
++                        onDragCancel = onDragCancel
++                    )
++                }
+                 .clip(RoundedCornerShape(10.dp))
+                 .background(Color.Black)
+-                .border(1.dp, HarmonyLine, RoundedCornerShape(10.dp))
++                .border(
++                    if (isDragging) 3.dp else 1.dp,
++                    if (isDragging) HarmonyGold else HarmonyLine,
++                    RoundedCornerShape(10.dp)
++                )
+                 .clickable { onPickImage() }
+         ) {
+             if (text.isNotBlank()) {
+@@ -1254,13 +1344,21 @@ private fun OptionSlot(
+                     .background(Color.Black.copy(alpha = 0.65f))
+                     .padding(horizontal = 6.dp, vertical = 3.dp)
+             ) {
+-                Text("Bild ändern", fontSize = 9.5.sp, color = Color.White)
++                Text(if (isDragging) "Ziehen…" else "Bild ändern", fontSize = 9.5.sp, color = Color.White)
+             }
+         }
+         Spacer(Modifier.height(4.dp))
+         OutlinedTextField(
+             value = displayValue,
+-            onValueChange = onTextChange,
++            onValueChange = { newValue ->
++                onTextChange(
++                    DeveloperDataManager.renameOptionKeepingImage(
++                        context = context,
++                        oldKey = text,
++                        newLabel = newValue
++                    )
++                )
++            },
+             placeholder = { Text("Name (optional)", fontSize = 11.5.sp, color = HarmonyMuted) },
+             singleLine = false,
+             maxLines = 3,
+@@ -1272,6 +1370,22 @@ private fun OptionSlot(
+             shape = RoundedCornerShape(10.dp),
+             modifier = Modifier.fillMaxWidth()
+         )
++        if (isUserFacing && text.isNotBlank()) {
++            TextButton(
++                onClick = {
++                    onTextChange(
++                        DeveloperDataManager.renameOptionKeepingImage(
++                            context = context,
++                            oldKey = text,
++                            newLabel = ""
++                        )
++                    )
++                },
++                modifier = Modifier.fillMaxWidth()
++            ) {
++                Text("Bildtext nicht anzeigen", color = HarmonyMuted, fontSize = 10.5.sp)
++            }
++        }
+     }
+ }
+ 
+diff --git a/app/src/test/java/com/example/ui/BottomNavGameCarouselTest.kt b/app/src/test/java/com/example/ui/BottomNavGameCarouselTest.kt
+new file mode 100644
+index 00000000..8aa0f063
+--- /dev/null
++++ b/app/src/test/java/com/example/ui/BottomNavGameCarouselTest.kt
+@@ -0,0 +1,124 @@
++package com.example.ui
++
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.runtime.mutableIntStateOf
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.test.junit4.createComposeRule
++import androidx.compose.ui.test.onNodeWithTag
++import androidx.compose.ui.test.onRoot
++import com.example.ui.components.AmbientBackground
++import com.example.ui.components.HarmonyBottomNav
++import com.example.ui.theme.HarmonyTheme
++import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
++import com.github.takahirom.roborazzi.captureRoboImage
++import org.junit.Rule
++import org.junit.Test
++import org.junit.runner.RunWith
++import org.robolectric.RobolectricTestRunner
++import org.robolectric.annotation.Config
++import org.robolectric.annotation.GraphicsMode
++
++@RunWith(RobolectricTestRunner::class)
++@GraphicsMode(GraphicsMode.Mode.NATIVE)
++@Config(qualifiers = RobolectricDeviceQualifiers.Pixel8, sdk = [36])
++class BottomNavGameCarouselTest {
++
++    @get:Rule
++    val composeTestRule = createComposeRule()
++
++    @Test
++    fun gameVisualUsesTenSecondsAndKeepsEitherOrForSeventeenSeconds() {
++        composeTestRule.mainClock.autoAdvance = false
++        composeTestRule.setContent {
++            HarmonyTheme(darkTheme = true) {
++                AmbientBackground {
++                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
++                        HarmonyBottomNav(
++                            selectedTab = 0,
++                            onTabSelected = {},
++                            appLanguage = "de"
++                        )
++                    }
++                }
++            }
++        }
++
++        composeTestRule.onNodeWithTag("nav_games_visual_zeich_running", useUnmergedTree = true).assertExists()
++
++        composeTestRule.mainClock.advanceTimeBy(10_700)
++        composeTestRule.onNodeWithTag("nav_games_visual_tot_running", useUnmergedTree = true).assertExists()
++
++        composeTestRule.mainClock.advanceTimeBy(16_900)
++        composeTestRule.onNodeWithTag("nav_games_visual_tot_running", useUnmergedTree = true).assertExists()
++
++        composeTestRule.mainClock.advanceTimeBy(700)
++        composeTestRule.onNodeWithTag("nav_games_visual_zust_running", useUnmergedTree = true).assertExists()
++    }
++
++    @Test
++    fun selectingGamesPausesTheCurrentVisual() {
++        composeTestRule.mainClock.autoAdvance = false
++        val selectedTab = mutableIntStateOf(0)
++        composeTestRule.setContent {
++            HarmonyTheme(darkTheme = true) {
++                AmbientBackground {
++                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
++                        HarmonyBottomNav(
++                            selectedTab = selectedTab.intValue,
++                            onTabSelected = { selectedTab.intValue = it },
++                            appLanguage = "de"
++                        )
++                    }
++                }
++            }
++        }
++
++        composeTestRule.onNodeWithTag("nav_games_visual_zeich_running", useUnmergedTree = true).assertExists()
++        composeTestRule.mainClock.advanceTimeBy(10_700)
++        composeTestRule.runOnIdle { selectedTab.intValue = 1 }
++        composeTestRule.mainClock.advanceTimeByFrame()
++        composeTestRule.onNodeWithTag("nav_games_visual_tot_paused", useUnmergedTree = true).assertExists()
++
++        composeTestRule.mainClock.advanceTimeBy(30_000)
++        composeTestRule.onNodeWithTag("nav_games_visual_tot_paused", useUnmergedTree = true).assertExists()
++    }
++
++    @Test
++    fun bottomNavigationPreviewFrames() {
++        composeTestRule.mainClock.autoAdvance = false
++        val selectedTab = mutableIntStateOf(0)
++        composeTestRule.setContent {
++            HarmonyTheme(darkTheme = true) {
++                AmbientBackground {
++                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
++                        HarmonyBottomNav(
++                            selectedTab = selectedTab.intValue,
++                            onTabSelected = { selectedTab.intValue = it },
++                            appLanguage = "de"
++                        )
++                    }
++                }
++            }
++        }
++
++        composeTestRule.onNodeWithTag("nav_games_visual_zeich_running", useUnmergedTree = true).assertExists()
++        composeTestRule.onRoot().captureRoboImage(
++            filePath = "build/bottom-nav-rework-preview/01-home-zeichenspiel.png"
++        )
++
++        composeTestRule.mainClock.advanceTimeBy(10_700)
++        composeTestRule.onNodeWithTag("nav_games_visual_tot_running", useUnmergedTree = true).assertExists()
++        composeTestRule.onRoot().captureRoboImage(
++            filePath = "build/bottom-nav-rework-preview/02-home-das-oder-das.png"
++        )
++
++        composeTestRule.runOnIdle { selectedTab.intValue = 1 }
++        composeTestRule.mainClock.advanceTimeByFrame()
++        composeTestRule.onNodeWithTag("nav_games_visual_tot_paused", useUnmergedTree = true).assertExists()
++        composeTestRule.onRoot().captureRoboImage(
++            filePath = "build/bottom-nav-rework-preview/03-spiele-pausiert.png"
++        )
++    }
++}

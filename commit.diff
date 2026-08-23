@@ -1,0 +1,528 @@
+diff --git a/.github/workflows/render-universal-intro-target.yml b/.github/workflows/render-universal-intro-target.yml
+new file mode 100644
+index 00000000..44e0a144
+--- /dev/null
++++ b/.github/workflows/render-universal-intro-target.yml
+@@ -0,0 +1,103 @@
++name: Render Universal intro from PR
++
++on:
++  pull_request_target:
++    types: [opened, synchronize, reopened]
++    branches:
++      - main
++    paths:
++      - 'tools/remotion/universal-intro/**'
++      - '.github/scripts/apply_universal_intro.py'
++      - '.github/workflows/render-universal-intro.yml'
++
++permissions:
++  contents: write
++
++concurrency:
++  group: universal-intro-target-render
++  cancel-in-progress: true
++
++jobs:
++  render-integrate-test:
++    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feature/universal-studios-intro' }}
++    runs-on: ubuntu-latest
++    timeout-minutes: 35
++    steps:
++      - name: Checkout trusted feature branch
++        uses: actions/checkout@v4
++        with:
++          ref: feature/universal-studios-intro
++          fetch-depth: 0
++
++      - name: Set up Node
++        uses: actions/setup-node@v4
++        with:
++          node-version: '22'
++
++      - name: Prepare branded panda asset
++        run: |
++          mkdir -p tools/remotion/universal-intro/public
++          cp app/src/main/res/drawable/panda_thinking_harmony.png tools/remotion/universal-intro/public/panda.png
++
++      - name: Install Remotion project
++        working-directory: tools/remotion/universal-intro
++        run: npm install --no-audit --no-fund
++
++      - name: Render Harmony intro
++        working-directory: tools/remotion/universal-intro
++        run: npm run render
++
++      - name: Apply Android intro integration
++        run: python .github/scripts/apply_universal_intro.py
++
++      - name: Bundle rendered intro as Android raw resource
++        run: |
++          mkdir -p app/src/main/res/raw
++          cp tools/remotion/universal-intro/out/universal_studios_intro.mp4 app/src/main/res/raw/universal_studios_intro.mp4
++
++      - name: Validate video dimensions
++        run: |
++          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 app/src/main/res/raw/universal_studios_intro.mp4)" = "720"
++          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 app/src/main/res/raw/universal_studios_intro.mp4)" = "1280"
++          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 app/src/main/res/raw/universal_studios_intro.mp4
++
++      - name: Create visual verification frames
++        run: |
++          mkdir -p tools/remotion/universal-intro/out/verification
++          ffmpeg -y -i app/src/main/res/raw/universal_studios_intro.mp4 -vf "fps=1,scale=180:-1,tile=4x2" -frames:v 1 tools/remotion/universal-intro/out/verification/contact-sheet.png
++          ffmpeg -y -ss 6.55 -i app/src/main/res/raw/universal_studios_intro.mp4 -frames:v 1 tools/remotion/universal-intro/out/verification/final-frame.png
++
++      - name: Set up JDK
++        uses: actions/setup-java@v5
++        with:
++          distribution: temurin
++          java-version: '21'
++
++      - name: Set up Gradle
++        uses: gradle/actions/setup-gradle@v4
++        with:
++          gradle-version: '9.3.1'
++
++      - name: Run focused tests
++        run: gradle :app:testDebugUnitTest --tests com.example.ui.UniversalStudiosIntroContractTest --stacktrace
++
++      - name: Compile app
++        run: gradle :app:compileDebugKotlin --stacktrace
++
++      - name: Upload verification artifact
++        uses: actions/upload-artifact@v4
++        with:
++          name: universal-studios-intro-verification
++          path: |
++            app/src/main/res/raw/universal_studios_intro.mp4
++            tools/remotion/universal-intro/out/verification/contact-sheet.png
++            tools/remotion/universal-intro/out/verification/final-frame.png
++          if-no-files-found: error
++
++      - name: Commit integration to feature branch
++        run: |
++          git config user.name "github-actions[bot]"
++          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
++          git add app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt app/src/main/res/raw/universal_studios_intro.mp4
++          git commit -m "feat: integrate rendered Universal intro"
++          git push origin HEAD:feature/universal-studios-intro
+diff --git a/.github/workflows/render-universal-intro.yml b/.github/workflows/render-universal-intro.yml
+new file mode 100644
+index 00000000..2ca9f8ae
+--- /dev/null
++++ b/.github/workflows/render-universal-intro.yml
+@@ -0,0 +1,103 @@
++name: Render Universal Studios intro
++
++on:
++  push:
++    branches:
++      - feature/universal-studios-intro
++    paths:
++      - 'tools/remotion/universal-intro/**'
++      - '.github/scripts/apply_universal_intro.py'
++      - '.github/workflows/render-universal-intro.yml'
++  workflow_dispatch:
++
++permissions:
++  contents: write
++
++concurrency:
++  group: universal-intro-render-${{ github.ref }}
++  cancel-in-progress: true
++
++jobs:
++  render-integrate-test:
++    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, 'feat: integrate rendered Universal intro') }}
++    runs-on: ubuntu-latest
++    timeout-minutes: 35
++    steps:
++      - name: Checkout feature branch
++        uses: actions/checkout@v4
++        with:
++          ref: feature/universal-studios-intro
++          fetch-depth: 0
++
++      - name: Set up Node
++        uses: actions/setup-node@v4
++        with:
++          node-version: '22'
++
++      - name: Prepare branded panda asset
++        run: |
++          mkdir -p tools/remotion/universal-intro/public
++          cp app/src/main/res/drawable/panda_thinking_harmony.png tools/remotion/universal-intro/public/panda.png
++
++      - name: Install Remotion project
++        working-directory: tools/remotion/universal-intro
++        run: npm install --no-audit --no-fund
++
++      - name: Render Harmony intro
++        working-directory: tools/remotion/universal-intro
++        run: npm run render
++
++      - name: Apply Android intro integration
++        run: python .github/scripts/apply_universal_intro.py
++
++      - name: Bundle rendered intro as Android raw resource
++        run: |
++          mkdir -p app/src/main/res/raw
++          cp tools/remotion/universal-intro/out/universal_studios_intro.mp4 app/src/main/res/raw/universal_studios_intro.mp4
++
++      - name: Validate rendered video metadata
++        run: |
++          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of default=noprint_wrappers=1 app/src/main/res/raw/universal_studios_intro.mp4
++          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 app/src/main/res/raw/universal_studios_intro.mp4)" = "720"
++          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 app/src/main/res/raw/universal_studios_intro.mp4)" = "1280"
++
++      - name: Create visual verification contact sheet
++        run: |
++          mkdir -p tools/remotion/universal-intro/out/verification
++          ffmpeg -y -i app/src/main/res/raw/universal_studios_intro.mp4 -vf "fps=1,scale=180:-1,tile=4x2" -frames:v 1 tools/remotion/universal-intro/out/verification/contact-sheet.png
++          ffmpeg -y -ss 6.55 -i app/src/main/res/raw/universal_studios_intro.mp4 -frames:v 1 tools/remotion/universal-intro/out/verification/final-frame.png
++
++      - name: Set up JDK
++        uses: actions/setup-java@v5
++        with:
++          distribution: temurin
++          java-version: '21'
++
++      - name: Set up Gradle
++        uses: gradle/actions/setup-gradle@v4
++        with:
++          gradle-version: '9.3.1'
++
++      - name: Run Universal intro contract tests
++        run: gradle :app:testDebugUnitTest --tests com.example.ui.UniversalStudiosIntroContractTest --stacktrace
++
++      - name: Compile app
++        run: gradle :app:compileDebugKotlin --stacktrace
++
++      - name: Upload rendered verification artifact
++        uses: actions/upload-artifact@v4
++        with:
++          name: universal-studios-intro-verification
++          path: |
++            app/src/main/res/raw/universal_studios_intro.mp4
++            tools/remotion/universal-intro/out/verification/contact-sheet.png
++            tools/remotion/universal-intro/out/verification/final-frame.png
++          if-no-files-found: error
++
++      - name: Commit generated video and Android integration
++        run: |
++          git config user.name "github-actions[bot]"
++          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
++          git add app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt app/src/main/res/raw/universal_studios_intro.mp4
++          git commit -m "feat: integrate rendered Universal intro"
++          git push origin HEAD:feature/universal-studios-intro
+diff --git a/.github/workflows/universal-intro-pr-render.yml b/.github/workflows/universal-intro-pr-render.yml
+new file mode 100644
+index 00000000..476fcabe
+--- /dev/null
++++ b/.github/workflows/universal-intro-pr-render.yml
+@@ -0,0 +1,96 @@
++name: Universal intro PR render
++
++on:
++  pull_request:
++    branches:
++      - main
++    types: [opened, synchronize, reopened]
++
++permissions:
++  contents: write
++
++concurrency:
++  group: universal-intro-pr-render
++  cancel-in-progress: true
++
++jobs:
++  render-integrate-test:
++    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feature/universal-studios-intro' }}
++    runs-on: ubuntu-latest
++    timeout-minutes: 35
++    steps:
++      - name: Checkout feature branch
++        uses: actions/checkout@v4
++        with:
++          ref: feature/universal-studios-intro
++          fetch-depth: 0
++
++      - name: Set up Node
++        uses: actions/setup-node@v4
++        with:
++          node-version: '22'
++
++      - name: Prepare panda asset
++        run: |
++          mkdir -p tools/remotion/universal-intro/public
++          cp app/src/main/res/drawable/panda_thinking_harmony.png tools/remotion/universal-intro/public/panda.png
++
++      - name: Install Remotion
++        working-directory: tools/remotion/universal-intro
++        run: npm install --no-audit --no-fund
++
++      - name: Render intro
++        working-directory: tools/remotion/universal-intro
++        run: npm run render
++
++      - name: Apply Android integration
++        run: python .github/scripts/apply_universal_intro.py
++
++      - name: Bundle and validate video
++        run: |
++          mkdir -p app/src/main/res/raw
++          cp tools/remotion/universal-intro/out/universal_studios_intro.mp4 app/src/main/res/raw/universal_studios_intro.mp4
++          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of default=noprint_wrappers=1 app/src/main/res/raw/universal_studios_intro.mp4
++          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 app/src/main/res/raw/universal_studios_intro.mp4)" = "720"
++          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 app/src/main/res/raw/universal_studios_intro.mp4)" = "1280"
++
++      - name: Create verification images
++        run: |
++          mkdir -p tools/remotion/universal-intro/out/verification
++          ffmpeg -y -i app/src/main/res/raw/universal_studios_intro.mp4 -vf "fps=1,scale=180:-1,tile=4x2" -frames:v 1 tools/remotion/universal-intro/out/verification/contact-sheet.png
++          ffmpeg -y -ss 6.55 -i app/src/main/res/raw/universal_studios_intro.mp4 -frames:v 1 tools/remotion/universal-intro/out/verification/final-frame.png
++
++      - name: Set up Java
++        uses: actions/setup-java@v5
++        with:
++          distribution: temurin
++          java-version: '21'
++
++      - name: Set up Gradle
++        uses: gradle/actions/setup-gradle@v4
++        with:
++          gradle-version: '9.3.1'
++
++      - name: Run contract tests
++        run: gradle :app:testDebugUnitTest --tests com.example.ui.UniversalStudiosIntroContractTest --stacktrace
++
++      - name: Compile app
++        run: gradle :app:compileDebugKotlin --stacktrace
++
++      - name: Upload verification artifact
++        uses: actions/upload-artifact@v4
++        with:
++          name: universal-studios-intro-verification
++          path: |
++            app/src/main/res/raw/universal_studios_intro.mp4
++            tools/remotion/universal-intro/out/verification/contact-sheet.png
++            tools/remotion/universal-intro/out/verification/final-frame.png
++          if-no-files-found: error
++
++      - name: Commit integration
++        run: |
++          git config user.name "github-actions[bot]"
++          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
++          git add app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt app/src/main/res/raw/universal_studios_intro.mp4
++          git commit -m "feat: integrate rendered Universal intro"
++          git push origin HEAD:feature/universal-studios-intro
+diff --git a/app/src/main/java/com/example/ui/screens/GamesScreen.kt b/app/src/main/java/com/example/ui/screens/GamesScreen.kt
+index 0f4305ac..5a8621a5 100644
+--- a/app/src/main/java/com/example/ui/screens/GamesScreen.kt
++++ b/app/src/main/java/com/example/ui/screens/GamesScreen.kt
+@@ -414,8 +414,13 @@ fun GamesScreen(
+             ) {
+                 items(HarmonyPacksData.CATEGORIES) { category ->
+                     val translatedCategory = LanguageManager.translateCategory(category, appLanguage)
++                    val displayCategory = if (category.id == "unterbewusstsein" && appLanguage == "de") {
++                        translatedCategory.copy(name = "Tauche ins Selbstbewusstsein ein")
++                    } else {
++                        translatedCategory
++                    }
+                     CategoryRailCard(
+-                        category = translatedCategory,
++                        category = displayCategory,
+                         onClick = { onCategoryClick(category.id) }
+                     )
+                 }
+@@ -686,7 +691,7 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
+     )
+     Box(
+         modifier = Modifier
+-            .size(width = 124.dp, height = 136.dp)
++            .size(width = 124.dp, height = if (isPortalCategory) 154.dp else 136.dp)
+             .graphicsLayer {
+                 scaleX = breathe
+                 scaleY = breathe
+@@ -733,7 +738,7 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
+         ) {
+             if (isPortalCategory) {
+                 IntrospectionPortal(
+-                    size = 72.dp,
++                    size = 64.dp,
+                     isRevelation = true,
+                     modifier = Modifier.align(Alignment.CenterHorizontally)
+                 )
+@@ -746,10 +751,10 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
+             }
+             Text(
+                 text = category.name,
+-                fontSize = if (isPortalCategory) 12.5.sp else 12.sp,
++                fontSize = if (isPortalCategory) 11.5.sp else 12.sp,
+                 fontWeight = FontWeight.ExtraBold,
+                 color = HarmonyText,
+-                lineHeight = 15.sp,
++                lineHeight = if (isPortalCategory) 14.sp else 15.sp,
+                 textAlign = TextAlign.Center,
+                 modifier = Modifier.fillMaxWidth()
+             )
+diff --git a/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt b/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt
+index 548f9f97..7bf83bee 100644
+--- a/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt
++++ b/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt
+@@ -114,6 +114,24 @@ private val QUESTION_FLOW_COLORS = listOf(
+ )
+ 
+ private const val QUESTION_FLOW_TWO_PI = 6.2831855f
++private const val PIZZA_BURGER_TENSION_QUESTION =
++    "Was wäre für dich schlimmer: nie wieder Pizza oder nie wieder Burger?"
++
++private fun compactPizzaBurgerQuestion(rawQuestion: String, localizedQuestion: String): String {
++    if (rawQuestion != PIZZA_BURGER_TENSION_QUESTION) return localizedQuestion
++
++    val colonIndex = listOf(
++        localizedQuestion.indexOf(':'),
++        localizedQuestion.indexOf('：')
++    ).filter { it >= 0 }.minOrNull() ?: return localizedQuestion
++
++    val questionMark = localizedQuestion.lastOrNull { it == '?' || it == '؟' || it == '？' } ?: '?'
++    val stem = localizedQuestion
++        .substring(0, colonIndex)
++        .trim()
++        .trimEnd('?', '؟', '？')
++    return "$stem$questionMark"
++}
+ 
+ private fun questionFlowColor(phase: Float): Color {
+     val normalized = ((phase % 1f) + 1f) % 1f
+@@ -927,7 +945,7 @@ fun QuizRunnerScreen(
+                                 CinematicSandMaterialize(
+                                     animationKey = questionAnimationKey,
+                                     delayMillis = 0,
+-                                    totalDurationMillis = 3_200,
++                                    totalDurationMillis = 1_900,
+                                     particleCount = 3_000,
+                                     accentColor = HarmonyPink,
+                                     flowDirection = 1f,
+@@ -935,27 +953,38 @@ fun QuizRunnerScreen(
+                                     modifier = Modifier.fillMaxWidth()
+                                 ) { glitchAmount ->
+                                     AnimatedQuestionCard(
+-                                        question = contentText(q?.q ?: ""),
++                                        question = compactPizzaBurgerQuestion(
++                                            rawQuestion = q?.q ?: "",
++                                            localizedQuestion = contentText(q?.q ?: "")
++                                        ),
+                                         glitchAmount = glitchAmount
+                                     )
+                                 }
+                             } else {
+-                                AnimatedQuestionCard(question = contentText(q?.q ?: ""))
++                                AnimatedQuestionCard(
++                                    question = compactPizzaBurgerQuestion(
++                                        rawQuestion = q?.q ?: "",
++                                        localizedQuestion = contentText(q?.q ?: "")
++                                    )
++                                )
+                             }
+                             Spacer(modifier = Modifier.height(26.dp))
+ 
+-                            
++                            val isPizzaBurgerTensionQuestion = q?.q == PIZZA_BURGER_TENSION_QUESTION
+                             val rawOptions = q?.options ?: emptyList()
+-                            val processedOptions = rawOptions.map { 
++                            val processedOptions = rawOptions.map {
+                                 it.replace("{user}", profile.userName).replace("{partner}", profile.partnerName)
+                             }
+                             val isNie = pack.cat == "nie"
+                             val fallbackText = if (isNie) tr("Überspringen", "Skip") else tr("Schreibe deine eigene Antwort", "Write your own answer")
+-                            val options = processedOptions + fallbackText
+-
++                            val options = if (isPizzaBurgerTensionQuestion) {
++                                processedOptions.take(2)
++                            } else {
++                                processedOptions + fallbackText
++                            }
+ 
+                             options.forEachIndexed { optIdx, optText ->
+-                                val isOwn = optIdx == options.size - 1
++                                val isOwn = !isPizzaBurgerTensionQuestion && optIdx == options.size - 1
+                                 val isSelected = if (isOwn) {
+                                     selectedAns != null && selectedAns !in (q?.options ?: emptyList())
+                                 } else {
+@@ -983,7 +1012,7 @@ fun QuizRunnerScreen(
+                                 if (isIntimacyPack) {
+                                     CinematicSandMaterialize(
+                                         animationKey = "${pack.id}_${activeRun.currentIndex}_option_$optIdx",
+-                                        delayMillis = 760 + optIdx * 210,
++                                        delayMillis = 760 + optIdx * 500,
+                                         totalDurationMillis = 2_400,
+                                         particleCount = 1_000,
+                                         accentColor = optionAccentColor(optIdx + 1),
+diff --git a/app/src/main/res/raw/introspection_animal.mp3 b/app/src/main/res/raw/introspection_animal.mp3
+deleted file mode 100644
+index 2f40a501..00000000
+Binary files a/app/src/main/res/raw/introspection_animal.mp3 and /dev/null differ
+diff --git a/app/src/main/res/raw/introspection_animal.xml b/app/src/main/res/raw/introspection_animal.xml
+new file mode 100644
+index 00000000..8aa5bcc5
+--- /dev/null
++++ b/app/src/main/res/raw/introspection_animal.xml
+@@ -0,0 +1,3 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Placeholder resource. Replace with the new narrator audio asset later. -->
++<placeholder />
+diff --git a/app/src/main/res/raw/introspection_color.mp3 b/app/src/main/res/raw/introspection_color.mp3
+deleted file mode 100644
+index cdd3199e..00000000
+Binary files a/app/src/main/res/raw/introspection_color.mp3 and /dev/null differ
+diff --git a/app/src/main/res/raw/introspection_color.xml b/app/src/main/res/raw/introspection_color.xml
+new file mode 100644
+index 00000000..8aa5bcc5
+--- /dev/null
++++ b/app/src/main/res/raw/introspection_color.xml
+@@ -0,0 +1,3 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Placeholder resource. Replace with the new narrator audio asset later. -->
++<placeholder />
+diff --git a/app/src/main/res/raw/introspection_reveal.mp3 b/app/src/main/res/raw/introspection_reveal.mp3
+deleted file mode 100644
+index d07bb7c8..00000000
+Binary files a/app/src/main/res/raw/introspection_reveal.mp3 and /dev/null differ
+diff --git a/app/src/main/res/raw/introspection_reveal.xml b/app/src/main/res/raw/introspection_reveal.xml
+new file mode 100644
+index 00000000..8aa5bcc5
+--- /dev/null
++++ b/app/src/main/res/raw/introspection_reveal.xml
+@@ -0,0 +1,3 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Placeholder resource. Replace with the new narrator audio asset later. -->
++<placeholder />
+diff --git a/app/src/main/res/raw/introspection_water.mp3 b/app/src/main/res/raw/introspection_water.mp3
+deleted file mode 100644
+index 91c0420c..00000000
+Binary files a/app/src/main/res/raw/introspection_water.mp3 and /dev/null differ
+diff --git a/app/src/main/res/raw/introspection_water.xml b/app/src/main/res/raw/introspection_water.xml
+new file mode 100644
+index 00000000..8aa5bcc5
+--- /dev/null
++++ b/app/src/main/res/raw/introspection_water.xml
+@@ -0,0 +1,3 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Placeholder resource. Replace with the new narrator audio asset later. -->
++<placeholder />
+diff --git a/app/src/main/res/raw/merlin_theme.mp3 b/app/src/main/res/raw/merlin_theme.mp3
+deleted file mode 100644
+index 63dd7930..00000000
+Binary files a/app/src/main/res/raw/merlin_theme.mp3 and /dev/null differ
+diff --git a/app/src/main/res/raw/merlin_theme.xml b/app/src/main/res/raw/merlin_theme.xml
+new file mode 100644
+index 00000000..b1204cc5
+--- /dev/null
++++ b/app/src/main/res/raw/merlin_theme.xml
+@@ -0,0 +1,3 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Placeholder resource. Replace with the new background music asset later. -->
++<placeholder />
