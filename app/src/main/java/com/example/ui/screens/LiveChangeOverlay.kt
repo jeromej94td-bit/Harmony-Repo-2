@@ -280,9 +280,11 @@ private fun LiveQuestionActions(
             )
         }
         Spacer(Modifier.height(18.dp))
-        ActionButton("✏️ Aktuelle Frage bearbeiten", onEdit)
-        ActionButton("➕ Frage direkt davor einfügen", onInsertBefore)
-        ActionButton("➕ Frage direkt danach einfügen", onInsertAfter)
+        if (question != null) {
+            ActionButton("✏️ Aktuelle Frage bearbeiten", onClick = onEdit)
+        }
+        ActionButton("➕ Frage direkt davor einfügen", onClick = onInsertBefore)
+        ActionButton("➕ Frage direkt danach einfügen", onClick = onInsertAfter)
 
         if (question != null) {
             ActionButton("⧉ Frage duplizieren") {
@@ -323,7 +325,7 @@ private fun LiveQuestionForm(
     var text by remember(initialQuestion, mode) { mutableStateOf(initialQuestion?.q ?: "") }
     val options = remember(initialQuestion, mode) {
         mutableStateListOf<String>().apply {
-            val initial = initialQuestion?.let(LiveQuestionEditing::visibleOptions).orEmpty()
+            val initial = initialQuestion?.let { LiveQuestionEditing.visibleOptions(it) }.orEmpty()
             if (initial.isNotEmpty()) addAll(initial) else if (initialKind == LiveQuestionKind.CHOICE) addAll(listOf("", ""))
         }
     }
@@ -495,7 +497,9 @@ private fun LivePairEditor(
                         Text("${it.first}  ↔  ${it.second}", color = HarmonyText, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                     }
                     Spacer(Modifier.height(18.dp))
-                    ActionButton("✏️ Paar bearbeiten") { mode = LiveEditorMode.EDIT }
+                    if (current != null) {
+                        ActionButton("✏️ Paar bearbeiten") { mode = LiveEditorMode.EDIT }
+                    }
                     ActionButton("➕ Paar direkt davor") { mode = LiveEditorMode.INSERT_BEFORE }
                     ActionButton("➕ Paar direkt danach") { mode = LiveEditorMode.INSERT_AFTER }
                     if (current != null) {
