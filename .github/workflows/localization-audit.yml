@@ -36,7 +36,10 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      max-parallel: 4
+      # Translation requests share GitHub-hosted runner egress IPs. Serializing
+      # locale batches prevents the public translation endpoint from rate-limiting
+      # all eight batches at once and leaving shipped languages stale.
+      max-parallel: 1
       matrix:
         include:
           - batch: europe-1
