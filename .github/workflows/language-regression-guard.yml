@@ -1,0 +1,46 @@
+name: Language Regression Guard
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'app/src/main/java/com/example/ui/Language.kt'
+      - 'app/src/main/java/com/example/ui/TranslationCatalog.kt'
+      - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
+      - 'app/src/main/java/com/example/ui/*Content.kt'
+      - 'app/src/main/java/com/example/data/CuisinePackInstaller.kt'
+      - 'app/src/main/java/com/example/data/DriveTotAssetInstaller.kt'
+      - 'app/src/test/java/com/example/ui/LanguageAvailabilityRegressionTest.kt'
+      - 'scripts/verify_language_inventory_guard.py'
+      - '.github/workflows/language-regression-guard.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'app/src/main/java/com/example/ui/Language.kt'
+      - 'app/src/main/java/com/example/ui/TranslationCatalog.kt'
+      - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
+      - 'app/src/main/java/com/example/ui/*Content.kt'
+      - 'app/src/main/java/com/example/data/CuisinePackInstaller.kt'
+      - 'app/src/main/java/com/example/data/DriveTotAssetInstaller.kt'
+      - 'app/src/test/java/com/example/ui/LanguageAvailabilityRegressionTest.kt'
+      - 'scripts/verify_language_inventory_guard.py'
+      - '.github/workflows/language-regression-guard.yml'
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify shipped language inventory and cuisine links
+        run: python3 scripts/verify_language_inventory_guard.py
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+      - name: Run language availability regression test
+        run: gradle :app:testDebugUnitTest --tests com.example.ui.LanguageAvailabilityRegressionTest --no-daemon
