@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.R
 import com.example.ui.contentText
 import com.example.ui.theme.HarmonyBg
@@ -117,7 +119,66 @@ private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImag
             ),
             images = travelChoiceImages
         )
+
+        HarmonyImageChoiceKind.PANDA_INTRO -> error("PANDA_INTRO is rendered as video before image-choice visuals")
     }
+
+@Composable
+private fun UnpopularOpinionsPandaVideoIntro(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(9f / 16f)
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color.Black)
+            .border(1.2.dp, HarmonyPurpleLight.copy(alpha = 0.58f), RoundedCornerShape(28.dp))
+            .testTag("unpopular_opinions_panda_intro")
+    ) {
+        AndroidView(
+            factory = { context ->
+                android.widget.VideoView(context).apply {
+                    setBackgroundColor(android.graphics.Color.BLACK)
+                    setVideoURI(
+                        android.net.Uri.parse(
+                            "android.resource://${context.packageName}/${R.raw.unpopular_opinions_panda_intro}"
+                        )
+                    )
+                    setOnPreparedListener { player ->
+                        player.isLooping = false
+                        player.setVolume(1f, 1f)
+                        start()
+                    }
+                    setOnCompletionListener {
+                        UnpopularOpinionsPandaIntroState.played = true
+                    }
+                    setOnErrorListener { _, _, _ ->
+                        UnpopularOpinionsPandaIntroState.played = true
+                        true
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        TextButton(
+            onClick = { UnpopularOpinionsPandaIntroState.played = true },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.46f))
+                .testTag("unpopular_opinions_panda_intro_skip")
+        ) {
+            Text(
+                text = tr("Überspringen", "Skip"),
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
 
 @Composable
 internal fun HarmonyImageChoiceQuestion(
@@ -128,6 +189,11 @@ internal fun HarmonyImageChoiceQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind == HarmonyImageChoiceKind.PANDA_INTRO) {
+        UnpopularOpinionsPandaVideoIntro(modifier = modifier)
+        return
+    }
+
     val visuals = harmonyImageChoiceVisuals(kind)
     val containerShape = RoundedCornerShape(28.dp)
 
