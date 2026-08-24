@@ -40,6 +40,7 @@ def main() -> None:
     language = (UI / "Language.kt").read_text(encoding="utf-8")
     catalog = (UI / "TranslationCatalog.kt").read_text(encoding="utf-8")
     profile = (UI / "screens/ProfileSheet.kt").read_text(encoding="utf-8")
+    language_selector = (UI / "screens/LanguageSelectorCard.kt").read_text(encoding="utf-8")
     cuisine = (DATA / "CuisinePackInstaller.kt").read_text(encoding="utf-8")
     drive = (DATA / "DriveTotAssetInstaller.kt").read_text(encoding="utf-8")
 
@@ -57,7 +58,11 @@ def main() -> None:
         "Strict translation coverage diagnostic is missing",
     )
     require(
-        'AppLanguage.entries.filter(TranslationCatalog::hasCompletePack)' in profile,
+        'LanguageSelectorCard(' in profile,
+        "Profile no longer wires the protected language selector",
+    )
+    require(
+        'AppLanguage.entries.filter(TranslationCatalog::hasCompletePack)' in language_selector,
         "Profile language selector no longer uses the protected availability gate",
     )
 

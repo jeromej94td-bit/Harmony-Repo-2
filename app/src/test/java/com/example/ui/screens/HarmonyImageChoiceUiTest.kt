@@ -22,8 +22,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w411dp-h1100dp-xxhdpi", sdk = [36])
+@GraphicsMode(GraphicsMode.Mode.LEGACY)
+@Config(qualifiers = "w411dp-h1100dp-xxhdpi", sdk = [35])
 class HarmonyImageChoiceUiTest {
 
     @get:Rule
