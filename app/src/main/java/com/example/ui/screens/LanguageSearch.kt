@@ -11,6 +11,11 @@ internal fun filterLanguages(
     val normalizedQuery = normalizeLanguageSearchTerm(query)
     if (normalizedQuery.isBlank()) return languages
 
+    val exactLocaleMatches = languages.filter { language ->
+        normalizeLanguageSearchTerm(language.code) == normalizedQuery
+    }
+    if (exactLocaleMatches.isNotEmpty()) return exactLocaleMatches
+
     return languages.filter { language ->
         languageSearchTerms(language).any { term ->
             normalizeLanguageSearchTerm(term).contains(normalizedQuery)
