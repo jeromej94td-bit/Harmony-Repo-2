@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.example.data.model.ProfileEntity
 import com.example.ui.theme.HarmonyTheme
@@ -38,6 +39,6 @@ class ProfileLanguageSearchUiTest {
 
         composeTestRule.onNodeWithTag("language_search_toggle").assertIsDisplayed().performClick()
         composeTestRule.onNodeWithTag("language_search_input").assertIsDisplayed().performTextInput("polnisch")
-        composeTestRule.onNodeWithTag("language_option_POLISH").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("language_option_POLISH").performScrollTo().assertIsDisplayed()
     }
 }
