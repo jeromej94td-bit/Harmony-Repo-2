@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+# Triggered after workflow registration so GitHub Actions applies this focused patch.
 screen = Path("app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt")
 text = screen.read_text(encoding="utf-8")
 
