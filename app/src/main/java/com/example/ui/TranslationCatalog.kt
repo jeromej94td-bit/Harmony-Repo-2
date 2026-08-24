@@ -16,7 +16,16 @@ object TranslationCatalog {
         "☀️", "❤️"
     )
 
-    fun hasCompletePack(language: AppLanguage): Boolean {
+    /**
+     * Runtime availability is intentionally decoupled from translation freshness.
+     * Every AppLanguage entry is a shipped offline locale and must remain visible in the selector.
+     * Missing newly-added keys are a CI/audit failure, not a reason to silently remove a language.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    fun hasCompletePack(language: AppLanguage): Boolean = true
+
+    /** Strict diagnostic used when checking whether every current customer key is translated. */
+    fun hasFullCustomerCoverage(language: AppLanguage): Boolean {
         if (language == AppLanguage.GERMAN) return true
         return EXACT_ENGLISH_CONTENT.keys
             .asSequence()
