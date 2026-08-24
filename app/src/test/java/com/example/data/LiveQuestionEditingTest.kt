@@ -22,6 +22,20 @@ class LiveQuestionEditingTest {
         )
     )
 
+    private val totPack = QuestionPack(
+        id = "tot_test",
+        title = "Das oder Das",
+        tags = listOf("dasoderdas"),
+        cat = "tot",
+        topic = "aufwaermen",
+        type = "tot",
+        pairs = listOf(
+            "A" to "B",
+            "C" to "D",
+            "E" to "F"
+        )
+    )
+
     @Test
     fun insertsQuestionAtExactRequestedPosition() {
         val newQuestion = LiveQuestionEditing.createQuestion(
@@ -49,7 +63,18 @@ class LiveQuestionEditingTest {
     }
 
     @Test
-    fun freeTextQuestionDropsVisibleAnswerOptions() {
+    fun choiceQuestionNeedsAtLeastOneAnswerOption() {
+        assertThrows(IllegalArgumentException::class.java) {
+            LiveQuestionEditing.createQuestion(
+                kind = LiveQuestionKind.CHOICE,
+                text = "Was passt?",
+                options = emptyList()
+            )
+        }
+    }
+
+    @Test
+    fun freeTextQuestionStoresNoAnswerOptions() {
         val question = LiveQuestionEditing.createQuestion(
             kind = LiveQuestionKind.FREE_TEXT,
             text = "Erzähl mir davon",
@@ -57,6 +82,7 @@ class LiveQuestionEditingTest {
         )
 
         assertEquals(LiveQuestionKind.FREE_TEXT, LiveQuestionEditing.effectiveKind(question, "quiz"))
+        assertEquals(emptyList<String>(), question.options)
         assertEquals(emptyList<String>(), LiveQuestionEditing.visibleOptions(question))
     }
 
@@ -76,7 +102,7 @@ class LiveQuestionEditingTest {
             options = listOf("Links", "Rechts")
         )
         assertEquals(listOf("Links", "Rechts"), LiveQuestionEditing.visibleOptions(valid))
-        assertEquals(LiveQuestionKind.THIS_OR_THAT, LiveQuestionEditing.effectiveKind(valid, "quiz"))
+        assertEquals(LiveQuestionKind.THIS_OR_THAT, LiveQuestionEditing.effectiveKind(valid, "tot"))
     }
 
     @Test
@@ -92,9 +118,13 @@ class LiveQuestionEditingTest {
     }
 
     @Test
-    fun legacyQuestionKindFallsBackToExistingPackType() {
+    fun legacyQuestionKindFallsBackToExistingPackTypeAndOptions() {
         assertEquals(
             LiveQuestionKind.CHOICE,
+            LiveQuestionEditing.effectiveKind(Question("Alt", listOf("A", "B")), packType = "quiz")
+        )
+        assertEquals(
+            LiveQuestionKind.FREE_TEXT,
             LiveQuestionEditing.effectiveKind(Question("Alt"), packType = "quiz")
         )
         assertEquals(
@@ -118,5 +148,29 @@ class LiveQuestionEditingTest {
         val updated = LiveQuestionEditing.replaceQuestion(basePack, 1, replacement)
 
         assertEquals(listOf("Frage A", "B neu", "Frage C"), updated.questions.map { it.q })
+    }
+
+    @Test
+    fun insertsAndEditsThisOrThatPairAtExactPosition() {
+        val inserted = LiveQuestionEditing.insertPair(totPack, 1, "Neu links" to "Neu rechts")
+        assertEquals(
+            listOf("A" to "B", "Neu links" to "Neu rechts", "C" to "D", "E" to "F"),
+            inserted.pairs
+        )
+
+        val replaced = LiveQuestionEditing.replacePair(inserted, 1, "Links 2" to "Rechts 2")
+        assertEquals("Links 2" to "Rechts 2", replaced.pairs[1])
+    }
+
+    @Test
+    fun duplicateMoveAndDeleteKeepPairOrderDeterministic() {
+        val duplicated = LiveQuestionEditing.duplicatePair(totPack, 1)
+        assertEquals(listOf("A" to "B", "C" to "D", "C" to "D", "E" to "F"), duplicated.pairs)
+
+        val moved = LiveQuestionEditing.movePair(duplicated, 2, 0)
+        assertEquals(listOf("C" to "D", "A" to "B", "C" to "D", "E" to "F"), moved.pairs)
+
+        val deleted = LiveQuestionEditing.deletePair(moved, 1)
+        assertEquals(listOf("C" to "D", "C" to "D", "E" to "F"), deleted.pairs)
     }
 }
