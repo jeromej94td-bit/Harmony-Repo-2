@@ -37,9 +37,9 @@ class ProfileLanguageSearchUiTest {
         }
 
         composeTestRule.onNodeWithTag("language_search_toggle").assertIsDisplayed().performClick()
-        composeTestRule.onNodeWithTag("language_search_input")
-            .assertIsDisplayed()
-            .performTextInput("polnisch")
-            .assertIsDisplayed()
+        val searchInput = composeTestRule.onNodeWithTag("language_search_input")
+        searchInput.assertIsDisplayed()
+        searchInput.performTextInput("polnisch")
+        searchInput.assertIsDisplayed()
     }
 }
