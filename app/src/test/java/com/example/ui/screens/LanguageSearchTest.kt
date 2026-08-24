@@ -20,4 +20,16 @@ class LanguageSearchTest {
         assertEquals(listOf(AppLanguage.ITALIAN), filterLanguages(languages, "ITALIAN"))
         assertTrue(AppLanguage.PORTUGUESE_BRAZIL in filterLanguages(languages, "pt-br"))
     }
+
+    @Test
+    fun searchMatchesCommonGermanLanguageNames() {
+        assertEquals(listOf(AppLanguage.POLISH), filterLanguages(languages, "polnisch"))
+        assertEquals(listOf(AppLanguage.ITALIAN), filterLanguages(languages, "italienisch"))
+    }
+
+    @Test
+    fun searchIgnoresDiacritics() {
+        assertEquals(listOf(AppLanguage.FRENCH), filterLanguages(languages, "francais"))
+        assertTrue(AppLanguage.PORTUGUESE_BRAZIL in filterLanguages(languages, "portugues brasil"))
+    }
 }
