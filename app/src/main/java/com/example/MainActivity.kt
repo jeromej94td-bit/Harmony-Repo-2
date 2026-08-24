@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
+import com.example.data.DeveloperDataManager
 import com.example.data.OkHttpLinkPreviewResolver
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.MemoryEntryKind
@@ -55,6 +56,9 @@ import com.example.ui.screens.DevStudioScreen
 import com.example.ui.screens.GamesScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.IntrospectionExperienceScreen
+import com.example.ui.screens.LiveChangeEditor
+import com.example.ui.screens.LiveChangeHud
+import com.example.ui.screens.LiveChangeLauncher
 import com.example.ui.screens.MomentsScreen
 import com.example.ui.screens.MemoryEditorSheet
 import com.example.ui.screens.MemoryScreen
@@ -63,6 +67,7 @@ import com.example.ui.screens.PANDA_EITHER_OR_PACK_ID
 import com.example.ui.screens.PandaEitherOrScreen
 import com.example.ui.screens.ProfileSheet
 import com.example.ui.screens.QuizRunnerScreen
+import com.example.ui.screens.liveChangeLongPressObserver
 import com.example.ui.theme.HarmonyTheme
 import com.example.widget.MemoryWidgetDatabaseObserver
 import com.example.widget.MemoryWidgetOpenRequest
@@ -135,6 +140,9 @@ fun HarmonyApp(
     var isIntrospectionOpen by remember { mutableStateOf(false) }
     var isPandaEitherOrOpen by remember { mutableStateOf(false) }
     var isPandaExitConfirmOpen by remember { mutableStateOf(false) }
+    var isLiveChangeMode by remember { mutableStateOf(false) }
+    var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
+    var liveChangeCount by remember { mutableStateOf(0) }
 
     LaunchedEffect(memoryWidgetOpenRequest) {
         val request = memoryWidgetOpenRequest ?: return@LaunchedEffect
@@ -181,6 +189,9 @@ fun HarmonyApp(
 
     BackHandler(enabled = canHandleBack) {
         when {
+            isLiveChangeEditorOpen -> {
+                isLiveChangeEditorOpen = false
+            }
             isIntrospectionOpen -> {
                 // IntrospectionExperienceScreen handles back so it can show its own leave dialog.
             }
@@ -225,7 +236,16 @@ fun HarmonyApp(
 
     AmbientBackground {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .liveChangeLongPressObserver(
+                    enabled = isLiveChangeMode &&
+                        isQuizActive &&
+                        !uiState.isExitConfirmOpen &&
+                        !uiState.isOwnAnswerDialogOpen &&
+                        !isLiveChangeEditorOpen,
+                    onLongPress = { isLiveChangeEditorOpen = true }
+                ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
                 if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen) {
@@ -385,6 +405,21 @@ fun HarmonyApp(
                     )
                 }
 
+                if (uiState.selectedTab == 5 && !isQuizActive && !isLiveChangeMode) {
+                    LiveChangeLauncher(
+                        onStart = {
+                            isLiveChangeMode = true
+                            isLiveChangeEditorOpen = false
+                            viewModel.closeProfileSheet()
+                            viewModel.selectTab(1)
+                            viewModel.showToast("Live Change aktiv · Spiel öffnen und Element gedrückt halten")
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                    )
+                }
+
                 // Toast Notification Overlay
                 HarmonyToast(
                     message = uiState.toastMessage,
@@ -447,6 +482,50 @@ fun HarmonyApp(
                                 .align(Alignment.TopEnd)
                                 .statusBarsPadding()
                                 .padding(top = 19.dp, end = 18.dp)
+                        )
+                    }
+                }
+
+                if (isLiveChangeMode) {
+                    LiveChangeHud(
+                        changeCount = liveChangeCount,
+                        hasActiveItem = uiState.activeRun != null,
+                        onEditCurrent = { isLiveChangeEditorOpen = uiState.activeRun != null },
+                        onStop = {
+                            isLiveChangeEditorOpen = false
+                            isLiveChangeMode = false
+                            viewModel.showToast("Live Change beendet · Änderungen bleiben gespeichert")
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .statusBarsPadding()
+                            .padding(top = 7.dp)
+                    )
+                }
+
+                if (isLiveChangeMode && isLiveChangeEditorOpen) {
+                    uiState.activeRun?.let { activeRun ->
+                        LiveChangeEditor(
+                            pack = activeRun.pack,
+                            currentIndex = activeRun.currentIndex,
+                            onDismiss = { isLiveChangeEditorOpen = false },
+                            onSave = { updatedPack, targetIndex, message ->
+                                DeveloperDataManager.savePack(context, updatedPack)
+                                liveChangeCount++
+                                isLiveChangeEditorOpen = false
+
+                                val totalItems = if (updatedPack.type == "tot") {
+                                    updatedPack.pairs.size
+                                } else {
+                                    updatedPack.questions.size
+                                }
+                                viewModel.startPack(updatedPack.id)
+                                if (totalItems > 0) {
+                                    val boundedTarget = targetIndex.coerceIn(0, totalItems - 1)
+                                    repeat(boundedTarget) { viewModel.nextStep() }
+                                }
+                                viewModel.showToast("$message · Live Change gespeichert")
+                            }
                         )
                     }
                 }
