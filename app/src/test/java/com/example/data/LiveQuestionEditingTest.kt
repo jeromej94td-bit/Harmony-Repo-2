@@ -33,8 +33,8 @@ class LiveQuestionEditingTest {
         val updated = LiveQuestionEditing.insertQuestion(basePack, 1, newQuestion)
 
         assertEquals(listOf("Frage A", "Neue Frage", "Frage B", "Frage C"), updated.questions.map { it.q })
-        assertEquals(listOf("Ja", "Nein", "Vielleicht"), updated.questions[1].options)
-        assertEquals("choice", updated.questions[1].kind)
+        assertEquals(listOf("Ja", "Nein", "Vielleicht"), LiveQuestionEditing.visibleOptions(updated.questions[1]))
+        assertEquals(LiveQuestionKind.CHOICE, LiveQuestionEditing.effectiveKind(updated.questions[1], "quiz"))
     }
 
     @Test
@@ -45,19 +45,19 @@ class LiveQuestionEditingTest {
             options = listOf("1", "2", "3", "4", "5", "6")
         )
 
-        assertEquals(6, question.options.size)
+        assertEquals(6, LiveQuestionEditing.visibleOptions(question).size)
     }
 
     @Test
-    fun freeTextQuestionDropsAnswerOptions() {
+    fun freeTextQuestionDropsVisibleAnswerOptions() {
         val question = LiveQuestionEditing.createQuestion(
             kind = LiveQuestionKind.FREE_TEXT,
             text = "Erzähl mir davon",
             options = listOf("soll", "weg")
         )
 
-        assertEquals("free_text", question.kind)
-        assertEquals(emptyList<String>(), question.options)
+        assertEquals(LiveQuestionKind.FREE_TEXT, LiveQuestionEditing.effectiveKind(question, "quiz"))
+        assertEquals(emptyList<String>(), LiveQuestionEditing.visibleOptions(question))
     }
 
     @Test
@@ -75,7 +75,8 @@ class LiveQuestionEditingTest {
             text = "Was lieber?",
             options = listOf("Links", "Rechts")
         )
-        assertEquals(listOf("Links", "Rechts"), valid.options)
+        assertEquals(listOf("Links", "Rechts"), LiveQuestionEditing.visibleOptions(valid))
+        assertEquals(LiveQuestionKind.THIS_OR_THAT, LiveQuestionEditing.effectiveKind(valid, "quiz"))
     }
 
     @Test
@@ -104,5 +105,18 @@ class LiveQuestionEditingTest {
             LiveQuestionKind.THIS_OR_THAT,
             LiveQuestionEditing.effectiveKind(Question("Alt"), packType = "tot")
         )
+    }
+
+    @Test
+    fun replaceQuestionKeepsExactIndex() {
+        val replacement = LiveQuestionEditing.createQuestion(
+            kind = LiveQuestionKind.CHOICE,
+            text = "B neu",
+            options = listOf("X", "Y")
+        )
+
+        val updated = LiveQuestionEditing.replaceQuestion(basePack, 1, replacement)
+
+        assertEquals(listOf("Frage A", "B neu", "Frage C"), updated.questions.map { it.q })
     }
 }
