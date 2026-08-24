@@ -82,8 +82,26 @@ jobs:
           path: build/generated-locales/*.kt
           if-no-files-found: error
 
-  audit:
+  refresh-existing-locales:
     needs: generate-new-locales
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Refresh the 16 pre-41 production locales
+        run: python3 scripts/refresh_existing_locale_catalogs.py --artifact-dir build/refreshed-locales
+      - name: Upload refreshed existing locales
+        uses: actions/upload-artifact@v4
+        with:
+          name: refreshed-existing-locales
+          path: build/refreshed-locales/*.kt
+          if-no-files-found: error
+
+  audit:
+    needs: [generate-new-locales, refresh-existing-locales]
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -95,14 +113,21 @@ jobs:
         run: python3 scripts/scaffold_six_new_locales.py
       - name: Apply 41-locale scaffolding
         run: python3 scripts/scaffold_41_new_locales.py
-      - name: Download generated locale catalogs
+      - name: Download generated 41-locale catalogs
         uses: actions/download-artifact@v4
         with:
           pattern: production-locales-*
           path: build/generated-locales
           merge-multiple: true
+      - name: Download refreshed existing locales
+        uses: actions/download-artifact@v4
+        with:
+          name: refreshed-existing-locales
+          path: build/refreshed-locales
       - name: Install generated locale catalogs
-        run: cp build/generated-locales/*.kt app/src/main/java/com/example/ui/
+        run: |
+          cp build/generated-locales/*.kt app/src/main/java/com/example/ui/
+          cp build/refreshed-locales/*.kt app/src/main/java/com/example/ui/
       - name: Normalize Kotlin locale sources
         run: |
           python3 scripts/repair_generated_locale_sources.py
@@ -123,6 +148,8 @@ jobs:
         run: python3 scripts/audit_41_locales.py
       - name: Verify existing effective localization
         run: python3 scripts/verify_localization_repair.py
+      - name: Verify language inventory and cuisine links
+        run: python3 scripts/verify_language_inventory_guard.py
       - name: Persist generated locale implementation
         run: |
           git config user.name "harmony-localization-bot"
@@ -130,10 +157,11 @@ jobs:
           git add app/src/main/java/com/example/MainActivity.kt
           git add app/src/main/java/com/example/ui/Language.kt
           git add app/src/main/java/com/example/ui/TranslationCatalog.kt
+          git add app/src/main/java/com/example/ui/LocalizationUpdates.kt
           git add app/src/main/java/com/example/ui/introspection/IntrospectionStrings.kt
           git add app/src/main/java/com/example/ui/*Content.kt
           if ! git diff --cached --quiet; then
-            git commit -m "Add 41 complete production locale catalogs"
+            git commit -m "Refresh complete production locale catalogs"
             git push origin HEAD:${{ github.head_ref }}
           fi
       - name: Set up Java 21
