@@ -7,6 +7,7 @@ import json
 import re
 import shutil
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -16,6 +17,12 @@ from production_locale_registry import BY_CODE, CORE_OVERRIDES
 
 ROOT = Path(__file__).resolve().parents[1]
 UI = ROOT / "app/src/main/java/com/example/ui"
+
+# GitHub-hosted runners share public egress IPs. The unofficial Google endpoint
+# rate-limits concurrent/bursty traffic aggressively, so generation is deliberately
+# paced even after successful requests. The workflow also serializes locale batches.
+SUCCESS_REQUEST_DELAY_SECONDS = 4.0
+MAX_TRANSLATION_ATTEMPTS = 9
 
 PLACEHOLDER_RE = re.compile(
     r'(\$\{[^}]+\}|\$[A-Za-z_][A-Za-z0-9_]*|\{[^}]+\}|%\d*\$?[a-zA-Z])'
@@ -39,19 +46,42 @@ def restore(text: str, placeholders: dict[str, str]) -> str:
     return text
 
 
+def retry_delay_seconds(exc: Exception, attempt: int) -> float:
+    """Return a conservative retry delay, with special handling for HTTP 429."""
+    if isinstance(exc, urllib.error.HTTPError) and exc.code == 429:
+        retry_after = 0.0
+        try:
+            retry_after = float(exc.headers.get("Retry-After", "0") or 0)
+        except (TypeError, ValueError):
+            retry_after = 0.0
+        exponential = min(120.0, 15.0 * (2 ** attempt))
+        return max(retry_after, exponential)
+    return min(30.0, 2.0 * (attempt + 1))
+
+
 def google_request(text: str, target: str) -> str:
     params = urllib.parse.urlencode({"client": "gtx", "sl": "de", "tl": target, "dt": "t", "q": text})
     url = "https://translate.googleapis.com/translate_a/single?" + params
-    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 HarmonyLocalization/3.0"})
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 HarmonyLocalization/3.1"})
     last_error: Exception | None = None
-    for attempt in range(7):
+    for attempt in range(MAX_TRANSLATION_ATTEMPTS):
         try:
             with urllib.request.urlopen(request, timeout=40) as response:
                 data = json.loads(response.read().decode("utf-8"))
-            return "".join(segment[0] for segment in data[0] if segment and segment[0]).strip()
+            translated = "".join(segment[0] for segment in data[0] if segment and segment[0]).strip()
+            time.sleep(SUCCESS_REQUEST_DELAY_SECONDS)
+            return translated
         except Exception as exc:  # noqa: BLE001
             last_error = exc
-            time.sleep(min(12.0, 1.5 * (attempt + 1)))
+            delay = retry_delay_seconds(exc, attempt)
+            status = getattr(exc, "code", type(exc).__name__)
+            print(
+                f"Translation request for {target} failed ({status}); "
+                f"retry {attempt + 1}/{MAX_TRANSLATION_ATTEMPTS} in {delay:.0f}s",
+                flush=True,
+            )
+            if attempt + 1 < MAX_TRANSLATION_ATTEMPTS:
+                time.sleep(delay)
     raise RuntimeError(f"Translation failed for {target}: {last_error}")
 
 
