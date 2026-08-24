@@ -7,10 +7,14 @@ on:
       - 'app/src/main/java/com/example/ui/Language.kt'
       - 'app/src/main/java/com/example/ui/TranslationCatalog.kt'
       - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
+      - 'app/src/main/java/com/example/ui/screens/LanguageSelectorCard.kt'
+      - 'app/src/main/java/com/example/ui/screens/LanguageSearch.kt'
       - 'app/src/main/java/com/example/ui/*Content.kt'
       - 'app/src/main/java/com/example/data/CuisinePackInstaller.kt'
       - 'app/src/main/java/com/example/data/DriveTotAssetInstaller.kt'
       - 'app/src/test/java/com/example/ui/LanguageAvailabilityRegressionTest.kt'
+      - 'app/src/test/java/com/example/ui/screens/LanguageSearchTest.kt'
+      - 'app/src/test/java/com/example/ui/screens/ProfileLanguageSearchUiTest.kt'
       - 'scripts/verify_language_inventory_guard.py'
       - 'scripts/report_localization_gaps.py'
       - '.github/workflows/language-regression-guard.yml'
@@ -20,10 +24,14 @@ on:
       - 'app/src/main/java/com/example/ui/Language.kt'
       - 'app/src/main/java/com/example/ui/TranslationCatalog.kt'
       - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
+      - 'app/src/main/java/com/example/ui/screens/LanguageSelectorCard.kt'
+      - 'app/src/main/java/com/example/ui/screens/LanguageSearch.kt'
       - 'app/src/main/java/com/example/ui/*Content.kt'
       - 'app/src/main/java/com/example/data/CuisinePackInstaller.kt'
       - 'app/src/main/java/com/example/data/DriveTotAssetInstaller.kt'
       - 'app/src/test/java/com/example/ui/LanguageAvailabilityRegressionTest.kt'
+      - 'app/src/test/java/com/example/ui/screens/LanguageSearchTest.kt'
+      - 'app/src/test/java/com/example/ui/screens/ProfileLanguageSearchUiTest.kt'
       - 'scripts/verify_language_inventory_guard.py'
       - 'scripts/report_localization_gaps.py'
       - '.github/workflows/language-regression-guard.yml'
@@ -52,5 +60,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-      - name: Run language availability regression test
-        run: gradle :app:testDebugUnitTest --tests com.example.ui.LanguageAvailabilityRegressionTest --no-daemon
+      - name: Run language selector regression tests
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests com.example.ui.LanguageAvailabilityRegressionTest
+          --tests com.example.ui.screens.LanguageSearchTest
+          --tests com.example.ui.screens.ProfileLanguageSearchUiTest
+          --no-daemon
