@@ -30,6 +30,8 @@ private fun normalizeLanguageSearchTerm(value: String): String =
     Normalizer.normalize(value.trim(), Normalizer.Form.NFD)
         .replace("\\p{Mn}+".toRegex(), "")
         .lowercase(Locale.ROOT)
+        .replace("[^\\p{L}\\p{N}]+".toRegex(), " ")
+        .trim()
 
 private val germanLanguageSearchAliases: Map<AppLanguage, List<String>> = mapOf(
     AppLanguage.GERMAN to listOf("Deutsch"),
