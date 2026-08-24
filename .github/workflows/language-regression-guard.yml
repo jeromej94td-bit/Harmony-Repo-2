@@ -29,7 +29,7 @@ on:
       - '.github/workflows/language-regression-guard.yml'
 
 jobs:
-  guard:
+  inventory:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +37,12 @@ jobs:
         run: python3 scripts/verify_language_inventory_guard.py
       - name: Report localization gaps
         run: python3 scripts/report_localization_gaps.py
+
+  kotlin-test:
+    needs: inventory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
