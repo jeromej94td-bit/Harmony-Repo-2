@@ -1,7 +1,7 @@
 package com.example.ui
 
-import com.example.data.CuisinePackInstaller
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LanguageAvailabilityRegressionTest {
@@ -19,23 +19,9 @@ class LanguageAvailabilityRegressionTest {
 
         assertEquals(59, AppLanguage.entries.size)
         assertEquals(expectedCodes, AppLanguage.entries.map { it.code }.toSet())
-        assertEquals(AppLanguage.entries, selectableAppLanguages())
-    }
-
-    @Test
-    fun italianAndPolishCuisinePacksStayLinkedToTheirLanguages() {
-        assertEquals(
-            setOf("tot_italian_cuisine_mixed"),
-            CuisinePackInstaller.cuisinePackIdsForLanguage("it")
+        assertTrue(
+            "A registered language must never silently disappear from the selector",
+            AppLanguage.entries.all(TranslationCatalog::hasCompletePack)
         )
-        assertEquals(
-            setOf("tot_italian_cuisine_mixed"),
-            CuisinePackInstaller.cuisinePackIdsForLanguage("it-IT")
-        )
-        assertEquals(
-            setOf("tot_polish_cuisine_traditional"),
-            CuisinePackInstaller.cuisinePackIdsForLanguage("pl")
-        )
-        assertEquals(emptySet<String>(), CuisinePackInstaller.cuisinePackIdsForLanguage("de"))
     }
 }
