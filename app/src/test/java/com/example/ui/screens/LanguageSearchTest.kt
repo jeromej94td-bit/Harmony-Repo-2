@@ -22,6 +22,13 @@ class LanguageSearchTest {
     }
 
     @Test
+    fun exactLocaleCodeWinsOverIncidentalTextMatches() {
+        assertEquals(listOf(AppLanguage.POLISH), filterLanguages(languages, "pl"))
+        assertEquals(listOf(AppLanguage.ITALIAN), filterLanguages(languages, "IT"))
+        assertEquals(listOf(AppLanguage.PORTUGUESE_BRAZIL), filterLanguages(languages, "pt-BR"))
+    }
+
+    @Test
     fun searchMatchesCommonGermanLanguageNames() {
         assertEquals(listOf(AppLanguage.POLISH), filterLanguages(languages, "polnisch"))
         assertEquals(listOf(AppLanguage.ITALIAN), filterLanguages(languages, "italienisch"))
