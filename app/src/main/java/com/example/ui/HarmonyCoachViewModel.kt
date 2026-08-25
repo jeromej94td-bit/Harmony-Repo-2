@@ -9,6 +9,7 @@ import com.example.ai.CoachRole
 import com.example.ai.HarmonyAiCoachRepository
 import com.example.ai.HarmonyCoachUiState
 import com.example.data.db.HarmonyDatabase
+import com.example.data.model.ProfileEntity
 import com.example.data.repository.HarmonyRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ class HarmonyCoachViewModel(application: Application) : AndroidViewModel(applica
 
         viewModelScope.launch {
             runCatching {
-                val profile = harmonyRepository.profileFlow.first()
+                val profile = harmonyRepository.profileFlow.first() ?: ProfileEntity()
                 val answers = harmonyRepository.answersFlow.first()
                 coachRepository.ask(
                     query = clean,
