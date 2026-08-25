@@ -3,7 +3,6 @@ package com.example.ai
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
 
@@ -16,10 +15,9 @@ object HarmonyLocationProvider {
         if (!hasPermission(context)) return null
         val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
         return runCatching {
-            val providers = manager.getProviders(true)
-            providers.mapNotNull { provider ->
-                runCatching { manager.getLastKnownLocation(provider) }.getOrNull()
-            }.maxByOrNull(Location::getTime)
+            manager.getProviders(true)
+                .mapNotNull { provider -> runCatching { manager.getLastKnownLocation(provider) }.getOrNull() }
+                .maxByOrNull { it.time }
                 ?.let { CoachLocation(it.latitude, it.longitude) }
         }.getOrNull()
     }
