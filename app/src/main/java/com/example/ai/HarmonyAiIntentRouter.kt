@@ -67,15 +67,18 @@ object HarmonyAiIntentRouter {
             isLocal -> HarmonyAiIntent.LOCAL_DISCOVERY
             isTravel -> HarmonyAiIntent.TRAVEL
             isEntertainment -> HarmonyAiIntent.ENTERTAINMENT
-            isCurrent -> HarmonyAiIntent.CURRENT_INFO
             isRelationship -> HarmonyAiIntent.RELATIONSHIP
+            isCurrent -> HarmonyAiIntent.CURRENT_INFO
             else -> HarmonyAiIntent.GENERAL
         }
 
         val grounding = when {
             isLocal && (isCurrent || isEvent) -> HarmonyGroundingMode.SEARCH_AND_MAPS
             isLocal -> HarmonyGroundingMode.GOOGLE_MAPS
-            isCurrent || isEvent -> HarmonyGroundingMode.GOOGLE_SEARCH
+            isEvent -> HarmonyGroundingMode.GOOGLE_SEARCH
+            isEntertainment && isCurrent -> HarmonyGroundingMode.GOOGLE_SEARCH
+            isTravel && isCurrent -> HarmonyGroundingMode.GOOGLE_SEARCH
+            intent == HarmonyAiIntent.CURRENT_INFO -> HarmonyGroundingMode.GOOGLE_SEARCH
             else -> HarmonyGroundingMode.NONE
         }
 
