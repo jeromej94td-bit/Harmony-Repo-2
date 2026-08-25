@@ -42,4 +42,11 @@ class HarmonyAiIntentRouterTest {
         assertEquals(HarmonyAiIntent.RELATIONSHIP, route.intent)
         assertEquals(HarmonyGroundingMode.NONE, route.grounding)
     }
+
+    @Test
+    fun relationshipQuestionMentioningTodayDoesNotTriggerWebSearch() {
+        val route = HarmonyAiIntentRouter.route("Wir hatten heute Streit. Wie können wir besser darüber reden?")
+        assertEquals(HarmonyAiIntent.RELATIONSHIP, route.intent)
+        assertEquals(HarmonyGroundingMode.NONE, route.grounding)
+    }
 }
