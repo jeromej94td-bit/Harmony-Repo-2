@@ -43,6 +43,11 @@ object HarmonyAiIntentRouter {
         "my area", "close to me", "vicino a me", "qui vicino", "w pobliżu mnie", "blisko mnie", "cerca de mí"
     )
 
+    private val explicitLocationPattern = Regex(
+        pattern = "\\b(in|bei|at|around|near|a|à|en|w)\\s+[\\p{L}][\\p{L}\\p{M}'’-]{2,}",
+        option = RegexOption.IGNORE_CASE
+    )
+
     fun route(query: String): HarmonyAiRoute {
         val q = query.lowercase()
         val isFood = foodTerms.any(q::contains)
@@ -52,7 +57,9 @@ object HarmonyAiIntentRouter {
         val isEvent = eventTerms.any(q::contains)
         val isTravel = travelTerms.any(q::contains)
         val isRelationship = relationshipTerms.any(q::contains)
-        val needsUserLocation = isLocal && userLocationTerms.any(q::contains)
+        val explicitlyAsksForOwnLocation = userLocationTerms.any(q::contains)
+        val hasExplicitPlace = !explicitlyAsksForOwnLocation && explicitLocationPattern.containsMatchIn(query)
+        val needsUserLocation = isLocal && !hasExplicitPlace
 
         val intent = when {
             isEvent -> HarmonyAiIntent.EVENT_SEARCH
