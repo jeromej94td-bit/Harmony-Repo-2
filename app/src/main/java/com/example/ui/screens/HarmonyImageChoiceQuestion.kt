@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlightTakeoff
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
@@ -88,6 +89,13 @@ private val travelChoiceImages = listOf(
     R.drawable.travel_choice_10, R.drawable.travel_choice_11, R.drawable.travel_choice_12
 )
 
+private val traumhausChoiceImages = listOf(
+    R.drawable.traumhaus_altbau, R.drawable.traumhaus_bibliothek, R.drawable.traumhaus_dachterrasse,
+    R.drawable.traumhaus_fensterfront, R.drawable.traumhaus_fussbodenheizung, R.drawable.traumhaus_garten,
+    R.drawable.traumhaus_glasfassade, R.drawable.traumhaus_heimkino, R.drawable.traumhaus_innenhof,
+    R.drawable.traumhaus_innenpool, R.drawable.traumhaus_kamin, R.drawable.traumhaus_landhaus
+)
+
 @Composable
 private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImageChoiceVisuals =
     when (kind) {
@@ -116,6 +124,15 @@ private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImag
                 "Which way of travelling feels most like you?"
             ),
             images = travelChoiceImages
+        )
+
+        HarmonyImageChoiceKind.TRAUMHAUS -> HarmonyImageChoiceVisuals(
+            icon = Icons.Filled.Home,
+            subtitle = tr(
+                "Welche Außenbereiche passen zu eurem Traumhaus?",
+                "Which exterior areas suit your dream home?"
+            ),
+            images = traumhausChoiceImages
         )
     }
 

@@ -3,7 +3,8 @@ package com.example.ui.screens
 internal enum class HarmonyImageChoiceKind {
     EGG,
     STEAK,
-    TRAVEL
+    TRAVEL,
+    TRAUMHAUS
 }
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? =
@@ -11,6 +12,7 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
         packId == "essenreden" && questionIndex == 3 -> HarmonyImageChoiceKind.EGG
         packId == "essenreden" && questionIndex == 4 -> HarmonyImageChoiceKind.STEAK
         packId == "reisevor" && questionIndex == 4 -> HarmonyImageChoiceKind.TRAVEL
+        packId == "aussen" -> HarmonyImageChoiceKind.TRAUMHAUS
         else -> null
     }
 

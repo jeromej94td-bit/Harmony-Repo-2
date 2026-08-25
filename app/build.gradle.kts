@@ -20,6 +20,8 @@ plugins {
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.roborazzi)
+  alias(libs.plugins.kotlinx.serialization)
+  alias(libs.plugins.secrets)
 //  alias(libs.plugins.google.services)
 }
 
@@ -157,6 +159,11 @@ ksp {
   arg("room.schemaLocation", "$projectDir/schemas")
 }
 
+secrets {
+    propertiesFileName = ".env"
+    defaultPropertiesFileName = ".env.example"
+}
+
 val reconstructMerlinTheme by tasks.registering(ReconstructMerlinThemeTask::class) {
   group = "build"
   description = "Reconstructs and verifies the Merlin background theme from Base64 assets."
@@ -216,11 +223,13 @@ dependencies {
   // implementation(libs.firebase.appcheck.recaptcha)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.kotlinx.serialization.json)
   implementation(libs.logging.interceptor)
   implementation(libs.moshi.kotlin)
   implementation(libs.okhttp)
   // implementation(libs.play.services.location)
   implementation(libs.retrofit)
+  implementation(libs.retrofit.converter.serialization)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)

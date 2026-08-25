@@ -69,6 +69,7 @@ import com.example.data.model.SharedPicEntity
 import com.example.ui.components.AuroraGlassSectionTitle
 import com.example.ui.components.AuroraProgressBar
 import com.example.ui.components.CategoryTag
+import com.example.ui.components.GeminiDateBot
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.HarmonyPackIcon
 import com.example.ui.theme.HarmonyLine
@@ -99,6 +100,7 @@ fun HomeScreen(
     onAddSharedPictures: (List<Uri>, String) -> Unit,
     onUpdateSharedPicture: (SharedPicEntity) -> Unit,
     onPinWidget: () -> Unit,
+    onOpenEureMischung: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -146,7 +148,91 @@ fun HomeScreen(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 6.dp)
         )
 
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(14.dp))
+
+        // --- EURE MISCHUNG HERO BANNER ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 4.dp)
+                .clip(RoundedCornerShape(22.dp))
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            HarmonyPink.copy(alpha = 0.28f),
+                            HarmonyPurple.copy(alpha = 0.32f),
+                            HarmonySurface2
+                        )
+                    )
+                )
+                .border(
+                    1.2.dp,
+                    Brush.linearGradient(
+                        listOf(HarmonyPinkSoft.copy(alpha = 0.6f), HarmonyPurpleLight.copy(alpha = 0.6f))
+                    ),
+                    RoundedCornerShape(22.dp)
+                )
+                .clickable { onOpenEureMischung() }
+                .padding(16.dp)
+                .testTag("eure_mischung_home_banner")
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(Brush.radialGradient(listOf(HarmonyPink, HarmonyPurple))),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "👶✨", fontSize = 24.sp)
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = LanguageManager.tr("Eure Mischung", appLanguage),
+                            fontSize = 16.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = HarmonyText
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(HarmonyPink.copy(alpha = 0.25f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "KI",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = HarmonyPinkSoft
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = LanguageManager.tr(
+                            "Wie könnten eure gemeinsamen Kinder aussehen? Mit Profilfotos & KI generieren!",
+                            appLanguage
+                        ),
+                        fontSize = 11.5.sp,
+                        color = HarmonyMuted,
+                        lineHeight = 15.5.sp
+                    )
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = HarmonyPinkSoft,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(14.dp))
         AuroraGlassSectionTitle(
             LanguageManager.tr("Paar-Statistiken", appLanguage),
             Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
@@ -175,6 +261,17 @@ fun HomeScreen(
             StatCard(stats.visitedCities.toString(), LanguageManager.tr("Besuchte Städte", appLanguage), Modifier.weight(1f))
             StatCard(stats.visitedCountries.toString(), LanguageManager.tr("Besuchte Länder", appLanguage), Modifier.weight(1f))
         }
+        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(14.dp))
+        AuroraGlassSectionTitle(
+            LanguageManager.tr("Persönlicher Date Coach", appLanguage),
+            Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
+        )
+        GeminiDateBot(
+            profile = profile,
+            answers = answers,
+            appLanguage = appLanguage
+        )
     }
 
     if (showAnswerList) {

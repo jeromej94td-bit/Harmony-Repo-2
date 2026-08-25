@@ -8,4 +8,11 @@
     <files-path
         name="dev_assets"
         path="dev_assets/" />
+    <!-- KI-generierte Bilder -->
+    <files-path
+        name="ai_images"
+        path="ai_images/" />
+    <cache-path
+        name="shared_images"
+        path="shared_images/" />
 </paths>
