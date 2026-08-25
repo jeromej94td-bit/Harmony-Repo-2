@@ -15,6 +15,14 @@ class HarmonyAiIntentRouterTest {
     }
 
     @Test
+    fun genericFoodRecommendationRequestsLocation() {
+        val route = HarmonyAiIntentRouter.route("Wo könnten wir heute gut essen gehen?")
+        assertEquals(HarmonyAiIntent.FOOD, route.intent)
+        assertEquals(HarmonyGroundingMode.SEARCH_AND_MAPS, route.grounding)
+        assertTrue(route.needsUserLocation)
+    }
+
+    @Test
     fun explicitBerlinRestaurantUsesMapsWithoutGpsRequirement() {
         val route = HarmonyAiIntentRouter.route("Zeig mir Restaurants in Berlin Tiergarten")
         assertEquals(HarmonyGroundingMode.GOOGLE_MAPS, route.grounding)
