@@ -52,8 +52,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.data.model.ChatMessageEntity
+import com.example.ui.HarmonyCoachViewModel
 import com.example.ui.components.formatTimeOnly
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
@@ -76,13 +79,100 @@ fun ChatScreen(
     onReportUser: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val coachViewModel: HarmonyCoachViewModel = viewModel()
+    val coachState by coachViewModel.uiState.collectAsStateWithLifecycle()
+    var coachMode by remember { mutableStateOf(false) }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 6.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(HarmonySurface)
+                .border(1.dp, HarmonyLine, RoundedCornerShape(18.dp))
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ModeButton(
+                label = if (appLanguage == "de") "Partner-Chat" else "Partner chat",
+                selected = !coachMode,
+                onClick = { coachMode = false },
+                modifier = Modifier.weight(1f)
+            )
+            ModeButton(
+                label = "✨ Harmony Coach",
+                selected = coachMode,
+                onClick = { coachMode = true },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (coachMode) {
+            HarmonyCoachPanelPublic(
+                state = coachState,
+                appLanguage = appLanguage,
+                onAskCoach = { text, location -> coachViewModel.ask(text, appLanguage, location) },
+                modifier = Modifier.weight(1f)
+            )
+        } else {
+            PartnerChatContent(
+                messages = messages,
+                partnerName = partnerName,
+                partnerAvatarPath = partnerAvatarPath,
+                appLanguage = appLanguage,
+                onSendMessage = onSendMessage,
+                onSendImage = onSendImage,
+                onReportUser = onReportUser,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ModeButton(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                if (selected) Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple))
+                else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            label,
+            color = if (selected) Color.White else HarmonyMuted,
+            fontSize = 13.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold
+        )
+    }
+}
+
+@Composable
+private fun PartnerChatContent(
+    messages: List<ChatMessageEntity>,
+    partnerName: String,
+    partnerAvatarPath: String?,
+    appLanguage: String,
+    onSendMessage: (String) -> Unit,
+    onSendImage: (Uri) -> Unit,
+    onReportUser: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var chatInputText by remember { mutableStateOf("") }
     var showReportDialog by remember { mutableStateOf(false) }
     var fullscreenImagePath by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let(onSendImage)
-    }
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> uri?.let(onSendImage) }
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
@@ -120,12 +210,8 @@ fun ChatScreen(
         ) {
             IconButton(
                 onClick = { imagePicker.launch("image/*") },
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(HarmonySurface)
-                    .border(1.dp, HarmonyLine, CircleShape)
-                    .testTag("add_chat_image_button")
+                modifier = Modifier.size(44.dp).clip(CircleShape).background(HarmonySurface)
+                    .border(1.dp, HarmonyLine, CircleShape).testTag("add_chat_image_button")
             ) {
                 Icon(Icons.Default.PhotoLibrary, contentDescription = LanguageManager.tr("Bild hinzufügen", appLanguage), tint = HarmonyPink)
             }
@@ -154,11 +240,8 @@ fun ChatScreen(
                         chatInputText = ""
                     }
                 },
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)))
-                    .testTag("send_chat_button")
+                modifier = Modifier.size(44.dp).clip(CircleShape)
+                    .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple))).testTag("send_chat_button")
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = LanguageManager.tr("Senden", appLanguage), tint = Color.White, modifier = Modifier.size(18.dp))
             }
@@ -170,29 +253,21 @@ fun ChatScreen(
             onDismissRequest = { showReportDialog = false },
             title = { Text(LanguageManager.tr("Nutzer melden", appLanguage)) },
             text = {
-                Text(
-                    LanguageManager.tr(
-                        "Möchtest du {partner} melden? Die Meldung wird erst nach deiner Bestätigung vorbereitet.",
-                        appLanguage
-                    ).replace("{partner}", partnerName)
-                )
+                Text(LanguageManager.tr("Möchtest du {partner} melden? Die Meldung wird erst nach deiner Bestätigung vorbereitet.", appLanguage).replace("{partner}", partnerName))
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showReportDialog = false
-                    onReportUser()
-                }) { Text(LanguageManager.tr("Meldung vorbereiten", appLanguage), color = HarmonyPink) }
+                TextButton(onClick = { showReportDialog = false; onReportUser() }) {
+                    Text(LanguageManager.tr("Meldung vorbereiten", appLanguage), color = HarmonyPink)
+                }
             },
-            dismissButton = { TextButton(onClick = { showReportDialog = false }) { Text(LanguageManager.tr("Abbrechen", appLanguage)) } }
+            dismissButton = {
+                TextButton(onClick = { showReportDialog = false }) { Text(LanguageManager.tr("Abbrechen", appLanguage)) }
+            }
         )
     }
 
     fullscreenImagePath?.let { path ->
-        ChatImageFullscreen(
-            path = path,
-            appLanguage = appLanguage,
-            onDismiss = { fullscreenImagePath = null }
-        )
+        ChatImageFullscreen(path = path, appLanguage = appLanguage, onDismiss = { fullscreenImagePath = null })
     }
 }
 
@@ -211,9 +286,7 @@ fun ChatMessageBubble(
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth(0.78f)
-                .clip(bubbleShape)
+            modifier = Modifier.fillMaxWidth(0.78f).clip(bubbleShape)
                 .background(if (isMe) Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)) else Brush.linearGradient(listOf(HarmonySurface2, HarmonySurface2)))
                 .border(if (isMe) 0.dp else 1.dp, if (isMe) Color.Transparent else HarmonyLine, bubbleShape)
                 .padding(if (message.imagePath == null) 12.dp else 7.dp)
@@ -224,24 +297,13 @@ fun ChatMessageBubble(
                         model = File(path),
                         contentDescription = LanguageManager.tr("Geteiltes Bild", appLanguage),
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(196.dp)
-                            .clip(RoundedCornerShape(15.dp))
-                            .clickable { onImageClick(path) }
-                            .testTag("chat_image_${message.id}")
+                        modifier = Modifier.fillMaxWidth().height(196.dp).clip(RoundedCornerShape(15.dp))
+                            .clickable { onImageClick(path) }.testTag("chat_image_${message.id}")
                     )
                 }
-                if (message.text.isNotBlank()) {
-                    Text(message.text, fontSize = 14.sp, color = Color.White, lineHeight = 19.sp)
-                }
+                if (message.text.isNotBlank()) Text(message.text, fontSize = 14.sp, color = Color.White, lineHeight = 19.sp)
                 Spacer(Modifier.height(4.dp))
-                Text(
-                    formatTimeOnly(message.timestamp),
-                    fontSize = 9.5.sp,
-                    color = Color.White.copy(alpha = 0.65f),
-                    modifier = Modifier.align(Alignment.End)
-                )
+                Text(formatTimeOnly(message.timestamp), fontSize = 9.5.sp, color = Color.White.copy(alpha = 0.65f), modifier = Modifier.align(Alignment.End))
             }
         }
     }
@@ -251,37 +313,22 @@ fun ChatMessageBubble(
 private fun ChatImageFullscreen(path: String, appLanguage: String, onDismiss: () -> Unit) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xF20A0610))
-                .clickable(onClick = onDismiss)
-                .testTag("chat_image_fullscreen"),
+            modifier = Modifier.fillMaxSize().background(Color(0xF20A0610)).clickable(onClick = onDismiss).testTag("chat_image_fullscreen"),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
                 model = File(path),
                 contentDescription = LanguageManager.tr("Geteiltes Bild im Vollbildmodus", appLanguage),
                 contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp, vertical = 54.dp)
-                    .clickable(enabled = false) {}
+                modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 54.dp).clickable(enabled = false) {}
             )
             IconButton(
                 onClick = onDismiss,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(18.dp)
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.56f))
-                    .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                modifier = Modifier.align(Alignment.TopEnd).padding(18.dp).size(44.dp).clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.56f)).border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
                     .testTag("close_chat_image_fullscreen")
             ) {
                 Icon(Icons.Default.Close, contentDescription = "Vollbild schließen", tint = Color.White)
