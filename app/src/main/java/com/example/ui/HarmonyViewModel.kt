@@ -56,7 +56,13 @@ data class HarmonyUiState(
     val toastMessage: String? = null,
     val isRefreshing: Boolean = false,
     val isDarkMode: Boolean = true,
-    val appLanguage: String = "de"
+    val appLanguage: String = "de",
+    val brainInterests: List<com.example.data.model.BrainInterestEntity> = emptyList(),
+    val brainSuggestions: List<com.example.data.model.BrainSuggestionEntity> = emptyList(),
+    val brainQuestions: List<com.example.data.model.BrainQuestionEntity> = emptyList(),
+    val brainMessages: List<com.example.data.model.BrainMessage> = emptyList(),
+    val isBrainChatMode: Boolean = false,
+    val isBrainGenerating: Boolean = false
 )
 
 class HarmonyViewModel(application: Application) : AndroidViewModel(application) {
@@ -87,6 +93,10 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
 
     private val _isRefreshing = MutableStateFlow(false)
 
+    private val _brainMessages = MutableStateFlow<List<com.example.data.model.BrainMessage>>(emptyList())
+    private val _isBrainChatMode = MutableStateFlow(false)
+    private val _isBrainGenerating = MutableStateFlow(false)
+
     @Suppress("UNCHECKED_CAST")
     val uiState: StateFlow<HarmonyUiState> = combine(
         _selectedTab,
@@ -108,7 +118,13 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
         _toastMessage,
         _isRefreshing,
         _isDarkMode,
-        _appLanguage
+        _appLanguage,
+        repository.brainInterestsFlow,
+        repository.brainSuggestionsFlow,
+        repository.brainQuestionsFlow,
+        _brainMessages,
+        _isBrainChatMode,
+        _isBrainGenerating
     ) { arrayOfValues ->
         HarmonyUiState(
             selectedTab = arrayOfValues[0] as Int,
@@ -132,7 +148,13 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
             toastMessage = arrayOfValues[16] as? String,
             isRefreshing = arrayOfValues[17] as Boolean,
             isDarkMode = arrayOfValues[18] as Boolean,
-            appLanguage = arrayOfValues[19] as String
+            appLanguage = arrayOfValues[19] as String,
+            brainInterests = (arrayOfValues[20] as? List<com.example.data.model.BrainInterestEntity>) ?: emptyList(),
+            brainSuggestions = (arrayOfValues[21] as? List<com.example.data.model.BrainSuggestionEntity>) ?: emptyList(),
+            brainQuestions = (arrayOfValues[22] as? List<com.example.data.model.BrainQuestionEntity>) ?: emptyList(),
+            brainMessages = (arrayOfValues[23] as? List<com.example.data.model.BrainMessage>) ?: emptyList(),
+            isBrainChatMode = arrayOfValues[24] as Boolean,
+            isBrainGenerating = arrayOfValues[25] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,
@@ -166,6 +188,41 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
             // SupabaseSync baut die Bildregistrierung neu auf. Drive-Bilder danach
             // erneut setzen, damit die lokalen GitHub-Assets die Web-Fallbacks schlagen.
             installDriveTotImages(application)
+        }
+
+        // --- HARMONY BRAIN ANALYZER ---
+        _brainMessages.value = listOf(
+            com.example.data.model.BrainMessage(
+                text = "Hallo! Ich bin euer Harmony Brain 🧠. Ich analysiere eure gemeinsamen Antworten und helfe euch dabei, noch tiefere Gemeinsamkeiten und neue Interessen zu entdecken.\n\nFragt mich gerne nach Date-Ideen, euren gemeinsamen Interessen oder wie ihr eure Unterschiede feiern könnt!",
+                sender = "brain"
+            )
+        )
+
+        viewModelScope.launch {
+            repository.answersFlow.collect { answers ->
+                runCatching {
+                    val interests = com.example.data.HarmonyBrainEngine.analyzeAnswers(answers)
+                    repository.saveInterests(interests)
+
+                    val suggestions = com.example.data.HarmonyBrainEngine.generateSuggestions(interests)
+                    val existingSuggestions = repository.getAllSuggestions()
+                    val suggestionsToInsert = suggestions.map { sug ->
+                        val existing = existingSuggestions.find { it.id == sug.id }
+                        if (existing != null) {
+                            sug.copy(feedback = existing.feedback)
+                        } else {
+                            sug
+                        }
+                    }
+                    repository.saveSuggestions(suggestionsToInsert)
+
+                    val existingQuestions = repository.getAllQuestions()
+                    if (existingQuestions.isEmpty()) {
+                        val questions = com.example.data.HarmonyBrainEngine.generateQuestions()
+                        repository.saveQuestions(questions)
+                    }
+                }
+            }
         }
     }
 
@@ -443,5 +500,160 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
 
     fun updateSharedPicture(pic: SharedPicEntity) {
         viewModelScope.launch { repository.updateSharedPicture(pic) }
+    }
+
+    // --- HARMONY BRAIN ---
+
+    fun setBrainChatMode(enabled: Boolean) {
+        _isBrainChatMode.value = enabled
+    }
+
+    fun setSuggestionFeedback(suggestionId: String, feedback: String) {
+        viewModelScope.launch {
+            val suggestions = repository.getAllSuggestions()
+            val suggestion = suggestions.find { it.id == suggestionId }
+            if (suggestion != null) {
+                repository.updateSuggestion(suggestion.copy(feedback = feedback))
+                if (feedback == "liked") {
+                    showToast("Gefällt mir markiert ❤️")
+                } else if (feedback == "disliked") {
+                    showToast("Ausgeblendet 🚫")
+                } else if (feedback == "done") {
+                    showToast("Als erledigt markiert 🎉")
+                }
+            }
+        }
+    }
+
+    fun sendBrainMessage(text: String) {
+        if (text.isBlank()) return
+        val userMsg = com.example.data.model.BrainMessage(text = text, sender = "user")
+        _brainMessages.value = _brainMessages.value + userMsg
+
+        _isBrainGenerating.value = true
+        val thinkingId = java.util.UUID.randomUUID().toString()
+        val thinkingMsg = com.example.data.model.BrainMessage(id = thinkingId, text = "...", sender = "brain", isSearching = true)
+        _brainMessages.value = _brainMessages.value + thinkingMsg
+
+        viewModelScope.launch {
+            try {
+                val gateway = com.example.data.SupabaseBrainGateway.getInstance()
+                val interests = repository.getAllInterests()
+                val profile = uiState.value.profile
+                val localContextText = buildString {
+                    append("Paar-Kontext (lokal):\n")
+                    append("- Name: ${profile.userName}, Partner: ${profile.partnerName}\n")
+                    append("- Gemeinsame Interessen:\n")
+                    interests.filter { it.confidence == "sicher" }.forEach {
+                        append("  * ${it.name} (Sicher, weil: ${it.reason})\n")
+                    }
+                    interests.filter { it.confidence == "wahrscheinlich" }.forEach {
+                        append("  * ${it.name} (Wahrscheinlich)\n")
+                    }
+                }
+
+                val isFoodQuery = text.lowercase().let { q ->
+                    q.contains("essen") || q.contains("restaurant") || q.contains("hunger") || 
+                    q.contains("gericht") || q.contains("speise") || q.contains("sushi") || 
+                    q.contains("pizza") || q.contains("café") || q.contains("cafe") || 
+                    q.contains("küche") || q.contains("kuche") || q.contains("lecker") || 
+                    q.contains("dinner") || q.contains("frühstück") || q.contains("lunch") || 
+                    q.contains("bistro") || q.contains("bar") || q.contains("kneipe")
+                }
+                
+                val foodInstructionText = if (isFoodQuery) {
+                    "\n\n[WICHTIGE SYSTEMINSTRUKTION FÜR ESSEN/RESTAURANTS: Halte deine Antwort extrem kompakt und übersichtlich. Nenne den Namen des Restaurants/Ortes oder des Gerichts zwingend in Fettschrift (z. B. **Restaurant Name**). Gib immer eine konkrete Adresse an. Füge zwingend einen Google Maps Suchlink hinzu (Format: [Auf Google Maps anzeigen](https://www.google.com/maps/search/?api=1&query=NAME_UND_ADRESSE_URL_ENCODED)).]"
+                } else ""
+
+                val enrichedQuery = "$localContextText\nNutzer-Anfrage:\n$text$foodInstructionText"
+                val response = gateway.search(enrichedQuery)
+
+                _brainMessages.value = _brainMessages.value.filter { it.id != thinkingId }
+
+                if (response.ok && response.answer != null) {
+                    val replyMsg = com.example.data.model.BrainMessage(
+                        text = response.answer,
+                        sender = "brain",
+                        sources = response.sources,
+                        searchQueries = response.searchQueries
+                    )
+                    _brainMessages.value = _brainMessages.value + replyMsg
+                } else {
+                    val fallbackText = generateOfflineBrainReply(text, interests)
+                    val replyMsg = com.example.data.model.BrainMessage(
+                        text = "⚠️ [Offline-Modus] ${response.errorMessage ?: "Konnte das Web-Brain nicht erreichen."}\n\n$fallbackText",
+                        sender = "brain",
+                        errorType = response.errorType
+                    )
+                    _brainMessages.value = _brainMessages.value + replyMsg
+                }
+            } catch (e: Exception) {
+                _brainMessages.value = _brainMessages.value.filter { it.id != thinkingId }
+                val replyMsg = com.example.data.model.BrainMessage(
+                    text = "⚠️ [Offline-Modus] Ein unerwarteter Fehler ist aufgetreten: ${e.localizedMessage}",
+                    sender = "brain",
+                    errorType = "exception"
+                )
+                _brainMessages.value = _brainMessages.value + replyMsg
+            } finally {
+                _isBrainGenerating.value = false
+            }
+        }
+    }
+
+    private fun generateOfflineBrainReply(text: String, interests: List<com.example.data.model.BrainInterestEntity>): String {
+        val queryLower = text.lowercase()
+        return when {
+            queryLower.contains("essen") || queryLower.contains("restaurant") || queryLower.contains("hunger") || queryLower.contains("sushi") || queryLower.contains("pizza") || queryLower.contains("café") || queryLower.contains("cafe") -> {
+                "Hier ist eine schnelle Empfehlung im Offline-Modus:\n\n" +
+                "🍕 **Trattoria Bella Vista**\n" +
+                "Adresse: Hauptstraße 12, 10115 Berlin\n" +
+                "[Auf Google Maps anzeigen](https://www.google.com/maps/search/?api=1&query=Trattoria+Bella+Vista+Hauptstrasse+12+Berlin)\n\n" +
+                "*(Hinweis: Für tagesaktuelle, personalisierte Restaurant-Empfehlungen in deiner Nähe, aktiviere bitte die Internetverbindung!)*"
+            }
+            queryLower.contains("interesse") || queryLower.contains("gemeinsam") -> {
+                buildString {
+                    append("Eure erkannten gemeinsamen Interessen:\n\n")
+                    interests.forEach {
+                        append("🧩 **${it.name}** (${it.confidence})\n")
+                        append("  _${it.reason}_\n\n")
+                    }
+                }
+            }
+            queryLower.contains("date") || queryLower.contains("idee") || queryLower.contains("vorschlag") -> {
+                "Hier ist eine gemütliche Date-Idee basierend auf euren Interessen:\n\n" +
+                "🎬 **Klassischer Filmabend & Deckenburg**\n" +
+                "Macht es euch auf der Couch gemütlich, schaltet das Licht aus und baut eine kuschelige Festung aus Decken. Popcorn ist Pflicht!\n\n" +
+                "*(Tipp: Für personalisierte, tagesaktuelle Events in eurer Nähe, aktiviere bitte die Internetverbindung.)*"
+            }
+            queryLower.contains("reise") || queryLower.contains("urlaub") -> {
+                "Für euren nächsten Urlaub solltet ihr euch folgendes überlegen:\n\n" +
+                "🏕️ **Natur-Ausflug oder gemütlicher Strandtag**\n" +
+                "Basierend auf eurer Entweder-Oder-Wahl scheint ihr die perfekte Balance aus Entspannung und frischer Luft zu lieben. Wie wäre es mit einem gemütlichen See in eurer Nähe?"
+            }
+            else -> {
+                "Ich habe eure Anfrage empfangen! Im Offline-Modus kann ich euch eure gemeinsamen Interessen aufzeigen (tippe 'Interessen') oder Date-Ideen vorschlagen (tippe 'Date-Ideen'). Für freie Fragen und Websuche ist eine Internetverbindung erforderlich."
+            }
+        }
+    }
+
+    fun resetBrainChat() {
+        _brainMessages.value = listOf(
+            com.example.data.model.BrainMessage(
+                text = "Hallo! Ich bin euer Harmony Brain 🧠. Ich analysiere eure gemeinsamen Antworten und helfe euch dabei, noch tiefere Gemeinsamkeiten und neue Interessen zu entdecken.\n\nFragt mich gerne nach Date-Ideen, euren gemeinsamen Interessen oder wie ihr eure Unterschiede feiern könnt!",
+                sender = "brain"
+            )
+        )
+    }
+
+    fun answerBrainQuestion(questionId: String, answerText: String) {
+        viewModelScope.launch {
+            val questions = repository.getAllQuestions()
+            val q = questions.find { it.id == questionId }
+            if (q != null) {
+                repository.updateQuestion(q.copy(answered = true, answerText = answerText))
+                showToast("Antwort im Paarprofil gespeichert! 🧠")
+            }
+        }
     }
 }

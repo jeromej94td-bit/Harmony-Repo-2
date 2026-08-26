@@ -59,6 +59,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.text.TextStyle
 import com.example.data.model.AnswerEntity
 import com.example.data.model.CoupleStatsEntity
 import com.example.data.model.EitherOrAnswerCodec
@@ -69,7 +71,6 @@ import com.example.data.model.SharedPicEntity
 import com.example.ui.components.AuroraGlassSectionTitle
 import com.example.ui.components.AuroraProgressBar
 import com.example.ui.components.CategoryTag
-import com.example.ui.components.GeminiDateBot
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.HarmonyPackIcon
 import com.example.ui.theme.HarmonyLine
@@ -101,6 +102,12 @@ fun HomeScreen(
     onUpdateSharedPicture: (SharedPicEntity) -> Unit,
     onPinWidget: () -> Unit,
     onOpenEureMischung: () -> Unit = {},
+    brainInterests: List<com.example.data.model.BrainInterestEntity> = emptyList(),
+    brainSuggestions: List<com.example.data.model.BrainSuggestionEntity> = emptyList(),
+    brainQuestions: List<com.example.data.model.BrainQuestionEntity> = emptyList(),
+    onSuggestionFeedback: (String, String) -> Unit = { _, _ -> },
+    onAnswerBrainQuestion: (String, String) -> Unit = { _, _ -> },
+    onOpenBrainChat: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -261,17 +268,368 @@ fun HomeScreen(
             StatCard(stats.visitedCities.toString(), LanguageManager.tr("Besuchte Städte", appLanguage), Modifier.weight(1f))
             StatCard(stats.visitedCountries.toString(), LanguageManager.tr("Besuchte Länder", appLanguage), Modifier.weight(1f))
         }
-        Spacer(Modifier.height(10.dp))
+        
+        // --- HARMONY BRAIN COACH ---
         Spacer(Modifier.height(14.dp))
-        AuroraGlassSectionTitle(
-            LanguageManager.tr("Persönlicher Date Coach", appLanguage),
-            Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
-        )
-        GeminiDateBot(
-            profile = profile,
-            answers = answers,
-            appLanguage = appLanguage
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp)
+                .clip(RoundedCornerShape(26.dp))
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            HarmonyPurple.copy(alpha = 0.22f),
+                            HarmonyPink.copy(alpha = 0.16f),
+                            HarmonySurface2
+                        )
+                    )
+                )
+                .border(
+                    1.2.dp,
+                    Brush.linearGradient(
+                        listOf(HarmonyPurpleLight.copy(alpha = 0.7f), HarmonyPinkSoft.copy(alpha = 0.5f))
+                    ),
+                    RoundedCornerShape(26.dp)
+                )
+                .padding(18.dp)
+        ) {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Text("🧠", fontSize = 24.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    LanguageManager.tr("Harmony Brain", appLanguage),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = HarmonyText
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(HarmonyPurple.copy(alpha = 0.3f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        "KI Coach",
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = HarmonyPurpleLight
+                                    )
+                                }
+                            }
+                            Text(
+                                LanguageManager.tr("Euer persönlicher Beziehungs-Coach", appLanguage),
+                                fontSize = 11.sp,
+                                color = HarmonyMuted
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(HarmonyPurple.copy(alpha = 0.25f))
+                            .clickable { onOpenBrainChat() }
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            LanguageManager.tr("Chat 💬", appLanguage),
+                            color = HarmonyPurpleLight,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(14.dp))
+
+                // Section 1: Erkannte Interessen
+                if (brainInterests.isNotEmpty()) {
+                    Text(
+                        LanguageManager.tr("Erkannte gemeinsame Interessen:", appLanguage),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = HarmonyText.copy(alpha = 0.9f)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        brainInterests.forEach { interest ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(HarmonySurface)
+                                    .border(1.dp, HarmonyLine, RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = when (interest.category.lowercase()) {
+                                            "essen" -> "🍕"
+                                            "reisen" -> "✈️"
+                                            "musik" -> "🎵"
+                                            "filme" -> "🎬"
+                                            "hobbys" -> "🎨"
+                                            else -> "🧩"
+                                        },
+                                        fontSize = 12.sp
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = interest.name,
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = HarmonyText
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+                }
+
+                // Section 2: Vorschläge & Empfehlungen
+                val activeSuggestions = brainSuggestions.filter { it.feedback == "none" }
+                if (activeSuggestions.isNotEmpty()) {
+                    Text(
+                        LanguageManager.tr("Empfehlungen für euch:", appLanguage),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = HarmonyText.copy(alpha = 0.9f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    activeSuggestions.take(2).forEach { suggestion ->
+                        var showMatchReason by remember { mutableStateOf(false) }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(HarmonySurface)
+                                .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
+                                .padding(12.dp)
+                        ) {
+                            Column {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = when (suggestion.category.lowercase()) {
+                                                "date" -> "🍷"
+                                                "aktivität" -> "🧗"
+                                                "essen" -> "🍜"
+                                                "reisen" -> "🎒"
+                                                "ausflug" -> "🏰"
+                                                else -> "💡"
+                                            },
+                                            fontSize = 16.sp
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = suggestion.title,
+                                            fontSize = 13.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = HarmonyText
+                                        )
+                                    }
+                                    
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .background(HarmonyPurple.copy(alpha = 0.15f))
+                                            .clickable { showMatchReason = !showMatchReason }
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = if (showMatchReason) "✕" else "Warum?",
+                                            color = HarmonyPurpleLight,
+                                            fontSize = 9.5.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = suggestion.description,
+                                    fontSize = 11.5.sp,
+                                    color = HarmonyMuted,
+                                    lineHeight = 15.sp
+                                )
+
+                                if (showMatchReason) {
+                                    Spacer(Modifier.height(6.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(HarmonyPurple.copy(alpha = 0.08f))
+                                            .padding(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "🧠 ${suggestion.matchReason}",
+                                            fontSize = 10.5.sp,
+                                            color = HarmonyPurpleLight,
+                                            lineHeight = 14.sp
+                                        )
+                                    }
+                                }
+
+                                Spacer(Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    TextButton(
+                                        onClick = { onSuggestionFeedback(suggestion.id, "disliked") },
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                    ) {
+                                        Text("Ignorieren 🚫", color = HarmonyMuted, fontSize = 11.sp)
+                                    }
+                                    Spacer(Modifier.width(4.dp))
+                                    Button(
+                                        onClick = { onSuggestionFeedback(suggestion.id, "liked") },
+                                        colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple.copy(alpha = 0.35f)),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                                        shape = RoundedCornerShape(10.dp)
+                                    ) {
+                                        Text("Interessiert ❤️", color = HarmonyPurpleLight, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                }
+
+                // Section 3: Offene Coach-Fragen
+                val openQuestions = brainQuestions.filter { !it.answered }
+                if (openQuestions.isNotEmpty()) {
+                    Text(
+                        LanguageManager.tr("Verbleibende Coach-Fragen:", appLanguage),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = HarmonyText.copy(alpha = 0.9f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    openQuestions.take(1).forEach { question ->
+                        var answerInputText by remember { mutableStateOf("") }
+                        var isAnswering by remember { mutableStateOf(false) }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(HarmonySurface)
+                                .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
+                                .padding(12.dp)
+                        ) {
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("💬", fontSize = 14.sp)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = question.text,
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = HarmonyText,
+                                        lineHeight = 17.sp
+                                    )
+                                }
+                                
+                                Spacer(Modifier.height(10.dp))
+                                
+                                if (!isAnswering) {
+                                    Button(
+                                        onClick = { isAnswering = true },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text(LanguageManager.tr("Antworten", appLanguage), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                } else {
+                                    OutlinedTextField(
+                                        value = answerInputText,
+                                        onValueChange = { answerInputText = it },
+                                        placeholder = { Text(LanguageManager.tr("Schreibe deine Antwort...", appLanguage), color = HarmonyMuted, fontSize = 12.sp) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textStyle = TextStyle(fontSize = 12.5.sp, color = HarmonyText),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = HarmonyPurple,
+                                            unfocusedBorderColor = HarmonyLine,
+                                            focusedContainerColor = HarmonySurface2,
+                                            unfocusedContainerColor = HarmonySurface2
+                                        ),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    
+                                    Spacer(Modifier.height(8.dp))
+                                    
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        TextButton(onClick = { isAnswering = false }) {
+                                            Text(LanguageManager.tr("Abbrechen", appLanguage), color = HarmonyMuted, fontSize = 11.5.sp)
+                                        }
+                                        Spacer(Modifier.width(6.dp))
+                                        Button(
+                                            onClick = {
+                                                if (answerInputText.isNotBlank()) {
+                                                    onAnswerBrainQuestion(question.id, answerInputText)
+                                                    isAnswering = false
+                                                }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple),
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text(LanguageManager.tr("Speichern", appLanguage), color = Color.White, fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (brainInterests.isEmpty() && activeSuggestions.isEmpty() && openQuestions.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(HarmonySurface)
+                            .padding(14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = LanguageManager.tr("Beantwortet mehr Fragen, damit das Harmony Brain eure Interessen analysieren kann!", appLanguage),
+                            fontSize = 11.5.sp,
+                            color = HarmonyMuted,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 15.5.sp
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(20.dp))
     }
 
     if (showAnswerList) {

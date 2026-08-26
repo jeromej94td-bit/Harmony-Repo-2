@@ -9,6 +9,9 @@ import com.example.data.model.CoupleStatsEntity
 import com.example.data.model.MomentEntity
 import com.example.data.model.ProfileEntity
 import com.example.data.model.SharedPicEntity
+import com.example.data.model.BrainInterestEntity
+import com.example.data.model.BrainSuggestionEntity
+import com.example.data.model.BrainQuestionEntity
 import com.example.widget.PicShareWidgetProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +31,9 @@ class HarmonyRepository(
     val sharedPicsFlow: Flow<List<SharedPicEntity>> = db.sharedPicDao().getAllPics()
     val momentsFlow: Flow<List<MomentEntity>> = db.momentDao().getAllMoments()
     val statsFlow: Flow<CoupleStatsEntity?> = db.coupleStatsDao().getStats()
+    val brainInterestsFlow: Flow<List<BrainInterestEntity>> = db.brainDao().getAllInterestsFlow()
+    val brainSuggestionsFlow: Flow<List<BrainSuggestionEntity>> = db.brainDao().getAllSuggestionsFlow()
+    val brainQuestionsFlow: Flow<List<BrainQuestionEntity>> = db.brainDao().getAllQuestionsFlow()
 
     suspend fun ensureInitialData() {
         // Initialize profile if not present
@@ -146,6 +152,24 @@ class HarmonyRepository(
     suspend fun updateStats(cities: Int, countries: Int) {
         db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = cities, visitedCountries = countries))
     }
+
+    // --- HARMONY BRAIN PERSISTENCE ---
+    suspend fun getAllInterests(): List<BrainInterestEntity> = db.brainDao().getAllInterests()
+    suspend fun saveInterest(interest: BrainInterestEntity) = db.brainDao().insertInterest(interest)
+    suspend fun saveInterests(interests: List<BrainInterestEntity>) = db.brainDao().insertInterests(interests)
+    suspend fun clearInterests() = db.brainDao().clearInterests()
+
+    suspend fun getAllSuggestions(): List<BrainSuggestionEntity> = db.brainDao().getAllSuggestions()
+    suspend fun saveSuggestion(suggestion: BrainSuggestionEntity) = db.brainDao().insertSuggestion(suggestion)
+    suspend fun saveSuggestions(suggestions: List<BrainSuggestionEntity>) = db.brainDao().insertSuggestions(suggestions)
+    suspend fun updateSuggestion(suggestion: BrainSuggestionEntity) = db.brainDao().updateSuggestion(suggestion)
+    suspend fun clearSuggestions() = db.brainDao().clearSuggestions()
+
+    suspend fun getAllQuestions(): List<BrainQuestionEntity> = db.brainDao().getAllQuestions()
+    suspend fun saveQuestion(question: BrainQuestionEntity) = db.brainDao().insertQuestion(question)
+    suspend fun saveQuestions(questions: List<BrainQuestionEntity>) = db.brainDao().insertQuestions(questions)
+    suspend fun updateQuestion(question: BrainQuestionEntity) = db.brainDao().updateQuestion(question)
+    suspend fun clearQuestions() = db.brainDao().clearQuestions()
 
     private suspend fun copyMediaToApp(uri: Uri, folder: String): String? = withContext(Dispatchers.IO) {
         runCatching {

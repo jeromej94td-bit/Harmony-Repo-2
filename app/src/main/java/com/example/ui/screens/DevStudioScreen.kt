@@ -127,6 +127,8 @@ private data class StagedRow(
 // =====================================================================
 @Composable
 fun DevStudioScreen(
+    answers: List<com.example.data.model.AnswerEntity>,
+    profile: com.example.data.model.ProfileEntity,
     onStartPack: (String) -> Unit,
     onShowToast: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -207,6 +209,8 @@ fun DevStudioScreen(
             2 -> DevPacksTab(
                 packs = packs,
                 categories = categories,
+                answers = answers,
+                profile = profile,
                 onChanged = { msg ->
                     updateCounter++
                     onShowToast(msg)
@@ -642,10 +646,14 @@ private fun StagedRowItem(
 private fun DevPacksTab(
     packs: List<QuestionPack>,
     categories: List<Category>,
+    answers: List<com.example.data.model.AnswerEntity>,
+    profile: com.example.data.model.ProfileEntity,
     onChanged: (String) -> Unit,
     onStartPack: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isGenerating by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var filterType by remember { mutableStateOf("all") }
     var editingPack by remember { mutableStateOf<QuestionPack?>(null) }
@@ -693,6 +701,46 @@ private fun DevPacksTab(
                     .background(HarmonyPurple)
             ) {
                 Icon(Icons.Default.Add, "Neues Spiel", tint = Color.White)
+            }
+        }
+
+        Button(
+            onClick = {
+                if (!isGenerating) {
+                    isGenerating = true
+                    coroutineScope.launch {
+                        com.example.util.GeminiGameGenerator.generateAndSaveGame(context, profile, answers)
+                            .onSuccess { pack ->
+                                isGenerating = false
+                                onChanged("🪄 KI hat das Spiel '${pack.title}' erfolgreich generiert!")
+                            }
+                            .onFailure { error ->
+                                isGenerating = false
+                                onChanged("❌ Fehler bei der KI-Generierung: ${error.localizedMessage}")
+                            }
+                    }
+                }
+            },
+            enabled = !isGenerating,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = HarmonyPurple,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 4.dp)
+                .height(48.dp)
+        ) {
+            if (isGenerating) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Generiere Spiel mit KI...", fontSize = 14.sp, color = Color.White)
+            } else {
+                Text("🪄 Spiel mit KI generieren", fontSize = 14.sp, color = Color.White)
             }
         }
 

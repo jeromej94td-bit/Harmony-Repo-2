@@ -19,6 +19,9 @@ import com.example.data.model.MemoryCategoryEntity
 import com.example.data.model.MemoryEntryEntity
 import com.example.data.model.ProfileEntity
 import com.example.data.model.SharedPicEntity
+import com.example.data.model.BrainInterestEntity
+import com.example.data.model.BrainSuggestionEntity
+import com.example.data.model.BrainQuestionEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -96,9 +99,12 @@ interface CoupleStatsDao {
         MomentEntity::class,
         CoupleStatsEntity::class,
         MemoryCategoryEntity::class,
-        MemoryEntryEntity::class
+        MemoryEntryEntity::class,
+        BrainInterestEntity::class,
+        BrainSuggestionEntity::class,
+        BrainQuestionEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class HarmonyDatabase : RoomDatabase() {
@@ -109,6 +115,7 @@ abstract class HarmonyDatabase : RoomDatabase() {
     abstract fun momentDao(): MomentDao
     abstract fun coupleStatsDao(): CoupleStatsDao
     abstract fun memoryDao(): MemoryDao
+    abstract fun brainDao(): BrainDao
 
     companion object {
         @Volatile
@@ -121,7 +128,7 @@ abstract class HarmonyDatabase : RoomDatabase() {
                     HarmonyDatabase::class.java,
                     "harmony_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 instance
@@ -196,6 +203,20 @@ abstract class HarmonyDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "ALTER TABLE memory_categories ADD COLUMN isVisible INTEGER NOT NULL DEFAULT 1"
+                )
+            }
+        }
+
+        internal val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS brain_interests (name TEXT NOT NULL PRIMARY KEY, category TEXT NOT NULL, confidence TEXT NOT NULL, reason TEXT NOT NULL, timestamp INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS brain_suggestions (id TEXT NOT NULL PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL, matchReason TEXT NOT NULL, feedback TEXT NOT NULL, timestamp INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS brain_questions (id TEXT NOT NULL PRIMARY KEY, text TEXT NOT NULL, category TEXT NOT NULL, difficulty TEXT NOT NULL, answered INTEGER NOT NULL, answerText TEXT, timestamp INTEGER NOT NULL)"
                 )
             }
         }

@@ -54,6 +54,7 @@ import com.example.ui.components.HarmonyTopBar
 import com.example.ui.screens.ChatScreen
 import com.example.ui.screens.DevStudioScreen
 import com.example.ui.screens.EureMischungScreen
+import com.example.ui.screens.KidGeneratorScreen
 import com.example.ui.screens.GamesScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.IntrospectionExperienceScreen
@@ -142,6 +143,7 @@ fun HarmonyApp(
     var isPandaEitherOrOpen by remember { mutableStateOf(false) }
     var isPandaExitConfirmOpen by remember { mutableStateOf(false) }
     var isEureMischungOpen by remember { mutableStateOf(false) }
+    var isKidGeneratorOpen by remember { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
     var liveChangeCount by remember { mutableStateOf(0) }
@@ -187,7 +189,7 @@ fun HarmonyApp(
     val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
-    val canHandleBack = isIntrospectionOpen || isPandaEitherOrOpen || isEureMischungOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
+    val canHandleBack = isIntrospectionOpen || isPandaEitherOrOpen || isEureMischungOpen || isKidGeneratorOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
@@ -202,6 +204,9 @@ fun HarmonyApp(
             }
             isEureMischungOpen -> {
                 isEureMischungOpen = false
+            }
+            isKidGeneratorOpen -> {
+                isKidGeneratorOpen = false
             }
             isQuizActive -> {
                 if (uiState.isExitConfirmOpen) {
@@ -299,7 +304,16 @@ fun HarmonyApp(
                             val requested = PicShareWidgetProvider.requestPin(context)
                             viewModel.showToast(if (requested) "Widget-Auswahl geöffnet" else "Widget bitte über den Startbildschirm hinzufügen")
                         },
-                        onOpenEureMischung = { isEureMischungOpen = true }
+                        onOpenEureMischung = { isEureMischungOpen = true },
+                        brainInterests = uiState.brainInterests,
+                        brainSuggestions = uiState.brainSuggestions,
+                        brainQuestions = uiState.brainQuestions,
+                        onSuggestionFeedback = { id, feedback -> viewModel.setSuggestionFeedback(id, feedback) },
+                        onAnswerBrainQuestion = { id, text -> viewModel.answerBrainQuestion(id, text) },
+                        onOpenBrainChat = {
+                            viewModel.setBrainChatMode(true)
+                            viewModel.selectTab(2)
+                        }
                     )
 
                     1 -> GamesScreen(
@@ -311,7 +325,7 @@ fun HarmonyApp(
                             if (catId == "unterbewusstsein") {
                                 isIntrospectionOpen = true
                             } else if (catId == "mischung") {
-                                isEureMischungOpen = true
+                                isKidGeneratorOpen = true
                             } else {
                                 viewModel.openCategory(catId)
                             }
@@ -327,7 +341,13 @@ fun HarmonyApp(
                         appLanguage = uiState.appLanguage,
                         onSendMessage = { text -> viewModel.sendChatMessage(text) },
                         onSendImage = { uri -> viewModel.sendChatImage(uri) },
-                        onReportUser = { viewModel.reportPartner() }
+                        onReportUser = { viewModel.reportPartner() },
+                        isBrainChatMode = uiState.isBrainChatMode,
+                        isBrainGenerating = uiState.isBrainGenerating,
+                        brainMessages = uiState.brainMessages,
+                        onToggleBrainChatMode = { enabled -> viewModel.setBrainChatMode(enabled) },
+                        onSendBrainMessage = { text -> viewModel.sendBrainMessage(text) },
+                        onResetBrainChat = { viewModel.resetBrainChat() }
                     )
 
                     3 -> MomentsScreen(
@@ -397,6 +417,8 @@ fun HarmonyApp(
                     }
 
                     5 -> DevStudioScreen(
+                        answers = uiState.answers,
+                        profile = uiState.profile,
                         onStartPack = { packId -> openPack(packId) },
                         onShowToast = { msg -> viewModel.showToast(msg) }
                     )
@@ -567,6 +589,18 @@ fun HarmonyApp(
                         profile = uiState.profile,
                         appLanguage = uiState.appLanguage,
                         onClose = { isEureMischungOpen = false },
+                        onAddMoment = { title, content, emoji ->
+                            viewModel.addMoment(title, content)
+                            viewModel.showToast("Zu euren Momenten hinzugefügt! ✨")
+                        }
+                    )
+                }
+
+                if (isKidGeneratorOpen) {
+                    KidGeneratorScreen(
+                        profile = uiState.profile,
+                        appLanguage = uiState.appLanguage,
+                        onClose = { isKidGeneratorOpen = false },
                         onAddMoment = { title, content, emoji ->
                             viewModel.addMoment(title, content)
                             viewModel.showToast("Zu euren Momenten hinzugefügt! ✨")

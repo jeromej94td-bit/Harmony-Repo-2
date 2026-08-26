@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import androidx.core.content.FileProvider
 import com.example.BuildConfig
 import kotlinx.coroutines.Dispatchers
@@ -25,11 +25,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.util.UUID
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 // --- API MODELS FOR GEMINI IMAGE GENERATION ---
@@ -81,9 +82,84 @@ data class GeminiImgGenerateResponse(
     val candidates: List<GeminiImgCandidate> = emptyList()
 )
 
+// --- GOOGLE API ERROR PAYLOAD MODELS ---
+
+@Serializable
+data class GoogleApiErrorDetails(
+    val reason: String? = null,
+    val domain: String? = null,
+    val metadata: Map<String, String>? = null
+)
+
+@Serializable
+data class GoogleApiErrorPayload(
+    val code: Int? = null,
+    val message: String? = null,
+    val status: String? = null,
+    val details: List<GoogleApiErrorDetails> = emptyList()
+)
+
+@Serializable
+data class GoogleApiErrorEnvelope(
+    val error: GoogleApiErrorPayload? = null
+)
+
+// --- STRUCTURED DOMAIN EXCEPTIONS ---
+
+sealed class GeminiImageException(
+    override val message: String,
+    val code: Int,
+    val status: String?,
+    val technicalDetails: String
+) : Exception(message) {
+
+    class RateLimitExceeded(
+        message: String,
+        code: Int = 429,
+        status: String? = "RESOURCE_EXHAUSTED",
+        technicalDetails: String
+    ) : GeminiImageException(message, code, status, technicalDetails)
+
+    class ModelUnavailable(
+        message: String,
+        code: Int = 404,
+        status: String? = "NOT_FOUND",
+        technicalDetails: String
+    ) : GeminiImageException(message, code, status, technicalDetails)
+
+    class AuthenticationFailed(
+        message: String,
+        code: Int = 401,
+        status: String? = "UNAUTHENTICATED",
+        technicalDetails: String
+    ) : GeminiImageException(message, code, status, technicalDetails)
+
+    class InvalidRequest(
+        message: String,
+        code: Int = 400,
+        status: String? = "INVALID_ARGUMENT",
+        technicalDetails: String
+    ) : GeminiImageException(message, code, status, technicalDetails)
+
+    class ServerError(
+        message: String,
+        code: Int = 500,
+        status: String? = "INTERNAL",
+        technicalDetails: String
+    ) : GeminiImageException(message, code, status, technicalDetails)
+
+    class Unknown(
+        message: String,
+        code: Int = -1,
+        status: String? = null,
+        technicalDetails: String
+    ) : GeminiImageException(message, code, status, technicalDetails)
+}
+
 interface GeminiImageApiService {
-    @POST("v1beta/models/gemini-2.5-flash-image:generateContent")
+    @POST("v1beta/models/{model}:generateContent")
     suspend fun generateImageContent(
+        @Path("model") model: String,
         @Query("key") apiKey: String,
         @Body request: GeminiImgGenerateRequest
     ): GeminiImgGenerateResponse
@@ -170,6 +246,14 @@ data class GeneratedImageResult(
 
 object GeminiImageService {
 
+    private const val TAG = "GeminiImageService"
+
+    val IMAGE_MODELS = listOf(
+        "gemini-3.1-flash-image",
+        "gemini-3.1-flash-image-preview",
+        "gemini-2.5-flash-image"
+    )
+
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -191,24 +275,183 @@ object GeminiImageService {
             .create(GeminiImageApiService::class.java)
     }
 
-    private suspend fun <T> retryWithBackoff(
-        times: Int = 3,
-        initialDelay: Long = 2000,
-        maxDelay: Long = 10000,
-        factor: Double = 2.0,
-        block: suspend () -> T
-    ): T {
-        var currentDelay = initialDelay
-        repeat(times - 1) {
-            try {
-                return block()
-            } catch (e: HttpException) {
-                if (e.code() != 429) throw e
-            }
-            delay(currentDelay)
-            currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
+    /**
+     * Resolves the configured Gemini API key centrally.
+     */
+    fun resolveGeminiApiKey(): String {
+        return BuildConfig.GEMINI_API_KEY.takeIf { it.isNotBlank() } ?: ""
+    }
+
+    /**
+     * Parses Google API error payloads into clear, actionable domain exceptions.
+     */
+    fun parseGoogleError(httpCode: Int, rawBody: String?): GeminiImageException {
+        val trimmed = rawBody?.trim().orEmpty()
+        val parsedEnvelope = try {
+            if (trimmed.isNotEmpty()) {
+                json.decodeFromString<GoogleApiErrorEnvelope>(trimmed)
+            } else null
+        } catch (_: Exception) {
+            null
         }
-        return block()
+
+        val errPayload = parsedEnvelope?.error
+        val apiMsg = errPayload?.message ?: ""
+        val apiStatus = errPayload?.status ?: ""
+        val detailsStr = if (trimmed.isNotBlank()) trimmed else "HTTP $httpCode (Keine Detaildaten vom Server empfangen)"
+
+        return when (httpCode) {
+            429 -> {
+                val isQuotaIssue = apiMsg.contains("quota", ignoreCase = true) ||
+                        apiMsg.contains("limit", ignoreCase = true) ||
+                        apiMsg.contains("RESOURCE_EXHAUSTED", ignoreCase = true) ||
+                        apiMsg.contains("billing", ignoreCase = true)
+
+                val userMsg = if (isQuotaIssue) {
+                    "Die KI-Bildgenerierung ist momentan nicht verfügbar. Das Nutzungslimit oder die Bild-Quota des Gemini-Projekts wurde erreicht."
+                } else {
+                    "Die KI-Bildgenerierung ist momentan ausgelastet (Rate-Limit). Bitte versuche es in wenigen Sekunden erneut."
+                }
+
+                GeminiImageException.RateLimitExceeded(
+                    message = userMsg,
+                    code = 429,
+                    status = apiStatus.ifBlank { "RESOURCE_EXHAUSTED" },
+                    technicalDetails = if (apiMsg.isNotBlank()) "$apiStatus: $apiMsg" else detailsStr
+                )
+            }
+            400 -> {
+                GeminiImageException.InvalidRequest(
+                    message = "Ungültige Bildgenerierungs-Anfrage: ${apiMsg.ifBlank { "Die Parameter oder Referenzbilder wurden vom Modell nicht akzeptiert." }}",
+                    code = 400,
+                    status = apiStatus.ifBlank { "INVALID_ARGUMENT" },
+                    technicalDetails = if (apiMsg.isNotBlank()) "$apiStatus: $apiMsg" else detailsStr
+                )
+            }
+            401, 403 -> {
+                GeminiImageException.AuthenticationFailed(
+                    message = "Ungültiger API-Schlüssel oder fehlende Berechtigung für Bildgenerierung im Google-AI-Studio-Projekt.",
+                    code = httpCode,
+                    status = apiStatus.ifBlank { "PERMISSION_DENIED" },
+                    technicalDetails = if (apiMsg.isNotBlank()) "$apiStatus: $apiMsg" else detailsStr
+                )
+            }
+            404 -> {
+                GeminiImageException.ModelUnavailable(
+                    message = "Das angeforderte Bildmodell ist für dieses Projekt nicht verfügbar.",
+                    code = 404,
+                    status = apiStatus.ifBlank { "NOT_FOUND" },
+                    technicalDetails = if (apiMsg.isNotBlank()) "$apiStatus: $apiMsg" else detailsStr
+                )
+            }
+            500, 503 -> {
+                GeminiImageException.ServerError(
+                    message = "Google KI-Dienst ist vorübergehend nicht erreichbar. Bitte versuche es gleich noch einmal.",
+                    code = httpCode,
+                    status = apiStatus.ifBlank { "UNAVAILABLE" },
+                    technicalDetails = if (apiMsg.isNotBlank()) "$apiStatus: $apiMsg" else detailsStr
+                )
+            }
+            else -> {
+                GeminiImageException.Unknown(
+                    message = "Bildgenerierung fehlgeschlagen (Code $httpCode): ${apiMsg.ifBlank { "Unbekannter Fehler" }}",
+                    code = httpCode,
+                    status = apiStatus,
+                    technicalDetails = if (apiMsg.isNotBlank()) "$apiStatus: $apiMsg" else detailsStr
+                )
+            }
+        }
+    }
+
+    /**
+     * Executes API call with progressive backoff:
+     * - Attempt 1: immediate
+     * - Attempt 2: after 2000 ms
+     * - Attempt 3: after 5000 ms
+     */
+    private suspend fun executeWithBackoff(
+        model: String,
+        call: suspend () -> GeminiImgGenerateResponse
+    ): GeminiImgGenerateResponse {
+        val delays = listOf(0L, 2000L, 5000L)
+        var lastError: Exception? = null
+
+        for ((index, delayMs) in delays.withIndex()) {
+            if (delayMs > 0) {
+                Log.d(TAG, "Retry ${index + 1}/${delays.size} for model=$model after ${delayMs}ms...")
+                delay(delayMs)
+            }
+
+            try {
+                return call()
+            } catch (e: HttpException) {
+                val code = e.code()
+                val rawBody = runCatching { e.response()?.errorBody()?.string() }.getOrNull()
+                val parsed = parseGoogleError(code, rawBody)
+                Log.e(TAG, "HTTP $code from Gemini API (Model: $model): ${parsed.technicalDetails}")
+
+                // Only retry on transient rate limits (429) or transient server errors (500/503)
+                if ((code == 429 || code == 500 || code == 503) && index < delays.size - 1) {
+                    lastError = parsed
+                    continue
+                }
+                throw parsed
+            } catch (e: IOException) {
+                Log.e(TAG, "Network IOException on model=$model: ${e.message}")
+                if (index < delays.size - 1) {
+                    lastError = e
+                    continue
+                }
+                throw GeminiImageException.ServerError(
+                    message = "Netzwerkfehler: Verbindung zu Google KI konnte nicht hergestellt werden. Bitte Internetverbindung prüfen.",
+                    code = -1,
+                    status = "NETWORK_ERROR",
+                    technicalDetails = e.message ?: "IOException"
+                )
+            }
+        }
+
+        throw lastError ?: GeminiImageException.Unknown(
+            message = "Bildgenerierung nach Wiederholungsversuchen fehlgeschlagen.",
+            code = -1,
+            status = null,
+            technicalDetails = "Max retries reached"
+        )
+    }
+
+    /**
+     * Executes generation with model fallback chain.
+     */
+    private suspend fun executeImageGenerationWithFallback(
+        apiKey: String,
+        request: GeminiImgGenerateRequest
+    ): GeminiImgGenerateResponse {
+        var lastException: Exception? = null
+
+        for (model in IMAGE_MODELS) {
+            Log.d(TAG, "Starting Gemini Image request with model=$model")
+            try {
+                return executeWithBackoff(model) {
+                    api.generateImageContent(model = model, apiKey = apiKey, request = request)
+                }
+            } catch (e: GeminiImageException.ModelUnavailable) {
+                Log.w(TAG, "Model $model returned 404 / Unavailable. Trying next model in fallback chain...")
+                lastException = e
+            } catch (e: GeminiImageException) {
+                Log.e(TAG, "Unrecoverable Gemini error on model=$model: HTTP ${e.code}, status=${e.status}")
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Unexpected error on model=$model: ${e.message}")
+                lastException = e
+            }
+        }
+
+        throw lastException ?: GeminiImageException.Unknown(
+            message = "Keines der verfügbaren Bildmodelle konnte erreicht werden.",
+            code = -1,
+            status = null,
+            technicalDetails = "Models attempted: ${IMAGE_MODELS.joinToString()}"
+        )
     }
 
     /**
@@ -224,9 +467,14 @@ object GeminiImageService {
         activityDescription: String
     ): Result<GeneratedImageResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val apiKey = BuildConfig.GEMINI_API_KEY
+            val apiKey = resolveGeminiApiKey()
             if (apiKey.isBlank()) {
-                error("Gemini API Key ist nicht konfiguriert.")
+                throw GeminiImageException.AuthenticationFailed(
+                    message = "Gemini API-Schlüssel ist nicht konfiguriert. Bitte prüfe die App-Einstellungen.",
+                    code = 401,
+                    status = "MISSING_KEY",
+                    technicalDetails = "GEMINI_API_KEY is empty in BuildConfig"
+                )
             }
 
             val parts = mutableListOf<GeminiImgPart>()
@@ -259,9 +507,14 @@ object GeminiImageService {
                 )
             )
 
-            val response = retryWithBackoff { api.generateImageContent(apiKey, request) }
+            val response = executeImageGenerationWithFallback(apiKey, request)
             val candidate = response.candidates.firstOrNull()
-                ?: error("Keine Antwort von Gemini Bildmodell erhalten.")
+                ?: throw GeminiImageException.Unknown(
+                    message = "Keine Antwortkandidaten vom Gemini-Bildmodell empfangen.",
+                    code = 200,
+                    status = "EMPTY_RESPONSE",
+                    technicalDetails = "Candidates list was empty"
+                )
 
             var imagePart: GeminiImgInlineData? = null
             var textPart = ""
@@ -275,13 +528,23 @@ object GeminiImageService {
                 }
             }
 
-            val inline = imagePart ?: error("Es wurde kein Bild im Antwortdatenstrom gefunden.")
+            val inline = imagePart ?: throw GeminiImageException.Unknown(
+                message = "Es wurde kein Bild im Antwortdatenstrom gefunden. Das Modell hat eventuell nur Text zurückgegeben.",
+                code = 200,
+                status = "NO_IMAGE_DATA",
+                technicalDetails = "Text received: ${textPart.take(200)}"
+            )
+
             val imageBytes = Base64.decode(inline.data, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                ?: error("Bild konnte nicht dekodiert werden.")
+                ?: throw GeminiImageException.Unknown(
+                    message = "Das empfangene Bild konnte nicht dekodiert werden.",
+                    code = 200,
+                    status = "DECODE_ERROR",
+                    technicalDetails = "ByteArray size: ${imageBytes.size}"
+                )
 
             val savedFile = saveBitmapToInternalStorage(context, bitmap, "anime_date_${System.currentTimeMillis()}")
-
             val description = if (textPart.isNotBlank()) textPart.trim() else "Anime-Visualisierung für euer Date: $activityTitle"
 
             GeneratedImageResult(
@@ -308,9 +571,14 @@ object GeminiImageService {
         customNotes: String = ""
     ): Result<GeneratedImageResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val apiKey = BuildConfig.GEMINI_API_KEY
+            val apiKey = resolveGeminiApiKey()
             if (apiKey.isBlank()) {
-                error("Gemini API Key ist nicht konfiguriert.")
+                throw GeminiImageException.AuthenticationFailed(
+                    message = "Gemini API-Schlüssel ist nicht konfiguriert. Bitte prüfe die App-Einstellungen.",
+                    code = 401,
+                    status = "MISSING_KEY",
+                    technicalDetails = "GEMINI_API_KEY is empty in BuildConfig"
+                )
             }
 
             val parts = mutableListOf<GeminiImgPart>()
@@ -347,9 +615,14 @@ object GeminiImageService {
                 )
             )
 
-            val response = retryWithBackoff { api.generateImageContent(apiKey, request) }
+            val response = executeImageGenerationWithFallback(apiKey, request)
             val candidate = response.candidates.firstOrNull()
-                ?: error("Keine Antwort von Gemini erhalten.")
+                ?: throw GeminiImageException.Unknown(
+                    message = "Keine Antwortkandidaten vom Gemini-Bildmodell empfangen.",
+                    code = 200,
+                    status = "EMPTY_RESPONSE",
+                    technicalDetails = "Candidates list was empty"
+                )
 
             var imagePart: GeminiImgInlineData? = null
             var textPart = ""
@@ -363,10 +636,21 @@ object GeminiImageService {
                 }
             }
 
-            val inline = imagePart ?: error("Es wurde kein Bild im Antwortdatenstrom gefunden.")
+            val inline = imagePart ?: throw GeminiImageException.Unknown(
+                message = "Es wurde kein Bild im Antwortdatenstrom gefunden. Das Modell hat eventuell nur Text zurückgegeben.",
+                code = 200,
+                status = "NO_IMAGE_DATA",
+                technicalDetails = "Text received: ${textPart.take(200)}"
+            )
+
             val imageBytes = Base64.decode(inline.data, Base64.DEFAULT)
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                ?: error("Bild konnte nicht dekodiert werden.")
+                ?: throw GeminiImageException.Unknown(
+                    message = "Das empfangene Bild konnte nicht dekodiert werden.",
+                    code = 200,
+                    status = "DECODE_ERROR",
+                    technicalDetails = "ByteArray size: ${imageBytes.size}"
+                )
 
             val savedFile = saveBitmapToInternalStorage(context, bitmap, "mischung_${System.currentTimeMillis()}")
 
@@ -464,7 +748,7 @@ object GeminiImageService {
                 } else null
             } ?: return null
 
-            val scaled = scaleBitmapDown(bitmap, 512)
+            val scaled = scaleBitmapDown(bitmap, 768)
             val stream = ByteArrayOutputStream()
             scaled.compress(Bitmap.CompressFormat.JPEG, 85, stream)
             val base64 = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
