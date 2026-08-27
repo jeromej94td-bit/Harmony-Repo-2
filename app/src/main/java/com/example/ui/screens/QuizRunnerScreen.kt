@@ -1164,8 +1164,6 @@ fun QuizRunnerScreen(
                     }
                 }
 
-            }
-
                 // Runner Footer
                 if (activeRun.isFinished || pack.type == "disc") {
                     Row(
@@ -1201,6 +1199,8 @@ fun QuizRunnerScreen(
                         }
                     }
                 }
+            }
+
             }
 
             // Exit Confirm Dialog
