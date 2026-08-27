@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import com.example.data.GenQuestion
+import com.example.data.GeneratedHarmonyAdrenaline360Section20TeamworkChallenge
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -96,5 +97,17 @@ class QuestionInteractionTest {
         )
 
         assertEquals("person_assignment", generated.interaction)
+    }
+
+    @Test
+    fun `roles question in harmony 360 is explicitly person assignment`() {
+        val pack = GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS
+            .first { it.id == "h500_414_rollenverteilung_ranking" }
+
+        assertEquals("person_assignment", pack.questions[1].interaction)
+        assertEquals(
+            listOf("Visionär/Ideen", "Detailplaner", "Ausführer", "Qualitätsprüfer"),
+            pack.questions[1].options
+        )
     }
 }
