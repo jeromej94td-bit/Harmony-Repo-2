@@ -196,9 +196,11 @@ class MemoryViewModel(
         title: String,
         items: List<MemoryChecklistItem>
     ) {
-        val normalizedItems = items.mapNotNull { item ->
-            val text = item.text.trim()
-            if (item.id.isBlank() || text.isEmpty()) null else item.copy(text = text)
+        val normalizedItems = items.flatMap { item ->
+            item.text.split("\n").mapNotNull { line ->
+                val text = line.trim()
+                if (text.isEmpty()) null else item.copy(id = java.util.UUID.randomUUID().toString(), text = text)
+            }
         }
         if (normalizedItems.isEmpty()) return
 

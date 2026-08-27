@@ -34,6 +34,17 @@ data class BrainQuestionEntity(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+data class BrainChatSuggestionItem(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val title: String,
+    val description: String,
+    val imageUrl: String? = null,
+    val linkUrl: String? = null,
+    val category: String? = null,
+    val matchReason: String? = null,
+    val isSavedToNotes: Boolean = false
+)
+
 data class BrainMessage(
     val id: String = java.util.UUID.randomUUID().toString(),
     val text: String,
@@ -42,5 +53,10 @@ data class BrainMessage(
     val isSearching: Boolean = false,
     val sources: List<com.example.data.HarmonyBrainSource> = emptyList(),
     val searchQueries: List<String> = emptyList(),
-    val errorType: String? = null
+    val errorType: String? = null,
+    val imageUrl: String? = null,
+    val audioPath: String? = null,
+    val audioDurationSeconds: Int = 0,
+    val suggestions: List<BrainChatSuggestionItem> = emptyList(),
+    val animateOnArrival: Boolean = false
 )

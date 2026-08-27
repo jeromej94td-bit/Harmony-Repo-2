@@ -579,6 +579,14 @@ Eigene Originaldateien bleiben im ZIP unverändert. Bereits in Harmony gebündel
         return "${prefix}_$stamp.$extension"
     }
 
+    fun exportLiveChangesTxt(context: Context): File {
+        val txtContent = LiveChangeHistory.generateTxt()
+        val fileName = suggestFileName("live_changes")
+        val file = writeToFile(context, fileName, txtContent)
+        shareFile(context, file, mime = "text/plain")
+        return file
+    }
+
     /**
      * Bestehender vollständiger Projekt-Export. In eine .kt-Datei wird nur noch
      * kompilierbarer Kotlin-Quelltext geschrieben, nie der frühere #-Vorspann.

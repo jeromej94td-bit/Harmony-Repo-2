@@ -22,6 +22,13 @@ import com.example.data.model.SharedPicEntity
 import com.example.data.model.BrainInterestEntity
 import com.example.data.model.BrainSuggestionEntity
 import com.example.data.model.BrainQuestionEntity
+import com.example.data.brain.db.BrainAnswerHistoryEntity
+import com.example.data.brain.db.BrainPreferenceEntity
+import com.example.data.brain.db.BrainInteractionEntity
+import com.example.data.brain.db.BrainMemoryFactEntity
+import com.example.data.brain.db.BrainGeneratedContentEntity
+import com.example.data.brain.db.BrainPendingGenerationEntity
+import com.example.data.brain.db.BrainRoomDao
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -37,6 +44,9 @@ interface ProfileDao {
 interface AnswerDao {
     @Query("SELECT * FROM answers")
     fun getAllAnswers(): Flow<List<AnswerEntity>>
+
+    @Query("SELECT * FROM answers")
+    suspend fun getAllAnswersDirect(): List<AnswerEntity>
 
     @Query("SELECT * FROM answers WHERE packId = :packId")
     fun getAnswersForPack(packId: String): Flow<List<AnswerEntity>>
@@ -102,9 +112,15 @@ interface CoupleStatsDao {
         MemoryEntryEntity::class,
         BrainInterestEntity::class,
         BrainSuggestionEntity::class,
-        BrainQuestionEntity::class
+        BrainQuestionEntity::class,
+        BrainAnswerHistoryEntity::class,
+        BrainPreferenceEntity::class,
+        BrainInteractionEntity::class,
+        BrainMemoryFactEntity::class,
+        BrainGeneratedContentEntity::class,
+        BrainPendingGenerationEntity::class
     ],
-    version = 5,
+    version = 8,
     exportSchema = true
 )
 abstract class HarmonyDatabase : RoomDatabase() {
@@ -116,6 +132,7 @@ abstract class HarmonyDatabase : RoomDatabase() {
     abstract fun coupleStatsDao(): CoupleStatsDao
     abstract fun memoryDao(): MemoryDao
     abstract fun brainDao(): BrainDao
+    abstract fun brainRoomDao(): BrainRoomDao
 
     companion object {
         @Volatile
@@ -128,7 +145,7 @@ abstract class HarmonyDatabase : RoomDatabase() {
                     HarmonyDatabase::class.java,
                     "harmony_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     .build()
                 INSTANCE = instance
                 instance
@@ -218,6 +235,151 @@ abstract class HarmonyDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE TABLE IF NOT EXISTS brain_questions (id TEXT NOT NULL PRIMARY KEY, text TEXT NOT NULL, category TEXT NOT NULL, difficulty TEXT NOT NULL, answered INTEGER NOT NULL, answerText TEXT, timestamp INTEGER NOT NULL)"
                 )
+            }
+        }
+
+        internal val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `brain_answer_history` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `packId` TEXT,
+                        `questionId` TEXT NOT NULL,
+                        `questionIndex` INTEGER,
+                        `questionText` TEXT NOT NULL,
+                        `category` TEXT NOT NULL,
+                        `topic` TEXT,
+                        `contentType` TEXT NOT NULL,
+                        `answerPersonA` TEXT,
+                        `answerPersonB` TEXT,
+                        `createdAt` INTEGER NOT NULL,
+                        `liked` INTEGER NOT NULL,
+                        `disliked` INTEGER NOT NULL,
+                        `skipped` INTEGER NOT NULL,
+                        `source` TEXT NOT NULL,
+                        `generatedContentId` TEXT,
+                        `metadataJson` TEXT
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_answer_history_questionId` ON `brain_answer_history` (`questionId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_answer_history_category` ON `brain_answer_history` (`category`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_answer_history_topic` ON `brain_answer_history` (`topic`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_answer_history_createdAt` ON `brain_answer_history` (`createdAt`)")
+
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `brain_preferences` (
+                        `scope` TEXT NOT NULL,
+                        `tag` TEXT NOT NULL,
+                        `score` REAL NOT NULL,
+                        `confidence` REAL NOT NULL,
+                        `engagement` REAL NOT NULL,
+                        `positiveSignals` INTEGER NOT NULL,
+                        `negativeSignals` INTEGER NOT NULL,
+                        `saturation` REAL NOT NULL,
+                        `lastSeenAt` INTEGER NOT NULL,
+                        `lastUsedForContentAt` INTEGER,
+                        `updatedAt` INTEGER NOT NULL,
+                        PRIMARY KEY(`scope`, `tag`)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_preferences_scope_score` ON `brain_preferences` (`scope`, `score`)")
+
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `brain_interactions` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `contentId` TEXT NOT NULL,
+                        `contentType` TEXT NOT NULL,
+                        `action` TEXT NOT NULL,
+                        `category` TEXT,
+                        `topic` TEXT,
+                        `personScope` TEXT,
+                        `createdAt` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_interactions_contentId` ON `brain_interactions` (`contentId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_interactions_category` ON `brain_interactions` (`category`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_interactions_createdAt` ON `brain_interactions` (`createdAt`)")
+
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `brain_memory_facts` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `factText` TEXT NOT NULL,
+                        `category` TEXT,
+                        `personScope` TEXT NOT NULL,
+                        `confidence` REAL NOT NULL,
+                        `importance` REAL NOT NULL,
+                        `sourceAnswerIdsJson` TEXT NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        `updatedAt` INTEGER NOT NULL,
+                        `lastUsedAt` INTEGER
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_memory_facts_category` ON `brain_memory_facts` (`category`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_memory_facts_personScope` ON `brain_memory_facts` (`personScope`)")
+
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `brain_generated_content` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `contentType` TEXT NOT NULL,
+                        `category` TEXT,
+                        `topic` TEXT,
+                        `title` TEXT,
+                        `normalizedText` TEXT NOT NULL,
+                        `payloadJson` TEXT NOT NULL,
+                        `sourceModel` TEXT,
+                        `promptVersion` TEXT,
+                        `status` TEXT NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        `firstShownAt` INTEGER,
+                        `lastShownAt` INTEGER,
+                        `playedCount` INTEGER NOT NULL,
+                        `likeCount` INTEGER NOT NULL,
+                        `dislikeCount` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_generated_content_contentType` ON `brain_generated_content` (`contentType`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_generated_content_normalizedText` ON `brain_generated_content` (`normalizedText`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_generated_content_status` ON `brain_generated_content` (`status`)")
+
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `brain_pending_generation` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `mode` TEXT NOT NULL,
+                        `query` TEXT NOT NULL,
+                        `contextJson` TEXT NOT NULL,
+                        `status` TEXT NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        `lastAttemptAt` INTEGER,
+                        `retryCount` INTEGER NOT NULL,
+                        `lastError` TEXT
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_brain_pending_generation_status` ON `brain_pending_generation` (`status`)")
+            }
+        }
+
+        internal val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE chat_messages ADD COLUMN audioPath TEXT")
+                db.execSQL("ALTER TABLE chat_messages ADD COLUMN audioDurationSeconds INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        internal val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE moments ADD COLUMN imagePathsJson TEXT NOT NULL DEFAULT '[]'")
             }
         }
     }

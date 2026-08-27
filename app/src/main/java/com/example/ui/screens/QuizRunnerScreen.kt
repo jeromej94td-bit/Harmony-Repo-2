@@ -88,6 +88,7 @@ import com.example.ui.contentText
 import com.example.ui.tr
 import com.example.ui.components.CategoryTag
 import com.example.ui.components.TotImageProvider
+import com.example.ui.components.VoiceInputButton
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyGold
 import com.example.ui.theme.HarmonyLine
@@ -803,6 +804,23 @@ fun QuizRunnerScreen(
                                 modifier = Modifier.weight(1f)
                             )
                         }
+                    } else if (pack.type == "draw") {
+                        val q = pack.questions.getOrNull(activeRun.currentIndex)
+                        val questionText = contentText(q?.q ?: "Zeichne etwas")
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            DrawingPromptCanvas(
+                                prompt = questionText,
+                                onDone = {
+                                    onPickAnswer("DRAWING_COMPLETED")
+                                    onNextStep()
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     } else if (pack.type == "disc") {
                         // Discussion Mode
                         val scrollState = rememberScrollState()
@@ -1174,20 +1192,45 @@ fun QuizRunnerScreen(
                             )
                             Spacer(modifier = Modifier.height(14.dp))
 
-                            OutlinedTextField(
-                                value = textInput,
-                                onValueChange = { textInput = it },
-                                placeholder = { Text(tr("Deine Antwort...", "Your answer..."), color = HarmonyMuted) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("own_answer_input"),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = HarmonyPink,
-                                    unfocusedBorderColor = HarmonyLine,
-                                    focusedTextColor = HarmonyText,
-                                    unfocusedTextColor = HarmonyText
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = textInput,
+                                    onValueChange = { textInput = it },
+                                    placeholder = { Text(tr("Deine Antwort...", "Your answer..."), color = HarmonyMuted) },
+                                    singleLine = false,
+                                    maxLines = 4,
+                                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                                    ),
+                                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                                        onDone = {
+                                            if (textInput.isNotBlank()) {
+                                                triggerMiniVibration(context, 40L)
+                                                onSaveOwnAnswer(textInput)
+                                            }
+                                        }
+                                    ),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .testTag("own_answer_input"),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = HarmonyPink,
+                                        unfocusedBorderColor = HarmonyLine,
+                                        focusedTextColor = HarmonyText,
+                                        unfocusedTextColor = HarmonyText
+                                    )
                                 )
-                            )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                VoiceInputButton(
+                                    appLanguage = appLanguage,
+                                    onTextTranscribed = { transcribed ->
+                                        textInput = if (textInput.isBlank()) transcribed else "$textInput $transcribed"
+                                    }
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(18.dp))
 

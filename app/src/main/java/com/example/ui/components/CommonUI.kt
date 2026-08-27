@@ -450,6 +450,7 @@ fun CategoryTag(tag: String, modifier: Modifier = Modifier) {
             "essen" -> "Essen & Genuss"
             "zuhause" -> "Zuhause & Alltag"
             "games" -> "Spiele"
+            "harmony360" -> "Harmony 360"
             else -> tag.replaceFirstChar { it.uppercase() }
         }
         val localized = LanguageManager.tr(normalized, appLanguage)
@@ -459,6 +460,7 @@ fun CategoryTag(tag: String, modifier: Modifier = Modifier) {
             "hochzeit" -> Triple(HarmonyGold.copy(alpha = 0.16f), HarmonyGold, localized)
             "kinder" -> Triple(HarmonyTeal.copy(alpha = 0.16f), HarmonyTeal, localized)
             "reden" -> Triple(HarmonyBlue.copy(alpha = 0.16f), HarmonyBlue, localized)
+            "harmony360" -> Triple(HarmonyPurpleLight.copy(alpha = 0.22f), HarmonyPurpleLight, "⚡ Harmony 360")
             else -> Triple(Color.White.copy(alpha = 0.12f), HarmonyText, localized)
         }
     }
@@ -475,7 +477,10 @@ fun CategoryTag(tag: String, modifier: Modifier = Modifier) {
             fontSize = 9.5.sp,
             fontWeight = FontWeight.ExtraBold,
             color = fg,
-            letterSpacing = 0.4.sp
+            letterSpacing = 0.4.sp,
+            maxLines = 1,
+            softWrap = false,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
         )
     }
 }

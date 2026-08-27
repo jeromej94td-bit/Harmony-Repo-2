@@ -168,7 +168,8 @@ fun DevStudioScreen(
                 "🔗 Ketten",
                 "🖼️ Bilder",
                 "⚡ Test",
-                "📤 Export"
+                "📤 Export",
+                "🧠 Brain"
             )
             tabs.forEachIndexed { idx, title ->
                 Tab(
@@ -243,6 +244,11 @@ fun DevStudioScreen(
                 packs = packs,
                 onShowToast = onShowToast,
                 onChanged = { updateCounter++ }
+            )
+
+            7 -> DevBrainTab(
+                profile = profile,
+                onShowToast = onShowToast
             )
         }
     }
@@ -1970,6 +1976,30 @@ private fun DevExportTab(
                 Icon(Icons.Default.Image, null, tint = HarmonyPurpleLight, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(6.dp))
                 Text("Bilder einzeln teilen", color = HarmonyPurpleLight, fontSize = 13.sp)
+            }
+
+            Spacer(Modifier.height(18.dp))
+            Text("⚡ Live-Change Protokoll (TXT)", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
+            Text(
+                "Exportiert die genauen im Spiel geänderten Fragen/Paare mit Zeitstempel als Textdatei.",
+                fontSize = 11.5.sp,
+                color = HarmonyMuted
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    DevExporter.exportLiveChangesTxt(context)
+                    onShowToast("📄 Live-Change TXT bereitgestellt!")
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = HarmonyGold),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp)
+            ) {
+                Icon(Icons.Default.Share, null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Live-Change Änderungen teilen (TXT)", color = Color.Black, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(Modifier.height(22.dp))

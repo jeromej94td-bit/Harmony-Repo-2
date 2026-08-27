@@ -121,9 +121,11 @@ fun MemoryEditorSheet(
     var urlTouched by rememberSaveable(initialEntry?.id) { mutableStateOf(false) }
 
     val normalizedItems = remember(listItems) {
-        val clean = listItems.mapNotNull { item ->
-            val text = item.text.trim()
-            if (text.isEmpty()) null else item.copy(text = text)
+        val clean = listItems.flatMap { item ->
+            item.text.split("\n").mapNotNull { line ->
+                val text = line.trim()
+                if (text.isEmpty()) null else item.copy(id = UUID.randomUUID().toString(), text = text)
+            }
         }
         clean.filterNot { it.completed } + clean.filter { it.completed }
     }

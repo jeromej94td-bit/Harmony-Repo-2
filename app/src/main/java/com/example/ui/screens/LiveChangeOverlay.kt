@@ -135,6 +135,7 @@ fun LiveChangeHud(
     hasActiveItem: Boolean,
     onEditCurrent: () -> Unit,
     onStop: () -> Unit,
+    onExportTxt: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -160,6 +161,11 @@ fun LiveChangeHud(
             if (hasActiveItem) {
                 TextButton(onClick = onEditCurrent) {
                     Text("Bearbeiten", color = HarmonyPurpleLight, fontSize = 11.sp)
+                }
+            }
+            if (onExportTxt != null && changeCount > 0) {
+                TextButton(onClick = onExportTxt) {
+                    Text("TXT 📄", color = HarmonyGold, fontSize = 11.sp)
                 }
             }
             TextButton(onClick = onStop) {

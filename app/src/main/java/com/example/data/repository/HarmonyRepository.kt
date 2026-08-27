@@ -12,6 +12,7 @@ import com.example.data.model.SharedPicEntity
 import com.example.data.model.BrainInterestEntity
 import com.example.data.model.BrainSuggestionEntity
 import com.example.data.model.BrainQuestionEntity
+import com.example.data.brain.repository.BrainRepository
 import com.example.widget.PicShareWidgetProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,8 @@ class HarmonyRepository(
     val brainInterestsFlow: Flow<List<BrainInterestEntity>> = db.brainDao().getAllInterestsFlow()
     val brainSuggestionsFlow: Flow<List<BrainSuggestionEntity>> = db.brainDao().getAllSuggestionsFlow()
     val brainQuestionsFlow: Flow<List<BrainQuestionEntity>> = db.brainDao().getAllQuestionsFlow()
+
+    val brainRepository = BrainRepository(db.brainRoomDao(), context)
 
     suspend fun ensureInitialData() {
         // Initialize profile if not present
@@ -86,6 +89,10 @@ class HarmonyRepository(
         if (stats == null) {
             db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = 7, visitedCountries = 3))
         }
+
+        // Perform initial idempotent backfill of legacy answers into BrainAnswerHistory
+        val legacyAnswers = db.answerDao().getAllAnswers().firstOrNull().orEmpty()
+        brainRepository.performInitialBackfillIfNeeded(legacyAnswers)
     }
 
     suspend fun updateProfile(userName: String, partnerName: String, startDate: Long) {
@@ -112,6 +119,15 @@ class HarmonyRepository(
                 answerText = answerText
             )
         )
+        brainRepository.recordAnswer(packId, questionIndex, answerText)
+    }
+
+    suspend fun recordBrainSkip(packId: String, questionIndex: Int) {
+        brainRepository.recordSkip(packId, questionIndex)
+    }
+
+    suspend fun recordBrainPackFinished(packId: String) {
+        brainRepository.recordPackFinished(packId)
     }
 
     suspend fun sendChatMessage(text: String, sender: String = "me") {
@@ -121,6 +137,17 @@ class HarmonyRepository(
     suspend fun sendChatImage(uri: Uri, sender: String = "me") {
         val path = copyMediaToApp(uri, "chat") ?: return
         db.chatDao().insertMessage(ChatMessageEntity(sender = sender, text = "", imagePath = path))
+    }
+
+    suspend fun sendChatVoiceMessage(audioPath: String, durationSeconds: Int, sender: String = "me") {
+        db.chatDao().insertMessage(
+            ChatMessageEntity(
+                sender = sender,
+                text = "",
+                audioPath = audioPath,
+                audioDurationSeconds = durationSeconds
+            )
+        )
     }
 
     suspend fun updateProfileAvatar(uri: Uri, isUser: Boolean) {
@@ -145,8 +172,20 @@ class HarmonyRepository(
         PicShareWidgetProvider.refreshAll(context)
     }
 
-    suspend fun addMoment(title: String, content: String, emoji: String = "💕") {
-        db.momentDao().insertMoment(MomentEntity(title = title, content = content, emoji = emoji))
+    suspend fun addMoment(title: String, content: String, imageUris: List<Uri> = emptyList(), emoji: String = "💕") {
+        val paths = imageUris.mapNotNull { uri ->
+            copyMediaToApp(uri, "moments")
+        }
+        val pathsJson = paths.joinToString(prefix = "[", postfix = "]") { "\"${it.replace("\\", "\\\\").replace("\"", "\\\"")}\"" }
+        db.momentDao().insertMoment(
+            MomentEntity(
+                title = title,
+                content = content,
+                emoji = emoji,
+                imagePathsJson = pathsJson
+            )
+        )
+        brainRepository.recordMoment(title, content)
     }
 
     suspend fun updateStats(cities: Int, countries: Int) {

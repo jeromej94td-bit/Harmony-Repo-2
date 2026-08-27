@@ -1,5 +1,8 @@
 package com.example.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,11 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 import com.example.util.LanguageManager
 import com.example.data.model.MomentEntity
 import com.example.data.model.ProfileEntity
@@ -48,7 +55,48 @@ import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
+import java.io.File
 import java.util.concurrent.TimeUnit
+
+@Composable
+fun MomentPhotoCarousel(
+    imagePaths: List<String>,
+    modifier: Modifier = Modifier
+) {
+    if (imagePaths.isEmpty()) return
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        items(imagePaths.size) { index ->
+            val path = imagePaths[index]
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(HarmonySurface2)
+                    .border(1.dp, HarmonyLine, RoundedCornerShape(12.dp))
+            ) {
+                AsyncImage(
+                    model = if (path.startsWith("/")) File(path) else path,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+fun decodeImagePaths(json: String?): List<String> {
+    if (json.isNullOrBlank() || json == "[]") return emptyList()
+    return runCatching {
+        json.removePrefix("[").removeSuffix("]")
+            .split(",")
+            .map { it.trim().removePrefix("\"").removeSuffix("\"").replace("\\\\", "\\").replace("\\\"", "\"") }
+            .filter { it.isNotBlank() }
+    }.getOrDefault(emptyList())
+}
 
 @Composable
 fun MomentsScreen(
@@ -58,7 +106,7 @@ fun MomentsScreen(
     appLanguage: String = "de",
     onOpenAddMoment: () -> Unit,
     onCloseAddMoment: () -> Unit,
-    onAddMoment: (String, String) -> Unit,
+    onAddMoment: (String, String, List<Uri>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -161,6 +209,15 @@ fun MomentsScreen(
                             lineHeight = 18.sp
                         )
 
+                        val images = decodeImagePaths(moment.imagePathsJson)
+                        if (images.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            MomentPhotoCarousel(
+                                imagePaths = images,
+                                modifier = Modifier.height(80.dp)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = formatTimestamp(moment.timestamp),
@@ -177,6 +234,13 @@ fun MomentsScreen(
     if (isAddMomentOpen) {
         var titleInput by remember { mutableStateOf("") }
         var contentInput by remember { mutableStateOf("") }
+        var selectedUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetMultipleContents()
+        ) { uris ->
+            selectedUris = uris
+        }
 
         Dialog(onDismissRequest = onCloseAddMoment) {
             Box(
@@ -234,6 +298,28 @@ fun MomentsScreen(
                         )
                     )
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Button(
+                        onClick = { launcher.launch("image/*") },
+                        colors = ButtonDefaults.buttonColors(containerColor = HarmonySurface2),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = if (selectedUris.isEmpty()) "Fotos hinzufügen 📷" else "${selectedUris.size} Fotos ausgewählt",
+                            color = HarmonyText
+                        )
+                    }
+
+                    if (selectedUris.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        MomentPhotoCarousel(
+                            imagePaths = selectedUris.map { it.toString() },
+                            modifier = Modifier.height(80.dp)
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(18.dp))
 
                     Row(
@@ -249,7 +335,7 @@ fun MomentsScreen(
                             Text(text = LanguageManager.tr("Abbrechen", appLanguage), color = HarmonyText)
                         }
                         Button(
-                            onClick = { onAddMoment(titleInput, contentInput) },
+                            onClick = { onAddMoment(titleInput, contentInput, selectedUris) },
                             enabled = titleInput.isNotBlank() && contentInput.isNotBlank(),
                             modifier = Modifier.weight(1f),
                             shape = CircleShape,

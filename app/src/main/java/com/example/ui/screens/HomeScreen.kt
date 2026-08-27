@@ -1004,10 +1004,37 @@ fun PaddingPackCard(
     val isDone = answeredCount >= totalCount && totalCount > 0
     val topicAccent = topicAccentColor(pack.topic)
 
+    val displayTags = remember(pack.tags, pack.cat, pack.topic) {
+        val clean = pack.tags.filter { tag ->
+            !tag.startsWith("h360_") &&
+            !tag.startsWith("h500_") &&
+            !tag.startsWith("intensitaet_") &&
+            !tag.startsWith("mechanik_") &&
+            !tag.contains("_") &&
+            tag.length <= 20
+        }
+        if (clean.isNotEmpty()) {
+            clean.take(2)
+        } else if (pack.tags.any { it.equals("harmony360", ignoreCase = true) }) {
+            listOf("harmony360")
+        } else {
+            listOfNotNull(pack.cat.ifBlank { null } ?: pack.topic.ifBlank { null })
+        }
+    }
+
     HarmonyCard(modifier = modifier.testTag("pack_card_${pack.id}"), onClick = { onStartPack(pack.id) }, accent = topicAccent) {
         Column {
-            Row { pack.tags.forEach { tag -> CategoryTag(tag, Modifier.padding(end = 6.dp)) } }
-            Spacer(Modifier.height(6.dp))
+            if (displayTags.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    displayTags.forEach { tag ->
+                        CategoryTag(tag, Modifier.padding(end = 6.dp))
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 HarmonyPackIcon(pack = pack, accent = topicAccent, size = 42.dp)
                 Spacer(Modifier.width(10.dp))

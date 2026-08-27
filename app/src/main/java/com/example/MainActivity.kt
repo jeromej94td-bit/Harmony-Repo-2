@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.example.data.DeveloperDataManager
+import com.example.data.DevExporter
 import com.example.data.OkHttpLinkPreviewResolver
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.MemoryEntryKind
@@ -83,7 +84,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.attachAutoGeneration(this)
         memoryWidgetOpenRequest = parseMemoryWidgetOpenRequest(intent)
+        if (intent.getIntExtra("open_tab", -1) == 1) {
+            viewModel.selectTab(1)
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                androidx.core.app.ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+            }
+        }
         MemoryWidgetDatabaseObserver.install(applicationContext)
         enableEdgeToEdge()
         window.navigationBarColor = AndroidColor.TRANSPARENT
@@ -114,6 +132,9 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         memoryWidgetOpenRequest = parseMemoryWidgetOpenRequest(intent)
+        if (intent.getIntExtra("open_tab", -1) == 1) {
+            viewModel.selectTab(1)
+        }
     }
 }
 
@@ -146,6 +167,7 @@ fun HarmonyApp(
     var isKidGeneratorOpen by remember { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
+    var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
     var liveChangeCount by remember { mutableStateOf(0) }
 
     LaunchedEffect(memoryWidgetOpenRequest) {
@@ -319,6 +341,7 @@ fun HarmonyApp(
                     1 -> GamesScreen(
                         answers = uiState.answers,
                         packFilter = uiState.packFilter,
+                        generatedGames = uiState.generatedGames,
                         appLanguage = uiState.appLanguage,
                         onSetFilter = { filter -> viewModel.setPackFilter(filter) },
                         onCategoryClick = { catId ->
@@ -331,7 +354,8 @@ fun HarmonyApp(
                             }
                         },
                         onTopicClick = { topicId -> viewModel.openTopic(topicId) },
-                        onStartPack = { packId -> openPack(packId) }
+                        onStartPack = { packId -> openPack(packId) },
+                        onStartGeneratedGame = { gameId -> viewModel.startGeneratedGame(gameId) }
                     )
 
                     2 -> ChatScreen(
@@ -347,7 +371,11 @@ fun HarmonyApp(
                         brainMessages = uiState.brainMessages,
                         onToggleBrainChatMode = { enabled -> viewModel.setBrainChatMode(enabled) },
                         onSendBrainMessage = { text -> viewModel.sendBrainMessage(text) },
-                        onResetBrainChat = { viewModel.resetBrainChat() }
+                        onResetBrainChat = { viewModel.resetBrainChat() },
+                        onSendVoiceMessage = { path, duration -> viewModel.sendVoiceChatMessage(path, duration) },
+                        onSendVoiceBrainMessage = { path, duration -> viewModel.sendVoiceBrainMessage(path, duration) },
+                        onSaveSuggestionToNotes = { suggestion -> viewModel.saveSuggestionToNotes(suggestion) },
+                        onSuggestionFeedback = { id, feedback -> viewModel.setSuggestionFeedback(id, feedback) }
                     )
 
                     3 -> MomentsScreen(
@@ -357,7 +385,7 @@ fun HarmonyApp(
                         appLanguage = uiState.appLanguage,
                         onOpenAddMoment = { viewModel.openAddMomentDialog() },
                         onCloseAddMoment = { viewModel.closeAddMomentDialog() },
-                        onAddMoment = { title, content -> viewModel.addMoment(title, content) }
+                        onAddMoment = { title, content, imageUris -> viewModel.addMoment(title, content, imageUris) }
                     )
 
                     4 -> {
@@ -435,7 +463,7 @@ fun HarmonyApp(
                     )
                 }
 
-                if (uiState.selectedTab == 5 && !isQuizActive && !isLiveChangeMode) {
+                if (uiState.selectedTab == 5 && !isQuizActive && !isLiveChangeMode && isLiveChangeLauncherVisible) {
                     LiveChangeLauncher(
                         onStart = {
                             isLiveChangeMode = true
@@ -487,7 +515,7 @@ fun HarmonyApp(
                         onPickAnswer = { optText -> viewModel.pickAnswer(optText) },
                         onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
                         onNextStep = { viewModel.nextStep() },
-                        onAskExit = { viewModel.previousStep() },
+                        onAskExit = { viewModel.askExitRun() },
                         onCloseExitConfirm = { viewModel.closeExitConfirm() },
                         onCloseRunner = { viewModel.closeRunner() },
                         onOpenOwnAnswerDialog = { idx, mode -> viewModel.openOwnAnswerDialog(idx, mode) },
@@ -523,6 +551,10 @@ fun HarmonyApp(
                         onEditCurrent = {
                             if (uiState.activeRun != null) isLiveChangeEditorOpen = true
                         },
+                        onExportTxt = {
+                            DevExporter.exportLiveChangesTxt(context)
+                            viewModel.showToast("📄 Live-Change TXT exportiert!")
+                        },
                         onStop = {
                             isLiveChangeEditorOpen = false
                             isLiveChangeMode = false
@@ -544,7 +576,15 @@ fun HarmonyApp(
                             onSave = { updatedPack, targetIndex, message ->
                                 DeveloperDataManager.savePack(context, updatedPack)
                                 liveChangeCount++
+                                com.example.data.LiveChangeHistory.record(
+                                    packId = updatedPack.id,
+                                    packTitle = updatedPack.title,
+                                    index = targetIndex,
+                                    actionType = message,
+                                    details = "Pack \"${updatedPack.title}\" aktualisiert"
+                                )
                                 isLiveChangeEditorOpen = false
+                                isLiveChangeMode = false
 
                                 val totalItems = if (updatedPack.type == "tot") {
                                     updatedPack.pairs.size
@@ -556,7 +596,7 @@ fun HarmonyApp(
                                     val boundedTarget = targetIndex.coerceIn(0, totalItems - 1)
                                     repeat(boundedTarget) { viewModel.nextStep() }
                                 }
-                                viewModel.showToast("$message · Live Change gespeichert")
+                                viewModel.showToast("$message · Gespeichert & Live Change beendet")
                             }
                         )
                     }

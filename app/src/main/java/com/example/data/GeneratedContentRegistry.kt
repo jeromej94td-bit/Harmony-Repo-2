@@ -11,10 +11,10 @@ package com.example.data
  */
 object GeneratedContentRegistry {
     val VERSION: Long =
-        (GeneratedHarmonyContent.VERSION * 31L) xor GeneratedHarmonyNewPicGame.VERSION
+        (GeneratedHarmonyContent.VERSION * 31L) xor GeneratedHarmonyNewPicGame.VERSION xor GeneratedHarmonyAdrenaline360.VERSION
 
     val CATEGORIES: List<GenCategory> by lazy {
-        (GeneratedHarmonyContent.CATEGORIES + GeneratedHarmonyNewPicGame.CATEGORIES)
+        (GeneratedHarmonyContent.CATEGORIES + GeneratedHarmonyNewPicGame.CATEGORIES + GeneratedHarmonyAdrenaline360.CATEGORIES)
             .distinctBy { it.id }
     }
 
@@ -22,6 +22,7 @@ object GeneratedContentRegistry {
         val byId = LinkedHashMap<String, GenPack>()
         GeneratedHarmonyContent.PACKS.forEach { byId[it.id] = it }
         GeneratedHarmonyNewPicGame.PACKS.forEach { byId[it.id] = it }
+        GeneratedHarmonyAdrenaline360.PACKS.forEach { byId[it.id] = it }
         byId.values.toList()
     }
 

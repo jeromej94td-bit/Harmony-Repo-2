@@ -30,6 +30,8 @@ data class ChatMessageEntity(
     val sender: String, // "me" or "them"
     val text: String,
     val imagePath: String? = null,
+    val audioPath: String? = null,
+    val audioDurationSeconds: Int = 0,
     val timestamp: Long = System.currentTimeMillis()
 )
 
@@ -52,7 +54,8 @@ data class MomentEntity(
     val content: String,
     val emoji: String = "💕",
     val timestamp: Long = System.currentTimeMillis(),
-    val isMilestone: Boolean = false
+    val isMilestone: Boolean = false,
+    val imagePathsJson: String = "[]"
 )
 
 @Entity(tableName = "couple_stats")
@@ -247,7 +250,11 @@ object HarmonyPacksData {
                 Question("Was gefällt dir an deinem Zuhause am besten?", listOf("Die Gemütlichkeit und Ruhe", "Dass alles meinen Stil hat", "Die Menschen, die darin wohnen", "Der Blick nach draußen")),
                 Question("Welcher Raum sagt am meisten über dich aus?", listOf("Küche", "Schlafzimmer", "Wohnzimmer", "Mein Arbeitsplatz")),
                 Question("Was würdest du sofort ändern, wenn Geld keine Rolle spielt?", listOf("Größere Küche", "Ein Balkon oder Garten", "Bessere Lage", "Nichts — es passt so")),
-                Question("Wie sieht dein perfekter Sonntag zuhause aus?", listOf("Ausschlafen und nichts tun", "Kochen und Freunde einladen", "Serienmarathon auf dem Sofa", "Aufräumen und Projekte angehen"))
+                Question("Wie sieht dein perfekter Sonntag zuhause aus?", listOf("Ausschlafen und nichts tun", "Kochen und Freunde einladen", "Serienmarathon auf dem Sofa", "Aufräumen und Projekte angehen")),
+                Question("Was ist dir wichtiger in einer Wohnung?", listOf("Viel Platz", "Perfekte Lage", "Helligkeit", "Gute Aufteilung")),
+                Question("Stört dich Unordnung?", listOf("Sehr", "Manchmal", "Kaum", "Gar nicht")),
+                Question("Wofür gibst du zuhause am ehesten Geld aus?", listOf("Möbel", "Pflanzen", "Technik", "Deko")),
+                Question("Was ist das erste, das du tust, wenn du heimkommst?", listOf("Schuhe aus", "Hände waschen", "Couch", "Kühlschrank öffnen"))
             )
         ),
 
@@ -279,7 +286,11 @@ object HarmonyPacksData {
                 Question("Wie werden wir Zeit für unsere Beziehung finden, wenn das Baby da ist?", listOf("Feste Date-Nights", "Zeit, wenn das Baby schläft", "Spontan"), defaultMine = "Regelmäßige Rendezvous oder gemeinsame Zeit einplanen"),
                 Question("Wie möchtest du, dass unsere Zukunft aussieht?", listOf("Große Familie", "Zu zweit reisen", "Karriere & Erfolg"), defaultMine = "Gemeinsam die Welt bereisen, neue Kulturen und Küchen erkunden"),
                 Question("Welche Eigenschaft sollte unser Kind unbedingt von uns mitbekommen?", listOf("Humor", "Mut", "Mitgefühl", "Neugier")),
-                Question("Was sollten wir als Eltern niemals aus den Augen verlieren?", listOf("Zeit füreinander", "Geduld", "Unsere eigenen Träume", "Leichtigkeit"))
+                Question("Was sollten wir als Eltern niemals aus den Augen verlieren?", listOf("Zeit füreinander", "Geduld", "Unsere eigenen Träume", "Leichtigkeit")),
+                Question("Wie wichtig sind Großeltern bei der Erziehung?", listOf("Sehr wichtig", "Gelegentlich hilfreich", "Wir machen das alleine", "Eher unwichtig")),
+                Question("Was ist der wichtigste Wert, den wir vermitteln wollen?", listOf("Ehrlichkeit", "Toleranz", "Respekt", "Selbstständigkeit")),
+                Question("Werden wir eher strengere oder lockerere Eltern?", listOf("Eher streng", "Eher locker", "Eine gute Mischung", "Kommt auf die Situation an")),
+                Question("Wie regeln wir die Kinderbetreuung im ersten Jahr?", listOf("Viel selbst machen", "Familie einbinden", "Tagesmutter/Kita", "Flexibel bleiben"))
             )
         ),
 
@@ -294,7 +305,11 @@ object HarmonyPacksData {
                 Question("Wer übernimmt die tägliche Versorgung?", listOf("{user}", "{partner}", "Beide", "Niemand")),
                 Question("Was passiert mit dem Tier, wenn wir verreisen?", listOf("Kommt mit", "Familie/Freunde", "Tierpension")),
                 Question("Welches Budget planen wir für Futter und Tierarzt ein?", listOf("Unter 50€/Monat", "50-100€/Monat", "Über 100€/Monat")),
-                Question("Passt ein Tier überhaupt zu unserem Alltag?", listOf("Ja, perfekt", "Mit Kompromissen", "Eher schwierig"))
+                Question("Passt ein Tier überhaupt zu unserem Alltag?", listOf("Ja, perfekt", "Mit Kompromissen", "Eher schwierig")),
+                Question("Was für ein Haustier wollen wir am liebsten?", listOf("Hund", "Katze", "Kleintiere", "Exotisch")),
+                Question("Was ist unsere größte Sorge bei einem Haustier?", listOf("Tierarztkosten", "Zeitmangel", "Schmutz in der Wohnung", "Die Verantwortung")),
+                Question("Soll das Haustier ins Schlafzimmer dürfen?", listOf("Auf jeden Fall", "Nein", "Manchmal", "Nur wenn es klein ist")),
+                Question("Sind wir bereit, bei Wind und Wetter Gassi zu gehen?", listOf("Klar", "Eher ungern", "Abwechselnd", "Lieber ein Stubentiger"))
             )
         ),
 
@@ -326,7 +341,11 @@ object HarmonyPacksData {
                         "Gourmet & Foodie – Kulinarische Entdeckungen, Restaurants & Genuss",
                         "Festival & Musik – Energie, Konzerte & Feiern"
                     )
-                )
+                ),
+                Question("Wie reisen wir am liebsten an?", listOf("Flugzeug", "Auto", "Zug", "Schiff")),
+                Question("Sind wir bereit für ein Airbnb oder lieber Hotel?", listOf("Hotel", "Airbnb", "Camping", "Hostel")),
+                Question("Wie gehen wir mit Reise-Stress um?", listOf("Wir bleiben ruhig", "Wir streiten kurz", "Einer muss die Führung übernehmen", "Kopfhörer rein")),
+                Question("Was darf auf keinen Fall im Koffer fehlen?", listOf("Gutes Buch", "Kamera", "Snacks", "Reiseapotheke"))
             )
         ),
 
@@ -341,7 +360,11 @@ object HarmonyPacksData {
                 Question("Wie viel Kredit ist für uns realistisch tragbar?", listOf("Unter 1000 im Monat", "1000 - 1500 im Monat", "1500 - 2000 im Monat", "Über 2000 im Monat")),
                 Question("Stadt oder Land — was ist uns wichtiger?", listOf("Stadt", "Land", "Vorort")),
                 Question("Wie lange wollen wir dort mindestens bleiben?", listOf("1-5 Jahre", "5-10 Jahre", "Für immer", "Weiß ich noch nicht")),
-                Question("Wer kümmert sich um Renovierung und Instandhaltung?", listOf("{user}", "{partner}", "Beide", "Niemand"))
+                Question("Wer kümmert sich um Renovierung und Instandhaltung?", listOf("{user}", "{partner}", "Beide", "Niemand")),
+                Question("Ist uns ein großer Garten wichtig?", listOf("Sehr wichtig", "Nice to have", "Eher unwichtig", "Gar keinen Garten bitte")),
+                Question("Sind wir bereit, selbst Hand anzulegen beim Bauen?", listOf("Klar, vieles", "Nur Kleinigkeiten", "Nein, alles machen lassen", "Mal schauen")),
+                Question("Wie viel Eigenkapital können wir aufbringen?", listOf("Wenig", "Mittel", "Viel", "Wird gerade gespart")),
+                Question("Gibt es ein Zimmer, auf das wir nicht verzichten können?", listOf("Büro", "Gästezimmer", "Hobbyraum", "Ankleidezimmer"))
             )
         ),
 
@@ -504,7 +527,13 @@ object HarmonyPacksData {
                 Question("Was magst du lieber: früh aufstehen oder lange wach bleiben?", listOf("Früh aufstehen", "Lange wach bleiben", "Kommt auf den Tag an")),
                 Question("Lieber ein ruhiger Abend zu zweit oder unter Leuten?", listOf("Ruhig zu zweit", "Unter Leuten", "Gemischt")),
                 Question("Was entspannt dich mehr?", listOf("Musik", "Spazieren", "Serie schauen", "Gar nichts tun")),
-                Question("Wobei lachst du am meisten?", listOf("Bei Insider-Witzen", "Bei Memes", "Wenn ich müde bin", "Über mich selbst"))
+                Question("Wobei lachst du am meisten?", listOf("Bei Insider-Witzen", "Bei Memes", "Wenn ich müde bin", "Über mich selbst")),
+                Question("Bist du eher Team Kaffee oder Tee?", listOf("Kaffee", "Tee", "Nichts von beidem", "Hauptsache viel Zucker")),
+                Question("Was würdest du wählen: Immer Sommer oder immer Winter?", listOf("Immer Sommer", "Immer Winter", "Mir egal", "Ich brauche den Wechsel")),
+                Question("Lieber süß oder salzig?", listOf("Süß", "Salzig", "Am besten beides zusammen", "Kommt auf die Tageszeit an")),
+                Question("Planst du gerne voraus oder entscheidest du spontan?", listOf("Alles durchplanen", "Spontan bleiben", "Grob planen, dann mal sehen")),
+                Question("Was motiviert dich morgens am meisten?", listOf("Gutes Frühstück", "Ein konkretes Ziel", "Die Dusche", "Gar nichts, ich bin ein Morgenmuffel")),
+                Question("Wie verbringst du eine lange Zugfahrt am liebsten?", listOf("Lesen", "Schlafen", "Aus dem Fenster schauen", "Podcast hören"))
             )
         ),
 
@@ -531,7 +560,14 @@ object HarmonyPacksData {
             questions = listOf(
                 Question("Was würdest du an einem gemeinsamen Tag am liebsten machen?", listOf("Ausschlafen und faulenzen", "Etwas Neues ausprobieren", "Rausgehen in die Natur", "Freunde treffen")),
                 Question("Wie fühlst du dich am meisten geliebt?", listOf("Durch Worte", "Durch Zeit zu zweit", "Durch Berührung", "Durch kleine Gesten")),
-                Question("Worauf freust du dich bei uns am meisten?", listOf("Unsere nächste Reise", "Zusammenziehen", "Einfach mehr Alltag", "Alles, was noch kommt"))
+                Question("Worauf freust du dich bei uns am meisten?", listOf("Unsere nächste Reise", "Zusammenziehen", "Einfach mehr Alltag", "Alles, was noch kommt")),
+                Question("Was war dein erster Eindruck von mir?", listOf("Sympathisch", "Interessant", "Attraktiv", "Ganz anders als jetzt")),
+                Question("Wie zeigst du am liebsten Zuneigung?", listOf("Kleine Geschenke", "Körperliche Nähe", "Hilfsbereitschaft", "Komplimente")),
+                Question("Welche Eigenschaft schätzt du an Menschen am meisten?", listOf("Ehrlichkeit", "Humor", "Loyalität", "Intelligenz")),
+                Question("Was ist dein liebstes Thema für tiefe Gespräche?", listOf("Zukunft", "Philosophie", "Unsere Gefühle", "Gott und die Welt")),
+                Question("Wie viel Freiraum brauchst du in einer Beziehung?", listOf("Viel", "Ein bisschen", "Kaum", "Wir können alles zusammen machen")),
+                Question("Was ist für dich das schönste Gefühl?", listOf("Verstanden werden", "Geborgenheit", "Freude", "Leidenschaft")),
+                Question("Welche kleine Macke von mir findest du süß?", listOf("Dein Lachen", "Wie du dich aufregst", "Deine Schusseligkeit", "Ich liebe alle deine Macken"))
             )
         ),
 
@@ -546,7 +582,15 @@ object HarmonyPacksData {
                 Question("Wer würde eher zu spät kommen?", listOf("Ich", "Mein Partner", "Beide gleich", "Keiner von uns")),
                 Question("Wer würde eher bei einem Streit als Erstes einlenken?", listOf("Ich", "Mein Partner", "Kommt drauf an", "Wir treffen uns in der Mitte")),
                 Question("Wer würde eher spontan eine Reise buchen?", listOf("Ich", "Mein Partner", "Beide zusammen", "Niemand ohne Plan")),
-                Question("Wer vergisst eher einen Jahrestag?", listOf("Ich", "Mein Partner", "Keiner", "Beide, aber wir tun so als ob nicht"))
+                Question("Wer vergisst eher einen Jahrestag?", listOf("Ich", "Mein Partner", "Keiner", "Beide, aber wir tun so als ob nicht")),
+                Question("Wer würde eher im Lotto gewinnen und alles ausgeben?", listOf("Ich", "Mein Partner", "Beide", "Wir würden es klug anlegen")),
+                Question("Wer würde eher eine Woche ohne Handy überleben?", listOf("Ich", "Mein Partner", "Beide", "Niemand von uns")),
+                Question("Wer flucht öfter beim Autofahren?", listOf("Ich", "Mein Partner", "Beide", "Wir sind total entspannt")),
+                Question("Wer würde eher fremde Leute auf der Straße ansprechen?", listOf("Ich", "Mein Partner", "Beide", "Auf keinen Fall")),
+                Question("Wer braucht morgens länger im Bad?", listOf("Ich", "Mein Partner", "Beide gleich lang", "Wir sind beide sehr schnell")),
+                Question("Wer würde eher einen Fallschirmsprung machen?", listOf("Ich", "Mein Partner", "Wir beide", "Keiner, zu gefährlich")),
+                Question("Wer isst eher den letzten Keks?", listOf("Ich", "Mein Partner", "Wir teilen", "Wir lassen ihn ewig liegen")),
+                Question("Wer lacht eher in einer völlig unpassenden Situation?", listOf("Ich", "Mein Partner", "Wir beide", "Wir haben uns gut im Griff"))
             )
         ),
 
@@ -560,7 +604,16 @@ object HarmonyPacksData {
             questions = listOf(
                 Question("Ich habe noch nie … ein Date abgesagt, um zuhause zu bleiben.", listOf("Stimmt, noch nie", "Doch, schon mal", "Öfter als ich zugebe")),
                 Question("Ich habe noch nie … heimlich das Handy meines Partners angeschaut.", listOf("Stimmt, noch nie", "Einmal", "Ich würde es nie tun")),
-                Question("Ich habe noch nie … eine Nachricht 10x umformuliert.", listOf("Stimmt, noch nie", "Ständig", "Nur bei wichtigen Themen"))
+                Question("Ich habe noch nie … eine Nachricht 10x umformuliert.", listOf("Stimmt, noch nie", "Ständig", "Nur bei wichtigen Themen")),
+                Question("Ich habe noch nie … den Namen des Partners in einem peinlichen Moment verwechselt.", listOf("Stimmt, noch nie", "Leider ja", "Fast")),
+                Question("Ich habe noch nie … so getan, als würde ich schlafen, um nicht reden zu müssen.", listOf("Stimmt, noch nie", "Einmal", "Das ist mein Standardtrick")),
+                Question("Ich habe noch nie … etwas geschenkt bekommen und so getan, als würde es mir gefallen.", listOf("Stimmt, noch nie", "Schon oft", "Ich bin immer ehrlich")),
+                Question("Ich habe noch nie … einen Jahrestag völlig vergessen.", listOf("Stimmt, noch nie", "Einmal", "Ich bin schrecklich mit Daten")),
+                Question("Ich habe noch nie … eine Serie weitergeschaut und behauptet, ich hätte gewartet.", listOf("Stimmt, noch nie", "Schuldig", "Ich habe sogar gespoilert")),
+                Question("Ich habe noch nie … einen peinlichen Kosenamen in der Öffentlichkeit gerufen.", listOf("Stimmt, noch nie", "Ja, aus Versehen", "Mache ich absichtlich")),
+                Question("Ich habe noch nie … einen Ex-Partner auf Social Media gestalkt.", listOf("Stimmt, noch nie", "Ein bisschen", "Wir sind befreundet")),
+                Question("Ich habe noch nie … beim ersten Date gelogen, um besser dazustehen.", listOf("Stimmt, noch nie", "Eine kleine Notlüge", "Total geflunkert")),
+                Question("Ich habe noch nie … heimlich die Schokolade des Partners gegessen.", listOf("Stimmt, noch nie", "Immer", "Wir teilen alles"))
             )
         ),
 
@@ -575,7 +628,13 @@ object HarmonyPacksData {
                 Question("Was bedeutet Vertrauen für dich konkret?", listOf("Dass ich alles erzählen kann", "Dass ich mich nicht sorgen muss", "Dass Zusagen gehalten werden", "Alles davon")),
                 Question("Was ist für dich ein absoluter Dealbreaker?", listOf("Lügen", "Respektlosigkeit", "Gleichgültigkeit", "Untreue")),
                 Question("Wann fühlst du dich mir am nächsten?", listOf("Beim Reden", "In Stille nebeneinander", "Wenn wir zusammen lachen", "Wenn es schwierig ist")),
-                Question("Wovor hast du in unserer Beziehung am meisten Angst?", listOf("Uns auseinanderzuleben", "Missverständnisse", "Die Distanz", "Vor nichts"))
+                Question("Wovor hast du in unserer Beziehung am meisten Angst?", listOf("Uns auseinanderzuleben", "Missverständnisse", "Die Distanz", "Vor nichts")),
+                Question("Was glaubst du, ist unser größtes gemeinsames Potenzial?", listOf("Wir ergänzen uns gut", "Unsere offene Kommunikation", "Unsere gemeinsame Vision", "Unsere Leidenschaft")),
+                Question("Gibt es etwas, das du mir schon immer sagen wolltest, aber dich nie getraut hast?", listOf("Ja, einiges", "Nur Kleinigkeiten", "Nein, ich bin immer offen", "Weiß nicht")),
+                Question("Wie gehst du innerlich mit Kritik von mir um?", listOf("Ich nehme sie mir sehr zu Herzen", "Ich versuche sachlich zu bleiben", "Manchmal blocke ich ab", "Ich bin dankbar dafür")),
+                Question("Was war der Moment, in dem du wusstest, dass du mich liebst?", listOf("Das war ein schleichender Prozess", "Ein ganz bestimmter Moment", "Weiß ich gar nicht mehr genau", "Ich wusste es sofort")),
+                Question("Wie sehr darf ich dich bei Entscheidungen beeinflussen?", listOf("Sehr stark", "Ein bisschen", "Nur als Ratgeber", "Gar nicht")),
+                Question("Was ist der Sinn unserer Beziehung für dich?", listOf("Zusammen wachsen", "Spaß haben und leben", "Eine Familie gründen", "Einfach nicht allein sein"))
             )
         ),
 
@@ -590,7 +649,13 @@ object HarmonyPacksData {
                 Question("Führen wir getrennte oder gemeinsame Konten?", listOf("Getrennte Konten", "Gemeinsame Konten", "Sowohl als auch")),
                 Question("Wie gehen wir mit unterschiedlichen Einkommen um?", listOf("Jeder zahlt 50%", "Prozentual nach Einkommen", "Einer zahlt alles")),
                 Question("Wofür sparen wir gemeinsam?", listOf("Urlaub", "Haus/Wohnung", "Auto", "Für die Zukunft")),
-                Question("Ab welchem Betrag sprechen wir vor einer Anschaffung?", listOf("Ab 50€", "Ab 100€", "Ab 500€", "Erst bei sehr großen Summen"))
+                Question("Ab welchem Betrag sprechen wir vor einer Anschaffung?", listOf("Ab 50€", "Ab 100€", "Ab 500€", "Erst bei sehr großen Summen")),
+                Question("Wer hat den besseren Überblick über die Finanzen?", listOf("{user}", "{partner}", "Wir beide", "Niemand")),
+                Question("Wie wichtig ist dir Reichtum?", listOf("Sehr wichtig", "Wichtig für Sicherheit", "Weniger wichtig", "Gar nicht wichtig")),
+                Question("Bist du eher Sparer oder Ausgeber?", listOf("Sparer", "Ausgeber", "Kommt auf die Phase an", "Gute Balance")),
+                Question("Würdest du einen Kredit aufnehmen für eine Reise?", listOf("Ja, auf jeden Fall", "Nein, niemals", "Nur im Notfall", "Kommt auf die Zinsen an")),
+                Question("Wie stehst du zu Investitionen (Aktien, etc.)?", listOf("Mache ich gerne", "Ist mir zu riskant", "Möchte ich noch lernen", "Kein Interesse")),
+                Question("Ist Geld oft ein Streitthema bei uns?", listOf("Ja, leider", "Selten", "Nie", "Wir reden kaum drüber"))
             )
         ),
 
@@ -605,7 +670,13 @@ object HarmonyPacksData {
                 Question("Wann fühlst du dich mir körperlich am nächsten?", listOf("Beim Einschlafen nebeneinander", "Wenn wir uns lange umarmen", "Bei einer spontanen Berührung", "Wenn wir zusammen lachen")),
                 Question("Was fehlt dir über die Distanz am meisten?", listOf("Körperliche Nähe", "Einfach nebeneinander sein", "Gemeinsame Nächte", "Alltägliche Berührungen")),
                 Question("Wie leicht fällt es dir, über Wünsche zu sprechen?", listOf("Sehr leicht", "Geht so", "Eher schwer", "Ich übe noch")),
-                Question("Was macht einen Moment für dich romantisch?", listOf("Aufmerksamkeit", "Überraschung", "Vertrautheit", "Dass wir ungestört sind"))
+                Question("Was macht einen Moment für dich romantisch?", listOf("Aufmerksamkeit", "Überraschung", "Vertrautheit", "Dass wir ungestört sind")),
+                Question("Wie wichtig ist dir Kuscheln ohne sexuellen Hintergrund?", listOf("Sehr wichtig", "Manchmal schön", "Eher unwichtig", "Gar nicht meins")),
+                Question("Was ist deine liebste Art der Berührung im Alltag?", listOf("Kuss auf die Stirn", "Händchen halten", "Umarmung von hinten", "Kurze Streichler")),
+                Question("Stört es dich, wenn wir beim Schlafen keinen Körperkontakt haben?", listOf("Ja, sehr", "Ein bisschen", "Nein, ich brauche Platz", "Wir wechseln uns ab")),
+                Question("Zeigst du gerne Zuneigung in der Öffentlichkeit?", listOf("Ja, absolut", "Nur dezent", "Nein, ungern", "Kommt auf die Umgebung an")),
+                Question("Wie reagierst du, wenn ich dich nach langer Zeit wiedersehe?", listOf("Umfallen vor Freude", "Lange Umarmung", "Eher cool", "Direkt küssen")),
+                Question("Wie wichtig ist dir Augenkontakt beim Reden?", listOf("Sehr wichtig", "Manchmal überbewertet", "Ich schaue lieber weg", "Kommt aufs Thema an"))
             )
         ),
 
@@ -615,12 +686,13 @@ object HarmonyPacksData {
             tags = listOf("unterhaltung"),
             cat = "zeich",
             topic = "hobbys",
-            type = "quiz",
+            type = "draw",
             questions = listOf(
-                Question("Zeichne unser erstes Date — was gehört unbedingt aufs Bild?", listOf("Der Ort", "Was wir gegessen haben", "Unsere Gesichter", "Das Wetter an dem Tag")),
-                Question("Zeichne unser Traumhaus in einem Strich. Was ist das Auffälligste?", listOf("Große Fenster", "Der Garten", "Ein Herz an der Tür", "Zwei Stühle davor")),
-                Question("Zeichne mich als Tier — welches wäre ich?", listOf("Katze", "Hund", "Pinguin", "Etwas ganz anderes")),
-                Question("Zeichne unser Gefühl zueinander als Symbol.", listOf("Ein Herz", "Zwei Kreise, die sich überschneiden", "Eine Brücke", "Ein Anker"))
+                Question("Ein kleiner süßer Roboter 🤖"),
+                Question("Ein glitzernder Zauberhut 🎩✨"),
+                Question("Unser Traumschloss in den Wolken 🏰☁️"),
+                Question("Ein lustiges Porträt deines Partners 🤭🎨"),
+                Question("Ein Alien, der gerade ein Selfie macht 👽🤳")
             )
         ),
 
@@ -636,7 +708,17 @@ object HarmonyPacksData {
                 Question("Man sollte nie streitend einschlafen.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
                 Question("Getrennte Urlaube tun einer Beziehung gut.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
                 Question("Eifersucht ist ein Zeichen von Liebe.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
-                Question("Freundschaften mit Ex-Partnern sind okay.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab"))
+                Question("Freundschaften mit Ex-Partnern sind okay.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Man sollte finanzielle Geheimnisse vor dem Partner haben.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Soziale Medien schaden modernen Beziehungen.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Gegensätze ziehen sich wirklich dauerhaft an.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Heiraten ist heute nicht mehr zeitgemäß.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Partner sollten immer zusammenwohnen.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Ehrlichkeit ist immer wichtiger als Taktgefühl.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Der Partner sollte der beste Freund sein.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Ein schlechter Witz ist besser als peinliches Schweigen.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Fernsehen im Schlafzimmer ruiniert die Romantik.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab")),
+                Question("Gemeinsame Hobbys sind ein Muss für lange Paare.", listOf("Stimme voll zu", "Eher zu", "Eher nicht", "Lehne ab"))
             )
         ),
 
@@ -689,7 +771,11 @@ object HarmonyPacksData {
                 Question("Was ist das Wichtigste, das du bei einer sexuellen Begegnung suchst?", listOf("Leidenschaft", "Romantik", "Spaß & Abenteuer", "Verbindung")),
                 Question("Was hältst du davon, gemeinsam erotische Inhalte anzuschauen?", listOf("Sehr gerne", "Ab und zu", "Lieber nicht")),
                 Question("Wie zeigst du deine Zuneigung am liebsten außerhalb von Sex?", listOf("Kuscheln", "Worte/Komplimente", "Kleine Geschenke", "Hilfe im Alltag")),
-                Question("Beschreibe unser Sexleben mit einem Emoji.", listOf("🔥", "❤️", "🎢", "🧸"))
+                Question("Beschreibe unser Sexleben mit einem Emoji.", listOf("🔥", "❤️", "🎢", "🧸")),
+                Question("Sind wir beim Sex eher laut oder leise?", listOf("Sehr laut", "Normal", "Sehr leise", "Kommt drauf an")),
+                Question("Wie wichtig ist dir das Vorspiel?", listOf("Extrem wichtig", "Schön, aber nicht zwingend", "Lieber gleich zur Sache", "Kommt auf die Stimmung an")),
+                Question("Probierst du gerne neue Dinge im Bett aus?", listOf("Ja, ständig", "Ab und zu", "Ich mag unsere Routine", "Eher nicht")),
+                Question("Wie fühlst du dich nach dem Sex am liebsten?", listOf("Müde und entspannt", "Energisch", "Kuschelbedürftig", "Ich brauche kurz Platz"))
             )
         ),
 
@@ -706,7 +792,17 @@ object HarmonyPacksData {
                 Question("Geister existieren wirklich.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
                 Question("Fernsehwerbung ist manchmal interessant anzusehen.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
                 Question("Eine neue Sprache zu lernen ist einfach.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
-                Question("Denselben Film zweimal zu schauen, ist Zeitverschwendung.", listOf("Stimmt", "Stimmt nicht", "Teils teils"))
+                Question("Denselben Film zweimal zu schauen, ist Zeitverschwendung.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Socken in Sandalen sind eigentlich ganz bequem.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Der Winter ist die weitaus schönere Jahreszeit als der Sommer.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Süßes Popcorn ist salzigem Popcorn haushoch überlegen.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Koriander schmeckt einfach nur nach Seife.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Morgens kalt duschen ist der beste Start in den Tag.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Frühstück ist die unwichtigste Mahlzeit des Tages.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Bücher sind fast immer besser als ihre Verfilmungen.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Papierkram digitalisieren macht das Leben komplizierter.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Hunde sind weitaus treuere Begleiter als Katzen.", listOf("Stimmt", "Stimmt nicht", "Teils teils")),
+                Question("Kaffee braucht weder Milch noch Zucker, um gut zu sein.", listOf("Stimmt", "Stimmt nicht", "Teils teils"))
             )
         ),
 
@@ -744,29 +840,34 @@ object HarmonyPacksData {
                 Question("Welches Lied macht dich an? 🥵", listOf("RnB / Soul", "Pop", "Rock", "Keine Musik")),
                 Question("Was magst du an deinem Partner am liebsten?", listOf("Humor", "Aussehen", "Intelligenz", "Fürsorglichkeit")),
                 Question("Was ist deine größte Angst vor dem Zusammenleben?", listOf("Keine Privatsphäre", "Streit über Haushalt", "Alltagsroutine")),
-                Question("Was hast du von deinem Partner gelernt?", listOf("Geduld", "Gelassenheit", "Neues Hobby", "Besser kommunizieren"))
+                Question("Was hast du von deinem Partner gelernt?", listOf("Geduld", "Gelassenheit", "Neues Hobby", "Besser kommunizieren")),
+                Question("Welcher gemeinsame Moment bringt dich immer zum Lächeln?", listOf("Unser erster Kuss", "Ein lustiger Fail", "Ein tiefer Blick", "Etwas Alltägliches")),
+                Question("Gibt es ein Thema, über das wir zu wenig reden?", listOf("Unsere Zukunft", "Unsere Ängste", "Finanzen", "Nein, alles super")),
+                Question("Was würdest du dir für unser nächstes Date wünschen?", listOf("Action", "Entspannung", "Gutes Essen", "Spontanität")),
+                Question("Wie würdest du unsere Beziehung in 3 Worten beschreiben?", listOf("Liebevoll, ehrlich, wild", "Ruhig, sicher, warm", "Spannend, witzig, tief", "Ich brauche mehr Worte")),
+                Question("Was ist das Schönste daran, mit mir zusammen zu sein?", listOf("Dass ich so bin, wie ich bin", "Die Geborgenheit", "Die gemeinsamen Abenteuer", "Alles")),
+                Question("Wenn wir morgen ans andere Ende der Welt ziehen müssten, wohin?", listOf("Asien", "Südamerika", "Nordamerika", "Australien/Ozeanien"))
             )
         ),
 
         QuestionPack(
             id = "liebegleichgewicht",
             title = "Liebe im Gleichgewicht",
-            tags = listOf("dasoderdas"),
+            tags = listOf("unterhaltung"),
             cat = "lieber",
             topic = "beziehung",
-            type = "tot",
-            pairs = listOf(
-                "Lass dich von deinem Partner inspirieren, dein bestes Selbst zu sein" to "Werde so akzeptiert, wie du bist",
-                "Ein Jahr lang eine Fernbeziehung führen" to "Einen Monat lang überhaupt nicht miteinander reden",
-                "Intime Momente nur dann zu haben, wenn dein Partner sie initiiert" to "Alle intimen Momente selbst initiieren",
-                "Deine tiefsten Geheimnisse lieber mit deinem Partner teilen" to "Einige Dinge für dich behalten",
-                "Eine Million Dollar gewinnen" to "Eine Million Dollar verdienen",
-                "Einen sehr emotionalen Partner haben" to "Einen sehr logischen Partner haben",
-                "Deine Beziehung stabil und sicher machen" to "Deine Beziehung abenteuerlich und spontan machen",
-                "Deinen besten Freund verlieren" to "Alle deine Freunde verlieren, außer deinem besten Freund",
-                "Teile alle deine Hobbys mit deinem Partner" to "Von deinem Partner in neue Hobbys eingeführt werden",
-                "Derjenige sein, der umarmt wird" to "Diejenige sein, die umarmt",
-                "Verbringe die Feiertage mit deiner Familie" to "Die Feiertage mit der Familie deines Partners verbringen"
+            type = "quiz",
+            questions = listOf(
+                Question("Was fällt dir in unserer Beziehung leichter?", listOf("Geben", "Nehmen", "Beides gleich", "Es ist situationsabhängig")),
+                Question("Wie triffst du am liebsten Entscheidungen für uns?", listOf("Ich schlage vor, du entscheidest", "Du schlägst vor, ich entscheide", "Gemeinsam stundenlang diskutieren", "Spontan abwechseln")),
+                Question("Wer investiert gefühlt mehr Zeit in die Beziehungsarbeit?", listOf("{user}", "{partner}", "Absolut ausgeglichen", "Wir machen das unbewusst")),
+                Question("Wie wichtig ist dir persönlicher Freiraum?", listOf("Extrem wichtig", "Wichtig, aber zu zweit ist besser", "Lieber fast alles zusammen machen", "Ein gesundes Mittelmaß")),
+                Question("Wie gehen wir mit unterschiedlichen Meinungen um?", listOf("Wir finden immer einen Kompromiss", "Einer gibt meistens nach", "Wir akzeptieren, dass wir uneinig sind", "Wir diskutieren leidenschaftlich")),
+                Question("Fühlst du dich in deinen Bedürfnissen voll gesehen?", listOf("Ja, immer", "Meistens", "Manchmal wünsche ich mir mehr Aufmerksamkeit", "Wir arbeiten daran")),
+                Question("Wer von uns initiiert häufiger tiefe Gespräche?", listOf("{user}", "{partner}", "Beide gleich", "Das ergibt sich von selbst")),
+                Question("Wie ausgeglichen ist unsere Aufgabenverteilung im Alltag?", listOf("Sehr fair", "Könnte besser sein", "Einer macht fast alles", "Wir haben keine feste Struktur")),
+                Question("Wie gehen wir mit Fehlern des anderen um?", listOf("Schnell verzeihen", "Darüber reden, bis alles geklärt ist", "Erstmal schmollen", "Wir lachen es oft weg")),
+                Question("Was stärkt das Gleichgewicht unserer Liebe am meisten?", listOf("Regelmäßige Dates", "Kleine Aufmerksamkeiten", "Ehrliches Feedback", "Gemeinsame Zukunftspläne"))
             )
         ),
 
@@ -917,20 +1018,25 @@ object HarmonyPacksData {
                         "Durch (Well-Done) – Kein Rosa, fest",
                         "Übergart – Ganz trocken & fest"
                     )
-                )
+                ),
+                Question("Bist du beim Essen eher probierfreudig oder isst du immer dasselbe?", listOf("Sehr probierfreudig", "Manchmal offen für Neues", "Meistens dasselbe", "Immer dasselbe")),
+                Question("Was ist dein absolutes Comfort Food?", listOf("Pasta", "Schokolade", "Suppe", "Fast Food")),
+                Question("Wenn du für den Rest deines Lebens nur noch aus einer Länderküche essen dürftest, welche wäre es?", listOf("Italienisch", "Asiatisch", "Mexikanisch", "Gutbürgerlich")),
+                Question("Wie stehst du zu scharfem Essen?", listOf("Ich liebe es extrem scharf", "Ein bisschen Schärfe ist gut", "Gar nicht", "Ich weine schon bei Pfeffer")),
+                Question("Nachtisch oder lieber eine Vorspeise?", listOf("Nachtisch", "Vorspeise", "Beides!", "Keins von beidem"))
             )
         )
     )
 
     val PACKS: List<QuestionPack>
         get() {
-            val result = DEFAULT_PACKS.toMutableList()
+            val result = (DEFAULT_PACKS + HarmonyExpansionPacks.PACKS).toMutableList()
             for (dp in dynamicPacks) {
                 val idx = result.indexOfFirst { it.id == dp.id }
                 if (idx >= 0) {
                     result[idx] = dp
                 } else {
-                    result.add(0, dp)
+                    result.add(dp)
                 }
             }
             return result

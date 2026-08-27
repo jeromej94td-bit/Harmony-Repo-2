@@ -6,6 +6,16 @@ package com.example.ui
  */
 object TranslationCatalog {
 
+    val dynamicTranslations = java.util.concurrent.ConcurrentHashMap<String, MutableMap<String, String>>()
+
+    fun addDynamicTranslation(german: String, languageNameOrCode: String, translation: String) {
+        dynamicTranslations.getOrPut(german) { java.util.concurrent.ConcurrentHashMap() }[languageNameOrCode] = translation
+    }
+
+    fun clearDynamicTranslations() {
+        dynamicTranslations.clear()
+    }
+
     private val nonCustomerKeys = setOf(
         "Entwickler Studio Öffnen", "Entwickler-Modus", "🛠️ Entwickler-Modus",
         "Spiele & Städte bearbeiten, Ordner reinladen, Bilder anpassen",
@@ -99,6 +109,9 @@ object TranslationCatalog {
 
     fun exact(german: String, language: AppLanguage): String? {
         if (language == AppLanguage.GERMAN) return german
+
+        dynamicTranslations[german]?.get(language.name)?.let { return it }
+        dynamicTranslations[german]?.get(language.code)?.let { return it }
 
         if (language == AppLanguage.PORTUGUESE_BRAZIL) {
             PT_BR_REVIEWED_OVERRIDES[german]?.let { return it }

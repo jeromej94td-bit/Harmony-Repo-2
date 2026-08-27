@@ -129,3 +129,63 @@ object LiveQuestionEditing {
         return first to second
     }
 }
+
+data class LiveChangeRecord(
+    val timestamp: Long = System.currentTimeMillis(),
+    val packId: String,
+    val packTitle: String,
+    val index: Int,
+    val actionType: String,
+    val details: String
+)
+
+object LiveChangeHistory {
+    private val _records = mutableListOf<LiveChangeRecord>()
+    val records: List<LiveChangeRecord> get() = _records
+
+    fun record(
+        packId: String,
+        packTitle: String,
+        index: Int,
+        actionType: String,
+        details: String
+    ) {
+        _records.add(
+            LiveChangeRecord(
+                packId = packId,
+                packTitle = packTitle,
+                index = index,
+                actionType = actionType,
+                details = details
+            )
+        )
+    }
+
+    fun clear() {
+        _records.clear()
+    }
+
+    fun generateTxt(): String {
+        val sdf = java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.GERMAN)
+        val now = sdf.format(java.util.Date())
+        return buildString {
+            append("====================================================\n")
+            append("HARMONY LIVE CHANGE PROTOKOLL\n")
+            append("Erstellt am: $now\n")
+            append("Gesamtanzahl Änderungen: ${_records.size}\n")
+            append("====================================================\n\n")
+
+            if (_records.isEmpty()) {
+                append("Keine Änderungen in dieser Sitzung aufgezeichnet.\n")
+            } else {
+                _records.forEachIndexed { i, rec ->
+                    val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.GERMAN).format(java.util.Date(rec.timestamp))
+                    append("[${i + 1}] $time · Spiel: \"${rec.packTitle}\" (ID: ${rec.packId})\n")
+                    append("    Aktion: ${rec.actionType} an Position ${rec.index + 1}\n")
+                    append("    Details: ${rec.details}\n\n")
+                }
+            }
+            append("====================================================\n")
+        }
+    }
+}

@@ -36,9 +36,9 @@ data class QuestionDto(
 )
 
 object SupabaseClientProvider {
-    var projectId: String = ""
+    var projectId: String = "yepluyipizbbrgoffqdq"
         private set
-    var anonKey: String = ""
+    var anonKey: String = "sb_publishable_lat183ycL-tC_3NDwzCHOw_GKmcNWqM"
         private set
 
     fun init(projectId: String, anonKey: String) {
