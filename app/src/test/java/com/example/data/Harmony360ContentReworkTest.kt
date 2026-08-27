@@ -50,6 +50,31 @@ class Harmony360ContentReworkTest {
     }
 
     @Test
+    fun genericPartnerForecastFillerIsContextualizedToo() {
+        val raw = GenPack(
+            id = "h500_test_forecast",
+            title = "Berufliche Veränderung – Herz oder Kopf",
+            cat = "h360_prognose",
+            topic = "beziehung",
+            type = "quiz",
+            tags = listOf("harmony360", "h360_section_10_arbeit_karriere", "mechanik_prognose"),
+            questions = listOf(
+                GenQuestion(
+                    q = "Was glaubst du: Welche Seite ist deinem Partner wichtiger?",
+                    options = listOf("Nähe", "Freiheit", "Sicherheit", "Abenteuer")
+                )
+            )
+        )
+
+        val polished = Harmony360ContentRework.apply(raw)
+        val question = polished.questions.single()
+
+        assertNotEquals(raw.questions.single().options, question.options)
+        assertTrue(question.q.contains("deinem Partner"))
+        assertTrue(question.q.contains("Berufliche Veränderung"))
+    }
+
+    @Test
     fun alreadySpecificRankingContentIsPreserved() {
         val raw = GenPack(
             id = "specific",
