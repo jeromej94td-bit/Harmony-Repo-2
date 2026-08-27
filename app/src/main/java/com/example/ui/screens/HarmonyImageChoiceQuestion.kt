@@ -31,6 +31,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +43,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -50,6 +53,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
+import com.example.data.db.HarmonyDatabase
+import com.example.data.model.ProfileEntity
+import com.example.data.model.QuestionInteractionKind
 import com.example.ui.contentText
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyMuted
@@ -134,6 +140,9 @@ private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImag
             ),
             images = traumhausChoiceImages
         )
+
+        HarmonyImageChoiceKind.RANK_ORDER,
+        HarmonyImageChoiceKind.PERSON_ASSIGNMENT -> error("Ranking interactions use QuestionInteractionBoard")
     }
 
 @Composable
@@ -145,6 +154,32 @@ internal fun HarmonyImageChoiceQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind == HarmonyImageChoiceKind.RANK_ORDER || kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
+        val context = LocalContext.current
+        val profileFlow = remember(context.applicationContext) {
+            HarmonyDatabase.getInstance(context.applicationContext).profileDao().getProfile()
+        }
+        val profile by profileFlow.collectAsState(initial = null)
+        val effectiveProfile = profile ?: ProfileEntity(
+            userName = tr("Du", "You"),
+            partnerName = tr("Partner", "Partner")
+        )
+        QuestionInteractionBoard(
+            kind = if (kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
+                QuestionInteractionKind.PERSON_ASSIGNMENT
+            } else {
+                QuestionInteractionKind.RANK_ORDER
+            },
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            profile = effectiveProfile,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     val visuals = harmonyImageChoiceVisuals(kind)
     val containerShape = RoundedCornerShape(28.dp)
 
