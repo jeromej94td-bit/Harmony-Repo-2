@@ -3,7 +3,6 @@ package com.example.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -993,10 +992,10 @@ fun QuizRunnerScreen(
                                 Spacer(modifier = Modifier.height(14.dp))
                                 AnimatedVisibility(
                                     visible = showMoralQuestion,
-                                    enter = fadeIn(tween(durationMillis = 620, easing = EaseOutCubic)) +
+                                    enter = fadeIn(tween(durationMillis = 620, easing = FastOutSlowInEasing)) +
                                         scaleIn(
                                             initialScale = 0.96f,
-                                            animationSpec = tween(durationMillis = 620, easing = EaseOutCubic)
+                                            animationSpec = tween(durationMillis = 620, easing = FastOutSlowInEasing)
                                         )
                                 ) {
                                     AnimatedQuestionCard(
@@ -1110,10 +1109,10 @@ fun QuizRunnerScreen(
                                     } else if (isMoralGreyZone) {
                                         AnimatedVisibility(
                                             visible = optIdx < visibleMoralOptions,
-                                            enter = fadeIn(tween(durationMillis = 520, easing = EaseOutCubic)) +
+                                            enter = fadeIn(tween(durationMillis = 520, easing = FastOutSlowInEasing)) +
                                                 scaleIn(
                                                     initialScale = 0.97f,
-                                                    animationSpec = tween(durationMillis = 520, easing = EaseOutCubic)
+                                                    animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing)
                                                 )
                                         ) {
                                             QuizOptionButton(
