@@ -116,6 +116,35 @@ object HarmonyExpansionPacks {
                 Question("Wer sollte bei Uneinigkeit entscheiden?", listOf("Abwechseln", "Wer zuletzt nachgegeben hat", "Zufall", "Wir suchen etwas Drittes")),
                 Question("Welches Ende magst du lieber?", listOf("Happy End", "Überraschend", "Offen", "Bittersüß"))
             )
+        ),
+        QuestionPack(
+            id = "kinder_teil_2",
+            title = "Kinder Teil 2",
+            tags = listOf("kinder", "familie", "wer-wuerde-eher"),
+            cat = "wer",
+            topic = "familie",
+            type = "quiz",
+            emoji = "👨‍👩‍👧",
+            questions = listOf(
+                Question("Wer ist eher in der Lage, Frieden zwischen rivalisierenden Geschwistern auszuhandeln?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer erzwingt am ehesten eine Schlafenszeit-Routine?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer macht sich wohl am meisten Sorgen um die Zukunft der Kinder?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer ist wohl eher das Kitzelmonster?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer setzt sich eher dafür ein, dass die Kinder neue Lebensmittel ausprobieren?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer ist wohl eher der Hausaufgabenhelfer?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer ist eher in der Lage, Lebenslektionen durch Abenteuer zu vermitteln?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer wird am ersten Schultag eher emotional?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer plant eher die meisten Bildungsurlaube?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer wird eher die Regeln lockern, wenn der andere nicht zuschaut?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer kann am ehesten die Liebe zum Lesen wecken?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer flippt bei kleinen Verletzungen eher aus?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer ist eher bereit, den Kindern einen Tag schulfrei zu gönnen, um Spaß zu haben?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer ist eher derjenige, dem die Kinder ihre Geheimnisse mitteilen?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer wird wohl eher die Regel 'Kein Nachtisch, bevor du aufgegessen hast' durchsetzen?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer umarmt am ehesten?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wem fällt es am schwersten loszulassen, wenn die Kinder erwachsen sind?", listOf("{user}", "{partner}", "Beide", "Keiner")),
+                Question("Wer ist wohl eher derjenige, der den Kindern das Autofahren beibringt?", listOf("{user}", "{partner}", "Beide", "Keiner"))
+            )
         )
     )
 }
