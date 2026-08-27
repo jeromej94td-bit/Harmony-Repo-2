@@ -8,16 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -91,6 +91,7 @@ internal fun QuestionInteractionBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
+            profile = profile,
             onPick = onPick,
             modifier = modifier
         )
@@ -109,6 +110,8 @@ private fun PersonAssignmentBoard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val items = mechanicOptions(options, profile)
+    val prompt = mechanicPrompt(question, items, profile)
     val initialAssignments = remember(selectedAnswer, options) {
         selectedAnswer?.let { PersonAssignmentCodec.decode(it, options) }.orEmpty()
     }
@@ -123,114 +126,119 @@ private fun PersonAssignmentBoard(
     val unassignedRoles = options.filter { assignments[it] == null }
     val complete = options.isNotEmpty() && assignments.keys.containsAll(options)
 
-    InteractionShell(
-        question = question,
-        subtitle = tr(
-            "Ziehe jede Rolle zu der Person, die sie bei euch eher übernimmt.",
-            "Drag every role to the person who is more likely to take it on."
+    FullscreenMechanicShell(
+        kicker = tr("👥 ROLLEN-DUELL", "👥 ROLE DUEL"),
+        question = prompt,
+        instruction = tr(
+            "Ziehe jede Karte zu der Person, zu der sie am besten passt.",
+            "Drag each card to the person it fits best."
         ),
         modifier = modifier.testTag("person_assignment_board")
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            AssignmentTarget(
-                name = profile.userName,
-                avatarPath = profile.userAvatarPath,
-                roles = userRoles,
-                options = options,
-                side = PersonSide.USER,
-                targetTag = "assignment_target_user",
-                onBounds = { userBounds = it },
-                userBounds = { userBounds },
-                partnerBounds = { partnerBounds },
-                onDrop = { role, side ->
-                    assignments[role] = side
-                    triggerMiniVibration(context, 38L)
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            Column(
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
                 modifier = Modifier
-                    .weight(1.05f)
-                    .heightIn(min = 235.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxWidth()
+                    .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    text = tr("Rollen", "Roles"),
-                    color = HarmonyMuted,
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold
+                AssignmentTarget(
+                    name = profile.userName,
+                    avatarPath = profile.userAvatarPath,
+                    roles = userRoles,
+                    options = options,
+                    side = PersonSide.USER,
+                    targetTag = "assignment_target_user",
+                    onBounds = { userBounds = it },
+                    userBounds = { userBounds },
+                    partnerBounds = { partnerBounds },
+                    onDrop = { role, side ->
+                        assignments[role] = side
+                        triggerMiniVibration(context, 38L)
+                    },
+                    modifier = Modifier.weight(1f).fillMaxSize()
                 )
-                if (unassignedRoles.isEmpty()) {
+
+                Column(
+                    modifier = Modifier
+                        .weight(1.08f)
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White.copy(alpha = 0.035f))
+                        .border(1.dp, HarmonyLine, RoundedCornerShape(24.dp))
+                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Text(
-                        text = tr("Alles verteilt", "All assigned"),
+                        text = tr("KARTEN", "CARDS"),
                         color = HarmonyPinkSoft,
-                        fontSize = 11.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 28.dp)
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                } else {
-                    unassignedRoles.forEach { role ->
-                        key(role) {
-                            DraggableRoleChip(
-                                role = role,
-                                roleIndex = options.indexOf(role),
-                                userBounds = { userBounds },
-                                partnerBounds = { partnerBounds },
-                                onDrop = { side ->
-                                    assignments[role] = side
-                                    triggerMiniVibration(context, 38L)
-                                }
+                    if (unassignedRoles.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = tr("Alles verteilt", "All assigned"),
+                                color = HarmonyPinkSoft,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
                             )
+                        }
+                    } else {
+                        unassignedRoles.forEach { role ->
+                            key(role) {
+                                DraggableRoleChip(
+                                    role = role,
+                                    roleIndex = options.indexOf(role),
+                                    userBounds = { userBounds },
+                                    partnerBounds = { partnerBounds },
+                                    onDrop = { side ->
+                                        assignments[role] = side
+                                        triggerMiniVibration(context, 38L)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
+
+                AssignmentTarget(
+                    name = profile.partnerName,
+                    avatarPath = profile.partnerAvatarPath,
+                    roles = partnerRoles,
+                    options = options,
+                    side = PersonSide.PARTNER,
+                    targetTag = "assignment_target_partner",
+                    onBounds = { partnerBounds = it },
+                    userBounds = { userBounds },
+                    partnerBounds = { partnerBounds },
+                    onDrop = { role, side ->
+                        assignments[role] = side
+                        triggerMiniVibration(context, 38L)
+                    },
+                    modifier = Modifier.weight(1f).fillMaxSize()
+                )
             }
 
-            AssignmentTarget(
-                name = profile.partnerName,
-                avatarPath = profile.partnerAvatarPath,
-                roles = partnerRoles,
-                options = options,
-                side = PersonSide.PARTNER,
-                targetTag = "assignment_target_partner",
-                onBounds = { partnerBounds = it },
-                userBounds = { userBounds },
-                partnerBounds = { partnerBounds },
-                onDrop = { role, side ->
-                    assignments[role] = side
-                    triggerMiniVibration(context, 38L)
+            Spacer(modifier = Modifier.height(14.dp))
+            PrimaryMechanicButton(
+                text = if (complete) {
+                    tr("Zuordnung speichern & weiter", "Save assignment & continue")
+                } else {
+                    tr("Verteile alle Karten", "Assign every card")
                 },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-        Button(
-            enabled = complete,
-            onClick = {
-                triggerMiniVibration(context, 45L)
-                onPick(PersonAssignmentCodec.encode(options, assignments))
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .testTag("assignment_submit"),
-            shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = HarmonyPink,
-                disabledContainerColor = Color.White.copy(alpha = 0.08f),
-                disabledContentColor = HarmonyMuted
-            )
-        ) {
-            Text(
-                text = if (complete) tr("Zuordnung speichern", "Save assignment") else tr("Verteile alle Rollen", "Assign every role"),
-                fontWeight = FontWeight.Bold
+                enabled = complete,
+                onClick = {
+                    triggerMiniVibration(context, 45L)
+                    onPick(PersonAssignmentCodec.encode(options, assignments))
+                },
+                testTag = "assignment_submit"
             )
         }
     }
@@ -250,32 +258,35 @@ private fun AssignmentTarget(
     onDrop: (String, PersonSide) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(26.dp)
     Column(
         modifier = modifier
-            .heightIn(min = 235.dp)
             .clip(shape)
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        if (side == PersonSide.USER) HarmonyPink.copy(alpha = 0.19f) else HarmonyPurple.copy(alpha = 0.22f),
-                        HarmonySurface2.copy(alpha = 0.95f),
-                        HarmonyBg.copy(alpha = 0.92f)
+                        if (side == PersonSide.USER) {
+                            HarmonyPink.copy(alpha = 0.24f)
+                        } else {
+                            HarmonyPurple.copy(alpha = 0.32f)
+                        },
+                        HarmonySurface2.copy(alpha = 0.96f),
+                        HarmonyBg.copy(alpha = 0.94f)
                     )
                 )
             )
-            .border(1.dp, Color.White.copy(alpha = 0.16f), shape)
+            .border(1.2.dp, Color.White.copy(alpha = 0.18f), shape)
             .onGloballyPositioned { onBounds(it.boundsInRoot()) }
-            .padding(horizontal = 7.dp, vertical = 10.dp)
+            .padding(horizontal = 9.dp, vertical = 14.dp)
             .testTag(targetTag),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(7.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         ProfileAvatar(name = name, avatarPath = avatarPath)
         Text(
             text = name,
             color = HarmonyText,
-            fontSize = 11.5.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.ExtraBold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -299,10 +310,10 @@ private fun AssignmentTarget(
 private fun ProfileAvatar(name: String, avatarPath: String?) {
     Box(
         modifier = Modifier
-            .size(54.dp)
+            .size(86.dp)
             .clip(CircleShape)
             .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
-            .border(1.5.dp, Color.White.copy(alpha = 0.55f), CircleShape),
+            .border(2.dp, Color.White.copy(alpha = 0.58f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
         if (!avatarPath.isNullOrBlank()) {
@@ -310,14 +321,14 @@ private fun ProfileAvatar(name: String, avatarPath: String?) {
                 model = avatarPath,
                 contentDescription = name,
                 modifier = Modifier
-                    .size(54.dp)
+                    .fillMaxSize()
                     .clip(CircleShape)
             )
         } else {
             Text(
                 text = name.trim().take(1).uppercase().ifBlank { "?" },
                 color = Color.White,
-                fontSize = 20.sp,
+                fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold
             )
         }
@@ -335,11 +346,12 @@ private fun DraggableRoleChip(
     var dragOffset by remember(role) { mutableStateOf(Offset.Zero) }
     var sourceBounds by remember(role) { mutableStateOf<Rect?>(null) }
     var dragging by remember(role) { mutableStateOf(false) }
-    val shape = RoundedCornerShape(15.dp)
+    val shape = RoundedCornerShape(18.dp)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 58.dp)
             .zIndex(if (dragging) 20f else 0f)
             .graphicsLayer {
                 translationX = dragOffset.x
@@ -377,24 +389,24 @@ private fun DraggableRoleChip(
             .clip(shape)
             .background(
                 Brush.horizontalGradient(
-                    listOf(HarmonySurface, HarmonyPurple.copy(alpha = 0.32f), HarmonySurface2)
+                    listOf(HarmonySurface, HarmonyPurple.copy(alpha = 0.34f), HarmonySurface2)
                 )
             )
             .border(
-                if (dragging) 1.7.dp else 1.dp,
+                if (dragging) 1.8.dp else 1.dp,
                 if (dragging) HarmonyPinkSoft else HarmonyLine,
                 shape
             )
-            .padding(horizontal = 7.dp, vertical = 10.dp)
+            .padding(horizontal = 10.dp, vertical = 11.dp)
             .testTag("assignment_role_$roleIndex"),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = contentText(role),
             color = HarmonyText,
-            fontSize = 10.5.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 13.sp,
+            lineHeight = 19.sp,
             textAlign = TextAlign.Center,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
@@ -407,10 +419,13 @@ private fun RankingDragBoard(
     question: String,
     options: List<String>,
     selectedAnswer: String?,
+    profile: ProfileEntity,
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val items = mechanicOptions(options, profile)
+    val prompt = mechanicPrompt(question, items, profile)
     val initialOrder = remember(selectedAnswer, options) {
         selectedAnswer?.let { RankingAnswerCodec.decode(it, options) } ?: options
     }
@@ -418,51 +433,54 @@ private fun RankingDragBoard(
         mutableStateListOf<String>().apply { addAll(initialOrder) }
     }
 
-    InteractionShell(
-        question = question,
-        subtitle = tr(
-            "Halte eine Karte gedrückt und ziehe sie an die passende Position.",
-            "Hold a card and drag it into the right position."
+    FullscreenMechanicShell(
+        kicker = tr("🏆 RANKING-DUELL", "🏆 RANKING DUEL"),
+        question = prompt,
+        instruction = tr(
+            "Halte eine Karte gedrückt und ziehe sie auf deinen Platz 1, 2, 3 …",
+            "Hold a card and drag it to your number 1, 2, 3 …"
         ),
         modifier = modifier.testTag("ranking_drag_board")
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-            order.toList().forEach { item ->
-                key(item) {
-                    RankingDragItem(
-                        item = item,
-                        originalIndex = options.indexOf(item),
-                        position = order.indexOf(item),
-                        itemCount = order.size,
-                        onMove = { delta ->
-                            val current = order.indexOf(item)
-                            val target = (current + delta).coerceIn(0, order.lastIndex)
-                            if (current != target) {
-                                order.removeAt(current)
-                                order.add(target, item)
-                                triggerMiniVibration(context, 24L)
-                            }
-                        }
-                    )
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(11.dp)
+            ) {
+                order.toList().forEach { item ->
+                    key(item) {
+                        RankingDragItem(
+                            item = item,
+                            originalIndex = options.indexOf(item),
+                            position = order.indexOf(item),
+                            itemCount = order.size,
+                            onMove = { delta ->
+                                val current = order.indexOf(item)
+                                val target = (current + delta).coerceIn(0, order.lastIndex)
+                                if (current != target) {
+                                    order.removeAt(current)
+                                    order.add(target, item)
+                                    triggerMiniVibration(context, 24L)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(15.dp))
-        Button(
-            enabled = order.isNotEmpty(),
-            onClick = {
-                triggerMiniVibration(context, 45L)
-                onPick(RankingAnswerCodec.encode(order.toList()))
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .testTag("ranking_submit"),
-            shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
-        ) {
-            Text(text = tr("Reihenfolge speichern", "Save order"), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(14.dp))
+            PrimaryMechanicButton(
+                text = tr("Reihenfolge speichern & weiter", "Save order & continue"),
+                enabled = order.isNotEmpty(),
+                onClick = {
+                    triggerMiniVibration(context, 45L)
+                    onPick(RankingAnswerCodec.encode(order.toList()))
+                },
+                testTag = "ranking_submit"
+            )
         }
     }
 }
@@ -473,17 +491,19 @@ private fun RankingDragItem(
     originalIndex: Int,
     position: Int,
     itemCount: Int,
-    onMove: (Int) -> Unit
+    onMove: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
-    val threshold = with(density) { 47.dp.toPx() }
+    val threshold = with(density) { 54.dp.toPx() }
     var dragY by remember(item) { mutableStateOf(0f) }
     var dragging by remember(item) { mutableStateOf(false) }
-    val shape = RoundedCornerShape(18.dp)
+    val shape = RoundedCornerShape(21.dp)
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 64.dp)
             .zIndex(if (dragging) 15f else 0f)
             .graphicsLayer {
                 translationY = dragY
@@ -523,19 +543,23 @@ private fun RankingDragItem(
                 Brush.horizontalGradient(
                     listOf(
                         HarmonySurface,
-                        HarmonyPurple.copy(alpha = if (dragging) 0.42f else 0.23f),
+                        HarmonyPurple.copy(alpha = if (dragging) 0.46f else 0.27f),
                         HarmonySurface2
                     )
                 )
             )
-            .border(if (dragging) 1.5.dp else 1.dp, if (dragging) HarmonyPinkSoft else HarmonyLine, shape)
-            .padding(horizontal = 12.dp, vertical = 13.dp)
+            .border(
+                if (dragging) 1.7.dp else 1.dp,
+                if (dragging) HarmonyPinkSoft else HarmonyLine,
+                shape
+            )
+            .padding(horizontal = 15.dp, vertical = 12.dp)
             .testTag("ranking_item_$originalIndex"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight))),
             contentAlignment = Alignment.Center
@@ -543,70 +567,26 @@ private fun RankingDragItem(
             Text(
                 text = "${position + 1}",
                 color = Color.White,
-                fontSize = 13.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.ExtraBold
             )
         }
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(13.dp))
         Text(
             text = contentText(item),
             color = HarmonyText,
-            fontSize = 13.sp,
+            fontSize = 17.sp,
+            lineHeight = 21.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
         )
         Text(
             text = "☰",
             color = HarmonyMuted,
-            fontSize = 19.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold
         )
-    }
-}
-
-@Composable
-private fun InteractionShell(
-    question: String,
-    subtitle: String,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    val shape = RoundedCornerShape(28.dp)
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(
-                Brush.radialGradient(
-                    listOf(
-                        HarmonyPurple.copy(alpha = 0.45f),
-                        HarmonyPink.copy(alpha = 0.14f),
-                        HarmonySurface2.copy(alpha = 0.97f),
-                        HarmonyBg
-                    )
-                )
-            )
-            .border(1.2.dp, HarmonyPink.copy(alpha = 0.42f), shape)
-            .padding(horizontal = 12.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = contentText(question),
-            color = HarmonyText,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.ExtraBold,
-            lineHeight = 24.sp,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            text = subtitle,
-            color = HarmonyMuted,
-            fontSize = 11.5.sp,
-            lineHeight = 15.sp,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(15.dp))
-        content()
     }
 }
