@@ -31,4 +31,16 @@ class GeneratedContentRegistryMechanicsTest {
             )
         }
     }
+
+    @Test
+    fun `scenario packs keep the eight decision journey contract`() {
+        val scenarioPacks = GeneratedContentRegistry.PACKS.filter {
+            "mechanik_szenario" in it.tags || it.cat == "h360_szenario"
+        }
+
+        assertTrue("Expected generated scenario packs", scenarioPacks.isNotEmpty())
+        scenarioPacks.forEach { pack ->
+            assertEquals("Scenario pack ${pack.id} must contain eight decisions", 8, pack.questions.size)
+        }
+    }
 }
