@@ -48,7 +48,6 @@ import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonyPurpleLight
 import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
-import com.example.ui.theme.HarmonyText
 import com.example.ui.tr
 
 internal data class MechanicOption(
@@ -218,12 +217,11 @@ internal fun LargeOptionGrid(
     modifier: Modifier = Modifier,
     tagPrefix: String = "mechanic_option"
 ) {
-    val visible = items.take(4)
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        visible.chunked(2).forEachIndexed { rowIndex, rowItems ->
+        items.chunked(2).forEachIndexed { rowIndex, rowItems ->
             Row(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
