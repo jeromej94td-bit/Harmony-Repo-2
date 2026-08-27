@@ -160,6 +160,10 @@ internal fun HarmonyImageChoiceQuestion(
             HarmonyDatabase.getInstance(context.applicationContext).profileDao().getProfile()
         }
         val profile by profileFlow.collectAsState(initial = null)
+        val effectiveProfile = profile ?: ProfileEntity(
+            userName = tr("Du", "You"),
+            partnerName = tr("Partner", "Partner")
+        )
         QuestionInteractionBoard(
             kind = if (kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
                 QuestionInteractionKind.PERSON_ASSIGNMENT
@@ -169,7 +173,7 @@ internal fun HarmonyImageChoiceQuestion(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
-            profile = profile ?: ProfileEntity(),
+            profile = effectiveProfile,
             onPick = onPick,
             modifier = modifier
         )
