@@ -29,9 +29,6 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
     }
 }
 
-internal fun shouldShowRunnerCategoryTag(kind: HarmonyImageChoiceKind?): Boolean =
-    kind != HarmonyImageChoiceKind.RANK_ORDER && kind != HarmonyImageChoiceKind.PERSON_ASSIGNMENT
-
 internal fun harmonyImageChoiceRevealDelayMillis(index: Int): Long {
     val row = index / 3
     val column = index % 3
