@@ -19,6 +19,16 @@ class QuestionInteractionTest {
         )
     )
 
+    private fun mechanicPack(tag: String, cat: String = "h360_test"): QuestionPack = QuestionPack(
+        id = "pack_$tag",
+        title = tag,
+        tags = listOf("harmony360", tag),
+        cat = cat,
+        topic = "beziehung",
+        type = "quiz",
+        questions = listOf(Question("Testfrage", listOf("A", "B", "C", "D")))
+    )
+
     @Test
     fun `explicit person assignment overrides ranking pack default`() {
         val pack = QuestionPack(
@@ -46,6 +56,41 @@ class QuestionInteractionTest {
     }
 
     @Test
+    fun `harmony 360 mechanic tags route to dedicated fullscreen interactions`() {
+        val expectations = listOf(
+            "mechanik_prognose" to QuestionInteractionKind.PARTNER_PREDICTION,
+            "mechanik_geheime_wahl" to QuestionInteractionKind.SECRET_CHOICE,
+            "mechanik_skala" to QuestionInteractionKind.SCALE_MATCH,
+            "mechanik_wer_eher" to QuestionInteractionKind.WHO_WOULD,
+            "mechanik_memory" to QuestionInteractionKind.MEMORY_MATCH,
+            "mechanik_szenario" to QuestionInteractionKind.SCENARIO,
+            "mechanik_prioritaet" to QuestionInteractionKind.PRIORITY_POKER,
+            "mechanik_entweder_oder" to QuestionInteractionKind.MATCH_TOURNAMENT,
+            "mechanik_deep_talk" to QuestionInteractionKind.DEEP_TALK
+        )
+
+        expectations.forEach { (tag, expected) ->
+            assertEquals(tag, expected, QuestionInteractionPolicy.resolve(mechanicPack(tag), 0))
+        }
+    }
+
+    @Test
+    fun `category fallback also routes scale prediction and secret choice`() {
+        assertEquals(
+            QuestionInteractionKind.SCALE_MATCH,
+            QuestionInteractionPolicy.resolve(mechanicPack("other", "h360_skala"), 0)
+        )
+        assertEquals(
+            QuestionInteractionKind.PARTNER_PREDICTION,
+            QuestionInteractionPolicy.resolve(mechanicPack("other", "h360_prognose"), 0)
+        )
+        assertEquals(
+            QuestionInteractionKind.SECRET_CHOICE,
+            QuestionInteractionPolicy.resolve(mechanicPack("other", "h360_geheim"), 0)
+        )
+    }
+
+    @Test
     fun `normal quiz stays standard`() {
         val pack = QuestionPack(
             id = "normal",
@@ -58,6 +103,37 @@ class QuestionInteractionTest {
         )
 
         assertEquals(QuestionInteractionKind.STANDARD, QuestionInteractionPolicy.resolve(pack, 0))
+    }
+
+    @Test
+    fun `specialized prompt removes duplicated options from question text`() {
+        val options = listOf("Traumhaus bauen", "Weltreise starten", "Spenden/Investieren", "Job sofort kündigen")
+        val raw = "Rangliste bei 50 Millionen Euro Gewinn: Traumhaus bauen, Weltreise starten, Spenden/Investieren, Job sofort kündigen"
+
+        assertEquals(
+            "Rangliste bei 50 Millionen Euro Gewinn",
+            InteractionPromptPolicy.displayPrompt(raw, options)
+        )
+    }
+
+    @Test
+    fun `specialized prompt removes dangling rank instruction after a real question`() {
+        val options = listOf("Niemandem erzählen", "Familie einladen", "Champagner öffnen", "Finanzberater suchen")
+        val raw = "Was wäre der erste Schritt nach dem Gewinn? Ordne: Niemandem erzählen, Familie einladen, Champagner öffnen, Finanzberater suchen"
+
+        assertEquals(
+            "Was wäre der erste Schritt nach dem Gewinn?",
+            InteractionPromptPolicy.displayPrompt(raw, options)
+        )
+    }
+
+    @Test
+    fun `prompt without repeated option remains unchanged`() {
+        val raw = "Was glaubst du: Was würde dein Partner zuerst tun?"
+        assertEquals(
+            raw,
+            InteractionPromptPolicy.displayPrompt(raw, listOf("Reisen", "Schlafen", "Feiern", "Lesen"))
+        )
     }
 
     @Test
@@ -85,6 +161,18 @@ class QuestionInteractionTest {
 
         assertEquals(order, RankingAnswerCodec.decode(encoded, options))
         assertNull(RankingAnswerCodec.decode(RankingAnswerCodec.encode(listOf("Humor", "Humor")), options))
+    }
+
+    @Test
+    fun `paired choice codecs keep both hidden answers`() {
+        val encoded = PairedChoiceAnswerCodec.encode("A", "D")
+        assertEquals(PairedChoiceAnswer("A", "D"), PairedChoiceAnswerCodec.decode(encoded))
+    }
+
+    @Test
+    fun `prediction codec keeps prediction and actual choice`() {
+        val encoded = PredictionAnswerCodec.encode("B", "B")
+        assertEquals(PredictionAnswer("B", "B"), PredictionAnswerCodec.decode(encoded))
     }
 
     @Test
