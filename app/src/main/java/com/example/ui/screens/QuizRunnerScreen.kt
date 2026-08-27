@@ -49,6 +49,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -589,6 +590,8 @@ fun QuizRunnerScreen(
     val pack = activeRun.pack
     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
     val isMoralGreyZone = pack.cat == "zust" && pack.topic == "moral"
+    val moralIntroKey = "${pack.id}_${activeRun.currentIndex}_moral_intro"
+    var moralIntroFinished by remember(moralIntroKey) { mutableStateOf(!isMoralGreyZone) }
 
     val category = com.example.data.model.HarmonyPacksData.CATEGORIES.find { it.id == pack.cat }
     val catColor = category?.tagColorHex?.let { Color(it) } ?: HarmonyPink
@@ -616,16 +619,29 @@ fun QuizRunnerScreen(
                 .fillMaxSize()
                 .background(HarmonyBg)
         ) {
-            QuestionColorFlowBackdrop(
-                accent = animatedCatColor,
-                modifier = Modifier.fillMaxSize()
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-            ) {
+            if (isMoralGreyZone) {
+                key(moralIntroKey) {
+                    HarmonyRawVideoAnimation(
+                        rawResId = R.raw.moral_grey_zones_intro,
+                        immersive = !moralIntroFinished,
+                        onCompleted = { moralIntroFinished = true },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            } else {
+                QuestionColorFlowBackdrop(
+                    accent = animatedCatColor,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            if (!isMoralGreyZone || moralIntroFinished) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                ) {
                 // Runner Top Bar
                 if (pack.type == "tot" && !activeRun.isFinished) {
                     Row(
@@ -976,20 +992,14 @@ fun QuizRunnerScreen(
                             } else if (isMoralGreyZone) {
                                 var showMoralQuestion by remember(questionAnimationKey) { mutableStateOf(false) }
 
-                                LaunchedEffect(questionAnimationKey) {
+                                LaunchedEffect(questionAnimationKey, moralIntroFinished) {
                                     showMoralQuestion = false
-                                    delay(1_050)
-                                    showMoralQuestion = true
+                                    if (moralIntroFinished) {
+                                        delay(220)
+                                        showMoralQuestion = true
+                                    }
                                 }
 
-                                HarmonyRawVideoAnimation(
-                                    rawResId = R.raw.moral_grey_zones_intro,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(275.dp)
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                                Spacer(modifier = Modifier.height(14.dp))
                                 AnimatedVisibility(
                                     visible = showMoralQuestion,
                                     enter = fadeIn(tween(durationMillis = 620, easing = FastOutSlowInEasing)) +
@@ -1055,7 +1065,7 @@ fun QuizRunnerScreen(
                                 LaunchedEffect(questionAnimationKey, options.size, isMoralGreyZone) {
                                     if (isMoralGreyZone) {
                                         visibleMoralOptions = 0
-                                        delay(1_850)
+                                        delay(820)
                                         options.indices.forEach { index ->
                                             visibleMoralOptions = index + 1
                                             delay(230)
@@ -1153,6 +1163,8 @@ fun QuizRunnerScreen(
                         }
                     }
                 }
+
+            }
 
                 // Runner Footer
                 if (activeRun.isFinished || pack.type == "disc") {
