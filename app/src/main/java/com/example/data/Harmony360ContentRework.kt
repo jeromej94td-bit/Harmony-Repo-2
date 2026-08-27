@@ -3,25 +3,42 @@ package com.example.data
 /**
  * Quality pass for generated Harmony 360 content.
  *
- * Older generated ranking packs reused a handful of generic answer quartets across unrelated
- * subjects (for example Sicherheit/Freiheit/Abenteuer/Komfort). Those packs remain the source of
- * truth, but obviously generic ranking filler is replaced deterministically at load time so the
- * app can ship a coherent catalogue without destructively rewriting all generated section files.
+ * Older generated packs reused a small number of generic answer quartets across unrelated
+ * subjects. The original generated files stay untouched, while obvious filler is replaced
+ * deterministically at load time with section-specific choices and shorter, coherent prompts.
  */
 object Harmony360ContentRework {
 
-    private val overusedRankingSets = listOf(
+    private val overusedOptionSets = listOf(
         setOf("Sicherheit", "Freiheit", "Abenteuer", "Komfort"),
         setOf("Jetzt genießen", "Langfristig planen", "Risiko eingehen", "Flexibel bleiben"),
         setOf("Karriere", "Familie", "Ausgewogen", "Sehr unabhängig"),
         setOf("Sofort ansprechen", "Erst fühlen", "Nähe suchen", "Raum geben"),
         setOf("Nähe", "Freiheit", "Humor", "Sicherheit"),
         setOf("Eine Umarmung", "Ein ehrliches Gespräch", "Gemeinsame Zeit", "Eine Überraschung"),
-        setOf("Spontan", "Ritual", "Große Geste", "Kleine Geste")
+        setOf("Spontan", "Ritual", "Große Geste", "Kleine Geste"),
+        setOf("Nähe", "Freiheit", "Sicherheit", "Abenteuer"),
+        setOf("Spontan", "Geplant", "Vertraut", "Etwas völlig Neues"),
+        setOf("Mehr Mut", "Mehr Gefühl", "Mehr Humor", "Mehr Konsequenz"),
+        setOf("Druck", "Desinteresse", "Unklarheit", "Zu viel Kontrolle"),
+        setOf("Zeit", "Persönliche Geste", "Überraschung", "Volle Aufmerksamkeit"),
+        setOf("Gelassener als gedacht", "Mutiger als gedacht", "Sensibler als gedacht", "Spontaner als gedacht"),
+        setOf("Vorfreude", "Nähe", "Neugier", "Anspannung"),
+        setOf("Sehr unsicher", "Eher unsicher", "Ziemlich sicher", "Fast sicher"),
+        setOf("Ruhe", "Nähe", "Abenteuer", "Überraschung"),
+        setOf("Die sichere Wahl", "Die mutige Wahl", "Die romantische Wahl", "Die völlig verrückte Wahl"),
+        setOf("Mehr Zeit", "Mehr Aufmerksamkeit", "Mehr Komfort", "Mehr Freiheit"),
+        setOf("Kaum", "Ein bisschen", "Deutlich", "Extrem"),
+        setOf("Planung", "Initiative", "Entscheidung", "Überraschung"),
+        setOf("Etwas Neues", "Etwas Mutigeres", "Etwas Persönlicheres", "Etwas Ungeplanteres"),
+        setOf("Routine", "Perfektion", "Erwartungen anderer", "Zu viel Planung"),
+        setOf("Eine kleine persönliche Geste", "Ein großer unerwarteter Plan", "Ein mutiger erster Schritt", "Etwas nur für euch zwei"),
+        setOf("Mehr Zeit", "Mehr Energie", "Mehr Freiheit", "Mehr Besonderheit"),
+        setOf("Wir-Gefühl", "Persönlicher Wunsch", "Leichtigkeit", "Verlässlichkeit")
     )
 
     fun apply(pack: GenPack): GenPack {
-        if ("harmony360" !in pack.tags || pack.cat != "h360_ranking") return pack
+        if ("harmony360" !in pack.tags) return pack
 
         if (pack.id == "h500_224_arbeitsweg_ranking") {
             return pack.copy(questions = arbeitswegQuestions)
@@ -34,12 +51,12 @@ object Harmony360ContentRework {
         var changed = false
 
         val questions = pack.questions.mapIndexed { index, question ->
-            if (!isOverusedRankingSet(question.options)) {
+            if (!shouldContextualize(pack, question.options)) {
                 question
             } else {
                 changed = true
                 GenQuestion(
-                    q = rankingPrompt(subject, index),
+                    q = contextualPrompt(pack.cat, subject, index),
                     options = contextualOptions(vocabulary, offset, index),
                     defaultMine = question.defaultMine
                 )
@@ -49,10 +66,9 @@ object Harmony360ContentRework {
         return if (changed) pack.copy(questions = questions) else pack
     }
 
-    private fun isOverusedRankingSet(options: List<String>): Boolean {
-        if (options.size != 4) return false
-        val set = options.toSet()
-        return overusedRankingSets.any { it == set }
+    private fun shouldContextualize(pack: GenPack, options: List<String>): Boolean {
+        if (options.size != 4 || overusedOptionSets.none { it == options.toSet() }) return false
+        return pack.cat in setOf("h360_ranking", "h360_prognose", "h360_geheim", "h360_prioritaet", "tot")
     }
 
     private fun sectionNumber(pack: GenPack): Int? {
@@ -60,11 +76,41 @@ object Harmony360ContentRework {
         return Regex("h360_section_(\\d{2})_").find(tag)?.groupValues?.getOrNull(1)?.toIntOrNull()
     }
 
-    private fun positiveHash(value: String): Int = value.hashCode().let { if (it == Int.MIN_VALUE) 0 else kotlin.math.abs(it) }
+    private fun positiveHash(value: String): Int = value.hashCode().let {
+        if (it == Int.MIN_VALUE) 0 else kotlin.math.abs(it)
+    }
 
     private fun contextualOptions(vocabulary: List<String>, offset: Int, questionIndex: Int): List<String> {
         val start = (offset + questionIndex * 3) % vocabulary.size
         return (0 until 4).map { vocabulary[(start + it) % vocabulary.size] }
+    }
+
+    private fun contextualPrompt(cat: String, subject: String, index: Int): String = when (cat) {
+        "h360_prognose" -> when (index % 4) {
+            0 -> "Was wäre deinem Partner bei „$subject“ vermutlich am wichtigsten?"
+            1 -> "Welche Seite von „$subject“ passt am ehesten zu deinem Partner?"
+            2 -> "Womit könnte dein Partner dich bei „$subject“ überraschen?"
+            else -> "Was würde dein Partner bei „$subject“ wahrscheinlich zuerst wählen?"
+        }
+        "h360_geheim" -> when (index % 4) {
+            0 -> "Was reizt dich bei „$subject“ heimlich am meisten?"
+            1 -> "Was würdest du bei „$subject“ wählen, wenn niemand urteilt?"
+            2 -> "Wovon hättest du bei „$subject“ insgeheim gern mehr?"
+            else -> "Welche Seite von „$subject“ würdest du gern öfter ausleben?"
+        }
+        "h360_prioritaet" -> when (index % 4) {
+            0 -> "Was hat bei „$subject“ für dich Vorrang?"
+            1 -> "Was darf bei „$subject“ niemals zu kurz kommen?"
+            2 -> "Was würdest du bei „$subject“ zuerst schützen?"
+            else -> "Was ist bei „$subject“ für dich am wenigsten verhandelbar?"
+        }
+        "tot" -> when (index % 4) {
+            0 -> "Was passt bei „$subject“ eher zu dir?"
+            1 -> "Was würdest du bei „$subject“ spontan wählen?"
+            2 -> "Welche Seite von „$subject“ spricht dich stärker an?"
+            else -> "Was gewinnt bei „$subject“ aus dem Bauch heraus?"
+        }
+        else -> rankingPrompt(subject, index)
     }
 
     private fun rankingPrompt(subject: String, index: Int): String = when (index % 8) {
