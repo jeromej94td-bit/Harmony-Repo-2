@@ -24,7 +24,8 @@ fun HarmonyRawVideoAnimation(
     rawResId: Int,
     modifier: Modifier = Modifier,
     immersive: Boolean = false,
-    onCompleted: () -> Unit = {}
+    onCompleted: () -> Unit = {},
+    roundedCorners: Boolean = true
 ) {
     val view = LocalView.current
     DisposableEffect(immersive, view) {
@@ -44,7 +45,7 @@ fun HarmonyRawVideoAnimation(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(28.dp))
+            .then(if (roundedCorners) Modifier.clip(RoundedCornerShape(28.dp)) else Modifier)
             .background(Color.Transparent)
     ) {
         val context = androidx.compose.ui.platform.LocalContext.current
