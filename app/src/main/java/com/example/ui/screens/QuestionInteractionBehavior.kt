@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import com.example.data.model.PersonSide
+import kotlin.math.max
 
 /** Lightweight geometry so drag/drop hit testing stays deterministic and unit-testable. */
 internal data class DropRect(
@@ -14,6 +15,12 @@ internal data class DropRect(
             x <= right + hitSlop &&
             y >= top - hitSlop &&
             y <= bottom + hitSlop
+
+    fun distanceSquaredTo(x: Float, y: Float): Float {
+        val dx = max(max(left - x, 0f), x - right)
+        val dy = max(max(top - y, 0f), y - bottom)
+        return dx * dx + dy * dy
+    }
 }
 
 internal fun resolvePersonDrop(
@@ -22,10 +29,26 @@ internal fun resolvePersonDrop(
     userBounds: DropRect?,
     partnerBounds: DropRect?,
     hitSlop: Float
-): PersonSide? = when {
-    userBounds?.contains(pointerX, pointerY, hitSlop) == true -> PersonSide.USER
-    partnerBounds?.contains(pointerX, pointerY, hitSlop) == true -> PersonSide.PARTNER
-    else -> null
+): PersonSide? {
+    val insideUser = userBounds?.contains(pointerX, pointerY) == true
+    val insidePartner = partnerBounds?.contains(pointerX, pointerY) == true
+    when {
+        insideUser && !insidePartner -> return PersonSide.USER
+        insidePartner && !insideUser -> return PersonSide.PARTNER
+    }
+
+    val nearUser = userBounds?.contains(pointerX, pointerY, hitSlop) == true
+    val nearPartner = partnerBounds?.contains(pointerX, pointerY, hitSlop) == true
+    return when {
+        nearUser && !nearPartner -> PersonSide.USER
+        nearPartner && !nearUser -> PersonSide.PARTNER
+        nearUser && nearPartner -> {
+            val userDistance = userBounds?.distanceSquaredTo(pointerX, pointerY) ?: Float.POSITIVE_INFINITY
+            val partnerDistance = partnerBounds?.distanceSquaredTo(pointerX, pointerY) ?: Float.POSITIVE_INFINITY
+            if (partnerDistance < userDistance) PersonSide.PARTNER else PersonSide.USER
+        }
+        else -> null
+    }
 }
 
 /**
