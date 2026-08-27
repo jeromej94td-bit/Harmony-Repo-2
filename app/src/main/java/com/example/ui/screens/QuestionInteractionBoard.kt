@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -118,13 +117,20 @@ private fun PersonAssignmentBoard(
     val assignments = remember(selectedAnswer, options) {
         mutableStateMapOf<String, PersonSide>().apply { putAll(initialAssignments) }
     }
-    var userBounds by remember { mutableStateOf<Rect?>(null) }
-    var partnerBounds by remember { mutableStateOf<Rect?>(null) }
+    var userBounds by remember { mutableStateOf<DropRect?>(null) }
+    var partnerBounds by remember { mutableStateOf<DropRect?>(null) }
+    var hoveredSide by remember { mutableStateOf<PersonSide?>(null) }
 
     val userRoles = options.filter { assignments[it] == PersonSide.USER }
     val partnerRoles = options.filter { assignments[it] == PersonSide.PARTNER }
     val unassignedRoles = options.filter { assignments[it] == null }
     val complete = options.isNotEmpty() && assignments.keys.containsAll(options)
+
+    val dropRole: (String, PersonSide) -> Unit = { role, side ->
+        assignments[role] = side
+        hoveredSide = null
+        triggerMiniVibration(context, 48L)
+    }
 
     FullscreenMechanicShell(
         kicker = tr("👥 ROLLEN-DUELL", "👥 ROLE DUEL"),
@@ -149,14 +155,13 @@ private fun PersonAssignmentBoard(
                     roles = userRoles,
                     options = options,
                     side = PersonSide.USER,
+                    highlighted = hoveredSide == PersonSide.USER,
                     targetTag = "assignment_target_user",
                     onBounds = { userBounds = it },
                     userBounds = { userBounds },
                     partnerBounds = { partnerBounds },
-                    onDrop = { role, side ->
-                        assignments[role] = side
-                        triggerMiniVibration(context, 38L)
-                    },
+                    onHover = { hoveredSide = it },
+                    onDrop = dropRole,
                     modifier = Modifier.weight(1f).fillMaxSize()
                 )
 
@@ -198,10 +203,8 @@ private fun PersonAssignmentBoard(
                                     roleIndex = options.indexOf(role),
                                     userBounds = { userBounds },
                                     partnerBounds = { partnerBounds },
-                                    onDrop = { side ->
-                                        assignments[role] = side
-                                        triggerMiniVibration(context, 38L)
-                                    }
+                                    onHover = { hoveredSide = it },
+                                    onDrop = { side -> dropRole(role, side) }
                                 )
                             }
                         }
@@ -214,14 +217,13 @@ private fun PersonAssignmentBoard(
                     roles = partnerRoles,
                     options = options,
                     side = PersonSide.PARTNER,
+                    highlighted = hoveredSide == PersonSide.PARTNER,
                     targetTag = "assignment_target_partner",
                     onBounds = { partnerBounds = it },
                     userBounds = { userBounds },
                     partnerBounds = { partnerBounds },
-                    onDrop = { role, side ->
-                        assignments[role] = side
-                        triggerMiniVibration(context, 38L)
-                    },
+                    onHover = { hoveredSide = it },
+                    onDrop = dropRole,
                     modifier = Modifier.weight(1f).fillMaxSize()
                 )
             }
@@ -235,7 +237,7 @@ private fun PersonAssignmentBoard(
                 },
                 enabled = complete,
                 onClick = {
-                    triggerMiniVibration(context, 45L)
+                    triggerMiniVibration(context, 50L)
                     onPick(PersonAssignmentCodec.encode(options, assignments))
                 },
                 testTag = "assignment_submit"
@@ -251,32 +253,39 @@ private fun AssignmentTarget(
     roles: List<String>,
     options: List<String>,
     side: PersonSide,
+    highlighted: Boolean,
     targetTag: String,
-    onBounds: (Rect) -> Unit,
-    userBounds: () -> Rect?,
-    partnerBounds: () -> Rect?,
+    onBounds: (DropRect) -> Unit,
+    userBounds: () -> DropRect?,
+    partnerBounds: () -> DropRect?,
+    onHover: (PersonSide?) -> Unit,
     onDrop: (String, PersonSide) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(26.dp)
+    val accent = if (side == PersonSide.USER) HarmonyPink else HarmonyPurpleLight
+
     Column(
         modifier = modifier
             .clip(shape)
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        if (side == PersonSide.USER) {
-                            HarmonyPink.copy(alpha = 0.24f)
-                        } else {
-                            HarmonyPurple.copy(alpha = 0.32f)
-                        },
+                        accent.copy(alpha = if (highlighted) 0.38f else 0.24f),
                         HarmonySurface2.copy(alpha = 0.96f),
                         HarmonyBg.copy(alpha = 0.94f)
                     )
                 )
             )
-            .border(1.2.dp, Color.White.copy(alpha = 0.18f), shape)
-            .onGloballyPositioned { onBounds(it.boundsInRoot()) }
+            .border(
+                if (highlighted) 2.4.dp else 1.2.dp,
+                if (highlighted) HarmonyPinkSoft else Color.White.copy(alpha = 0.18f),
+                shape
+            )
+            .onGloballyPositioned { coordinates ->
+                val rect = coordinates.boundsInRoot()
+                onBounds(DropRect(rect.left, rect.top, rect.right, rect.bottom))
+            }
             .padding(horizontal = 9.dp, vertical = 14.dp)
             .testTag(targetTag),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -292,15 +301,41 @@ private fun AssignmentTarget(
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.height(2.dp))
-        roles.forEach { role ->
-            key(role) {
-                DraggableRoleChip(
-                    role = role,
-                    roleIndex = options.indexOf(role),
-                    userBounds = userBounds,
-                    partnerBounds = partnerBounds,
-                    onDrop = { target -> onDrop(role, target) }
+        if (roles.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White.copy(alpha = if (highlighted) 0.12f else 0.045f))
+                    .border(
+                        1.dp,
+                        if (highlighted) HarmonyPinkSoft else HarmonyLine,
+                        RoundedCornerShape(18.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = tr("Hier ablegen", "Drop here"),
+                    color = if (highlighted) HarmonyText else HarmonyMuted,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
+            }
+        } else {
+            roles.forEach { role ->
+                key(role) {
+                    DraggableRoleChip(
+                        role = role,
+                        roleIndex = options.indexOf(role),
+                        userBounds = userBounds,
+                        partnerBounds = partnerBounds,
+                        onHover = onHover,
+                        onDrop = { target -> onDrop(role, target) },
+                        assigned = true
+                    )
+                }
             }
         }
     }
@@ -313,7 +348,7 @@ private fun ProfileAvatar(name: String, avatarPath: String?) {
             .size(86.dp)
             .clip(CircleShape)
             .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
-            .border(2.dp, Color.White.copy(alpha = 0.58f), CircleShape),
+            .border(2.dp, Color.White.copy(alpha = 0.62f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
         if (!avatarPath.isNullOrBlank()) {
@@ -339,77 +374,137 @@ private fun ProfileAvatar(name: String, avatarPath: String?) {
 private fun DraggableRoleChip(
     role: String,
     roleIndex: Int,
-    userBounds: () -> Rect?,
-    partnerBounds: () -> Rect?,
-    onDrop: (PersonSide) -> Unit
+    userBounds: () -> DropRect?,
+    partnerBounds: () -> DropRect?,
+    onHover: (PersonSide?) -> Unit,
+    onDrop: (PersonSide) -> Unit,
+    assigned: Boolean = false
 ) {
+    val density = LocalDensity.current
+    val hitSlop = with(density) { 24.dp.toPx() }
     var dragOffset by remember(role) { mutableStateOf(Offset.Zero) }
-    var sourceBounds by remember(role) { mutableStateOf<Rect?>(null) }
+    var sourceBounds by remember(role) { mutableStateOf<DropRect?>(null) }
+    var pointerInRoot by remember(role) { mutableStateOf<Offset?>(null) }
     var dragging by remember(role) { mutableStateOf(false) }
     val shape = RoundedCornerShape(18.dp)
 
-    Box(
+    fun updateHover(pointer: Offset?) {
+        if (pointer == null) {
+            onHover(null)
+            return
+        }
+        onHover(
+            resolvePersonDrop(
+                pointerX = pointer.x,
+                pointerY = pointer.y,
+                userBounds = userBounds(),
+                partnerBounds = partnerBounds(),
+                hitSlop = hitSlop
+            )
+        )
+    }
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 58.dp)
-            .zIndex(if (dragging) 20f else 0f)
+            .heightIn(min = if (assigned) 54.dp else 62.dp)
+            .zIndex(if (dragging) 40f else 0f)
             .graphicsLayer {
                 translationX = dragOffset.x
                 translationY = dragOffset.y
-                scaleX = if (dragging) 1.06f else 1f
-                scaleY = if (dragging) 1.06f else 1f
-                shadowElevation = if (dragging) 20f else 4f
+                scaleX = if (dragging) 1.055f else 1f
+                scaleY = if (dragging) 1.055f else 1f
+                shadowElevation = if (dragging) 28f else 6f
             }
-            .onGloballyPositioned { sourceBounds = it.boundsInRoot() }
+            .onGloballyPositioned { coordinates ->
+                val rect = coordinates.boundsInRoot()
+                sourceBounds = DropRect(rect.left, rect.top, rect.right, rect.bottom)
+            }
             .pointerInput(role) {
                 detectDragGestures(
-                    onDragStart = {
+                    onDragStart = { localStart ->
                         dragging = true
                         dragOffset = Offset.Zero
+                        pointerInRoot = sourceBounds?.let { bounds ->
+                            Offset(bounds.left + localStart.x, bounds.top + localStart.y)
+                        }
+                        updateHover(pointerInRoot)
                     },
                     onDragCancel = {
                         dragging = false
                         dragOffset = Offset.Zero
+                        pointerInRoot = null
+                        updateHover(null)
                     },
                     onDragEnd = {
-                        val dropPoint = sourceBounds?.center?.plus(dragOffset)
-                        when {
-                            dropPoint != null && userBounds()?.contains(dropPoint) == true -> onDrop(PersonSide.USER)
-                            dropPoint != null && partnerBounds()?.contains(dropPoint) == true -> onDrop(PersonSide.PARTNER)
+                        val pointer = pointerInRoot
+                        val target = pointer?.let {
+                            resolvePersonDrop(
+                                pointerX = it.x,
+                                pointerY = it.y,
+                                userBounds = userBounds(),
+                                partnerBounds = partnerBounds(),
+                                hitSlop = hitSlop
+                            )
                         }
+                        if (target != null) onDrop(target)
                         dragging = false
                         dragOffset = Offset.Zero
+                        pointerInRoot = null
+                        updateHover(null)
                     },
                     onDrag = { change, amount ->
                         change.consume()
                         dragOffset += amount
+                        pointerInRoot = pointerInRoot?.plus(amount)
+                        updateHover(pointerInRoot)
                     }
                 )
             }
             .clip(shape)
             .background(
                 Brush.horizontalGradient(
-                    listOf(HarmonySurface, HarmonyPurple.copy(alpha = 0.34f), HarmonySurface2)
+                    listOf(
+                        HarmonySurface,
+                        HarmonyPurple.copy(alpha = if (dragging) 0.52f else 0.34f),
+                        HarmonySurface2
+                    )
                 )
             )
             .border(
-                if (dragging) 1.8.dp else 1.dp,
+                if (dragging) 2.dp else 1.dp,
                 if (dragging) HarmonyPinkSoft else HarmonyLine,
                 shape
             )
             .padding(horizontal = 10.dp, vertical = 11.dp)
             .testTag("assignment_role_$roleIndex"),
-        contentAlignment = Alignment.Center
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Box(
+            modifier = Modifier
+                .width(5.dp)
+                .height(34.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Brush.verticalGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = contentText(role),
             color = HarmonyText,
-            fontSize = 15.sp,
+            fontSize = if (assigned) 13.5.sp else 15.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 19.sp,
-            textAlign = TextAlign.Center,
+            lineHeight = if (assigned) 17.sp else 19.sp,
+            textAlign = TextAlign.Start,
             maxLines = 3,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = "☰",
+            color = if (dragging) HarmonyPinkSoft else HarmonyMuted,
+            fontSize = if (assigned) 19.sp else 23.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -462,7 +557,7 @@ private fun RankingDragBoard(
                                 if (current != target) {
                                     order.removeAt(current)
                                     order.add(target, item)
-                                    triggerMiniVibration(context, 24L)
+                                    triggerMiniVibration(context, 28L)
                                 }
                             },
                             modifier = Modifier.weight(1f)
@@ -476,7 +571,7 @@ private fun RankingDragBoard(
                 text = tr("Reihenfolge speichern & weiter", "Save order & continue"),
                 enabled = order.isNotEmpty(),
                 onClick = {
-                    triggerMiniVibration(context, 45L)
+                    triggerMiniVibration(context, 48L)
                     onPick(RankingAnswerCodec.encode(order.toList()))
                 },
                 testTag = "ranking_submit"
@@ -495,21 +590,21 @@ private fun RankingDragItem(
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
-    val threshold = with(density) { 54.dp.toPx() }
+    val threshold = with(density) { 58.dp.toPx() }
     var dragY by remember(item) { mutableStateOf(0f) }
     var dragging by remember(item) { mutableStateOf(false) }
-    val shape = RoundedCornerShape(21.dp)
+    val shape = RoundedCornerShape(22.dp)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp)
-            .zIndex(if (dragging) 15f else 0f)
+            .heightIn(min = 72.dp)
+            .zIndex(if (dragging) 30f else 0f)
             .graphicsLayer {
                 translationY = dragY
                 scaleX = if (dragging) 1.025f else 1f
                 scaleY = if (dragging) 1.025f else 1f
-                shadowElevation = if (dragging) 18f else 3f
+                shadowElevation = if (dragging) 24f else 7f
             }
             .pointerInput(item, itemCount) {
                 detectDragGestures(
@@ -528,10 +623,11 @@ private fun RankingDragItem(
                     onDrag = { change, amount ->
                         change.consume()
                         dragY += amount.y
-                        if (dragY > threshold) {
+                        while (dragY > threshold) {
                             onMove(1)
                             dragY -= threshold
-                        } else if (dragY < -threshold) {
+                        }
+                        while (dragY < -threshold) {
                             onMove(-1)
                             dragY += threshold
                         }
@@ -542,24 +638,25 @@ private fun RankingDragItem(
             .background(
                 Brush.horizontalGradient(
                     listOf(
-                        HarmonySurface,
-                        HarmonyPurple.copy(alpha = if (dragging) 0.46f else 0.27f),
-                        HarmonySurface2
+                        HarmonySurface2,
+                        HarmonyPurple.copy(alpha = if (dragging) 0.58f else 0.34f),
+                        HarmonyPink.copy(alpha = if (dragging) 0.30f else 0.12f),
+                        HarmonySurface
                     )
                 )
             )
             .border(
-                if (dragging) 1.7.dp else 1.dp,
-                if (dragging) HarmonyPinkSoft else HarmonyLine,
+                if (dragging) 2.dp else 1.4.dp,
+                if (dragging) HarmonyPinkSoft else HarmonyPink.copy(alpha = 0.42f),
                 shape
             )
-            .padding(horizontal = 15.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 13.dp)
             .testTag("ranking_item_$originalIndex"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(42.dp)
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight))),
             contentAlignment = Alignment.Center
@@ -571,21 +668,22 @@ private fun RankingDragItem(
                 fontWeight = FontWeight.ExtraBold
             )
         }
-        Spacer(modifier = Modifier.width(13.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Text(
             text = contentText(item),
             color = HarmonyText,
             fontSize = 17.sp,
             lineHeight = 21.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.weight(1f),
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "☰",
-            color = HarmonyMuted,
-            fontSize = 22.sp,
+            color = if (dragging) HarmonyPinkSoft else HarmonyMuted,
+            fontSize = 25.sp,
             fontWeight = FontWeight.Bold
         )
     }
