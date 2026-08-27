@@ -164,6 +164,7 @@ internal fun HarmonyImageChoiceQuestion(
             userName = tr("Du", "You"),
             partnerName = tr("Partner", "Partner")
         )
+        val headerLiftPx = with(LocalDensity.current) { 42.dp.toPx() }
         QuestionInteractionBoard(
             kind = if (kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
                 QuestionInteractionKind.PERSON_ASSIGNMENT
@@ -175,7 +176,7 @@ internal fun HarmonyImageChoiceQuestion(
             selectedAnswer = selectedAnswer,
             profile = effectiveProfile,
             onPick = onPick,
-            modifier = modifier
+            modifier = modifier.graphicsLayer { translationY = -headerLiftPx }
         )
         return
     }
