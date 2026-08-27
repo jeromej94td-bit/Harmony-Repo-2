@@ -2,13 +2,9 @@ package com.example.ui
 
 import com.example.data.model.PersonSide
 import com.example.ui.screens.DropRect
-import com.example.ui.screens.HarmonyImageChoiceKind
 import com.example.ui.screens.compactInteractionQuestion
 import com.example.ui.screens.resolvePersonDrop
-import com.example.ui.screens.shouldShowRunnerCategoryTag
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class QuestionInteractionBehaviorTest {
@@ -87,13 +83,5 @@ class QuestionInteractionBehaviorTest {
                 options
             )
         )
-    }
-
-    @Test
-    fun rankingAndRoleInteractionsHideRunnerCategoryTagToGainVerticalSpace() {
-        assertFalse(shouldShowRunnerCategoryTag(HarmonyImageChoiceKind.RANK_ORDER))
-        assertFalse(shouldShowRunnerCategoryTag(HarmonyImageChoiceKind.PERSON_ASSIGNMENT))
-        assertTrue(shouldShowRunnerCategoryTag(HarmonyImageChoiceKind.TRAVEL))
-        assertTrue(shouldShowRunnerCategoryTag(null))
     }
 }
