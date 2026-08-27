@@ -88,6 +88,7 @@ import com.example.ui.contentText
 import com.example.ui.tr
 import com.example.ui.components.CategoryTag
 import com.example.ui.components.TotImageProvider
+import com.example.ui.components.HarmonyRawVideoAnimation
 import com.example.ui.components.VoiceInputButton
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyGold
@@ -587,6 +588,7 @@ fun QuizRunnerScreen(
     val context = LocalContext.current
     val pack = activeRun.pack
     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
+    val isMoralGreyZone = pack.cat == "zust" && pack.topic == "moral"
 
     val category = com.example.data.model.HarmonyPacksData.CATEGORIES.find { it.id == pack.cat }
     val catColor = category?.tagColorHex?.let { Color(it) } ?: HarmonyPink
@@ -971,6 +973,38 @@ fun QuizRunnerScreen(
                                         onPickAnswer(answer)
                                     }
                                 )
+                            } else if (isMoralGreyZone) {
+                                var showMoralQuestion by remember(questionAnimationKey) { mutableStateOf(false) }
+
+                                LaunchedEffect(questionAnimationKey) {
+                                    showMoralQuestion = false
+                                    delay(1_050)
+                                    showMoralQuestion = true
+                                }
+
+                                HarmonyRawVideoAnimation(
+                                    rawResId = R.raw.moral_grey_zones_intro,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(275.dp)
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+                                AnimatedVisibility(
+                                    visible = showMoralQuestion,
+                                    enter = fadeIn(tween(durationMillis = 620, easing = FastOutSlowInEasing)) +
+                                        scaleIn(
+                                            initialScale = 0.96f,
+                                            animationSpec = tween(durationMillis = 620, easing = FastOutSlowInEasing)
+                                        )
+                                ) {
+                                    AnimatedQuestionCard(
+                                        question = compactPizzaBurgerQuestion(
+                                            rawQuestion = q?.q ?: "",
+                                            localizedQuestion = contentText(q?.q ?: "")
+                                        )
+                                    )
+                                }
                             } else if (isIntimacyPack) {
                                 CinematicSandMaterialize(
                                     animationKey = questionAnimationKey,
@@ -1014,6 +1048,23 @@ fun QuizRunnerScreen(
                                     processedOptions + fallbackText
                                 }
 
+                                var visibleMoralOptions by remember(questionAnimationKey) {
+                                    mutableStateOf(if (isMoralGreyZone) 0 else Int.MAX_VALUE)
+                                }
+
+                                LaunchedEffect(questionAnimationKey, options.size, isMoralGreyZone) {
+                                    if (isMoralGreyZone) {
+                                        visibleMoralOptions = 0
+                                        delay(1_850)
+                                        options.indices.forEach { index ->
+                                            visibleMoralOptions = index + 1
+                                            delay(230)
+                                        }
+                                    } else {
+                                        visibleMoralOptions = Int.MAX_VALUE
+                                    }
+                                }
+
                                 options.forEachIndexed { optIdx, optText ->
                                     val isOwn = !isPizzaBurgerTensionQuestion && optIdx == options.size - 1
                                     val isSelected = if (isOwn) {
@@ -1054,6 +1105,31 @@ fun QuizRunnerScreen(
                                                 .padding(bottom = 11.dp)
                                         ) { glitchAmount ->
                                             optionButton(glitchAmount)
+                                        }
+                                    } else if (isMoralGreyZone) {
+                                        AnimatedVisibility(
+                                            visible = optIdx < visibleMoralOptions,
+                                            enter = fadeIn(tween(durationMillis = 520, easing = FastOutSlowInEasing)) +
+                                                scaleIn(
+                                                    initialScale = 0.97f,
+                                                    animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing)
+                                                )
+                                        ) {
+                                            QuizOptionButton(
+                                                number = optIdx + 1,
+                                                text = if (isSelected && isOwn) contentText(selectedAns ?: optText) else contentText(optText),
+                                                isSelected = isSelected,
+                                                isOwn = isOwn,
+                                                onClick = {
+                                                    triggerMiniVibration(context, 40L)
+                                                    if (isOwn) {
+                                                        onOpenOwnAnswerDialog(activeRun.currentIndex, null)
+                                                    } else {
+                                                        onPickAnswer(optText)
+                                                    }
+                                                },
+                                                modifier = Modifier.padding(bottom = 11.dp)
+                                            )
                                         }
                                     } else {
                                         QuizOptionButton(
