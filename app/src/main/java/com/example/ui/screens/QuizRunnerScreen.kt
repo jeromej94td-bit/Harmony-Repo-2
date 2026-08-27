@@ -57,6 +57,7 @@ import com.example.ui.util.triggerMiniVibration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -88,6 +89,7 @@ import com.example.ui.contentText
 import com.example.ui.tr
 import com.example.ui.components.CategoryTag
 import com.example.ui.components.TotImageProvider
+import com.example.ui.components.HarmonyVideoHeartAnimation
 import com.example.ui.components.VoiceInputButton
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyGold
@@ -587,6 +589,7 @@ fun QuizRunnerScreen(
     val context = LocalContext.current
     val pack = activeRun.pack
     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
+    val isMoralGreyZone = pack.cat == "zust" && pack.topic == "moral"
 
     val category = com.example.data.model.HarmonyPacksData.CATEGORIES.find { it.id == pack.cat }
     val catColor = category?.tagColorHex?.let { Color(it) } ?: HarmonyPink
@@ -618,6 +621,16 @@ fun QuizRunnerScreen(
                 accent = animatedCatColor,
                 modifier = Modifier.fillMaxSize()
             )
+            if (isMoralGreyZone) {
+                HarmonyVideoHeartAnimation(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 74.dp)
+                        .size(300.dp)
+                        .alpha(0.72f),
+                    contentScale = 0.88f
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
