@@ -1,5 +1,8 @@
 package com.example.ui.screens
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +66,7 @@ internal fun PartnerPredictionBoard(
     var prediction by remember(question, selectedAnswer) { mutableStateOf(restored?.prediction) }
     var actual by remember(question, selectedAnswer) { mutableStateOf(restored?.actual) }
     var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    var predictionSeries by remember { mutableStateOf(emptyList<Boolean>()) }
 
     FullscreenMechanicShell(
         kicker = tr("🔮 PARTNER-PROGNOSE", "🔮 PARTNER PREDICTION"),
@@ -96,24 +102,65 @@ internal fun PartnerPredictionBoard(
                 val predictedIndex = items.indexOfFirst { it.raw == prediction }
                 val actualIndex = items.indexOfFirst { it.raw == actual }
                 val distance = if (predictedIndex >= 0 && actualIndex >= 0) abs(predictedIndex - actualIndex) else Int.MAX_VALUE
+                val hit = distance == 0
+                val currentHits = predictionSeries.count { it } + if (hit) 1 else 0
+                val currentTotal = predictionSeries.size + 1
                 val result = when (distance) {
                     0 -> tr("✨ Treffer", "✨ Perfect hit")
                     1 -> tr("💫 Knapp daneben", "💫 Very close")
                     else -> tr("😮 Komplett überrascht", "😮 Total surprise")
                 }
+                val finale = if (currentTotal >= 8) {
+                    val rate = ((currentHits.toFloat() / currentTotal.toFloat()) * 100f).roundToInt()
+                    when {
+                        rate >= 75 -> tr("Ihr lest euch fast die Gedanken.", "You almost read each other's minds.")
+                        rate >= 50 -> tr("Ihr kennt euch stark – mit Raum für Überraschungen.", "You know each other well – with room for surprises.")
+                        else -> tr("Ihr habt noch herrlich viel aneinander zu entdecken.", "There is still wonderfully much to discover about each other.")
+                    }
+                } else null
+                val sparkle = remember(question) { Animatable(0f) }
+                LaunchedEffect(question, hit) {
+                    sparkle.snapTo(0f)
+                    if (hit) sparkle.animateTo(1f, tween(700, easing = FastOutSlowInEasing))
+                }
+
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(result, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(result, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(7.dp))
+                        Text(
+                            text = tr("$currentHits/$currentTotal richtig", "$currentHits/$currentTotal correct"),
+                            color = HarmonyPinkSoft,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center
+                        )
+                        if (hit) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "✦  ✧  ✦  ✧  ✦",
+                                color = Color.White,
+                                fontSize = 21.sp,
+                                modifier = Modifier.graphicsLayer {
+                                    alpha = sparkle.value.coerceIn(0f, 1f)
+                                    scaleX = 0.72f + sparkle.value * 0.28f
+                                    scaleY = 0.72f + sparkle.value * 0.28f
+                                    rotationZ = (1f - sparkle.value) * -8f
+                                }
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == prediction } ?: MechanicOption("", "–"),
-                            selected = distance == 0,
+                            selected = hit,
                             onClick = {},
                             badge = tr("Dein Tipp", "Your prediction"),
                             modifier = Modifier.weight(1f).heightIn(min = 155.dp)
@@ -126,12 +173,40 @@ internal fun PartnerPredictionBoard(
                             modifier = Modifier.weight(1f).heightIn(min = 155.dp)
                         )
                     }
+                    if (finale != null) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(HarmonyPurple.copy(alpha = 0.25f))
+                                .border(1.dp, HarmonyPink.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+                                .padding(12.dp)
+                        ) {
+                            Text(
+                                text = tr("Wie gut kennst du deinen Partner?", "How well do you know your partner?"),
+                                color = Color.White,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Black,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = finale,
+                                color = HarmonyMuted,
+                                fontSize = 14.sp,
+                                lineHeight = 18.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                     PrimaryMechanicButton(
-                        text = tr("Reveal speichern & weiter", "Save reveal & continue"),
+                        text = if (currentTotal >= 8) tr("Ergebnis speichern & weiter", "Save result & continue") else tr("Reveal speichern & weiter", "Save reveal & continue"),
                         onClick = {
                             val predicted = prediction
                             val chosen = actual
                             if (predicted != null && chosen != null) {
+                                predictionSeries = predictionSeries + hit
                                 onPick(PredictionAnswerCodec.encode(predicted, chosen))
                             }
                         },
@@ -192,6 +267,12 @@ internal fun SecretChoiceBoard(
 
             else -> {
                 val same = first != null && first == second
+                val revealMotion = remember(question) { Animatable(0f) }
+                LaunchedEffect(question, same) {
+                    revealMotion.snapTo(0f)
+                    revealMotion.animateTo(1f, tween(620, easing = FastOutSlowInEasing))
+                }
+                val travel = revealMotion.value
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -213,14 +294,26 @@ internal fun SecretChoiceBoard(
                             selected = same,
                             onClick = {},
                             badge = profile.userName,
-                            modifier = Modifier.weight(1f).heightIn(min = 160.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 160.dp)
+                                .graphicsLayer {
+                                    translationX = if (same) 24f * travel else -18f * travel
+                                    rotationZ = if (same) -1.5f * travel else -3f * travel
+                                }
                         )
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == second } ?: MechanicOption("", "–"),
                             selected = same,
                             onClick = {},
                             badge = profile.partnerName,
-                            modifier = Modifier.weight(1f).heightIn(min = 160.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 160.dp)
+                                .graphicsLayer {
+                                    translationX = if (same) -24f * travel else 18f * travel
+                                    rotationZ = if (same) 1.5f * travel else 3f * travel
+                                }
                         )
                     }
                     PrimaryMechanicButton(
@@ -308,8 +401,8 @@ internal fun ScaleMatchBoard(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(items.firstOrNull()?.label ?: "1", color = HarmonyMuted, fontSize = 12.sp, modifier = Modifier.weight(1f))
-                            Text(items.lastOrNull()?.label ?: max.toString(), color = HarmonyMuted, fontSize = 12.sp, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
+                            Text(items.firstOrNull()?.label ?: "1", color = HarmonyMuted, fontSize = 14.sp, lineHeight = 18.sp, modifier = Modifier.weight(1f))
+                            Text(items.lastOrNull()?.label ?: max.toString(), color = HarmonyMuted, fontSize = 14.sp, lineHeight = 18.sp, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
                         }
                     }
                     PrimaryMechanicButton(
@@ -344,7 +437,8 @@ internal fun ScaleMatchBoard(
                 val firstIndex = items.indexOfFirst { it.raw == first }.coerceAtLeast(0)
                 val secondIndex = items.indexOfFirst { it.raw == second }.coerceAtLeast(0)
                 val gap = abs(firstIndex - secondIndex)
-                val match = (100 - gap * 22).coerceIn(0, 100)
+                val maxGap = (items.size - 1).coerceAtLeast(1)
+                val match = (100f - gap.toFloat() * (100f / maxGap.toFloat())).roundToInt().coerceIn(0, 100)
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -391,8 +485,8 @@ internal fun ScaleMatchBoard(
 private fun ScaleRevealLine(name: String, label: String, index: Int, size: Int) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(name, color = HarmonyPinkSoft, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-            Text(label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(name, color = HarmonyPinkSoft, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+            Text(label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Spacer(Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
