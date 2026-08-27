@@ -396,7 +396,13 @@ internal fun ScenarioBoard(
     var selected by remember(question, selectedAnswer) {
         mutableStateOf(selectedAnswer?.takeIf { answer -> items.any { it.raw == answer } })
     }
+    var journeyChoices by remember { mutableStateOf(emptyList<Int>()) }
+    var showJourneyResult by remember(question) { mutableStateOf(false) }
+
     val sceneEmoji = when {
+        journeyChoices.size >= 7 -> "🏝️"
+        journeyChoices.size >= 6 -> "🌅"
+        journeyChoices.size >= 5 -> "🗺️"
         prompt.contains("insel", true) -> "🌴"
         prompt.contains("reise", true) || prompt.contains("unterwegs", true) -> "🗺️"
         prompt.contains("streit", true) -> "🌩️"
@@ -405,53 +411,168 @@ internal fun ScenarioBoard(
         else -> "🧭"
     }
 
+    val finalChoiceIndex = selected?.let { raw -> items.indexOfFirst { it.raw == raw }.coerceAtLeast(0) }
+    val projectedJourney = if (finalChoiceIndex != null) journeyChoices + finalChoiceIndex.coerceIn(0, 3) else journeyChoices
+    val dominantStyle = (0..3).maxByOrNull { style -> projectedJourney.count { it == style } } ?: 0
+    val resultTitle = when (dominantStyle) {
+        0 -> tr("Die Überlebenskünstler", "The Survivors")
+        1 -> tr("Die Strategen", "The Strategists")
+        2 -> tr("Die Genießer", "The Enjoyers")
+        else -> tr("Das Chaos-Duo", "The Chaos Duo")
+    }
+    val resultText = when (dominantStyle) {
+        0 -> tr("Ihr entscheidet direkt, praktisch und mit Blick auf das, was jetzt wirklich zählt.", "You decide directly, practically, and focus on what matters right now.")
+        1 -> tr("Ihr denkt voraus, wägt ab und baut euch Schritt für Schritt einen gemeinsamen Plan.", "You think ahead, weigh options, and build a shared plan step by step.")
+        2 -> tr("Ihr verliert auch im Abenteuer nicht aus den Augen, dass das Leben gemeinsam Spaß machen soll.", "Even in an adventure, you never forget that life together should be enjoyed.")
+        else -> tr("Ihr seid spontan, überraschend und vermutlich genau deshalb schwer aus der Ruhe zu bringen.", "You are spontaneous, surprising, and probably hard to shake for exactly that reason.")
+    }
+
     FullscreenMechanicShell(
         kicker = tr("🎭 SZENARIO", "🎭 SCENARIO"),
-        question = prompt,
-        instruction = tr(
-            "Entscheidet euch – die Geschichte geht mit eurer Wahl weiter.",
-            "Choose – the story continues with your decision."
-        ),
+        question = if (showJourneyResult) tr("Eure Geschichte ist geschrieben", "Your story is written") else prompt,
+        instruction = if (showJourneyResult) {
+            tr("Acht Entscheidungen ergeben euren Spieltyp.", "Eight decisions reveal your play style.")
+        } else {
+            tr(
+                "Entscheidet euch – die Geschichte geht mit eurer Wahl weiter.",
+                "Choose – the story continues with your decision."
+            )
+        },
         modifier = modifier.testTag("scenario_board")
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(112.dp)
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                HarmonyPurple.copy(alpha = 0.52f),
-                                HarmonyPink.copy(alpha = 0.24f),
-                                HarmonySurface2
+        if (showJourneyResult) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    HarmonyPink.copy(alpha = 0.42f),
+                                    HarmonyPurple.copy(alpha = 0.50f),
+                                    HarmonySurface2
+                                )
                             )
                         )
+                        .border(2.dp, Color.White.copy(alpha = 0.30f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("🏆", fontSize = 72.sp)
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(HarmonyPurple.copy(alpha = 0.25f))
+                        .border(1.dp, HarmonyPink.copy(alpha = 0.36f), RoundedCornerShape(26.dp))
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = resultTitle,
+                        color = Color.White,
+                        fontSize = 27.sp,
+                        lineHeight = 32.sp,
+                        fontWeight = FontWeight.Black,
+                        textAlign = TextAlign.Center
                     )
-                    .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(28.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(sceneEmoji, fontSize = 60.sp)
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = resultText,
+                        color = Color.White.copy(alpha = 0.78f),
+                        fontSize = 16.sp,
+                        lineHeight = 22.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = tr("8 Entscheidungen · 1 gemeinsamer Weg", "8 decisions · 1 shared path"),
+                        color = HarmonyPinkSoft,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                PrimaryMechanicButton(
+                    text = tr("Geschichte speichern & weiter", "Save story & continue"),
+                    onClick = {
+                        val answer = selected
+                        val index = finalChoiceIndex
+                        if (answer != null && index != null) {
+                            journeyChoices = journeyChoices + index.coerceIn(0, 3)
+                            onPick(answer)
+                        }
+                    },
+                    testTag = "scenario_finale_submit"
+                )
             }
-            Spacer(Modifier.height(12.dp))
-            LargeOptionGrid(
-                items = items,
-                selectedRaw = selected,
-                onSelect = { item ->
-                    triggerMiniVibration(context, 34L)
-                    selected = item.raw
-                },
-                modifier = Modifier.weight(1f),
-                tagPrefix = "scenario_option"
-            )
-            Spacer(Modifier.height(12.dp))
-            PrimaryMechanicButton(
-                text = tr("Entscheidung treffen", "Make decision"),
-                enabled = selected != null,
-                onClick = { selected?.let(onPick) },
-                testTag = "scenario_submit"
-            )
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(112.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    HarmonyPurple.copy(alpha = 0.52f),
+                                    HarmonyPink.copy(alpha = 0.24f),
+                                    HarmonySurface2
+                                )
+                            )
+                        )
+                        .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(28.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(sceneEmoji, fontSize = 60.sp)
+                        if (journeyChoices.isNotEmpty()) {
+                            Text(
+                                text = tr("Kapitel ${journeyChoices.size + 1}", "Chapter ${journeyChoices.size + 1}"),
+                                color = Color.White.copy(alpha = 0.74f),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                LargeOptionGrid(
+                    items = items,
+                    selectedRaw = selected,
+                    onSelect = { item ->
+                        triggerMiniVibration(context, 34L)
+                        selected = item.raw
+                    },
+                    modifier = Modifier.weight(1f),
+                    tagPrefix = "scenario_option"
+                )
+                Spacer(Modifier.height(12.dp))
+                PrimaryMechanicButton(
+                    text = if (projectedJourney.size >= 8) tr("Finale aufdecken", "Reveal finale") else tr("Entscheidung treffen", "Make decision"),
+                    enabled = selected != null,
+                    onClick = {
+                        val answer = selected
+                        val index = finalChoiceIndex
+                        if (answer != null && index != null) {
+                            triggerMiniVibration(context, 42L)
+                            if (projectedJourney.size >= 8) {
+                                showJourneyResult = true
+                            } else {
+                                journeyChoices = journeyChoices + index.coerceIn(0, 3)
+                                onPick(answer)
+                            }
+                        }
+                    },
+                    testTag = "scenario_submit"
+                )
+            }
         }
     }
 }
