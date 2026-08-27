@@ -1,8 +1,8 @@
 package com.example.ui.screens
 
+import com.example.data.model.FullscreenGameMechanicKind
+import com.example.data.model.FullscreenGameMechanicPolicy
 import com.example.data.model.HarmonyPacksData
-import com.example.data.model.QuestionInteractionKind
-import com.example.data.model.QuestionInteractionPolicy
 
 internal enum class HarmonyImageChoiceKind {
     EGG,
@@ -31,19 +31,19 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
     }
 
     val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId } ?: return null
-    return when (QuestionInteractionPolicy.resolve(pack, questionIndex)) {
-        QuestionInteractionKind.PERSON_ASSIGNMENT -> HarmonyImageChoiceKind.PERSON_ASSIGNMENT
-        QuestionInteractionKind.RANK_ORDER -> HarmonyImageChoiceKind.RANK_ORDER
-        QuestionInteractionKind.PARTNER_PREDICTION -> HarmonyImageChoiceKind.PARTNER_PREDICTION
-        QuestionInteractionKind.SECRET_CHOICE -> HarmonyImageChoiceKind.SECRET_CHOICE
-        QuestionInteractionKind.SCALE_MATCH -> HarmonyImageChoiceKind.SCALE_MATCH
-        QuestionInteractionKind.WHO_WOULD -> HarmonyImageChoiceKind.WHO_WOULD
-        QuestionInteractionKind.MEMORY_MATCH -> HarmonyImageChoiceKind.MEMORY_MATCH
-        QuestionInteractionKind.SCENARIO -> HarmonyImageChoiceKind.SCENARIO
-        QuestionInteractionKind.PRIORITY_POKER -> HarmonyImageChoiceKind.PRIORITY_POKER
-        QuestionInteractionKind.MATCH_TOURNAMENT -> HarmonyImageChoiceKind.MATCH_TOURNAMENT
-        QuestionInteractionKind.DEEP_TALK -> HarmonyImageChoiceKind.DEEP_TALK
-        QuestionInteractionKind.STANDARD -> null
+    return when (FullscreenGameMechanicPolicy.resolve(pack, questionIndex)) {
+        FullscreenGameMechanicKind.PERSON_ASSIGNMENT -> HarmonyImageChoiceKind.PERSON_ASSIGNMENT
+        FullscreenGameMechanicKind.RANK_ORDER -> HarmonyImageChoiceKind.RANK_ORDER
+        FullscreenGameMechanicKind.PARTNER_PREDICTION -> HarmonyImageChoiceKind.PARTNER_PREDICTION
+        FullscreenGameMechanicKind.SECRET_CHOICE -> HarmonyImageChoiceKind.SECRET_CHOICE
+        FullscreenGameMechanicKind.SCALE_MATCH -> HarmonyImageChoiceKind.SCALE_MATCH
+        FullscreenGameMechanicKind.WHO_WOULD -> HarmonyImageChoiceKind.WHO_WOULD
+        FullscreenGameMechanicKind.MEMORY_MATCH -> HarmonyImageChoiceKind.MEMORY_MATCH
+        FullscreenGameMechanicKind.SCENARIO -> HarmonyImageChoiceKind.SCENARIO
+        FullscreenGameMechanicKind.PRIORITY_POKER -> HarmonyImageChoiceKind.PRIORITY_POKER
+        FullscreenGameMechanicKind.MATCH_TOURNAMENT -> HarmonyImageChoiceKind.MATCH_TOURNAMENT
+        FullscreenGameMechanicKind.DEEP_TALK -> HarmonyImageChoiceKind.DEEP_TALK
+        null -> null
     }
 }
 
