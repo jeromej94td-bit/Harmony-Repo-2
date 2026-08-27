@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -590,7 +591,7 @@ fun QuizRunnerScreen(
     val pack = activeRun.pack
     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
     val isMoralGreyZone = pack.cat == "zust" && pack.topic == "moral"
-    val moralIntroKey = "${pack.id}_${activeRun.currentIndex}_moral_intro"
+    val moralIntroKey = pack.id
     var moralIntroFinished by remember(moralIntroKey) { mutableStateOf(!isMoralGreyZone) }
 
     val category = com.example.data.model.HarmonyPacksData.CATEGORIES.find { it.id == pack.cat }
@@ -620,11 +621,27 @@ fun QuizRunnerScreen(
                 .background(HarmonyBg)
         ) {
             if (isMoralGreyZone) {
-                key(moralIntroKey) {
-                    HarmonyRawVideoAnimation(
-                        rawResId = R.raw.moral_grey_zones_intro,
-                        immersive = !moralIntroFinished,
-                        onCompleted = { moralIntroFinished = true },
+                AnimatedVisibility(
+                    visible = !moralIntroFinished,
+                    enter = fadeIn(tween(durationMillis = 180, easing = FastOutSlowInEasing)),
+                    exit = fadeOut(tween(durationMillis = 900, easing = FastOutSlowInEasing))
+                ) {
+                    key(moralIntroKey) {
+                        HarmonyRawVideoAnimation(
+                            rawResId = R.raw.moral_grey_zones_intro,
+                            immersive = true,
+                            onCompleted = { moralIntroFinished = true },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = moralIntroFinished,
+                    enter = fadeIn(tween(durationMillis = 900, easing = FastOutSlowInEasing))
+                ) {
+                    QuestionColorFlowBackdrop(
+                        accent = animatedCatColor,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
