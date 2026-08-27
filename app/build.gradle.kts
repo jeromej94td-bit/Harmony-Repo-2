@@ -100,6 +100,65 @@ abstract class ReconstructMerlinThemeTask : DefaultTask() {
   }
 }
 
+
+abstract class ReconstructMoralGreyZonesIntroTask : DefaultTask() {
+  @get:InputFiles
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val chunks: ConfigurableFileCollection
+
+  @get:OutputFile
+  abstract val outputFile: RegularFileProperty
+
+  @get:Input
+  abstract val expectedSize: Property<Int>
+
+  @get:Input
+  abstract val expectedSha256: Property<String>
+
+  @TaskAction
+  fun reconstruct() {
+    val expectedNames = (1..13).map { "moral_grey_zones_intro_%02d.b64".format(it) }
+    val chunkFiles = chunks.files.sortedBy { it.name }
+    val actualNames = chunkFiles.map { it.name }
+    if (actualNames != expectedNames) {
+      throw GradleException("Unexpected moral grey zones video chunks: expected $expectedNames, got $actualNames")
+    }
+
+    val encoded = chunkFiles.joinToString(separator = "") { it.readText(Charsets.US_ASCII) }.filterNot { it.isWhitespace() }
+    val decoded = try {
+      Base64.getDecoder().decode(encoded)
+    } catch (error: IllegalArgumentException) {
+      throw GradleException("Moral grey zones video Base64 assets are invalid", error)
+    }
+
+    val actualSize = decoded.size
+    if (actualSize != expectedSize.get()) {
+      throw GradleException("Moral grey zones intro has $actualSize bytes; expected ${expectedSize.get()}")
+    }
+
+    val actualSha256 = MessageDigest.getInstance("SHA-256").digest(decoded).joinToString(separator = "") { "%02x".format(it) }
+    if (actualSha256 != expectedSha256.get()) {
+      throw GradleException("Moral grey zones intro SHA-256 is $actualSha256; expected ${expectedSha256.get()}")
+    }
+
+    val output = outputFile.get().asFile.toPath()
+    Files.createDirectories(output.parent)
+    val temporary = Files.createTempFile(output.parent, "moral_grey_zones_intro_", ".tmp")
+    try {
+      Files.write(temporary, decoded)
+      try {
+        Files.move(temporary, output, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+      } catch (_: AtomicMoveNotSupportedException) {
+        Files.move(temporary, output, StandardCopyOption.REPLACE_EXISTING)
+      }
+    } finally {
+      Files.deleteIfExists(temporary)
+    }
+
+    logger.lifecycle("Moral grey zones intro reconstructed: $actualSize bytes, sha256=$actualSha256")
+  }
+}
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
@@ -177,8 +236,21 @@ val reconstructMerlinTheme by tasks.registering(ReconstructMerlinThemeTask::clas
   expectedSha256.set("43a81cfc7254d69dce6027d7fadbdef32f3ce70c27d7d99507a20fe02127de24")
 }
 
+val reconstructMoralGreyZonesIntro by tasks.registering(ReconstructMoralGreyZonesIntroTask::class) {
+  group = "build"
+  description = "Reconstructs and verifies the moral grey zones intro video from Base64 assets."
+  chunks.from(
+    fileTree("src/main/assets/introspection") {
+      include("moral_grey_zones_intro_*.b64")
+    }
+  )
+  outputFile.set(layout.projectDirectory.file("src/main/res/raw/moral_grey_zones_intro.mp4"))
+  expectedSize.set(4863529)
+  expectedSha256.set("1cb564f6029af8f2222dae5ab62d6ce429bba6f76d7b9eef3c15f85843d66cf3")
+}
+
 tasks.named("preBuild").configure {
-  dependsOn(reconstructMerlinTheme)
+  dependsOn(reconstructMerlinTheme, reconstructMoralGreyZonesIntro)
 }
 
 // googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }
