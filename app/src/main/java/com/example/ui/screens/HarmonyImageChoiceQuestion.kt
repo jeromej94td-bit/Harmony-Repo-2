@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -102,48 +103,37 @@ private val traumhausChoiceImages = listOf(
     R.drawable.traumhaus_innenpool, R.drawable.traumhaus_kamin, R.drawable.traumhaus_landhaus
 )
 
+private fun isLegacyImageChoice(kind: HarmonyImageChoiceKind): Boolean = kind in setOf(
+    HarmonyImageChoiceKind.EGG,
+    HarmonyImageChoiceKind.STEAK,
+    HarmonyImageChoiceKind.TRAVEL,
+    HarmonyImageChoiceKind.TRAUMHAUS
+)
+
 @Composable
-private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImageChoiceVisuals =
-    when (kind) {
-        HarmonyImageChoiceKind.EGG -> HarmonyImageChoiceVisuals(
-            icon = Icons.Filled.Restaurant,
-            subtitle = tr(
-                "Wähle die Garstufe, die dir am besten schmeckt.",
-                "Choose the doneness you enjoy most."
-            ),
-            images = eggChoiceImages
-        )
-
-        HarmonyImageChoiceKind.STEAK -> HarmonyImageChoiceVisuals(
-            icon = Icons.Filled.Restaurant,
-            subtitle = tr(
-                "Tippe auf die gewünschte Garstufe.",
-                "Tap your preferred doneness."
-            ),
-            images = steakChoiceImages
-        )
-
-        HarmonyImageChoiceKind.TRAVEL -> HarmonyImageChoiceVisuals(
-            icon = Icons.Filled.FlightTakeoff,
-            subtitle = tr(
-                "Welche Art zu reisen fühlt sich nach euch an?",
-                "Which way of travelling feels most like you?"
-            ),
-            images = travelChoiceImages
-        )
-
-        HarmonyImageChoiceKind.TRAUMHAUS -> HarmonyImageChoiceVisuals(
-            icon = Icons.Filled.Home,
-            subtitle = tr(
-                "Welche Außenbereiche passen zu eurem Traumhaus?",
-                "Which exterior areas suit your dream home?"
-            ),
-            images = traumhausChoiceImages
-        )
-
-        HarmonyImageChoiceKind.RANK_ORDER,
-        HarmonyImageChoiceKind.PERSON_ASSIGNMENT -> error("Ranking interactions use QuestionInteractionBoard")
-    }
+private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImageChoiceVisuals = when (kind) {
+    HarmonyImageChoiceKind.EGG -> HarmonyImageChoiceVisuals(
+        icon = Icons.Filled.Restaurant,
+        subtitle = tr("Wähle die Garstufe, die dir am besten schmeckt.", "Choose the doneness you enjoy most."),
+        images = eggChoiceImages
+    )
+    HarmonyImageChoiceKind.STEAK -> HarmonyImageChoiceVisuals(
+        icon = Icons.Filled.Restaurant,
+        subtitle = tr("Tippe auf die gewünschte Garstufe.", "Tap your preferred doneness."),
+        images = steakChoiceImages
+    )
+    HarmonyImageChoiceKind.TRAVEL -> HarmonyImageChoiceVisuals(
+        icon = Icons.Filled.FlightTakeoff,
+        subtitle = tr("Welche Art zu reisen fühlt sich nach euch an?", "Which way of travelling feels most like you?"),
+        images = travelChoiceImages
+    )
+    HarmonyImageChoiceKind.TRAUMHAUS -> HarmonyImageChoiceVisuals(
+        icon = Icons.Filled.Home,
+        subtitle = tr("Welche Außenbereiche passen zu eurem Traumhaus?", "Which exterior areas suit your dream home?"),
+        images = traumhausChoiceImages
+    )
+    else -> error("Fullscreen mechanics do not use image-choice visuals")
+}
 
 @Composable
 internal fun HarmonyImageChoiceQuestion(
@@ -154,7 +144,7 @@ internal fun HarmonyImageChoiceQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (kind == HarmonyImageChoiceKind.RANK_ORDER || kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
+    if (!isLegacyImageChoice(kind)) {
         val context = LocalContext.current
         val profileFlow = remember(context.applicationContext) {
             HarmonyDatabase.getInstance(context.applicationContext).profileDao().getProfile()
@@ -164,24 +154,56 @@ internal fun HarmonyImageChoiceQuestion(
             userName = tr("Du", "You"),
             partnerName = tr("Partner", "Partner")
         )
-        QuestionInteractionBoard(
-            kind = if (kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
-                QuestionInteractionKind.PERSON_ASSIGNMENT
-            } else {
-                QuestionInteractionKind.RANK_ORDER
-            },
-            question = question,
-            options = options,
-            selectedAnswer = selectedAnswer,
-            profile = effectiveProfile,
-            onPick = onPick,
-            modifier = modifier
-        )
+
+        when (kind) {
+            HarmonyImageChoiceKind.RANK_ORDER,
+            HarmonyImageChoiceKind.PERSON_ASSIGNMENT -> QuestionInteractionBoard(
+                kind = if (kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
+                    QuestionInteractionKind.PERSON_ASSIGNMENT
+                } else {
+                    QuestionInteractionKind.RANK_ORDER
+                },
+                question = question,
+                options = options,
+                selectedAnswer = selectedAnswer,
+                profile = effectiveProfile,
+                onPick = onPick,
+                modifier = modifier.fillMaxSize()
+            )
+            HarmonyImageChoiceKind.PARTNER_PREDICTION -> PartnerPredictionBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.SECRET_CHOICE -> SecretChoiceBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.SCALE_MATCH -> ScaleMatchBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.WHO_WOULD -> WhoWouldBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.MEMORY_MATCH -> MemoryMatchBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.SCENARIO -> ScenarioBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.PRIORITY_POKER -> PriorityPokerBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.MATCH_TOURNAMENT -> MatchTournamentBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            HarmonyImageChoiceKind.DEEP_TALK -> DeepTalkBoard(
+                question, options, selectedAnswer, effectiveProfile, onPick, modifier
+            )
+            else -> Unit
+        }
         return
     }
 
     val visuals = harmonyImageChoiceVisuals(kind)
-    val containerShape = RoundedCornerShape(28.dp)
+    val containerShape = RoundedCornerShape(30.dp)
 
     Box(
         modifier = modifier
@@ -198,13 +220,13 @@ internal fun HarmonyImageChoiceQuestion(
                 )
             )
             .border(1.2.dp, HarmonyPink.copy(alpha = 0.46f), containerShape)
-            .padding(horizontal = 11.dp, vertical = 15.dp)
+            .padding(horizontal = 14.dp, vertical = 18.dp)
             .testTag("harmony_image_choice_question")
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -214,41 +236,38 @@ internal fun HarmonyImageChoiceQuestion(
                     .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = visuals.icon,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(23.dp)
-                )
+                Icon(visuals.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = contentText(question),
                 color = HarmonyText,
-                fontSize = 21.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.ExtraBold,
-                lineHeight = 24.sp,
+                lineHeight = 30.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = visuals.subtitle,
                 color = HarmonyMuted,
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 16.sp,
+                lineHeight = 19.sp,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(13.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            options.take(12).chunked(3).forEachIndexed { row, rowOptions ->
+            // Two large cards per row instead of twelve tiny tiles. All twelve remain available,
+            // but each image and label is readable at normal phone distance.
+            options.take(12).chunked(2).forEachIndexed { row, rowOptions ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    horizontalArrangement = Arrangement.spacedBy(11.dp)
                 ) {
                     rowOptions.forEachIndexed { column, option ->
-                        val index = row * 3 + column
+                        val index = row * 2 + column
                         HarmonyImageChoiceCard(
                             animationKey = "${kind.name}_$index",
                             index = index,
@@ -259,8 +278,9 @@ internal fun HarmonyImageChoiceQuestion(
                             modifier = Modifier.weight(1f)
                         )
                     }
+                    if (rowOptions.size == 1) Spacer(Modifier.weight(1f))
                 }
-                if (row < 3) Spacer(modifier = Modifier.height(8.dp))
+                if (row < 5) Spacer(modifier = Modifier.height(11.dp))
             }
         }
     }
@@ -278,7 +298,7 @@ private fun HarmonyImageChoiceCard(
 ) {
     val reveal = remember(animationKey) { Animatable(0f) }
     val density = LocalDensity.current.density
-    val shape = RoundedCornerShape(17.dp)
+    val shape = RoundedCornerShape(22.dp)
     val localizedOption = contentText(option)
     val title = localizedOption.substringBefore(" – ")
     val detail = localizedOption.substringAfter(" – ", missingDelimiterValue = "")
@@ -286,21 +306,18 @@ private fun HarmonyImageChoiceCard(
     LaunchedEffect(animationKey) {
         reveal.snapTo(0f)
         delay(harmonyImageChoiceRevealDelayMillis(index))
-        reveal.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 430, easing = FastOutSlowInEasing)
-        )
+        reveal.animateTo(1f, tween(durationMillis = 430, easing = FastOutSlowInEasing))
     }
 
     val progress = reveal.value.coerceIn(0f, 1f)
     Column(
         modifier = modifier
-            .aspectRatio(0.63f)
+            .aspectRatio(0.82f)
             .graphicsLayer {
                 alpha = progress
-                rotationY = -82f * (1f - progress)
-                translationX = -18f * (1f - progress)
-                scaleX = 0.94f + progress * 0.06f
+                rotationY = -76f * (1f - progress)
+                translationX = -14f * (1f - progress)
+                scaleX = 0.95f + progress * 0.05f
                 scaleY = 0.96f + progress * 0.04f
                 transformOrigin = TransformOrigin(0f, 0.5f)
                 cameraDistance = 26f * density
@@ -321,13 +338,10 @@ private fun HarmonyImageChoiceCard(
                 shape = shape
             )
             .clickable(enabled = progress > 0.86f, onClick = onClick)
-            .padding(bottom = 7.dp)
+            .padding(bottom = 10.dp)
             .testTag(
-                if (selected) {
-                    "harmony_image_choice_option_${index}_selected"
-                } else {
-                    "harmony_image_choice_option_$index"
-                }
+                if (selected) "harmony_image_choice_option_${index}_selected"
+                else "harmony_image_choice_option_$index"
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -335,7 +349,7 @@ private fun HarmonyImageChoiceCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(4f / 3f)
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .clip(RoundedCornerShape(topStart = 21.dp, topEnd = 21.dp))
         ) {
             Image(
                 painter = painterResource(imageRes),
@@ -344,40 +358,36 @@ private fun HarmonyImageChoiceCard(
                 modifier = Modifier.fillMaxSize()
             )
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Transparent, HarmonyBg.copy(alpha = 0.20f))
-                        )
-                    )
+                modifier = Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(listOf(Color.Transparent, HarmonyBg.copy(alpha = 0.20f)))
+                )
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = title,
             color = if (selected) Color.White else HarmonyText,
-            fontSize = 10.5.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.ExtraBold,
-            lineHeight = 12.sp,
+            lineHeight = 17.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 5.dp)
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
         if (detail.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = detail,
                 color = HarmonyMuted,
-                fontSize = 8.sp,
+                fontSize = 10.5.sp,
                 fontWeight = FontWeight.Medium,
-                lineHeight = 9.5.sp,
+                lineHeight = 13.sp,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(horizontal = 7.dp)
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -385,7 +395,7 @@ private fun HarmonyImageChoiceCard(
             imageVector = if (selected) Icons.Filled.Check else Icons.Outlined.FavoriteBorder,
             contentDescription = null,
             tint = if (selected) HarmonyPink else Color.White.copy(alpha = 0.50f),
-            modifier = Modifier.size(17.dp)
+            modifier = Modifier.size(21.dp)
         )
     }
 }
