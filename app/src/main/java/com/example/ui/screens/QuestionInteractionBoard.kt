@@ -35,12 +35,12 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -491,7 +491,7 @@ private fun RankingDragItem(
                 scaleY = if (dragging) 1.025f else 1f
                 shadowElevation = if (dragging) 18f else 3f
             }
-            .pointerInput(item, position, itemCount) {
+            .pointerInput(item, itemCount) {
                 detectDragGestures(
                     onDragStart = {
                         dragging = true
@@ -508,10 +508,10 @@ private fun RankingDragItem(
                     onDrag = { change, amount ->
                         change.consume()
                         dragY += amount.y
-                        if (dragY > threshold && position < itemCount - 1) {
+                        if (dragY > threshold) {
                             onMove(1)
                             dragY -= threshold
-                        } else if (dragY < -threshold && position > 0) {
+                        } else if (dragY < -threshold) {
                             onMove(-1)
                             dragY += threshold
                         }
