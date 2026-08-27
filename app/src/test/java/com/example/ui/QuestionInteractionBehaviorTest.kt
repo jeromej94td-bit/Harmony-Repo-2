@@ -43,6 +43,23 @@ class QuestionInteractionBehaviorTest {
     }
 
     @Test
+    fun overlappingHitSlopChoosesNearestTargetInsteadOfAlwaysLeftTarget() {
+        val user = DropRect(left = 0f, top = 0f, right = 120f, bottom = 220f)
+        val partner = DropRect(left = 134f, top = 0f, right = 254f, bottom = 220f)
+
+        assertEquals(
+            PersonSide.PARTNER,
+            resolvePersonDrop(
+                pointerX = 130f,
+                pointerY = 110f,
+                userBounds = user,
+                partnerBounds = partner,
+                hitSlop = 24f
+            )
+        )
+    }
+
+    @Test
     fun rankingQuestionDoesNotRepeatVisibleAnswerCards() {
         val options = listOf("Sicherheit", "Freiheit", "Abenteuer", "Komfort")
 
