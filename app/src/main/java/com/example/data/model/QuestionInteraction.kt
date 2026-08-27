@@ -3,6 +3,11 @@ package com.example.data.model
 enum class QuestionInteractionKind {
     STANDARD,
     RANK_ORDER,
+    PERSON_ASSIGNMENT
+}
+
+enum class FullscreenGameMechanicKind {
+    RANK_ORDER,
     PERSON_ASSIGNMENT,
     PARTNER_PREDICTION,
     SECRET_CHOICE,
@@ -28,11 +33,6 @@ object QuestionInteractionPolicy {
     private const val PERSON_ASSIGNMENT_PREFIX = "interaction_person_assignment_"
     private const val RANK_ORDER_PREFIX = "interaction_rank_order_"
 
-    /**
-     * Explicit per-question interaction metadata lives in pack tags so it survives
-     * the existing Dev-Studio/export pipeline without changing the stored question schema.
-     * Pack-level Harmony-360 mechanic tags then provide the reusable default interaction.
-     */
     fun resolve(pack: QuestionPack, questionIndex: Int): QuestionInteractionKind {
         if (pack.tags.any { it == "$PERSON_ASSIGNMENT_PREFIX$questionIndex" }) {
             return QuestionInteractionKind.PERSON_ASSIGNMENT
@@ -41,52 +41,66 @@ object QuestionInteractionPolicy {
             return QuestionInteractionKind.RANK_ORDER
         }
 
-        // The first shipped role-assignment question predates the interaction tag.
-        // Keep the metadata centralized here rather than coupling UI behavior to question text.
         if (pack.id == "h500_414_rollenverteilung_ranking" && questionIndex == 1) {
             return QuestionInteractionKind.PERSON_ASSIGNMENT
         }
 
-        return when {
-            pack.tags.any { it == "mechanik_prognose" } || pack.cat == "h360_prognose" ->
-                QuestionInteractionKind.PARTNER_PREDICTION
-
-            pack.tags.any { it == "mechanik_geheime_wahl" } || pack.cat == "h360_geheim" ->
-                QuestionInteractionKind.SECRET_CHOICE
-
-            pack.tags.any { it == "mechanik_skala" } || pack.cat == "h360_skala" ->
-                QuestionInteractionKind.SCALE_MATCH
-
-            pack.tags.any { it == "mechanik_wer_eher" } ->
-                QuestionInteractionKind.WHO_WOULD
-
-            pack.tags.any { it == "mechanik_memory" } ->
-                QuestionInteractionKind.MEMORY_MATCH
-
-            pack.tags.any { it == "mechanik_szenario" } || pack.cat == "h360_szenario" ->
-                QuestionInteractionKind.SCENARIO
-
-            pack.tags.any { it == "mechanik_prioritaet" } ->
-                QuestionInteractionKind.PRIORITY_POKER
-
-            pack.tags.any { it == "mechanik_entweder_oder" } ->
-                QuestionInteractionKind.MATCH_TOURNAMENT
-
-            pack.tags.any { it == "mechanik_deep_talk" } ->
-                QuestionInteractionKind.DEEP_TALK
-
-            pack.cat == "h360_ranking" || pack.tags.any { it == "mechanik_ranking" } ->
-                QuestionInteractionKind.RANK_ORDER
-
-            else -> QuestionInteractionKind.STANDARD
+        return if (pack.cat == "h360_ranking" || pack.tags.any { it == "mechanik_ranking" }) {
+            QuestionInteractionKind.RANK_ORDER
+        } else {
+            QuestionInteractionKind.STANDARD
         }
     }
 }
 
 /**
- * Specialized boards own their options. Some generated source questions still append the same
- * choices to the prompt (for example "Ordne: A, B, C, D"). This policy removes only a detected
- * repeated option tail so the fullscreen board never renders the same choices twice.
+ * All full-screen game routing lives here. The old ranking dispatcher stays intentionally small
+ * so the already shipped drag/drop implementation is not destabilized by the new game systems.
+ */
+object FullscreenGameMechanicPolicy {
+    fun resolve(pack: QuestionPack, questionIndex: Int): FullscreenGameMechanicKind? {
+        when (QuestionInteractionPolicy.resolve(pack, questionIndex)) {
+            QuestionInteractionKind.PERSON_ASSIGNMENT -> return FullscreenGameMechanicKind.PERSON_ASSIGNMENT
+            QuestionInteractionKind.RANK_ORDER -> return FullscreenGameMechanicKind.RANK_ORDER
+            QuestionInteractionKind.STANDARD -> Unit
+        }
+
+        return when {
+            pack.tags.any { it == "mechanik_prognose" } || pack.cat == "h360_prognose" ->
+                FullscreenGameMechanicKind.PARTNER_PREDICTION
+
+            pack.tags.any { it == "mechanik_geheime_wahl" } || pack.cat == "h360_geheim" ->
+                FullscreenGameMechanicKind.SECRET_CHOICE
+
+            pack.tags.any { it == "mechanik_skala" } || pack.cat == "h360_skala" ->
+                FullscreenGameMechanicKind.SCALE_MATCH
+
+            pack.tags.any { it == "mechanik_wer_eher" } ->
+                FullscreenGameMechanicKind.WHO_WOULD
+
+            pack.tags.any { it == "mechanik_memory" } ->
+                FullscreenGameMechanicKind.MEMORY_MATCH
+
+            pack.tags.any { it == "mechanik_szenario" } || pack.cat == "h360_szenario" ->
+                FullscreenGameMechanicKind.SCENARIO
+
+            pack.tags.any { it == "mechanik_prioritaet" } ->
+                FullscreenGameMechanicKind.PRIORITY_POKER
+
+            pack.tags.any { it == "mechanik_entweder_oder" } ->
+                FullscreenGameMechanicKind.MATCH_TOURNAMENT
+
+            pack.tags.any { it == "mechanik_deep_talk" } ->
+                FullscreenGameMechanicKind.DEEP_TALK
+
+            else -> null
+        }
+    }
+}
+
+/**
+ * Specialized boards own their options. Generated source questions sometimes append the exact
+ * same options to the prompt. Remove only a detected repeated option tail so choices appear once.
  */
 object InteractionPromptPolicy {
     private val trailingInstruction = Regex(
@@ -107,8 +121,6 @@ object InteractionPromptPolicy {
             .sorted()
             .toList()
 
-        // One incidental word can legitimately occur in a question. Two or more repeated choices
-        // are a strong signal that the generated prompt contains an answer list.
         if (occurrences.size < 2) return prompt
 
         var cleaned = prompt.substring(0, occurrences.first()).trim()
