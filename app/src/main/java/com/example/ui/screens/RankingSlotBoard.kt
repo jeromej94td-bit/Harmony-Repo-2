@@ -168,7 +168,7 @@ internal fun RankingSlotBoard(
                                 onBounds = { slotBounds[slotIndex] = it },
                                 resolveSlot = ::resolveSlot,
                                 onHover = { hoveredSlot = it },
-                                onDrop = { raw, from -> placeCard(raw, from, slotIndex) },
+                                onMove = { raw, from, target -> placeCard(raw, from, target) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -252,7 +252,7 @@ private fun RankingDropSlot(
     onBounds: (DropRect) -> Unit,
     resolveSlot: (Offset?) -> Int?,
     onHover: (Int?) -> Unit,
-    onDrop: (String, Int?) -> Unit,
+    onMove: (String, Int, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(22.dp)
@@ -290,8 +290,13 @@ private fun RankingDropSlot(
                 .size(44.dp)
                 .clip(CircleShape)
                 .background(
-                    if (raw == null) Color.White.copy(alpha = 0.08f)
-                    else Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight))
+                    Brush.linearGradient(
+                        if (raw == null) {
+                            listOf(Color.White.copy(alpha = 0.09f), Color.White.copy(alpha = 0.04f))
+                        } else {
+                            listOf(HarmonyPink, HarmonyPurpleLight)
+                        }
+                    )
                 )
                 .border(1.dp, Color.White.copy(alpha = 0.22f), CircleShape),
             contentAlignment = Alignment.Center
@@ -321,7 +326,7 @@ private fun RankingDropSlot(
                 fromSlot = position,
                 resolveSlot = resolveSlot,
                 onHover = onHover,
-                onDrop = { target -> onDrop(raw, position) },
+                onDrop = { target -> onMove(raw, position, target) },
                 compact = true,
                 modifier = Modifier.weight(1f)
             )
