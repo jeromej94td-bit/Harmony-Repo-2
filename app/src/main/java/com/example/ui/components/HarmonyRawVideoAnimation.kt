@@ -56,8 +56,10 @@ fun HarmonyRawVideoAnimation(
     }
 
     var assetVideoPath by remember(assetPrefix, rawResId) { mutableStateOf<String?>(null) }
+    var useRawFallback by remember(assetPrefix, rawResId) { mutableStateOf(false) }
 
     LaunchedEffect(assetPrefix, rawResId) {
+        useRawFallback = false
         assetVideoPath = if (assetPrefix == null) {
             null
         } else {
@@ -92,7 +94,7 @@ fun HarmonyRawVideoAnimation(
             .then(if (roundedCorners) Modifier.clip(RoundedCornerShape(28.dp)) else Modifier)
             .background(Color.Black)
     ) {
-        if (assetPrefix == null) {
+        if (assetPrefix == null || useRawFallback) {
             val videoUri = remember(rawResId, context.packageName) {
                 Uri.parse("android.resource://" + context.packageName + "/" + rawResId)
             }
