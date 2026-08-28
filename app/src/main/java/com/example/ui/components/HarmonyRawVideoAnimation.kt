@@ -90,7 +90,7 @@ fun HarmonyRawVideoAnimation(
     Box(
         modifier = modifier
             .then(if (roundedCorners) Modifier.clip(RoundedCornerShape(28.dp)) else Modifier)
-            .background(Color.Transparent)
+            .background(Color.Black)
     ) {
         if (assetPrefix == null) {
             val videoUri = remember(rawResId, context.packageName) {
