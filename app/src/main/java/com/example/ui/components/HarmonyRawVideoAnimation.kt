@@ -108,6 +108,12 @@ fun HarmonyRawVideoAnimation(
                             start()
                         }
                         setOnCompletionListener { onCompleted() }
+                        setOnErrorListener { _, _, _ ->
+                            if (assetPrefix != null && rawResId != 0 && !useRawFallback) {
+                                useRawFallback = true
+                                true
+                            } else false
+                        }
                     }
                 },
                 update = { videoView ->
@@ -126,6 +132,12 @@ fun HarmonyRawVideoAnimation(
                                 start()
                             }
                             setOnCompletionListener { onCompleted() }
+                        setOnErrorListener { _, _, _ ->
+                            if (assetPrefix != null && rawResId != 0 && !useRawFallback) {
+                                useRawFallback = true
+                                true
+                            } else false
+                        }
                         }
                     },
                     update = { videoView ->
