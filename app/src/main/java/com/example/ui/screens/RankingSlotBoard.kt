@@ -62,9 +62,8 @@ import com.example.ui.tr
 import com.example.ui.util.triggerMiniVibration
 
 /**
- * Ranking starts deliberately empty. Answers live in the card pool on the right and only become
- * part of the ranking after the user drags them into a numbered slot. This prevents accepting the
- * generator's source order as an accidental answer.
+ * New ranking questions start empty. Answers stay in the right-hand card pool until the user
+ * actively drags each card into one of the numbered ranking slots.
  */
 @Composable
 internal fun RankingSlotBoard(
@@ -76,36 +75,29 @@ internal fun RankingSlotBoard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val density = LocalDensity.current
-    val hitSlop = with(density) { 22.dp.toPx() }
+    val hitSlop = with(LocalDensity.current) { 22.dp.toPx() }
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
-    val labelByRaw = items.associate { it.raw to it.label }
+    val labels = items.associate { it.raw to it.label }
 
-    val restoredOrder = remember(question, selectedAnswer, options) {
+    val restored = remember(question, selectedAnswer, options) {
         selectedAnswer?.let { RankingAnswerCodec.decode(it, options) }
     }
     val slots = remember(question, selectedAnswer, options) {
         mutableStateListOf<String?>().apply {
-            if (restoredOrder != null) {
-                addAll(restoredOrder)
-            } else {
-                repeat(options.size) { add(null) }
-            }
+            if (restored != null) addAll(restored) else repeat(options.size) { add(null) }
         }
     }
     val slotBounds = remember(question) { mutableStateMapOf<Int, DropRect>() }
     var hoveredSlot by remember(question) { mutableStateOf<Int?>(null) }
 
     val unassigned = options.filter { option -> slots.none { it == option } }
-    val complete = options.isNotEmpty() && slots.size == options.size && slots.all { it != null } &&
+    val complete = options.isNotEmpty() && slots.all { it != null } &&
         slots.filterNotNull().distinct().size == options.size
 
     fun resolveSlot(pointer: Offset?): Int? {
         if (pointer == null) return null
-        val direct = slotBounds.entries.firstOrNull { (_, rect) -> rect.contains(pointer.x, pointer.y) }
-        if (direct != null) return direct.key
-
+        slotBounds.entries.firstOrNull { (_, rect) -> rect.contains(pointer.x, pointer.y) }?.let { return it.key }
         return slotBounds.entries
             .filter { (_, rect) -> rect.contains(pointer.x, pointer.y, hitSlop) }
             .minByOrNull { (_, rect) -> rect.distanceSquaredTo(pointer.x, pointer.y) }
@@ -120,9 +112,7 @@ internal fun RankingSlotBoard(
         }
 
         val displaced = slots[targetSlot]
-        if (fromSlot != null && fromSlot in slots.indices) {
-            slots[fromSlot] = displaced
-        }
+        if (fromSlot != null && fromSlot in slots.indices) slots[fromSlot] = displaced
         slots[targetSlot] = raw
         hoveredSlot = null
         triggerMiniVibration(context, 48L)
@@ -137,17 +127,13 @@ internal fun RankingSlotBoard(
         ),
         modifier = modifier.testTag("ranking_slot_board")
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .weight(1.42f)
-                        .fillMaxSize(),
+                    modifier = Modifier.weight(1.42f).fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
@@ -157,31 +143,32 @@ internal fun RankingSlotBoard(
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(start = 4.dp)
                     )
-
                     slots.indices.forEach { slotIndex ->
                         key("slot_$slotIndex") {
                             RankingDropSlot(
                                 position = slotIndex,
                                 raw = slots[slotIndex],
-                                label = slots[slotIndex]?.let { labelByRaw[it] },
+                                label = slots[slotIndex]?.let { labels[it] },
                                 highlighted = hoveredSlot == slotIndex,
                                 onBounds = { slotBounds[slotIndex] = it },
                                 resolveSlot = ::resolveSlot,
                                 onHover = { hoveredSlot = it },
-                                onMove = { raw, from, target -> placeCard(raw, from, target) },
+                                onMove = ::placeCard,
                                 modifier = Modifier.weight(1f)
                             )
                         }
                     }
                 }
 
+                val poolShape = RoundedCornerShape(26.dp)
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(26.dp))
-                        .background(Color.White.copy(alpha = 0.035f))
-                        .border(1.dp, HarmonyLine, RoundedCornerShape(26.dp))
+                        // Do not clip this parent: dragged cards must stay visible while crossing
+                        // from the right-hand pool into the ranking slots on the left.
+                        .background(Color.White.copy(alpha = 0.035f), poolShape)
+                        .border(1.dp, HarmonyLine, poolShape)
                         .padding(horizontal = 10.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -192,9 +179,8 @@ internal fun RankingSlotBoard(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
-
                     if (unassigned.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
                                 text = tr("Alle Karten liegen in der Rangliste", "All cards are in the ranking"),
                                 color = HarmonyPinkSoft,
@@ -209,7 +195,7 @@ internal fun RankingSlotBoard(
                             key("pool_$raw") {
                                 RankingDraggableCard(
                                     raw = raw,
-                                    label = labelByRaw[raw] ?: raw,
+                                    label = labels[raw] ?: raw,
                                     fromSlot = null,
                                     resolveSlot = ::resolveSlot,
                                     onHover = { hoveredSlot = it },
@@ -252,7 +238,7 @@ private fun RankingDropSlot(
     onBounds: (DropRect) -> Unit,
     resolveSlot: (Offset?) -> Int?,
     onHover: (Int?) -> Unit,
-    onMove: (String, Int, Int) -> Unit,
+    onMove: (String, Int?, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(22.dp)
@@ -262,7 +248,7 @@ private fun RankingDropSlot(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 66.dp)
-            .clip(shape)
+            // Keep children drawable outside the slot while a placed card is being moved.
             .background(
                 Brush.horizontalGradient(
                     listOf(
@@ -270,7 +256,8 @@ private fun RankingDropSlot(
                         HarmonySurface2.copy(alpha = 0.96f),
                         HarmonyBg.copy(alpha = 0.94f)
                     )
-                )
+                ),
+                shape
             )
             .border(
                 if (highlighted) 2.2.dp else 1.2.dp,
@@ -309,7 +296,6 @@ private fun RankingDropSlot(
             )
         }
         Spacer(Modifier.width(12.dp))
-
         if (raw == null) {
             Text(
                 text = tr("Platz ${position + 1} · Karte hier ablegen", "Place ${position + 1} · drop card here"),
@@ -351,9 +337,7 @@ private fun RankingDraggableCard(
     var dragging by remember(raw, fromSlot) { mutableStateOf(false) }
     val shape = RoundedCornerShape(if (compact) 16.dp else 20.dp)
 
-    fun updateHover(pointer: Offset?) {
-        onHover(resolveSlot(pointer))
-    }
+    fun updateHover(pointer: Offset?) = onHover(resolveSlot(pointer))
 
     Row(
         modifier = modifier
@@ -388,8 +372,7 @@ private fun RankingDraggableCard(
                         onHover(null)
                     },
                     onDragEnd = {
-                        val target = resolveSlot(pointerInRoot)
-                        if (target != null) onDrop(target)
+                        resolveSlot(pointerInRoot)?.let(onDrop)
                         dragging = false
                         dragOffset = Offset.Zero
                         pointerInRoot = null
@@ -423,7 +406,7 @@ private fun RankingDraggableCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
+            Modifier
                 .width(5.dp)
                 .height(if (compact) 28.dp else 34.dp)
                 .clip(RoundedCornerShape(4.dp))
