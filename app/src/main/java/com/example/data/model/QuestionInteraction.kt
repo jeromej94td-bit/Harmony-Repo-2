@@ -6,6 +6,20 @@ enum class QuestionInteractionKind {
     PERSON_ASSIGNMENT
 }
 
+enum class FullscreenGameMechanicKind {
+    RANK_ORDER,
+    PERSON_ASSIGNMENT,
+    PARTNER_PREDICTION,
+    SECRET_CHOICE,
+    SCALE_MATCH,
+    WHO_WOULD,
+    MEMORY_MATCH,
+    SCENARIO,
+    PRIORITY_POKER,
+    MATCH_TOURNAMENT,
+    DEEP_TALK
+}
+
 enum class PersonSide(val token: String) {
     USER("user"),
     PARTNER("partner");
@@ -19,10 +33,6 @@ object QuestionInteractionPolicy {
     private const val PERSON_ASSIGNMENT_PREFIX = "interaction_person_assignment_"
     private const val RANK_ORDER_PREFIX = "interaction_rank_order_"
 
-    /**
-     * Explicit per-question interaction metadata lives in pack tags so it survives
-     * the existing Dev-Studio/export pipeline without changing the stored question schema.
-     */
     fun resolve(pack: QuestionPack, questionIndex: Int): QuestionInteractionKind {
         if (pack.tags.any { it == "$PERSON_ASSIGNMENT_PREFIX$questionIndex" }) {
             return QuestionInteractionKind.PERSON_ASSIGNMENT
@@ -31,8 +41,6 @@ object QuestionInteractionPolicy {
             return QuestionInteractionKind.RANK_ORDER
         }
 
-        // The first shipped role-assignment question predates the interaction tag.
-        // Keep the metadata centralized here rather than coupling UI behavior to question text.
         if (pack.id == "h500_414_rollenverteilung_ranking" && questionIndex == 1) {
             return QuestionInteractionKind.PERSON_ASSIGNMENT
         }
@@ -42,6 +50,130 @@ object QuestionInteractionPolicy {
         } else {
             QuestionInteractionKind.STANDARD
         }
+    }
+}
+
+/**
+ * All full-screen game routing lives here. The old ranking dispatcher stays intentionally small
+ * so the already shipped drag/drop implementation is not destabilized by the new game systems.
+ */
+object FullscreenGameMechanicPolicy {
+    fun resolve(pack: QuestionPack, questionIndex: Int): FullscreenGameMechanicKind? {
+        when (QuestionInteractionPolicy.resolve(pack, questionIndex)) {
+            QuestionInteractionKind.PERSON_ASSIGNMENT -> return FullscreenGameMechanicKind.PERSON_ASSIGNMENT
+            QuestionInteractionKind.RANK_ORDER -> return FullscreenGameMechanicKind.RANK_ORDER
+            QuestionInteractionKind.STANDARD -> Unit
+        }
+
+        return when {
+            pack.tags.any { it == "mechanik_prognose" } || pack.cat == "h360_prognose" ->
+                FullscreenGameMechanicKind.PARTNER_PREDICTION
+
+            pack.tags.any { it == "mechanik_geheime_wahl" } || pack.cat == "h360_geheim" ->
+                FullscreenGameMechanicKind.SECRET_CHOICE
+
+            pack.tags.any { it == "mechanik_skala" } || pack.cat == "h360_skala" ->
+                FullscreenGameMechanicKind.SCALE_MATCH
+
+            pack.tags.any { it == "mechanik_wer_eher" } ->
+                FullscreenGameMechanicKind.WHO_WOULD
+
+            pack.tags.any { it == "mechanik_memory" } ->
+                FullscreenGameMechanicKind.MEMORY_MATCH
+
+            pack.tags.any { it == "mechanik_szenario" } || pack.cat == "h360_szenario" ->
+                FullscreenGameMechanicKind.SCENARIO
+
+            pack.tags.any { it == "mechanik_prioritaet" } ->
+                FullscreenGameMechanicKind.PRIORITY_POKER
+
+            pack.tags.any { it == "mechanik_entweder_oder" } ->
+                FullscreenGameMechanicKind.MATCH_TOURNAMENT
+
+            pack.tags.any { it == "mechanik_deep_talk" } ->
+                FullscreenGameMechanicKind.DEEP_TALK
+
+            else -> null
+        }
+    }
+}
+
+/**
+ * Specialized boards own their options. Generated source questions sometimes append the exact
+ * same options to the prompt. Remove only a detected repeated option tail so choices appear once.
+ */
+object InteractionPromptPolicy {
+    private val trailingInstruction = Regex(
+        pattern = "(?i)\\s*(ordne|ordnet|rank|rankt|ranking|sortiere|sortiert|reihe|reiht)(\\s+(sie|es|diese|die))?\\s*[:\\-–—]?\\s*$"
+    )
+
+    fun displayPrompt(question: String, options: List<String>): String {
+        val prompt = question.trim()
+        if (prompt.isBlank()) return prompt
+
+        val occurrences = options
+            .asSequence()
+            .map(String::trim)
+            .filter { it.length >= 2 }
+            .mapNotNull { option ->
+                prompt.indexOf(option, ignoreCase = true).takeIf { it >= 0 }
+            }
+            .sorted()
+            .toList()
+
+        if (occurrences.size < 2) return prompt
+
+        var cleaned = prompt.substring(0, occurrences.first()).trim()
+        cleaned = cleaned.trimEnd(' ', ':', ',', ';', '-', '–', '—')
+        cleaned = cleaned.replace(trailingInstruction, "").trim()
+        cleaned = cleaned.trimEnd(' ', ':', ',', ';', '-', '–', '—')
+        return cleaned.ifBlank { prompt }
+    }
+}
+
+data class PairedChoiceAnswer(
+    val first: String,
+    val second: String
+)
+
+object PairedChoiceAnswerCodec {
+    private const val PREFIX = "paired-choice-v1:"
+    private const val SEPARATOR = "\u001E"
+
+    private fun clean(value: String): String = value.replace(SEPARATOR, " ")
+
+    fun encode(first: String, second: String): String =
+        PREFIX + clean(first) + SEPARATOR + clean(second)
+
+    fun decode(value: String): PairedChoiceAnswer? {
+        if (!value.startsWith(PREFIX)) return null
+        val parts = value.removePrefix(PREFIX).split(SEPARATOR, limit = 2)
+        if (parts.size != 2) return null
+        return PairedChoiceAnswer(parts[0], parts[1])
+    }
+}
+
+data class PredictionAnswer(
+    val prediction: String,
+    val actual: String
+) {
+    val isHit: Boolean get() = prediction == actual
+}
+
+object PredictionAnswerCodec {
+    private const val PREFIX = "prediction-v1:"
+    private const val SEPARATOR = "\u001E"
+
+    private fun clean(value: String): String = value.replace(SEPARATOR, " ")
+
+    fun encode(prediction: String, actual: String): String =
+        PREFIX + clean(prediction) + SEPARATOR + clean(actual)
+
+    fun decode(value: String): PredictionAnswer? {
+        if (!value.startsWith(PREFIX)) return null
+        val parts = value.removePrefix(PREFIX).split(SEPARATOR, limit = 2)
+        if (parts.size != 2) return null
+        return PredictionAnswer(parts[0], parts[1])
     }
 }
 

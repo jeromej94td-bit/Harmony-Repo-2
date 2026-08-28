@@ -14,9 +14,17 @@ class QuestionInteractionTest {
         cat = "h360_ranking",
         topic = "beziehung",
         type = "quiz",
-        questions = listOf(
-            Question("Ordne nach Wichtigkeit", listOf("A", "B", "C", "D"))
-        )
+        questions = listOf(Question("Ordne nach Wichtigkeit", listOf("A", "B", "C", "D")))
+    )
+
+    private fun mechanicPack(tag: String, cat: String = "h360_test"): QuestionPack = QuestionPack(
+        id = "pack_$tag",
+        title = tag,
+        tags = listOf("harmony360", tag),
+        cat = cat,
+        topic = "beziehung",
+        type = "quiz",
+        questions = listOf(Question("Testfrage", listOf("A", "B", "C", "D")))
     )
 
     @Test
@@ -31,17 +39,48 @@ class QuestionInteractionTest {
             questions = listOf(Question("Wer übernimmt?", listOf("A", "B")))
         )
 
-        assertEquals(
-            QuestionInteractionKind.PERSON_ASSIGNMENT,
-            QuestionInteractionPolicy.resolve(pack, 0)
-        )
+        assertEquals(QuestionInteractionKind.PERSON_ASSIGNMENT, QuestionInteractionPolicy.resolve(pack, 0))
+        assertEquals(FullscreenGameMechanicKind.PERSON_ASSIGNMENT, FullscreenGameMechanicPolicy.resolve(pack, 0))
     }
 
     @Test
     fun `ranking pack defaults to drag order`() {
+        assertEquals(QuestionInteractionKind.RANK_ORDER, QuestionInteractionPolicy.resolve(rankingPack(), 0))
+        assertEquals(FullscreenGameMechanicKind.RANK_ORDER, FullscreenGameMechanicPolicy.resolve(rankingPack(), 0))
+    }
+
+    @Test
+    fun `harmony 360 mechanic tags route to dedicated fullscreen interactions`() {
+        val expectations = listOf(
+            "mechanik_prognose" to FullscreenGameMechanicKind.PARTNER_PREDICTION,
+            "mechanik_geheime_wahl" to FullscreenGameMechanicKind.SECRET_CHOICE,
+            "mechanik_skala" to FullscreenGameMechanicKind.SCALE_MATCH,
+            "mechanik_wer_eher" to FullscreenGameMechanicKind.WHO_WOULD,
+            "mechanik_memory" to FullscreenGameMechanicKind.MEMORY_MATCH,
+            "mechanik_szenario" to FullscreenGameMechanicKind.SCENARIO,
+            "mechanik_prioritaet" to FullscreenGameMechanicKind.PRIORITY_POKER,
+            "mechanik_entweder_oder" to FullscreenGameMechanicKind.MATCH_TOURNAMENT,
+            "mechanik_deep_talk" to FullscreenGameMechanicKind.DEEP_TALK
+        )
+
+        expectations.forEach { (tag, expected) ->
+            assertEquals(tag, expected, FullscreenGameMechanicPolicy.resolve(mechanicPack(tag), 0))
+        }
+    }
+
+    @Test
+    fun `category fallback also routes scale prediction and secret choice`() {
         assertEquals(
-            QuestionInteractionKind.RANK_ORDER,
-            QuestionInteractionPolicy.resolve(rankingPack(), 0)
+            FullscreenGameMechanicKind.SCALE_MATCH,
+            FullscreenGameMechanicPolicy.resolve(mechanicPack("other", "h360_skala"), 0)
+        )
+        assertEquals(
+            FullscreenGameMechanicKind.PARTNER_PREDICTION,
+            FullscreenGameMechanicPolicy.resolve(mechanicPack("other", "h360_prognose"), 0)
+        )
+        assertEquals(
+            FullscreenGameMechanicKind.SECRET_CHOICE,
+            FullscreenGameMechanicPolicy.resolve(mechanicPack("other", "h360_geheim"), 0)
         )
     }
 
@@ -58,6 +97,38 @@ class QuestionInteractionTest {
         )
 
         assertEquals(QuestionInteractionKind.STANDARD, QuestionInteractionPolicy.resolve(pack, 0))
+        assertNull(FullscreenGameMechanicPolicy.resolve(pack, 0))
+    }
+
+    @Test
+    fun `specialized prompt removes duplicated options from question text`() {
+        val options = listOf("Traumhaus bauen", "Weltreise starten", "Spenden/Investieren", "Job sofort kündigen")
+        val raw = "Rangliste bei 50 Millionen Euro Gewinn: Traumhaus bauen, Weltreise starten, Spenden/Investieren, Job sofort kündigen"
+
+        assertEquals(
+            "Rangliste bei 50 Millionen Euro Gewinn",
+            InteractionPromptPolicy.displayPrompt(raw, options)
+        )
+    }
+
+    @Test
+    fun `specialized prompt removes dangling rank instruction after a real question`() {
+        val options = listOf("Niemandem erzählen", "Familie einladen", "Champagner öffnen", "Finanzberater suchen")
+        val raw = "Was wäre der erste Schritt nach dem Gewinn? Ordne: Niemandem erzählen, Familie einladen, Champagner öffnen, Finanzberater suchen"
+
+        assertEquals(
+            "Was wäre der erste Schritt nach dem Gewinn?",
+            InteractionPromptPolicy.displayPrompt(raw, options)
+        )
+    }
+
+    @Test
+    fun `prompt without repeated option remains unchanged`() {
+        val raw = "Was glaubst du: Was würde dein Partner zuerst tun?"
+        assertEquals(
+            raw,
+            InteractionPromptPolicy.displayPrompt(raw, listOf("Reisen", "Schlafen", "Feiern", "Lesen"))
+        )
     }
 
     @Test
@@ -85,6 +156,18 @@ class QuestionInteractionTest {
 
         assertEquals(order, RankingAnswerCodec.decode(encoded, options))
         assertNull(RankingAnswerCodec.decode(RankingAnswerCodec.encode(listOf("Humor", "Humor")), options))
+    }
+
+    @Test
+    fun `paired choice codecs keep both hidden answers`() {
+        val encoded = PairedChoiceAnswerCodec.encode("A", "D")
+        assertEquals(PairedChoiceAnswer("A", "D"), PairedChoiceAnswerCodec.decode(encoded))
+    }
+
+    @Test
+    fun `prediction codec keeps prediction and actual choice`() {
+        val encoded = PredictionAnswerCodec.encode("B", "B")
+        assertEquals(PredictionAnswer("B", "B"), PredictionAnswerCodec.decode(encoded))
     }
 
     @Test

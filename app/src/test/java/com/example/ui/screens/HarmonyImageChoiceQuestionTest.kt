@@ -75,7 +75,7 @@ class HarmonyImageChoiceQuestionTest {
     }
 
     @Test
-    fun `only the three requested question positions use the image choice screen`() {
+    fun `requested image questions still use image choice screen`() {
         assertEquals(HarmonyImageChoiceKind.EGG, harmonyImageChoiceKind("essenreden", 3))
         assertEquals(HarmonyImageChoiceKind.STEAK, harmonyImageChoiceKind("essenreden", 4))
         assertEquals(HarmonyImageChoiceKind.TRAVEL, harmonyImageChoiceKind("reisevor", 4))
@@ -83,6 +83,27 @@ class HarmonyImageChoiceQuestionTest {
         assertNull(harmonyImageChoiceKind("essenreden", 2))
         assertNull(harmonyImageChoiceKind("reisevor", 3))
         assertNull(harmonyImageChoiceKind("other", 4))
+    }
+
+    @Test
+    fun `Harmony 360 mechanics are intercepted before generic quiz buttons`() {
+        val expectations = listOf(
+            "mechanik_prognose" to HarmonyImageChoiceKind.PARTNER_PREDICTION,
+            "mechanik_geheime_wahl" to HarmonyImageChoiceKind.SECRET_CHOICE,
+            "mechanik_skala" to HarmonyImageChoiceKind.SCALE_MATCH,
+            "mechanik_wer_eher" to HarmonyImageChoiceKind.WHO_WOULD,
+            "mechanik_memory" to HarmonyImageChoiceKind.MEMORY_MATCH,
+            "mechanik_szenario" to HarmonyImageChoiceKind.SCENARIO,
+            "mechanik_prioritaet" to HarmonyImageChoiceKind.PRIORITY_POKER,
+            "mechanik_entweder_oder" to HarmonyImageChoiceKind.MATCH_TOURNAMENT,
+            "mechanik_deep_talk" to HarmonyImageChoiceKind.DEEP_TALK
+        )
+
+        expectations.forEach { (tag, expectedKind) ->
+            val pack = HarmonyPacksData.PACKS.firstOrNull { tag in it.tags }
+                ?: error("Expected at least one Harmony pack with $tag")
+            assertEquals(tag, expectedKind, harmonyImageChoiceKind(pack.id, 0))
+        }
     }
 
     @Test

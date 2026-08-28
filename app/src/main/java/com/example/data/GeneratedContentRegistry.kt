@@ -1,5 +1,7 @@
 package com.example.data
 
+import com.example.data.model.InteractionPromptPolicy
+
 /**
  * Vereinigt den bisherigen generierten Harmony-Content mit zusätzlichen
  * Dev-Studio-Imports, ohne GeneratedHarmonyContent.kt destruktiv zu ersetzen.
@@ -18,11 +20,36 @@ object GeneratedContentRegistry {
             .distinctBy { it.id }
     }
 
+    private fun runtimePack(pack: GenPack): GenPack {
+        // Deep Talk owns a dedicated full-screen, two-person reveal flow. The legacy
+        // "disc" runner renders every question in one long discussion list and would
+        // otherwise swallow this mechanic before the fullscreen router can see it.
+        var result = if (pack.type == "disc" && "mechanik_deep_talk" in pack.tags) {
+            pack.copy(type = "quiz")
+        } else {
+            pack
+        }
+
+        // Fullscreen mechanics own their answer presentation. Some generated questions
+        // repeat the same choices in the sentence (for example "Ordne A, B, C, D") and
+        // then show A-D again as cards. Strip only a detected repeated option tail.
+        if (result.tags.any { it.startsWith("mechanik_") }) {
+            result = result.copy(
+                questions = result.questions.map { question ->
+                    question.copy(
+                        q = InteractionPromptPolicy.displayPrompt(question.q, question.options)
+                    )
+                }
+            )
+        }
+        return result
+    }
+
     val PACKS: List<GenPack> by lazy {
         val byId = LinkedHashMap<String, GenPack>()
-        GeneratedHarmonyContent.PACKS.forEach { byId[it.id] = it }
-        GeneratedHarmonyNewPicGame.PACKS.forEach { byId[it.id] = it }
-        GeneratedHarmonyAdrenaline360.PACKS.forEach { byId[it.id] = it }
+        GeneratedHarmonyContent.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
+        GeneratedHarmonyNewPicGame.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
+        GeneratedHarmonyAdrenaline360.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         byId.values.toList()
     }
 
