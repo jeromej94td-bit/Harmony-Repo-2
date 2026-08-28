@@ -424,9 +424,10 @@ fun IntrospectionExperienceScreen(
             exit = fadeOut(animationSpec = tween(780, easing = FastOutSlowInEasing))
         ) {
             HarmonyRawVideoAnimation(
-                rawResId = com.example.R.raw.introspection_intro,
                 immersive = true,
                 roundedCorners = false,
+                assetPrefix = "introspection_intro_",
+
                 onCompleted = {
                     showIntroVideo = false
                     mediaController.resumeBackgroundMusic()
