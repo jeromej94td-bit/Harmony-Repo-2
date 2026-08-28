@@ -70,6 +70,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import com.example.ui.AppLanguage
 import com.example.ui.introspection.AudioPlaybackCard
@@ -227,7 +228,10 @@ fun IntrospectionExperienceScreen(
         screenState = if (progress.completed) ScreenState.RESULTS
         else if (progress.stage == IntrospectionStage.REVELATION) ScreenState.REVELATION
         else ScreenState.QUESTION
-        mediaController.startBackgroundMusic()
+        mediaController.stopNarrator()
+        mediaController.stopAnswerAudio()
+        mediaController.pauseBackgroundMusic()
+        showIntroVideo = true
     }
 
     fun goBackOneQuestion() {
@@ -420,14 +424,17 @@ fun IntrospectionExperienceScreen(
             exit = fadeOut(animationSpec = tween(780, easing = FastOutSlowInEasing))
         ) {
             HarmonyRawVideoAnimation(
-                rawResId = com.example.R.raw.introspection_intro,
                 immersive = true,
                 roundedCorners = false,
+                assetPrefix = "introspection_intro_",
+
                 onCompleted = {
                     showIntroVideo = false
                     mediaController.resumeBackgroundMusic()
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(20f)
             )
         }
     }
