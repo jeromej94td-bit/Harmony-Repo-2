@@ -328,6 +328,27 @@ class IntrospectionMediaController(
 
     // --- Narrator Audio ---
 
+    private fun createNarratorPlayer(resId: Int): MediaPlayer? {
+        val resName = runCatching {
+            context.resources.getResourceEntryName(resId)
+        }.getOrDefault("$resId")
+
+        // Direct resource creation is the most reliable path for the bundled MP3 narrator files.
+        runCatching {
+            MediaPlayer.create(context, resId)
+        }.onSuccess { player ->
+            if (player != null) {
+                Log.i(TAG, "Narrator direct resource player created for $resName: duration=${player.duration}ms")
+                return player
+            }
+        }.onFailure { error ->
+            Log.w(TAG, "Narrator direct resource player failed for $resName: ${error.message}")
+        }
+
+        Log.w(TAG, "Falling back to the generic raw-resource loader for narrator $resName")
+        return createPlayerForRawResource(resId, isSpeech = true)
+    }
+
     fun playNarratorForStage(stage: IntrospectionStage, onComplete: () -> Unit = {}) {
         val rawRes = when (stage) {
             IntrospectionStage.COLOR -> R.raw.introspection_color
@@ -349,7 +370,7 @@ class IntrospectionMediaController(
 
         runCatching {
             requestAudioFocus()
-            val player = createPlayerForRawResource(rawResId, isSpeech = true)
+            val player = createNarratorPlayer(rawResId)
             if (player == null) {
                 Log.e(TAG, "playNarrator: createPlayerForRawResource returned null for $rawResId")
                 _isNarratorPlaying.value = false

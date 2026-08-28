@@ -92,6 +92,7 @@ import com.example.ui.introspection.MysticCard
 import com.example.ui.introspection.MysticSecondaryButton
 import com.example.ui.introspection.MysticTextField
 import com.example.ui.introspection.RecordingVisualizer
+import com.example.ui.components.HarmonyRawVideoAnimation
 import java.io.File
 
 private enum class ScreenState {
@@ -115,6 +116,7 @@ fun IntrospectionExperienceScreen(
 
     var progress by remember { mutableStateOf(store.load()) }
     var screenState by remember { mutableStateOf(ScreenState.ENTRY) }
+    var showIntroVideo by remember { mutableStateOf(false) }
 
     var showContinueDialog by remember { mutableStateOf(false) }
     var showLeaveDialog by remember { mutableStateOf(false) }
@@ -173,9 +175,11 @@ fun IntrospectionExperienceScreen(
         }
     }
 
-    // When entering QUESTION / REVELATION / RESULTS, manage narrator
-    LaunchedEffect(progress.stage, screenState) {
-        if (screenState == ScreenState.QUESTION && progress.stage.isQuestion) {
+    // The intro must finish before any narrator audio starts.
+    LaunchedEffect(progress.stage, screenState, showIntroVideo) {
+        if (showIntroVideo) {
+            mediaController.stopNarrator()
+        } else if (screenState == ScreenState.QUESTION && progress.stage.isQuestion) {
             // Preload existing text/audio for stage if any
             when (val existing = progress.answers[progress.stage]) {
                 is IntrospectionAnswer.Text -> {
@@ -212,8 +216,11 @@ fun IntrospectionExperienceScreen(
         currentTextAnswer = ""
         currentRecordedFile = null
         inputMode = "text"
+        mediaController.stopNarrator()
+        mediaController.stopAnswerAudio()
+        mediaController.pauseBackgroundMusic()
+        showIntroVideo = true
         screenState = ScreenState.QUESTION
-        mediaController.startBackgroundMusic()
     }
 
     fun continueExistingRun() {
@@ -403,6 +410,25 @@ fun IntrospectionExperienceScreen(
                     )
                 }
             }
+        }
+    }
+
+    if (showIntroVideo) {
+        AnimatedVisibility(
+            visible = true,
+            enter = fadeIn(animationSpec = tween(260, easing = FastOutSlowInEasing)),
+            exit = fadeOut(animationSpec = tween(780, easing = FastOutSlowInEasing))
+        ) {
+            HarmonyRawVideoAnimation(
+                rawResId = com.example.R.raw.introspection_intro,
+                immersive = true,
+                roundedCorners = false,
+                onCompleted = {
+                    showIntroVideo = false
+                    mediaController.resumeBackgroundMusic()
+                },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 
