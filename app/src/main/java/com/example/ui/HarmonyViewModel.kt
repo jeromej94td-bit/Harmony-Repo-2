@@ -441,6 +441,9 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
             }
         } else {
             _activeRun.value = run.copy(currentAnswers = answers, currentIndex = run.currentIndex + 1)
+            viewModelScope.launch {
+                repository.saveAnswer(run.pack.id, run.currentIndex, optionText)
+            }
         }
     }
 
