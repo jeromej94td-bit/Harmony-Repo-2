@@ -8,7 +8,8 @@
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY  
 **Next Stage-02 work package:** 24.8 — Stage 02.3 Proposal-location image duels  
-**Latest merged Stage-02 package:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #48)<br>**Prepared follow-up:** 24.10 — Stage 02.5 Proposal priority ranking content (PR #49)
+**Latest merged Stage-02 package:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #48)<br>**Latest merged Stage-02 package:** 24.10 — Stage 02.5 Proposal priority ranking content (PR #49)  
+**Prepared follow-up:** 24.11 — Stage 02.6 Partner prediction rounds (PR #50)
 
 ## Source-of-truth rule
 
