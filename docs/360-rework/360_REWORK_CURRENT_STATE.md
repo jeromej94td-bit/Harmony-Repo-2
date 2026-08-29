@@ -6,9 +6,19 @@
 **Current stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
 **Current substage:** 02.1 — Experience data model and deterministic proposal flow definition  
 **Current stage progress:** 0/12 complete (0%)  
-**Current status:** 🔵 NEXT
+**Current status:** 🔵 NEXT  
+**Foundation work package:** 24.1 — Control Center Foundation  
+**Next work package:** 24.2 — Stage 02.1 Experience data model / proposal flow
 
-## Last completed work
+## Merge strategy
+
+PR #24 is an **umbrella/reference PR only** and must not be merged wholesale.
+
+`24.1`, `24.2`, `24.3`, etc. are logical **360 Rework work-package IDs**. GitHub itself assigns a separate integer PR number to each package.
+
+Every package must be narrow, independently verifiable, independently mergeable, and independently traceable/revertible. A finished package is merged into `main` before the next risky package is treated as complete.
+
+## Last completed product work
 
 **Stage:** 01/08 — Ring Image Quality Rework  
 **Status:** ✅ DONE  
@@ -38,24 +48,30 @@ The intended experience includes:
 - open personal prompts
 - qualitative `Euer perfekter Antrag` reveal
 
+These are **not** to be delivered in one PR. They are split into small `24.x` packages aligned with substages or another similarly narrow coherent change.
+
 ## NEXT EXACT ACTION
 
-**Start Stage 02.1:** inspect the current Harmony runner/content models and define the reusable mixed-step data model plus a deterministic first proposal flow. Do not modify legacy proposal navigation or delete old packs in this substage.
+**Work package 24.2 / Stage 02.1:** create a fresh branch from current `main`, inspect the actual Harmony runner/content models, and implement only the mixed-step data model plus deterministic first proposal-flow definition needed for 02.1.
 
-Expected handover after 02.1 is completed and verified:
+Do **not** include 02.2 Das-oder-Das UI, ring duels, ranking, partner prediction, legacy navigation cleanup, or other later substages in package 24.2.
 
-> `360 Rework → Stage 02/08 → 1/12 complete (8.3%)`
+Expected handover after 02.1 is completed, independently verified and merged:
 
-Then update this file, the master roadmap, and the worklog.
+> `360 Rework → Stage 02/08 → 1/12 complete (8.3%) → next package 24.3`
+
+Then update this file, the master roadmap, and the worklog in the relevant small package.
 
 ## Current blockers / verification caveats
 
-- No known blocker prevents starting Stage 02.1.
-- Existing GitHub Actions infrastructure has recently produced failures before workflow step 1. Treat this as a verification caveat; do not silently convert it into a code failure or a green-test claim.
+- No known product-code blocker prevents starting Stage 02.1.
+- Existing GitHub Actions infrastructure has recently produced failures before workflow step 1. Treat this as a verification caveat; do not silently convert it into an application-code failure or a green-test claim.
 - Before Stage 02 implementation, inspect the actual current runner/model files rather than assuming the planned mechanic interfaces already exist.
 
 ## DO NOT REPEAT
 
+- Do not merge umbrella PR #24 wholesale.
+- Do not combine several unrelated 360 Rework substages into one PR.
 - Do not replace the ten refreshed ring assets again unless a regression is proven.
 - Do not delete existing proposal/ring/wedding source content yet.
 - Do not hide all legacy proposal packs during Stage 02.1; full consolidation belongs to Stage 04/08.
@@ -63,20 +79,8 @@ Then update this file, the master roadmap, and the worklog.
 - Do not add unrelated new categories while the quality/experience rework is in progress.
 - Do not mark Stage 02 progress based on design discussion alone; only verified implementation substages count.
 
-## Files / areas likely relevant next
-
-The next worker must verify exact current paths in the repo before editing, but the known Harmony content/runtime areas include:
-
-- content/question models and pack definitions
-- generated Harmony content registries
-- game runner / question rendering flow
-- image duel / Das-oder-Das rendering
-- ranking mechanics
-- partner-prediction mechanics, if any exist
-- result/reveal state
-
 ## Handover rule
 
 For historical detail, read `docs/360-rework/360_REWORK_WORKLOG.md`.
 
-For the full plan and Definitions of Done, read `docs/360-rework/360_REWORK_MASTER_ROADMAP.md`.
+For the full stage plan and Definitions of Done, read `docs/360-rework/360_REWORK_MASTER_ROADMAP.md`.
