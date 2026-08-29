@@ -70,6 +70,17 @@ class GeneratedHarmonyContentTest {
     }
 
     @Test
+    fun `entertainment pack avoids direct streaming and award brands`() {
+        val pack = GeneratedContentRegistry.PACKS.single { it.id == "cj_entertainment_quiz" }
+        val visibleText = pack.questions.joinToString("\n") { it.q }
+
+        assertFalse("Netflix" in visibleText)
+        assertFalse("Oscar" in visibleText)
+        assertTrue("Streaming-Passwort" in visibleText)
+        assertTrue("große Filmpreis-Verleihung" in visibleText)
+    }
+
+    @Test
     fun `all registered never-have-i-ever questions expose answer options`() {
         val packs = GeneratedContentRegistry.PACKS.filter { "ichhabenochnie" in it.tags }
 
