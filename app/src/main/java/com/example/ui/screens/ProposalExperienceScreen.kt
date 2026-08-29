@@ -62,7 +62,6 @@ import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPinkSoft
 import com.example.ui.theme.HarmonyPurple
-import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
 
 @Composable
@@ -179,7 +178,7 @@ internal fun ProposalExperienceScreen(
                         } else {
                             val round = ProposalRingImageDuels.rounds[position.itemIndex]
                             val context = LocalContext.current
-                            ExperienceImageDuelBoard(
+                            ExperienceProductImageDuelBoard(
                                 round = round.toExperienceImageDuelRound(),
                                 selectedOptionId = ringSelections[round.id],
                                 imageResolver = { imageKey ->
@@ -190,7 +189,6 @@ internal fun ProposalExperienceScreen(
                                     advance()
                                 },
                                 kicker = "💎  RING-DUELL",
-                                instruction = "",
                                 testTagPrefix = "proposal_ring",
                                 rootTestTag = "proposal_ring_duel",
                                 modifier = Modifier.fillMaxSize()
