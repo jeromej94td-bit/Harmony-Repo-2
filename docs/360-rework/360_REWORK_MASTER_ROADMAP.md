@@ -52,13 +52,13 @@ The ten intended refreshed ring assets are present on `main`, the merged diff co
 ## Stage 02/08 — 💍 Unser perfekter Antrag
 
 **Original plan reference:** Point 1  
-**Status:** 🔵 NEXT  
+**Status:** 🧪 VERIFY<br>
 **Progress:** 0/12 complete (0%)  
 **Dependencies:** Stage 01 complete; uses refreshed ring assets
 
 ### Substages
 
-- [ ] 02.1 Experience data model and deterministic proposal flow definition
+- [ ] 02.1 Experience data model and deterministic proposal flow definition — implementation awaiting build verification
 - [ ] 02.2 Das-oder-Das proposal mood/details rounds
 - [ ] 02.3 Proposal-location image duels
 - [ ] 02.4 Refreshed ring-image duels integrated into the experience
