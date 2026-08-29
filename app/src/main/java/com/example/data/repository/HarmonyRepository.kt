@@ -44,7 +44,6 @@ class HarmonyRepository(
     private val answerSaveMutex = Mutex()
 
     suspend fun ensureInitialData() {
-        // Initialize profile if not present
         val existingProfile = db.profileDao().getProfile().firstOrNull()
         if (existingProfile == null) {
             db.profileDao().insertOrUpdateProfile(
@@ -58,7 +57,6 @@ class HarmonyRepository(
             )
         }
 
-        // Initialize chat messages if empty
         val messages = db.chatDao().getAllMessages().firstOrNull()
         if (messages.isNullOrEmpty()) {
             val now = System.currentTimeMillis()
@@ -67,7 +65,6 @@ class HarmonyRepository(
             db.chatDao().insertMessage(ChatMessageEntity(sender = "them", text = "Ich hab schon an unser Wiedersehen gedacht 🥹", timestamp = now - 2 * 3600000))
         }
 
-        // Initialize moments if empty
         val moments = db.momentDao().getAllMoments().firstOrNull()
         if (moments.isNullOrEmpty()) {
             val now = System.currentTimeMillis()
@@ -89,13 +86,11 @@ class HarmonyRepository(
             )
         }
 
-        // Initialize stats if empty
         val stats = db.coupleStatsDao().getStats().firstOrNull()
         if (stats == null) {
             db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = 7, visitedCountries = 3))
         }
 
-        // Perform initial idempotent backfill of legacy answers into BrainAnswerHistory
         val legacyAnswers = db.answerDao().getAllAnswers().firstOrNull().orEmpty()
         brainRepository.performInitialBackfillIfNeeded(legacyAnswers)
     }
@@ -129,9 +124,6 @@ class HarmonyRepository(
                     return@withLock
                 }
 
-                // The durable answer exists but its Brain history may have been interrupted
-                // between the Room write and the append-only Brain write. Repair only the
-                // missing signal; do not replace the user's answer or create duplicates.
                 brainRepository.recordAnswer(packId, questionIndex, answerText)
                 return@withLock
             }
@@ -211,11 +203,36 @@ class HarmonyRepository(
         PicShareWidgetProvider.refreshAll(context)
     }
 
-    suspend fun addMoment(title: String, content: String, imageUris: List<Uri> = emptyList(), emoji: String = "💕") {
-        val paths = imageUris.mapNotNull { uri ->
-            copyMediaToApp(uri, "moments")
+    suspend fun addMoment(
+        title: String,
+        content: String,
+        imageUris: List<Uri> = emptyList(),
+        emoji: String = "💕"
+    ) {
+        val paths = imageUris.mapNotNull { uri -> copyMediaToApp(uri, "moments") }
+        persistMoment(title, content, paths, emoji)
+    }
+
+    suspend fun addGeneratedMoment(
+        title: String,
+        content: String,
+        imagePath: String,
+        emoji: String = "💕"
+    ) {
+        val copiedPath = copyLocalMediaToApp(imagePath, "moments")
+            ?: throw IllegalStateException("Generiertes Bild konnte nicht in Momente kopiert werden")
+        persistMoment(title, content, listOf(copiedPath), emoji)
+    }
+
+    private suspend fun persistMoment(
+        title: String,
+        content: String,
+        imagePaths: List<String>,
+        emoji: String
+    ) {
+        val pathsJson = imagePaths.joinToString(prefix = "[", postfix = "]") {
+            "\"${it.replace("\\", "\\\\").replace("\"", "\\\"")}\""
         }
-        val pathsJson = paths.joinToString(prefix = "[", postfix = "]") { "\"${it.replace("\\", "\\\\").replace("\"", "\\\"")}\"" }
         db.momentDao().insertMoment(
             MomentEntity(
                 title = title,
@@ -228,10 +245,9 @@ class HarmonyRepository(
     }
 
     suspend fun updateStats(cities: Int, countries: Int) {
-        db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = cities, visitedCountries = countries))
+        db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = cities, countries = countries))
     }
 
-    // --- HARMONY BRAIN PERSISTENCE ---
     suspend fun getAllInterests(): List<BrainInterestEntity> = db.brainDao().getAllInterests()
     suspend fun saveInterest(interest: BrainInterestEntity) = db.brainDao().insertInterest(interest)
     suspend fun saveInterests(interests: List<BrainInterestEntity>) = db.brainDao().insertInterests(interests)
@@ -263,6 +279,18 @@ class HarmonyRepository(
                 requireNotNull(input) { "Bild konnte nicht geöffnet werden" }
                 target.outputStream().use { output -> input.copyTo(output) }
             }
+            target.absolutePath
+        }.getOrNull()
+    }
+
+    private suspend fun copyLocalMediaToApp(sourcePath: String, folder: String): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            val source = File(sourcePath)
+            require(source.exists() && source.isFile) { "Generiertes Bild existiert nicht" }
+            val directory = File(context.filesDir, folder).apply { mkdirs() }
+            val extension = source.extension.takeIf { it.isNotBlank() } ?: "jpg"
+            val target = File(directory, "${System.currentTimeMillis()}-${UUID.randomUUID()}.$extension")
+            source.copyTo(target, overwrite = false)
             target.absolutePath
         }.getOrNull()
     }
