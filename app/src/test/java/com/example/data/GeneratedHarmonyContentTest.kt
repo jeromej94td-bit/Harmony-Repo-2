@@ -43,6 +43,33 @@ class GeneratedHarmonyContentTest {
     }
 
     @Test
+    fun `animation pack is user-facing franchise neutral`() {
+        val pack = GeneratedContentRegistry.PACKS.single { it.id == "cj_disney_quiz" }
+        val visibleText = buildString {
+            append(pack.title).append('\n')
+            append(pack.tags.joinToString(" ")).append('\n')
+            pack.questions.forEach { append(it.q).append('\n') }
+        }
+        val forbiddenReferences = listOf(
+            "Disney",
+            "disney",
+            "König der Löwen",
+            "Schneewittchen",
+            "Disneyland",
+            "Yoda",
+            "Star Wars",
+            "Marvel",
+            "Oben",
+            "Toy Story",
+            "Elsa"
+        )
+
+        assertEquals("Animationswelten, Abenteuer und Feenstaub", pack.title)
+        assertTrue("animation_fantasy" in pack.tags)
+        assertFalse(forbiddenReferences.any { it in visibleText })
+    }
+
+    @Test
     fun `all registered never-have-i-ever questions expose answer options`() {
         val packs = GeneratedContentRegistry.PACKS.filter { "ichhabenochnie" in it.tags }
 

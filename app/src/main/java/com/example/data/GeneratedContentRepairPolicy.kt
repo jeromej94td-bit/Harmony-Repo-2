@@ -27,6 +27,9 @@ object GeneratedContentRepairPolicy {
         if (result.id == "cj_hogwarts_quiz") {
             result = neutralizeMagicAcademyPack(result)
         }
+        if (result.id == "cj_disney_quiz") {
+            result = neutralizeAnimationPack(result)
+        }
 
         return result
     }
@@ -47,6 +50,31 @@ object GeneratedContentRepairPolicy {
                     .replace("Harry-Potter-Film-Marathon", "Fantasy-Film-Marathon mit Zauberschulen")
                     .replace("Charakter aus Hogwarts", "Charakter aus einer magischen Akademiegeschichte")
                     .replace("Slytherin", "das vermeintlich düstere Haus")
+            )
+        }
+    )
+
+    private fun neutralizeAnimationPack(pack: GenPack): GenPack = pack.copy(
+        title = "Animationswelten, Abenteuer und Feenstaub",
+        tags = pack.tags.map { tag ->
+            if (tag == "disney") "animation_fantasy" else tag
+        },
+        questions = pack.questions.map { question ->
+            question.copy(
+                q = question.q
+                    .replace("Disney-Film", "Animationsfilm")
+                    .replace("aus \"Der König der Löwen\"", "aus einem bekannten Animationsklassiker")
+                    .replace("wie bei Disney", "wie in Animationsfilmen")
+                    .replace("Schneewittchen", "einer Märchenfigur")
+                    .replace("ins Disneyland", "in einen großen Themenpark")
+                    .replace("Disney-Ohrwurm", "Animationsfilm-Ohrwurm")
+                    .replace("Disney-Filme", "Animationsfilme")
+                    .replace("Meister Yoda aus Star Wars", "einem weisen Weltraum-Meister")
+                    .replace("Marvel-Film", "Superheldenfilm")
+                    .replace("bei \"Oben\" (Up)", "bei einem besonders emotionalen Animationsfilm")
+                    .replace("aus Toy Story", "aus einer Spielzeug-Abenteuergeschichte")
+                    .replace("wie Elsa", "wie eine Eiszauberin")
+                    .replace("Disney-Lied", "Animationsfilm-Lied")
             )
         }
     )
