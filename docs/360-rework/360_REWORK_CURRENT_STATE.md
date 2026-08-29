@@ -4,13 +4,13 @@
 **Project:** 360 Rework  
 **Completed core stages:** 1/8  
 **Current stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Current substage:** 02.1 — Experience data model and deterministic proposal flow definition  
+**Current substage:** 02.2 — Das-oder-Das proposal mood/details rounds<br>
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY<br>
 **Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
-**Next work package:** 24.2 — Stage 02.1 Experience data model / proposal flow
+**Next work package:** 24.3 — Stage 02.2 Proposal mood/details rounds
 
 ## Merge strategy
 
@@ -68,7 +68,7 @@ The intended experience includes:
 
 These are **not** to be delivered in one PR. They are split into small `24.x` packages aligned with substages or another similarly narrow coherent change.
 
-## Active work package
+## Previous work package awaiting verification
 
 **Work package:** 24.2 — Stage 02.1 Experience data model / proposal flow<br>
 **Branch:** `360-rework/24-2-proposal-flow-model`<br>
@@ -78,9 +78,19 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 **Deliberately excluded:** UI, navigation, content/mechanic implementation, legacy migration and deletion.<br>
 **Verification status:** whitespace/diff validation passed. No tests were added or run by explicit instruction. A local Android build could not start because this repository checkout has no Gradle Wrapper and no system Gradle executable is installed.
 
+## Active work package
+
+**Work package:** 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds<br>
+**Branch:** `360-rework/24-3-proposal-either-or`<br>
+**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` (draft)<br>
+**Commit:** `487bb671d89c2efd203601b31eb62f0ed2d1f48d`<br>
+**Scope:** add UI-independent rounds for the existing `proposal_mood` and `proposal_details` flow steps only.<br>
+**Deliberately excluded:** new UI, navigation, images, ranking, prediction, scenario, reveal, legacy migration and deletion.<br>
+**Ordering decision:** the operator explicitly authorized 24.3 to start while the Gradle build verification for merged 24.2 remains open. Neither substage is marked complete.
+
 ## NEXT EXACT ACTION
 
-**Work package 24.2 / Stage 02.1:** run the focused build in an environment that provides the project's Gradle Wrapper or a compatible Gradle installation. Only after that verification succeeds may 02.1 be marked complete and the next work package 24.3 started.
+**Work package 24.3 / Stage 02.2:** add and review the proposal mood/details round data against the two `EITHER_OR` flow steps, then record the branch, PR and verification gap. The Gradle verification for 24.2 remains a separate open requirement.
 
 Do **not** include 02.2 Das-oder-Das UI, ring duels, ranking, partner prediction, legacy navigation cleanup, or other later substages in package 24.2.
 

@@ -13,6 +13,29 @@ This file is the append-only project black box for **360 Rework**.
 
 ---
 
+## 2026-08-29 — 24.3 started before 24.2 build verification
+
+**Work package:** 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds<br>
+**Status:** 🟡 IN PROGRESS<br>
+**Branch:** `360-rework/24-3-proposal-either-or`<br>
+**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` (draft)<br>
+**Implementation commit:** `487bb671d89c2efd203601b31eb62f0ed2d1f48d`
+
+### Ordering decision
+
+The operator explicitly authorized 24.3 to begin while 24.2 remains `🧪 VERIFY` because a Gradle-capable build environment is unavailable. This does not mark 24.2 or 24.3 complete and does not authorize the later Stage 02 mechanics.
+
+### Scope
+
+- Define only the proposal mood and proposal detail Das-oder-Das rounds for the existing `proposal_mood` and `proposal_details` flow IDs.
+- Keep the content UI-independent and out of standalone navigation until the planned experience entry exists.
+
+### Next action
+
+Review the draft PR and record the requested merge decision. The Gradle verification gap remains open.
+
+---
+
 ## 2026-08-29 — 24.2 Stage 02.1 implementation prepared
 
 **Work package:** 24.2 — Experience data model / deterministic proposal flow<br>
