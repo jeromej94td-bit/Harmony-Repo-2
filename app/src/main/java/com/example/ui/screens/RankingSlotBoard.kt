@@ -5,9 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +39,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -49,7 +52,6 @@ import androidx.compose.ui.zIndex
 import com.example.data.model.ProfileEntity
 import com.example.data.model.RankingAnswerCodec
 import com.example.ui.theme.HarmonyBg
-import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPinkSoft
@@ -62,8 +64,9 @@ import com.example.ui.tr
 import com.example.ui.util.triggerMiniVibration
 
 /**
- * New ranking questions start empty. Answers stay in the right-hand card pool until the user
- * actively drags each card into one of the numbered ranking slots.
+ * Ranking questions use one compact vertical board: numbered drop lanes first, then the
+ * full-width card pool. This keeps long answer labels readable on phone screens while retaining
+ * the existing drag/drop and answer-encoding behavior.
  */
 @Composable
 internal fun RankingSlotBoard(
@@ -75,6 +78,15 @@ internal fun RankingSlotBoard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp
+    val compactScreen = screenHeight < 700
+    val reservedChrome = when {
+        screenHeight < 600 -> 92
+        compactScreen -> 110
+        else -> 132
+    }
+    val boardHeight = (screenHeight - reservedChrome).coerceIn(360, 720).dp
     val hitSlop = with(LocalDensity.current) { 22.dp.toPx() }
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
@@ -118,97 +130,114 @@ internal fun RankingSlotBoard(
         triggerMiniVibration(context, 48L)
     }
 
-    FullscreenMechanicShell(
-        kicker = tr("🏆 RANKING-DUELL", "🏆 RANKING DUEL"),
-        question = prompt,
-        instruction = tr(
-            "Die Rangliste ist leer. Ziehe jede Karte von rechts auf Platz 1, 2, 3 …",
-            "The ranking starts empty. Drag every card from the right onto place 1, 2, 3 …"
-        ),
-        modifier = modifier.testTag("ranking_slot_board")
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(boardHeight)
+            .testTag("ranking_slot_board")
     ) {
-        Column(Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Column(
-                    modifier = Modifier.weight(1.42f).fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(
-                        text = tr("DEINE RANGLISTE", "YOUR RANKING"),
-                        color = HarmonyPinkSoft,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
-                    slots.indices.forEach { slotIndex ->
-                        key("slot_$slotIndex") {
-                            RankingDropSlot(
-                                position = slotIndex,
-                                raw = slots[slotIndex],
-                                label = slots[slotIndex]?.let { labels[it] },
-                                highlighted = hoveredSlot == slotIndex,
-                                onBounds = { slotBounds[slotIndex] = it },
-                                resolveSlot = ::resolveSlot,
-                                onHover = { hoveredSlot = it },
-                                onMove = ::placeCard,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
+        val compactHeight = maxHeight < 620.dp
+        val questionSize = if (compactHeight) 21.sp else 24.sp
+        val questionLineHeight = if (compactHeight) 26.sp else 30.sp
+        val sectionGap = if (compactHeight) 8.dp else 11.dp
+        val rowGap = if (compactHeight) 6.dp else 8.dp
 
-                val poolShape = RoundedCornerShape(26.dp)
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        // Do not clip this parent: dragged cards must stay visible while crossing
-                        // from the right-hand pool into the ranking slots on the left.
-                        .background(Color.White.copy(alpha = 0.035f), poolShape)
-                        .border(1.dp, HarmonyLine, poolShape)
-                        .padding(horizontal = 10.dp, vertical = 12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(
-                        text = tr("KARTEN", "CARDS"),
-                        color = HarmonyPinkSoft,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    if (unassigned.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = tr("Alle Karten liegen in der Rangliste", "All cards are in the ranking"),
-                                color = HarmonyPinkSoft,
-                                fontSize = 15.sp,
-                                lineHeight = 19.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    } else {
-                        unassigned.forEach { raw ->
-                            key("pool_$raw") {
-                                RankingDraggableCard(
-                                    raw = raw,
-                                    label = labels[raw] ?: raw,
-                                    fromSlot = null,
-                                    resolveSlot = ::resolveSlot,
-                                    onHover = { hoveredSlot = it },
-                                    onDrop = { target -> placeCard(raw, null, target) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = prompt,
+                color = HarmonyText,
+                fontSize = questionSize,
+                lineHeight = questionLineHeight,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = if (compactHeight) 2.dp else 6.dp)
+                    .testTag("ranking_question")
+            )
+
+            Spacer(Modifier.height(sectionGap))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.88f),
+                verticalArrangement = Arrangement.spacedBy(rowGap)
+            ) {
+                slots.indices.forEach { slotIndex ->
+                    key("slot_$slotIndex") {
+                        RankingDropSlot(
+                            position = slotIndex,
+                            raw = slots[slotIndex],
+                            label = slots[slotIndex]?.let { labels[it] },
+                            highlighted = hoveredSlot == slotIndex,
+                            onBounds = { slotBounds[slotIndex] = it },
+                            resolveSlot = ::resolveSlot,
+                            onHover = { hoveredSlot = it },
+                            onMove = ::placeCard,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(sectionGap))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color.Transparent,
+                                HarmonyPink.copy(alpha = 0.34f),
+                                HarmonyPurpleLight.copy(alpha = 0.28f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+
+            Spacer(Modifier.height(sectionGap))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1.08f),
+                verticalArrangement = Arrangement.spacedBy(rowGap)
+            ) {
+                unassigned.forEach { raw ->
+                    key("pool_$raw") {
+                        RankingDraggableCard(
+                            raw = raw,
+                            label = labels[raw] ?: raw,
+                            fromSlot = null,
+                            resolveSlot = ::resolveSlot,
+                            onHover = { hoveredSlot = it },
+                            onDrop = { target -> placeCard(raw, null, target) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                repeat((options.size - unassigned.size).coerceAtLeast(0)) { index ->
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .testTag("ranking_pool_spacer_$index")
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(if (compactHeight) 8.dp else 12.dp))
+
             PrimaryMechanicButton(
                 text = if (complete) {
                     tr("Rangliste speichern & weiter", "Save ranking & continue")
@@ -241,81 +270,89 @@ private fun RankingDropSlot(
     onMove: (String, Int?, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(22.dp)
+    val laneShape = RoundedCornerShape(20.dp)
     val accent = if (position == 0) HarmonyPinkSoft else HarmonyPurpleLight
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 66.dp)
-            // Keep children drawable outside the slot while a placed card is being moved.
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        accent.copy(alpha = if (highlighted) 0.34f else 0.16f),
-                        HarmonySurface2.copy(alpha = 0.96f),
-                        HarmonyBg.copy(alpha = 0.94f)
-                    )
-                ),
-                shape
-            )
-            .border(
-                if (highlighted) 2.2.dp else 1.2.dp,
-                if (highlighted) HarmonyPinkSoft else Color.White.copy(alpha = 0.16f),
-                shape
-            )
-            .onGloballyPositioned { coordinates ->
-                val rect = coordinates.boundsInRoot()
-                onBounds(DropRect(rect.left, rect.top, rect.right, rect.bottom))
-            }
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .heightIn(min = 50.dp)
             .testTag("ranking_slot_$position"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(44.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(
                     Brush.linearGradient(
                         if (raw == null) {
-                            listOf(Color.White.copy(alpha = 0.09f), Color.White.copy(alpha = 0.04f))
+                            listOf(
+                                HarmonyPurple.copy(alpha = 0.34f),
+                                HarmonySurface2.copy(alpha = 0.84f)
+                            )
                         } else {
                             listOf(HarmonyPink, HarmonyPurpleLight)
                         }
                     )
                 )
-                .border(1.dp, Color.White.copy(alpha = 0.22f), CircleShape),
+                .border(
+                    width = if (highlighted) 1.8.dp else 1.dp,
+                    color = if (highlighted) HarmonyPinkSoft else accent.copy(alpha = 0.58f),
+                    shape = CircleShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "${position + 1}",
                 color = Color.White,
-                fontSize = 17.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Black
             )
         }
-        Spacer(Modifier.width(12.dp))
-        if (raw == null) {
-            Text(
-                text = tr("Platz ${position + 1} · Karte hier ablegen", "Place ${position + 1} · drop card here"),
-                color = if (highlighted) Color.White else HarmonyMuted,
-                fontSize = 15.sp,
-                lineHeight = 19.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-        } else {
-            RankingDraggableCard(
-                raw = raw,
-                label = label ?: raw,
-                fromSlot = position,
-                resolveSlot = resolveSlot,
-                onHover = onHover,
-                onDrop = { target -> onMove(raw, position, target) },
-                compact = true,
-                modifier = Modifier.weight(1f)
-            )
+
+        Spacer(Modifier.width(10.dp))
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .heightIn(min = 50.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            HarmonySurface.copy(alpha = if (highlighted) 0.72f else 0.44f),
+                            HarmonyPurple.copy(alpha = if (highlighted) 0.34f else 0.17f),
+                            HarmonyBg.copy(alpha = 0.70f)
+                        )
+                    ),
+                    laneShape
+                )
+                .border(
+                    width = if (highlighted) 1.8.dp else 1.dp,
+                    color = if (highlighted) HarmonyPinkSoft else HarmonyPink.copy(alpha = 0.32f),
+                    shape = laneShape
+                )
+                .onGloballyPositioned { coordinates ->
+                    val rect = coordinates.boundsInRoot()
+                    onBounds(DropRect(rect.left, rect.top, rect.right, rect.bottom))
+                }
+                .padding(4.dp)
+                .testTag("ranking_slot_lane_$position"),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            if (raw != null) {
+                RankingDraggableCard(
+                    raw = raw,
+                    label = label ?: raw,
+                    fromSlot = position,
+                    resolveSlot = resolveSlot,
+                    onHover = onHover,
+                    onDrop = { target -> onMove(raw, position, target) },
+                    compact = true,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
@@ -335,21 +372,21 @@ private fun RankingDraggableCard(
     var sourceBounds by remember(raw, fromSlot) { mutableStateOf<DropRect?>(null) }
     var pointerInRoot by remember(raw, fromSlot) { mutableStateOf<Offset?>(null) }
     var dragging by remember(raw, fromSlot) { mutableStateOf(false) }
-    val shape = RoundedCornerShape(if (compact) 16.dp else 20.dp)
+    val shape = RoundedCornerShape(if (compact) 16.dp else 19.dp)
 
     fun updateHover(pointer: Offset?) = onHover(resolveSlot(pointer))
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = if (compact) 48.dp else 62.dp)
+            .heightIn(min = if (compact) 42.dp else 54.dp)
             .zIndex(if (dragging) 60f else 0f)
             .graphicsLayer {
                 translationX = dragOffset.x
                 translationY = dragOffset.y
-                scaleX = if (dragging) 1.06f else 1f
-                scaleY = if (dragging) 1.06f else 1f
-                shadowElevation = if (dragging) 30f else 7f
+                scaleX = if (dragging) 1.045f else 1f
+                scaleY = if (dragging) 1.045f else 1f
+                shadowElevation = if (dragging) 28f else 6f
             }
             .onGloballyPositioned { coordinates ->
                 val rect = coordinates.boundsInRoot()
@@ -391,43 +428,50 @@ private fun RankingDraggableCard(
                 Brush.horizontalGradient(
                     listOf(
                         HarmonySurface,
-                        HarmonyPurple.copy(alpha = if (dragging) 0.58f else 0.34f),
+                        HarmonyPurple.copy(alpha = if (dragging) 0.52f else 0.30f),
                         HarmonySurface2
                     )
                 )
             )
             .border(
-                if (dragging) 2.dp else 1.dp,
-                if (dragging) HarmonyPinkSoft else HarmonyPink.copy(alpha = 0.34f),
+                if (dragging) 1.8.dp else 1.dp,
+                if (dragging) HarmonyPinkSoft else HarmonyPink.copy(alpha = 0.46f),
                 shape
             )
-            .padding(horizontal = if (compact) 10.dp else 12.dp, vertical = if (compact) 8.dp else 11.dp)
+            .padding(
+                horizontal = if (compact) 8.dp else 11.dp,
+                vertical = if (compact) 6.dp else 8.dp
+            )
             .testTag(if (fromSlot == null) "ranking_pool_${raw.hashCode()}" else "ranking_placed_$fromSlot"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             Modifier
                 .width(5.dp)
-                .height(if (compact) 28.dp else 34.dp)
+                .height(if (compact) 26.dp else 32.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(Brush.verticalGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
         )
-        Spacer(Modifier.width(9.dp))
+
+        Spacer(Modifier.width(if (compact) 7.dp else 10.dp))
+
         Text(
             text = label,
             color = HarmonyText,
-            fontSize = if (compact) 14.5.sp else 15.5.sp,
-            lineHeight = if (compact) 18.sp else 20.sp,
+            fontSize = if (compact) 14.sp else 16.sp,
+            lineHeight = if (compact) 17.sp else 20.sp,
             fontWeight = FontWeight.ExtraBold,
-            maxLines = if (compact) 2 else 3,
-            overflow = TextOverflow.Ellipsis,
+            maxLines = if (compact) 3 else 4,
+            overflow = TextOverflow.Clip,
             modifier = Modifier.weight(1f)
         )
+
         Spacer(Modifier.width(6.dp))
+
         Text(
             text = "☰",
             color = if (dragging) HarmonyPinkSoft else HarmonyMuted,
-            fontSize = if (compact) 20.sp else 24.sp,
+            fontSize = if (compact) 18.sp else 22.sp,
             fontWeight = FontWeight.Bold
         )
     }
