@@ -1,6 +1,16 @@
 package com.example.ui.screens
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.FastOutSlowInEasing
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.weight
@@ -20,11 +31,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -39,6 +57,7 @@ import com.example.data.model.ProposalImageDuelRound
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonySurface2
+import kotlinx.coroutines.delay
 
 private val proposalLocationImages = mapOf(
     "location_home" to R.drawable.proposal_location_home,
@@ -49,11 +68,19 @@ private val proposalLocationImages = mapOf(
     "location_coast" to R.drawable.proposal_location_coast
 )
 
+private enum class ProposalDuelPhase {
+    IntroCards,
+    RevealQuestion,
+    AwaitingSelection,
+    SelectionLocked,
+    TransitionOut
+}
+
 /**
  * Aurora-Glass presentation for one Stage 02.3 proposal-location duel.
  *
- * The board is deliberately not registered in navigation. Stage 02.11 will connect the
- * deterministic proposal runner to this component after the remaining mechanics are ready.
+ * This keeps the original non-orchestrated API available for previews and focused callers.
+ * Stage 02.11 can use [AnimatedProposalLocationDuelBoard] when it wires the proposal runner.
  */
 @Composable
 internal fun ProposalLocationDuelBoard(
@@ -62,51 +89,179 @@ internal fun ProposalLocationDuelBoard(
     onPick: (ProposalImageDuelOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    ProposalLocationDuelBoardContent(
+        round = round,
+        selectedOptionId = selectedOptionId,
+        onPick = onPick,
+        phase = ProposalDuelPhase.AwaitingSelection,
+        pickingEnabled = true,
+        animateCardIntro = false,
+        modifier = modifier
+    )
+}
+
+/**
+ * Staged Harmony duel choreography:
+ * 1. the two visual cards arrive with a staggered 3D turn,
+ * 2. the question is revealed after the images have had a short suspense beat,
+ * 3. one choice locks with Harmony feedback,
+ * 4. the question leaves while both cards flip away together.
+ */
+@Composable
+internal fun AnimatedProposalLocationDuelBoard(
+    round: ProposalImageDuelRound,
+    selectedOptionId: String?,
+    onPick: (ProposalImageDuelOption) -> Unit,
+    onTransitionFinished: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var phase by remember(round.id) { mutableStateOf(ProposalDuelPhase.IntroCards) }
+    var lockedSelectionId by remember(round.id) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(round.id) {
+        lockedSelectionId = null
+        phase = ProposalDuelPhase.IntroCards
+        delay(620)
+        phase = ProposalDuelPhase.RevealQuestion
+        delay(120)
+        phase = ProposalDuelPhase.AwaitingSelection
+    }
+
+    LaunchedEffect(lockedSelectionId) {
+        if (lockedSelectionId == null) return@LaunchedEffect
+        delay(420)
+        phase = ProposalDuelPhase.TransitionOut
+        delay(760)
+        onTransitionFinished()
+    }
+
+    val effectiveSelectionId = lockedSelectionId ?: selectedOptionId
+
+    ProposalLocationDuelBoardContent(
+        round = round,
+        selectedOptionId = effectiveSelectionId,
+        onPick = { option ->
+            if (phase == ProposalDuelPhase.AwaitingSelection && lockedSelectionId == null) {
+                lockedSelectionId = option.id
+                phase = ProposalDuelPhase.SelectionLocked
+                onPick(option)
+            }
+        },
+        phase = phase,
+        pickingEnabled = phase == ProposalDuelPhase.AwaitingSelection && lockedSelectionId == null,
+        animateCardIntro = true,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ProposalLocationDuelBoardContent(
+    round: ProposalImageDuelRound,
+    selectedOptionId: String?,
+    onPick: (ProposalImageDuelOption) -> Unit,
+    phase: ProposalDuelPhase,
+    pickingEnabled: Boolean,
+    animateCardIntro: Boolean,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(30.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        HarmonyPurple.copy(alpha = 0.48f),
-                        HarmonySurface2.copy(alpha = 0.96f)
-                    )
-                )
-            )
-            .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(30.dp))
-            .padding(16.dp)
             .testTag("proposal_location_duel"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Euer Ort",
-            color = HarmonyPink,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = round.prompt,
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Black,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(16.dp))
+        AnimatedVisibility(
+            visible = phase != ProposalDuelPhase.IntroCards && phase != ProposalDuelPhase.TransitionOut,
+            enter = fadeIn(tween(durationMillis = 320)) +
+                slideInVertically(
+                    animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
+                    initialOffsetY = { it / 4 }
+                ),
+            exit = fadeOut(tween(durationMillis = 240)) +
+                slideOutVertically(
+                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+                    targetOffsetY = { -it / 5 }
+                )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                HarmonyPurple.copy(alpha = 0.52f),
+                                HarmonySurface2.copy(alpha = 0.97f)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.18f),
+                        shape = RoundedCornerShape(30.dp)
+                    )
+                    .padding(horizontal = 20.dp, vertical = 18.dp)
+                    .testTag("proposal_location_question")
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "✦  Euer Ort",
+                        color = HarmonyPink,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Spacer(Modifier.height(7.dp))
+                    Text(
+                        text = round.prompt,
+                        color = Color.White,
+                        fontSize = 23.sp,
+                        lineHeight = 28.sp,
+                        fontWeight = FontWeight.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Wählt den Ort, der sich für euren Moment am meisten nach euch anfühlt.",
+                        color = Color.White.copy(alpha = 0.72f),
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(18.dp))
+
         Row(
-            modifier = Modifier.fillMaxWidth().height(292.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(320.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ProposalLocationOptionCard(
                 option = round.firstOption,
+                choiceNumber = 1,
+                cardIndex = 0,
                 selected = selectedOptionId == round.firstOption.id,
+                anotherOptionSelected = selectedOptionId != null && selectedOptionId != round.firstOption.id,
+                enabled = pickingEnabled,
+                phase = phase,
+                animateEntrance = animateCardIntro,
                 onClick = { onPick(round.firstOption) },
                 modifier = Modifier.weight(1f)
             )
             ProposalLocationOptionCard(
                 option = round.secondOption,
+                choiceNumber = 2,
+                cardIndex = 1,
                 selected = selectedOptionId == round.secondOption.id,
+                anotherOptionSelected = selectedOptionId != null && selectedOptionId != round.secondOption.id,
+                enabled = pickingEnabled,
+                phase = phase,
+                animateEntrance = animateCardIntro,
                 onClick = { onPick(round.secondOption) },
                 modifier = Modifier.weight(1f)
             )
@@ -117,23 +272,102 @@ internal fun ProposalLocationDuelBoard(
 @Composable
 private fun ProposalLocationOptionCard(
     option: ProposalImageDuelOption,
+    choiceNumber: Int,
+    cardIndex: Int,
     selected: Boolean,
+    anotherOptionSelected: Boolean,
+    enabled: Boolean,
+    phase: ProposalDuelPhase,
+    animateEntrance: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val imageResId = proposalLocationImages.getValue(option.id)
     val shape = RoundedCornerShape(24.dp)
 
+    var entered by remember(option.id, animateEntrance) { mutableStateOf(!animateEntrance) }
+
+    LaunchedEffect(option.id, animateEntrance) {
+        if (!animateEntrance) {
+            entered = true
+            return@LaunchedEffect
+        }
+        entered = false
+        delay(if (cardIndex == 0) 30 else 170)
+        entered = true
+    }
+
+    val isExiting = phase == ProposalDuelPhase.TransitionOut
+    val side = if (cardIndex == 0) -1f else 1f
+
+    val horizontalOffset by animateDpAsState(
+        targetValue = when {
+            isExiting -> (16f * side).dp
+            !entered -> (30f * side).dp
+            else -> 0.dp
+        },
+        animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing),
+        label = "proposalCardOffset"
+    )
+    val rotationY by animateFloatAsState(
+        targetValue = when {
+            isExiting -> 82f * side
+            !entered -> 18f * side
+            else -> 0f
+        },
+        animationSpec = tween(durationMillis = 560, easing = FastOutSlowInEasing),
+        label = "proposalCardRotation"
+    )
+    val cardScale by animateFloatAsState(
+        targetValue = when {
+            isExiting -> 0.94f
+            !entered -> 0.91f
+            selected -> 1.025f
+            else -> 1f
+        },
+        animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
+        label = "proposalCardScale"
+    )
+    val cardAlpha by animateFloatAsState(
+        targetValue = when {
+            isExiting -> 0.08f
+            !entered -> 0f
+            anotherOptionSelected -> 0.72f
+            else -> 1f
+        },
+        animationSpec = tween(durationMillis = 360),
+        label = "proposalCardAlpha"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) HarmonyPink else Color.White.copy(alpha = 0.26f),
+        animationSpec = tween(durationMillis = 240),
+        label = "proposalCardBorder"
+    )
+
     Box(
         modifier = modifier
             .fillMaxSize()
+            .graphicsLayer {
+                translationX = horizontalOffset.toPx()
+                this.rotationY = rotationY
+                scaleX = cardScale
+                scaleY = cardScale
+                alpha = cardAlpha
+                cameraDistance = 14f * density
+            }
+            .shadow(
+                elevation = if (selected) 18.dp else 7.dp,
+                shape = shape,
+                clip = false
+            )
             .clip(shape)
+            .background(HarmonySurface2)
             .border(
                 width = if (selected) 3.dp else 1.dp,
-                color = if (selected) HarmonyPink else Color.White.copy(alpha = 0.26f),
+                color = borderColor,
                 shape = shape
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .testTag("proposal_location_${option.id}")
     ) {
         ProposalLocationImage(
@@ -145,18 +379,23 @@ private fun ProposalLocationOptionCard(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        0f to Color.Black.copy(alpha = 0.06f),
-                        0.55f to Color.Transparent,
-                        1f to Color.Black.copy(alpha = 0.78f)
+                        0f to Color.Black.copy(alpha = 0.04f),
+                        0.52f to Color.Transparent,
+                        1f to Color.Black.copy(alpha = 0.82f)
                     )
                 )
         )
         if (selected) {
             Box(
                 modifier = Modifier
+                    .fillMaxSize()
+                    .background(HarmonyPink.copy(alpha = 0.08f))
+            )
+            Box(
+                modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(10.dp)
-                    .size(28.dp)
+                    .size(30.dp)
                     .clip(CircleShape)
                     .background(HarmonyPink),
                 contentAlignment = Alignment.Center
@@ -174,8 +413,26 @@ private fun ProposalLocationOptionCard(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(14.dp)
+                .padding(start = 14.dp, end = 14.dp, bottom = 62.dp)
         )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = (-10).dp)
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(HarmonySurface2.copy(alpha = 0.94f))
+                .border(2.dp, HarmonyPink, CircleShape)
+                .testTag("proposal_location_choice_$choiceNumber"),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = choiceNumber.toString(),
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Black
+            )
+        }
     }
 }
 
