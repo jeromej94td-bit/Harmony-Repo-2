@@ -178,7 +178,7 @@ class HarmonyRepository(
         db.chatDao().insertMessage(ChatMessageEntity(sender = sender, text = "", imagePath = path))
     }
 
-    suspend fun sendVoiceChatMessage(audioPath: String, durationSeconds: Int, sender: String = "me") {
+    suspend fun sendChatVoiceMessage(audioPath: String, durationSeconds: Int, sender: String = "me") {
         db.chatDao().insertMessage(
             ChatMessageEntity(
                 sender = sender,
@@ -207,13 +207,13 @@ class HarmonyRepository(
     }
 
     suspend fun updateSharedPicture(pic: SharedPicEntity) {
-        db.sharedPicDao().updatePic(pic)
+        db.sharedPicDao().updateSharedPicture(pic)
         PicShareWidgetProvider.refreshAll(context)
     }
 
     suspend fun addMoment(title: String, content: String, imageUris: List<Uri> = emptyList(), emoji: String = "💕") {
         val paths = imageUris.mapNotNull { uri ->
-            copyMediaToApp(uri, "moments")
+            copyMediaToApp(uri, "moments") ?: return@mapNotNull null
         }
         val pathsJson = paths.joinToString(prefix = "[", postfix = "]") { "\"${it.replace("\\", "\\\\").replace("\"", "\\\"")}\"" }
         db.momentDao().insertMoment(
