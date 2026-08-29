@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,13 +35,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.InteractionPromptPolicy
 import com.example.data.model.ProfileEntity
 import com.example.ui.contentText
 import com.example.ui.theme.HarmonyBg
+import com.example.ui.theme.HarmonyBlue
+import com.example.ui.theme.HarmonyGold
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPinkSoft
@@ -48,6 +50,7 @@ import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonyPurpleLight
 import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
+import com.example.ui.theme.HarmonyTeal
 import com.example.ui.tr
 
 internal data class MechanicOption(
@@ -90,8 +93,29 @@ internal fun FullscreenMechanicShell(
     content: @Composable () -> Unit
 ) {
     val configuration = LocalConfiguration.current
-    val stageHeight = (configuration.screenHeightDp - 178).coerceAtLeast(560).dp
-    val shape = RoundedCornerShape(30.dp)
+    val screenHeight = configuration.screenHeightDp
+    val compact = screenHeight < 700
+    val reservedChrome = when {
+        screenHeight < 600 -> 96
+        compact -> 118
+        else -> 150
+    }
+    // Never force a stage taller than the usable phone viewport. The old 560dp
+    // minimum made compact phones scroll even when a question only had four answers.
+    val stageHeight = (screenHeight - reservedChrome).coerceIn(360, 720).dp
+    val shape = RoundedCornerShape(if (compact) 26.dp else 30.dp)
+    val horizontalPadding = if (compact) 14.dp else 18.dp
+    val verticalPadding = if (compact) 12.dp else 18.dp
+    val questionSize = when {
+        compact && question.length > 95 -> 18.sp
+        compact && question.length > 70 -> 19.sp
+        compact && question.length > 48 -> 21.sp
+        compact -> 23.sp
+        question.length > 110 -> 22.sp
+        question.length > 80 -> 24.sp
+        else -> 27.sp
+    }
+    val questionLineHeight = (questionSize.value + if (compact) 4f else 6f).sp
 
     Column(
         modifier = modifier
@@ -101,44 +125,42 @@ internal fun FullscreenMechanicShell(
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        HarmonyPurple.copy(alpha = 0.42f),
+                        HarmonyPurple.copy(alpha = 0.46f),
                         HarmonySurface2.copy(alpha = 0.98f),
                         HarmonyBg.copy(alpha = 0.99f)
                     )
                 )
             )
-            .border(1.2.dp, HarmonyPink.copy(alpha = 0.46f), shape)
-            .padding(horizontal = 18.dp, vertical = 18.dp)
+            .border(1.2.dp, HarmonyPink.copy(alpha = 0.54f), shape)
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
             .testTag("fullscreen_mechanic_stage"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = kicker,
             color = HarmonyPinkSoft,
-            fontSize = 13.sp,
+            fontSize = if (compact) 11.sp else 13.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
         Text(
             text = question,
             color = Color.White,
-            fontSize = 27.sp,
-            lineHeight = 33.sp,
+            fontSize = questionSize,
+            lineHeight = questionLineHeight,
             fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.Center,
-            maxLines = 5,
-            overflow = TextOverflow.Ellipsis
+            textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
         Text(
             text = instruction,
             color = HarmonyMuted,
-            fontSize = 14.sp,
-            lineHeight = 19.sp,
+            fontSize = if (compact) 12.sp else 14.sp,
+            lineHeight = if (compact) 16.sp else 19.sp,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(if (compact) 10.dp else 18.dp))
         Box(modifier = Modifier.fillMaxSize()) { content() }
     }
 }
@@ -150,10 +172,11 @@ internal fun LargeOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     testTag: String? = null,
-    badge: String? = null
+    badge: String? = null,
+    accent: Color = HarmonyPink
 ) {
     val scale by animateFloatAsState(
-        targetValue = if (selected) 1.035f else 1f,
+        targetValue = if (selected) 1.018f else 1f,
         animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "mechanic_option_scale"
     )
@@ -163,48 +186,91 @@ internal fun LargeOptionCard(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-                shadowElevation = if (selected) 18f else 5f
+                shadowElevation = if (selected) 24f else 8f
             }
             .clip(shape)
             .background(
                 Brush.linearGradient(
                     if (selected) {
-                        listOf(HarmonyPink.copy(alpha = 0.55f), HarmonyPurple.copy(alpha = 0.68f), HarmonySurface2)
+                        listOf(
+                            accent.copy(alpha = 0.70f),
+                            HarmonyPurple.copy(alpha = 0.62f),
+                            HarmonySurface2
+                        )
                     } else {
-                        listOf(HarmonySurface, HarmonyPurple.copy(alpha = 0.26f), HarmonySurface2)
+                        listOf(
+                            accent.copy(alpha = 0.24f),
+                            HarmonySurface.copy(alpha = 0.96f),
+                            HarmonyPurple.copy(alpha = 0.25f),
+                            HarmonySurface2
+                        )
                     }
                 )
             )
             .border(
-                if (selected) 2.dp else 1.dp,
-                if (selected) HarmonyPinkSoft else Color.White.copy(alpha = 0.16f),
+                if (selected) 2.dp else 1.2.dp,
+                if (selected) Color.White.copy(alpha = 0.72f) else accent.copy(alpha = 0.58f),
                 shape
             )
             .clickable(onClick = onClick)
-            .then(if (testTag != null) Modifier.testTag(testTag) else Modifier)
-            .padding(horizontal = 14.dp, vertical = 16.dp),
+            .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (!badge.isNullOrBlank()) {
-                Text(
-                    text = badge,
-                    color = HarmonyPinkSoft,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .fillMaxWidth()
+                .height(if (selected) 4.dp else 3.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            accent.copy(alpha = if (selected) 0.95f else 0.70f),
+                            Color.White.copy(alpha = if (selected) 0.62f else 0.20f),
+                            Color.Transparent
+                        )
+                    )
                 )
-                Spacer(Modifier.height(6.dp))
+        )
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            val compactCard = maxHeight < 145.dp
+            val labelSize = when {
+                compactCard && item.label.length > 78 -> 12.sp
+                compactCard && item.label.length > 55 -> 13.sp
+                compactCard && item.label.length > 36 -> 14.sp
+                compactCard -> 15.sp
+                item.label.length > 78 -> 14.sp
+                item.label.length > 55 -> 15.sp
+                else -> 17.sp
             }
-            Text(
-                text = item.label,
-                color = Color.White,
-                fontSize = 17.sp,
-                lineHeight = 22.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis
-            )
+            val labelLineHeight = (labelSize.value + 4f).sp
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (!badge.isNullOrBlank()) {
+                    Text(
+                        text = badge,
+                        color = accent,
+                        fontSize = if (compactCard) 10.sp else 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(if (compactCard) 4.dp else 6.dp))
+                }
+                Text(
+                    text = item.label,
+                    color = Color.White,
+                    fontSize = labelSize,
+                    lineHeight = labelLineHeight,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -217,14 +283,18 @@ internal fun LargeOptionGrid(
     modifier: Modifier = Modifier,
     tagPrefix: String = "mechanic_option"
 ) {
+    val configuration = LocalConfiguration.current
+    val gap = if (configuration.screenHeightDp < 700) 8.dp else 12.dp
+    val accents = listOf(HarmonyPink, HarmonyBlue, HarmonyTeal, HarmonyGold, HarmonyPurpleLight)
+
     Column(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(gap)
     ) {
         items.chunked(2).forEachIndexed { rowIndex, rowItems ->
             Row(
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(gap)
             ) {
                 rowItems.forEachIndexed { columnIndex, item ->
                     val index = rowIndex * 2 + columnIndex
@@ -233,7 +303,8 @@ internal fun LargeOptionGrid(
                         selected = selectedRaw == item.raw,
                         onClick = { onSelect(item) },
                         modifier = Modifier.weight(1f).fillMaxSize(),
-                        testTag = "${tagPrefix}_$index"
+                        testTag = "${tagPrefix}_$index",
+                        accent = accents[index % accents.size]
                     )
                 }
                 if (rowItems.size == 1) Spacer(Modifier.weight(1f))
@@ -249,6 +320,7 @@ internal fun HandoffPane(
     onReady: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val compact = LocalConfiguration.current.screenHeightDp < 700
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -256,7 +328,7 @@ internal fun HandoffPane(
     ) {
         Box(
             modifier = Modifier
-                .size(112.dp)
+                .size(if (compact) 88.dp else 112.dp)
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
                 .border(2.dp, Color.White.copy(alpha = 0.5f), CircleShape),
@@ -265,20 +337,20 @@ internal fun HandoffPane(
             Text(
                 text = name.trim().take(1).uppercase().ifBlank { "?" },
                 color = Color.White,
-                fontSize = 42.sp,
+                fontSize = if (compact) 34.sp else 42.sp,
                 fontWeight = FontWeight.Black
             )
         }
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(if (compact) 14.dp else 20.dp))
         Text(
             text = text,
             color = Color.White,
-            fontSize = 24.sp,
-            lineHeight = 30.sp,
+            fontSize = if (compact) 20.sp else 24.sp,
+            lineHeight = if (compact) 25.sp else 30.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.ExtraBold
         )
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(if (compact) 18.dp else 28.dp))
         PrimaryMechanicButton(text = tr("Ich bin bereit", "I'm ready"), onClick = onReady)
     }
 }
@@ -291,12 +363,13 @@ internal fun PrimaryMechanicButton(
     modifier: Modifier = Modifier,
     testTag: String? = null
 ) {
+    val compact = LocalConfiguration.current.screenHeightDp < 700
     Button(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
-            .height(58.dp)
+            .height(if (compact) 52.dp else 58.dp)
             .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(
@@ -305,6 +378,6 @@ internal fun PrimaryMechanicButton(
             disabledContentColor = HarmonyMuted
         )
     ) {
-        Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+        Text(text = text, fontSize = if (compact) 15.sp else 16.sp, fontWeight = FontWeight.ExtraBold)
     }
 }
