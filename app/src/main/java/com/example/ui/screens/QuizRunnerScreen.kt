@@ -981,176 +981,208 @@ fun QuizRunnerScreen(
                         val isIntimacyPack = pack.id == "naehe" && pack.topic == "sex"
                         val questionAnimationKey = "${pack.id}_${activeRun.currentIndex}_question"
                         val imageChoiceKind = harmonyImageChoiceKind(pack.id, activeRun.currentIndex)
+                        val interactionSpec = q?.let {
+                            QuestionInteractionPolicy.resolveSpec(pack, activeRun.currentIndex, it)
+                        }
+                        val fullscreenMechanic = if (imageChoiceKind == null) interactionSpec?.fullscreenMechanic else null
 
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            CategoryTag(tag = contentText(pack.tags.firstOrNull() ?: "unterhaltung"))
-                            Spacer(modifier = Modifier.height(14.dp))
+                        if (fullscreenMechanic != null && q != null) {
+                            FullscreenQuestionMechanicBoard(
+                                kind = fullscreenMechanic,
+                                question = q.q,
+                                options = q.options,
+                                selectedAnswer = selectedAns,
+                                profile = profile,
+                                onPick = { answer ->
+                                    triggerMiniVibration(context, 40L)
+                                    onPickAnswer(answer)
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(scrollState),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                CategoryTag(tag = contentText(pack.tags.firstOrNull() ?: "unterhaltung"))
+                                Spacer(modifier = Modifier.height(14.dp))
 
-                            if (imageChoiceKind != null) {
-                                HarmonyImageChoiceQuestion(
-                                    kind = imageChoiceKind,
-                                    question = q?.q ?: "",
-                                    options = q?.options ?: emptyList(),
-                                    selectedAnswer = selectedAns,
-                                    onPick = { answer ->
-                                        triggerMiniVibration(context, 40L)
-                                        onPickAnswer(answer)
-                                    }
-                                )
-                            } else if (isMoralGreyZone) {
-                                var showMoralQuestion by remember(questionAnimationKey) { mutableStateOf(false) }
-
-                                LaunchedEffect(questionAnimationKey, moralIntroFinished) {
-                                    showMoralQuestion = false
-                                    if (moralIntroFinished) {
-                                        delay(220)
-                                        showMoralQuestion = true
-                                    }
-                                }
-
-                                AnimatedVisibility(
-                                    visible = showMoralQuestion,
-                                    enter = fadeIn(tween(durationMillis = 620, easing = FastOutSlowInEasing)) +
-                                        scaleIn(
-                                            initialScale = 0.96f,
-                                            animationSpec = tween(durationMillis = 620, easing = FastOutSlowInEasing)
-                                        )
-                                ) {
-                                    AnimatedQuestionCard(
-                                        question = compactPizzaBurgerQuestion(
-                                            rawQuestion = q?.q ?: "",
-                                            localizedQuestion = contentText(q?.q ?: "")
-                                        )
-                                    )
-                                }
-                            } else if (isIntimacyPack) {
-                                CinematicSandMaterialize(
-                                    animationKey = questionAnimationKey,
-                                    delayMillis = 0,
-                                    totalDurationMillis = 1_900,
-                                    particleCount = 3_000,
-                                    accentColor = HarmonyPink,
-                                    flowDirection = 1f,
-                                    shape = RoundedCornerShape(24.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) { glitchAmount ->
-                                    AnimatedQuestionCard(
-                                        question = compactPizzaBurgerQuestion(
-                                            rawQuestion = q?.q ?: "",
-                                            localizedQuestion = contentText(q?.q ?: "")
-                                        ),
-                                        glitchAmount = glitchAmount
-                                    )
-                                }
-                            } else {
-                                AnimatedQuestionCard(
-                                    question = compactPizzaBurgerQuestion(
-                                        rawQuestion = q?.q ?: "",
-                                        localizedQuestion = contentText(q?.q ?: "")
-                                    )
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(if (imageChoiceKind == null) 26.dp else 12.dp))
-
-                            if (imageChoiceKind == null) {
-                                val isPizzaBurgerTensionQuestion = q?.q == PIZZA_BURGER_TENSION_QUESTION
-                                val rawOptions = q?.options ?: emptyList()
-                                val processedOptions = rawOptions.map {
-                                    it.replace("{user}", profile.userName).replace("{partner}", profile.partnerName)
-                                }
-                                val interactionSpec = q?.let {
-                                    QuestionInteractionPolicy.resolveSpec(pack, activeRun.currentIndex, it)
-                                }
-                                val customTextLabel = tr("Schreibe deine eigene Antwort", "Write your own answer")
-                                val skipLabel = tr("Überspringen", "Skip")
-                                val baseOptions = if (isPizzaBurgerTensionQuestion) {
-                                    processedOptions.take(2)
-                                } else {
-                                    processedOptions
-                                }
-                                val options = if (isPizzaBurgerTensionQuestion || interactionSpec == null) {
-                                    baseOptions
-                                } else {
-                                    QuizAnswerOptionsPolicy.build(
-                                        options = baseOptions,
-                                        spec = interactionSpec,
-                                        customTextLabel = customTextLabel,
-                                        skipLabel = skipLabel
-                                    )
-                                }
-
-                                var visibleMoralOptions by remember(questionAnimationKey) {
-                                    mutableStateOf(if (isMoralGreyZone) 0 else Int.MAX_VALUE)
-                                }
-
-                                LaunchedEffect(questionAnimationKey, options.size, isMoralGreyZone) {
-                                    if (isMoralGreyZone) {
-                                        visibleMoralOptions = 0
-                                        delay(820)
-                                        options.indices.forEach { index ->
-                                            visibleMoralOptions = index + 1
-                                            delay(230)
+                                if (imageChoiceKind != null) {
+                                    HarmonyImageChoiceQuestion(
+                                        kind = imageChoiceKind,
+                                        question = q?.q ?: "",
+                                        options = q?.options ?: emptyList(),
+                                        selectedAnswer = selectedAns,
+                                        onPick = { answer ->
+                                            triggerMiniVibration(context, 40L)
+                                            onPickAnswer(answer)
                                         }
-                                    } else {
-                                        visibleMoralOptions = Int.MAX_VALUE
-                                    }
-                                }
+                                    )
+                                } else if (isMoralGreyZone) {
+                                    var showMoralQuestion by remember(questionAnimationKey) { mutableStateOf(false) }
 
-                                options.forEachIndexed { optIdx, optText ->
-                                    val isOwn = !isPizzaBurgerTensionQuestion &&
-                                        interactionSpec?.allowCustomText == true &&
-                                        optText == customTextLabel
-                                    val isSelected = if (isOwn) {
-                                        selectedAns != null && selectedAns !in baseOptions && selectedAns != skipLabel
-                                    } else {
-                                        selectedAns == optText
+                                    LaunchedEffect(questionAnimationKey, moralIntroFinished) {
+                                        showMoralQuestion = false
+                                        if (moralIntroFinished) {
+                                            delay(220)
+                                            showMoralQuestion = true
+                                        }
                                     }
 
-                                    val optionButton: @Composable (Float) -> Unit = { glitchAmount ->
-                                        QuizOptionButton(
-                                            number = optIdx + 1,
-                                            text = if (isSelected && isOwn) contentText(selectedAns ?: optText) else contentText(optText),
-                                            isSelected = isSelected,
-                                            isOwn = isOwn,
-                                            onClick = {
-                                                triggerMiniVibration(context, 40L)
-                                                if (isOwn) {
-                                                    onOpenOwnAnswerDialog(activeRun.currentIndex, null)
-                                                } else {
-                                                    onPickAnswer(optText)
-                                                }
-                                            },
+                                    AnimatedVisibility(
+                                        visible = showMoralQuestion,
+                                        enter = fadeIn(tween(durationMillis = 620, easing = FastOutSlowInEasing)) +
+                                            scaleIn(
+                                                initialScale = 0.96f,
+                                                animationSpec = tween(durationMillis = 620, easing = FastOutSlowInEasing)
+                                            )
+                                    ) {
+                                        AnimatedQuestionCard(
+                                            question = compactPizzaBurgerQuestion(
+                                                rawQuestion = q?.q ?: "",
+                                                localizedQuestion = contentText(q?.q ?: "")
+                                            )
+                                        )
+                                    }
+                                } else if (isIntimacyPack) {
+                                    CinematicSandMaterialize(
+                                        animationKey = questionAnimationKey,
+                                        delayMillis = 0,
+                                        totalDurationMillis = 1_900,
+                                        particleCount = 3_000,
+                                        accentColor = HarmonyPink,
+                                        flowDirection = 1f,
+                                        shape = RoundedCornerShape(24.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) { glitchAmount ->
+                                        AnimatedQuestionCard(
+                                            question = compactPizzaBurgerQuestion(
+                                                rawQuestion = q?.q ?: "",
+                                                localizedQuestion = contentText(q?.q ?: "")
+                                            ),
                                             glitchAmount = glitchAmount
                                         )
                                     }
+                                } else {
+                                    AnimatedQuestionCard(
+                                        question = compactPizzaBurgerQuestion(
+                                            rawQuestion = q?.q ?: "",
+                                            localizedQuestion = contentText(q?.q ?: "")
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(if (imageChoiceKind == null) 26.dp else 12.dp))
 
-                                    if (isIntimacyPack) {
-                                        CinematicSandMaterialize(
-                                            animationKey = "${pack.id}_${activeRun.currentIndex}_option_$optIdx",
-                                            delayMillis = 760 + optIdx * 500,
-                                            totalDurationMillis = 2_400,
-                                            particleCount = 1_000,
-                                            accentColor = optionAccentColor(optIdx + 1),
-                                            flowDirection = if (optIdx % 2 == 0) 1f else -1f,
-                                            shape = RoundedCornerShape(18.dp),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(bottom = 11.dp)
-                                        ) { glitchAmount -> optionButton(glitchAmount) }
-                                    } else if (isMoralGreyZone) {
-                                        AnimatedVisibility(
-                                            visible = optIdx < visibleMoralOptions,
-                                            enter = fadeIn(tween(durationMillis = 520, easing = FastOutSlowInEasing)) +
-                                                scaleIn(
-                                                    initialScale = 0.97f,
-                                                    animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing)
+                                if (imageChoiceKind == null) {
+                                    val isPizzaBurgerTensionQuestion = q?.q == PIZZA_BURGER_TENSION_QUESTION
+                                    val rawOptions = q?.options ?: emptyList()
+                                    val processedOptions = rawOptions.map {
+                                        it.replace("{user}", profile.userName).replace("{partner}", profile.partnerName)
+                                    }
+                                    val customTextLabel = tr("Schreibe deine eigene Antwort", "Write your own answer")
+                                    val skipLabel = tr("Überspringen", "Skip")
+                                    val baseOptions = if (isPizzaBurgerTensionQuestion) {
+                                        processedOptions.take(2)
+                                    } else {
+                                        processedOptions
+                                    }
+                                    val options = if (isPizzaBurgerTensionQuestion || interactionSpec == null) {
+                                        baseOptions
+                                    } else {
+                                        QuizAnswerOptionsPolicy.build(
+                                            options = baseOptions,
+                                            spec = interactionSpec,
+                                            customTextLabel = customTextLabel,
+                                            skipLabel = skipLabel
+                                        )
+                                    }
+
+                                    var visibleMoralOptions by remember(questionAnimationKey) {
+                                        mutableStateOf(if (isMoralGreyZone) 0 else Int.MAX_VALUE)
+                                    }
+
+                                    LaunchedEffect(questionAnimationKey, options.size, isMoralGreyZone) {
+                                        if (isMoralGreyZone) {
+                                            visibleMoralOptions = 0
+                                            delay(820)
+                                            options.indices.forEach { index ->
+                                                visibleMoralOptions = index + 1
+                                                delay(230)
+                                            }
+                                        } else {
+                                            visibleMoralOptions = Int.MAX_VALUE
+                                        }
+                                    }
+
+                                    options.forEachIndexed { optIdx, optText ->
+                                        val isOwn = !isPizzaBurgerTensionQuestion &&
+                                            interactionSpec?.allowCustomText == true &&
+                                            optText == customTextLabel
+                                        val isSelected = if (isOwn) {
+                                            selectedAns != null && selectedAns !in baseOptions && selectedAns != skipLabel
+                                        } else {
+                                            selectedAns == optText
+                                        }
+
+                                        val optionButton: @Composable (Float) -> Unit = { glitchAmount ->
+                                            QuizOptionButton(
+                                                number = optIdx + 1,
+                                                text = if (isSelected && isOwn) contentText(selectedAns ?: optText) else contentText(optText),
+                                                isSelected = isSelected,
+                                                isOwn = isOwn,
+                                                onClick = {
+                                                    triggerMiniVibration(context, 40L)
+                                                    if (isOwn) {
+                                                        onOpenOwnAnswerDialog(activeRun.currentIndex, null)
+                                                    } else {
+                                                        onPickAnswer(optText)
+                                                    }
+                                                },
+                                                glitchAmount = glitchAmount
+                                            )
+                                        }
+
+                                        if (isIntimacyPack) {
+                                            CinematicSandMaterialize(
+                                                animationKey = "${pack.id}_${activeRun.currentIndex}_option_$optIdx",
+                                                delayMillis = 760 + optIdx * 500,
+                                                totalDurationMillis = 2_400,
+                                                particleCount = 1_000,
+                                                accentColor = optionAccentColor(optIdx + 1),
+                                                flowDirection = if (optIdx % 2 == 0) 1f else -1f,
+                                                shape = RoundedCornerShape(18.dp),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(bottom = 11.dp)
+                                            ) { glitchAmount -> optionButton(glitchAmount) }
+                                        } else if (isMoralGreyZone) {
+                                            AnimatedVisibility(
+                                                visible = optIdx < visibleMoralOptions,
+                                                enter = fadeIn(tween(durationMillis = 520, easing = FastOutSlowInEasing)) +
+                                                    scaleIn(
+                                                        initialScale = 0.97f,
+                                                        animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing)
+                                                    )
+                                            ) {
+                                                QuizOptionButton(
+                                                    number = optIdx + 1,
+                                                    text = if (isSelected && isOwn) contentText(selectedAns ?: optText) else contentText(optText),
+                                                    isSelected = isSelected,
+                                                    isOwn = isOwn,
+                                                    onClick = {
+                                                        triggerMiniVibration(context, 40L)
+                                                        if (isOwn) {
+                                                            onOpenOwnAnswerDialog(activeRun.currentIndex, null)
+                                                        } else {
+                                                            onPickAnswer(optText)
+                                                        }
+                                                    },
+                                                    modifier = Modifier.padding(bottom = 11.dp)
                                                 )
-                                        ) {
+                                            }
+                                        } else {
                                             QuizOptionButton(
                                                 number = optIdx + 1,
                                                 text = if (isSelected && isOwn) contentText(selectedAns ?: optText) else contentText(optText),
@@ -1167,22 +1199,6 @@ fun QuizRunnerScreen(
                                                 modifier = Modifier.padding(bottom = 11.dp)
                                             )
                                         }
-                                    } else {
-                                        QuizOptionButton(
-                                            number = optIdx + 1,
-                                            text = if (isSelected && isOwn) contentText(selectedAns ?: optText) else contentText(optText),
-                                            isSelected = isSelected,
-                                            isOwn = isOwn,
-                                            onClick = {
-                                                triggerMiniVibration(context, 40L)
-                                                if (isOwn) {
-                                                    onOpenOwnAnswerDialog(activeRun.currentIndex, null)
-                                                } else {
-                                                    onPickAnswer(optText)
-                                                }
-                                            },
-                                            modifier = Modifier.padding(bottom = 11.dp)
-                                        )
                                     }
                                 }
                             }
