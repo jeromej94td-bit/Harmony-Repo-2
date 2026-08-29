@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.data.GeneratedContentRegistry
 import com.example.data.model.HarmonyPacksData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -76,12 +77,13 @@ class HarmonyImageChoiceQuestionTest {
     }
 
     @Test
-    fun `love balance starts with the happy couple image question`() {
-        val loveBalancePack = HarmonyPacksData.PACKS.first { it.id == "liebegleichgewicht" }
+    fun `love balance generated runtime pack starts with the happy couple image question`() {
+        val loveBalancePack = GeneratedContentRegistry.PACKS.first { it.id == "liebegleichgewicht" }
         val firstQuestion = loveBalancePack.questions.first()
 
         assertEquals("Welches Paar ist GLÜCKLICH?", firstQuestion.q)
         assertEquals(listOf("1", "2", "3", "4"), firstQuestion.options)
+        assertEquals(11, loveBalancePack.questions.size)
         assertEquals(
             HarmonyImageChoiceKind.HAPPY_COUPLE,
             harmonyImageChoiceKind("liebegleichgewicht", 0)
