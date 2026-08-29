@@ -406,9 +406,11 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
             ?: return
         val currentAnswers = uiState.value.answers.filter { it.packId == packId }
             .associate { it.questionIndex to it.answerText }
+        val total = if (pack.type == "tot") pack.pairs.size else pack.questions.size
+        val resumeIndex = RunnerProgressPolicy.firstUnanswered(total, currentAnswers.keys) ?: 0
         _activeRun.value = ActivePackRun(
             pack = pack,
-            currentIndex = 0,
+            currentIndex = resumeIndex,
             currentAnswers = currentAnswers,
             isFinished = false
         )
@@ -431,6 +433,14 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
 
         val answers = run.currentAnswers.toMutableMap()
         answers[run.currentIndex] = optionText
+
+        if (RunnerProgressPolicy.deferAutomaticAdvance(run.pack.type, optionText)) {
+            _activeRun.value = run.copy(currentAnswers = answers)
+            viewModelScope.launch {
+                repository.saveAnswer(run.pack.id, run.currentIndex, optionText)
+            }
+            return
+        }
 
         if (run.currentIndex >= total - 1) {
             val completedRun = run.copy(currentAnswers = answers, isFinished = true)
@@ -543,6 +553,35 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
         closeOwnAnswerDialog()
 
         val total = if (run.pack.type == "tot") run.pack.pairs.size else run.pack.questions.size
+        if (run.pack.type == "disc") {
+            val nextUnanswered = RunnerProgressPolicy.nextUnanswered(
+                total = total,
+                answeredIndexes = answers.keys,
+                afterIndex = targetIndex
+            )
+            if (nextUnanswered == null) {
+                _activeRun.value = run.copy(
+                    currentIndex = targetIndex.coerceIn(0, (total - 1).coerceAtLeast(0)),
+                    currentAnswers = answers,
+                    isFinished = true
+                )
+                viewModelScope.launch {
+                    answers.forEach { (i, ans) -> repository.saveAnswer(run.pack.id, i, ans) }
+                    repository.recordBrainPackFinished(run.pack.id)
+                }
+            } else {
+                _activeRun.value = run.copy(
+                    currentIndex = nextUnanswered,
+                    currentAnswers = answers,
+                    isFinished = false
+                )
+                viewModelScope.launch {
+                    repository.saveAnswer(run.pack.id, targetIndex, trimmed)
+                }
+            }
+            return
+        }
+
         if (targetIndex >= total - 1) {
             _activeRun.value = run.copy(currentIndex = targetIndex, currentAnswers = answers, isFinished = true)
             viewModelScope.launch {
@@ -989,7 +1028,7 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
                 text = "Hallo! Ich bin euer Harmony Brain 🧠. Ich plane mit euch die schönsten Dates, finde leckere Restaurants und analysiere eure gemeinsamen Interessen mit Bildvorschlägen und Google Maps Verknüpfung.\n\nIhr könnt mir auch gerne eine **Sprachnachricht 🎙️** schicken!",
                 sender = "brain"
             )
-        )
+        }
     }
 
     fun answerBrainQuestion(questionId: String, answerText: String) {
