@@ -120,7 +120,7 @@ interface CoupleStatsDao {
         BrainGeneratedContentEntity::class,
         BrainPendingGenerationEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 abstract class HarmonyDatabase : RoomDatabase() {
@@ -145,7 +145,16 @@ abstract class HarmonyDatabase : RoomDatabase() {
                     HarmonyDatabase::class.java,
                     "harmony_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(
+                        MIGRATION_1_2,
+                        MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_4_5,
+                        MIGRATION_5_6,
+                        MIGRATION_6_7,
+                        MIGRATION_7_8,
+                        MIGRATION_8_9
+                    )
                     .build()
                 INSTANCE = instance
                 instance
@@ -380,6 +389,23 @@ abstract class HarmonyDatabase : RoomDatabase() {
         internal val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE moments ADD COLUMN imagePathsJson TEXT NOT NULL DEFAULT '[]'")
+            }
+        }
+
+        internal val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // The new visual question is inserted at index 0. Move existing answers
+                // out of the primary-key range first, then shift them back by +1.
+                db.execSQL(
+                    "UPDATE answers SET questionIndex = questionIndex + 1000 WHERE packId = 'liebegleichgewicht'"
+                )
+                db.execSQL(
+                    "UPDATE answers SET questionIndex = questionIndex - 999 WHERE packId = 'liebegleichgewicht'"
+                )
+                db.execSQL(
+                    "UPDATE brain_answer_history SET questionIndex = questionIndex + 1 " +
+                        "WHERE packId = 'liebegleichgewicht' AND questionIndex IS NOT NULL"
+                )
             }
         }
     }

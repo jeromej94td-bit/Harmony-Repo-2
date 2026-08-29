@@ -156,6 +156,17 @@ internal fun HarmonyImageChoiceQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind == HarmonyImageChoiceKind.HAPPY_COUPLE) {
+        HarmonyHappyCoupleQuestion(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     if (!isLegacyImageChoice(kind)) {
         val context = LocalContext.current
         val profileFlow = remember(context.applicationContext) {
@@ -275,8 +286,6 @@ internal fun HarmonyImageChoiceQuestion(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Two large cards per row instead of twelve tiny tiles. All twelve remain available,
-            // but each image and label is readable at normal phone distance.
             options.take(12).chunked(2).forEachIndexed { row, rowOptions ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
