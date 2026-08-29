@@ -8,8 +8,8 @@
 **Stage 02 package coverage:** 12/12 = 100%  
 **Stage 02 status:** 🧪 IMPLEMENTATION/CONTRACT COMPLETE; GREEN ANDROID BUILD PENDING INFRASTRUCTURE  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #81:** 1/7  
-**Next core substage after PR #81:** 03.2 — Reusable `EitherOr` step  
+**Stage-03 progress after PR #87:** 3/7  
+**Next core substage after PR #87:** 03.4 — Reusable `Ranking` step  
 **Stage-05 progress:** 1/5 = 20%
 
 > Stage 02 has all twelve feature/contract slices on `main`. PR #79 closes 02.12 with available static/UI/end-to-end contracts but explicitly does not claim a green Android/Gradle build because Actions still fail before step 1. A later successful Android build is an infrastructure verification check, not a new feature slice.
@@ -20,7 +20,7 @@
 |---|---|---|---|---:|
 | 01/08 | prerequisite | Ring Image Quality Rework | ✅ DONE | 1/1 = 100% |
 | 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 CONTRACT-COMPLETE / BUILD CAVEAT | 12/12 slices = 100% |
-| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 1/7 after PR #81 |
+| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 3/7 after PR #87 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
 | 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 1/5 = 20% |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
@@ -69,23 +69,23 @@ Feature implementation and available contract coverage are complete. A genuine A
 
 **Original plan reference:** Point 2  
 **Status:** 🟣 ACTIVE  
-**Progress after PR #81:** 1/7
+**Progress after PR #87:** 3/7
 
 - [x] **03.1 General mixed-step experience definition/state model** — 26.1 / PR #81. Adds generic step kinds, immutable validated experience definitions, generic position/navigation/progress, safe invalid-position handling, content-owned item-count resolution, and a proposal compatibility adapter. Proposal remains nine steps / 35 positions with locked ratio parity.
-- [ ] **03.2 Reusable `EitherOr` step** — 🔵 NEXT.
-- [ ] 03.3 Reusable `ImageDuel` step
-- [ ] 03.4 Reusable `Ranking` step
+- [x] **03.2 Reusable `EitherOr` step** — 26.2 / PR #85, merge `4ef6d583144df4f59c59daef301ffe2596b89b7b`. Adds validated generic two-choice rounds, proposal adapter, stateless reusable Compose board, explicit selection semantics and proposal integration while preserving all 11 shipped proposal Either-Or rounds.
+- [x] **03.3 Reusable `ImageDuel` step** — 26.3 / PR #87, merge `704fa2a14732ed8141abb7d98da2018d27853aeb`. Adds generic image-duel options/rounds, shared static + animated boards, location/ring adapters, keeps the shipped location timing/tags through compatibility wrappers, and moves proposal ring duels onto the same reusable visual mechanic while preserving saved asset-key answers.
+- [ ] **03.4 Reusable `Ranking` step** — 🔵 NEXT.
 - [ ] 03.5 Reusable `PartnerPrediction` step
 - [ ] 03.6 Reusable `Scenario` + `OpenPrompt` steps
 - [ ] 03.7 Reusable `Reveal`/result flow plus legacy compatibility during migration
 
-### 03.1 verification note
+### 03.1–03.3 verification note
 
-26.1 follows test-first sequencing. Local Kotlin RED compilation confirmed the generic API and proposal adapter were absent before implementation; subsequent isolated Kotlin harnesses pass definition/validation/navigation/progress and proposal parity at exactly 35 positions. The full Android/Gradle suite is not claimed green while GitHub Actions remain blocked before executable step 1.
+26.1–26.3 follow test-first sequencing. Focused Kotlin RED compilation confirmed each generic API was absent before implementation; subsequent isolated Kotlin harnesses pass the model/navigation/adapter contracts. Existing proposal-location tests remain the compatibility contract for the shipped staged image-duel choreography, and 26.3 adds a Robolectric Compose contract for the generic image-duel surface. The full Android/Gradle/Robolectric suite is not claimed green while GitHub Actions/runners remain unavailable or expose no runnable status checks.
 
 ### NEXT EXACT ACTION
 
-Implement **03.2 — Reusable `EitherOr` step** as a narrow package on top of the 03.1 core. Do not pull ImageDuel, Ranking, Prediction or a full generic renderer into that slice.
+Implement **03.4 — Reusable `Ranking` step** as a narrow package. Reuse the existing drag/drop ranking board and `RankingAnswerCodec`, keep proposal priority IDs/labels and persistence semantics stable, and do not pull PartnerPrediction, Scenario, OpenPrompt or Reveal into that slice.
 
 Definition of Done: the proposal implementation becomes the reference for reusable mixed-step experiences without copying one-off runners; legacy content remains usable during migration.
 

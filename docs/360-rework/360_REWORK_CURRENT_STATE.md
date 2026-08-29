@@ -7,8 +7,8 @@
 **Stage-02 package coverage:** 12/12 = 100%  
 **Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #81:** 1/7  
-**Current Stage-03 substage after PR #81:** 03.2 — Reusable `EitherOr` step  
+**Stage-03 progress after PR #87:** 3/7  
+**Current Stage-03 substage after PR #87:** 03.4 — Reusable `Ranking` step  
 **Stage-05 progress:** 1/5 = 20%  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
@@ -42,10 +42,10 @@ PR #79 adds UI/Robolectric, ring-asset and 35-subround end-to-end contracts and 
 
 ### 03.1 Generic mixed-step experience foundation
 
-**Status after PR #81 merges:** ✅ DONE  
-**Progress:** **1/7**
+**Status:** ✅ DONE  
+**Package:** 26.1 / PR #81  
 
-PR #81 / work package 26.1 introduces:
+PR #81 introduced:
 
 - generic `ExperienceStepKind`, `ExperienceStep` and `ExperienceDefinition`;
 - generic `ExperiencePosition` and deterministic `ExperienceNavigator`;
@@ -55,11 +55,43 @@ PR #81 / work package 26.1 introduces:
 - proposal navigation/progress delegation without moving proposal content or UI state;
 - contract/parity coverage locking the existing nine proposal steps, 35 navigable positions and shipped progress ratios.
 
-TDD evidence for 26.1 includes local Kotlin RED compilation before the generic types/adapter existed, followed by passing isolated Kotlin contract/parity harnesses. No green full Android/Gradle build is claimed while repository Actions remain blocked before executable step 1.
+### 03.2 Reusable Either-Or step
+
+**Status:** ✅ DONE  
+**Package:** 26.2 / PR #85  
+**Merge:** `4ef6d583144df4f59c59daef301ffe2596b89b7b`  
+
+PR #85 introduced:
+
+- reusable `ExperienceEitherOrRound` with fail-fast validation;
+- a narrow proposal-to-generic adapter so proposal content stays proposal-owned;
+- stateless `ExperienceEitherOrBoard` with caller-owned selection state;
+- explicit first/second choice tags and selection semantics;
+- proposal integration by replacing the old private Either-Or pane with the generic board;
+- model and Compose contracts while preserving the existing 11 proposal Either-Or rounds, text, order and direct advance behavior.
+
+### 03.3 Reusable ImageDuel step
+
+**Status:** ✅ DONE  
+**Package:** 26.3 / PR #87  
+**Merge:** `704fa2a14732ed8141abb7d98da2018d27853aeb`  
+**Stage-03 progress:** **3/7**
+
+PR #87 introduced:
+
+- reusable `ExperienceImageDuelOption` and `ExperienceImageDuelRound` with fail-fast validation;
+- narrow proposal adapters for both location duels and ring duels;
+- stateless `ExperienceImageDuelBoard` plus `AnimatedExperienceImageDuelBoard`;
+- the shipped proposal-location choreography moved into the generic board: cards first, question after 620 ms, selection lock, then 420 ms hold + 760 ms 3D transition;
+- `ProposalLocationDuelBoard` retained as a compatibility wrapper with the existing `proposal_location_*` tags and callbacks;
+- proposal ring rounds now use the same generic board while preserving existing drawable keys and saved asset-key answers;
+- the old private proposal ring-card renderer was removed.
+
+TDD/verification evidence for 26.3: generic model contracts landed before production code; focused Kotlin RED compilation failed on the absent generic image-duel types, followed by a passing isolated Kotlin model/adapter harness. Existing proposal-location tests continue to specify legacy tags, timing, selection-lock and the three-round sequence. A new Robolectric Compose contract covers generic rendering, stable tags and the pick callback. GitHub reported the final PR conflict-free and 0 commits behind `main`; no green full Android/Gradle/Robolectric run is claimed because repository CI has no runnable status checks/credits.
 
 ### NEXT EXACT ACTION — core
 
-Begin **03.2 — Reusable `EitherOr` step** as its own narrow 26.x package. Reuse the generic definition/navigation core from 03.1; do not broaden 03.2 into ImageDuel, Ranking, Prediction or a generic full renderer.
+Begin **03.4 — Reusable `Ranking` step** as its own narrow 26.x package. Reuse the existing drag/drop ranking behavior and answer codec, preserve the proposal priority-ranking semantics, and do not pull PartnerPrediction, Scenario, OpenPrompt or Reveal into 03.4.
 
 ## Parallel Stage 05 — Questions Quality Rework
 
@@ -99,7 +131,7 @@ Stage 06 remains 0/5 complete. Existing targeted cleanup packages are partial re
 
 ## Verification caveat
 
-Repository-wide GitHub Actions continue to terminate before executable workflow step 1 in affected runs, so no green full Android/Gradle result is claimed from those failures. Focused local/static/contract evidence is recorded per narrow package and completed implementation is not left unmerged solely because CI credits/runners are unavailable.
+Repository-wide GitHub Actions continue to terminate before executable workflow step 1 or expose no runnable status checks in affected runs, so no green full Android/Gradle result is claimed from those failures. Focused local/static/contract evidence is recorded per narrow package and completed implementation is not left unmerged solely because CI credits/runners are unavailable.
 
 ## DO NOT REPEAT
 

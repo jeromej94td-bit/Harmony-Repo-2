@@ -1,9 +1,13 @@
 package com.example.ui.screens
 
+import com.example.data.GeneratedContentRegistry
+import com.example.data.HarmonyContentRepository
 import com.example.data.model.FullscreenGameMechanicKind
 import com.example.data.model.FullscreenGameMechanicPolicy
 import com.example.data.model.HarmonyPacksData
+import com.example.data.model.LoveBalanceQuestionPolicy
 import com.example.data.model.QuestionPack
+import com.example.data.model.SexIntimacyRevealPolicy
 
 internal enum class HarmonyImageChoiceKind {
     EGG,
@@ -22,12 +26,17 @@ internal enum class HarmonyImageChoiceKind {
     SCENARIO,
     PRIORITY_POKER,
     MATCH_TOURNAMENT,
-    DEEP_TALK
+    DEEP_TALK,
+    INTIMACY_COMPACT,
+    INTIMACY_PRIVATE_REVEAL
 }
 
 internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
 
-private const val HAPPY_COUPLE_PROMPT = "Was fällt dir in unserer Beziehung leichter?"
+private val HAPPY_COUPLE_PROMPTS = setOf(
+    LoveBalanceQuestionPolicy.QUESTION_TEXT,
+    "Was fällt dir in unserer Beziehung leichter?"
+)
 private const val EGG_PROMPT = "Wie möchtest du dein Ei am liebsten?"
 private const val STEAK_PROMPT = "Wie willst du dein Steak?"
 private const val TRAVEL_PROMPT = "Wie sieht deine Traumreise aus?"
@@ -37,6 +46,9 @@ internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeas
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
     val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
+        ?: GeneratedContentRegistry.PACKS.firstOrNull { it.id == packId }
+        ?: HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
+
     if (pack != null) return harmonyImageChoiceKind(pack, questionIndex)
 
     // Compatibility fallback for callers that only know an id/index for a pack not loaded yet.
@@ -62,6 +74,21 @@ internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): Har
         return HarmonyImageChoiceKind.TRAUMHAUS
     }
 
+    if (SexIntimacyRevealPolicy.isSexIntimacyPack(pack.id, pack.topic)) {
+        val questionText = rawQuestion ?: return HarmonyImageChoiceKind.INTIMACY_COMPACT
+        return if (
+            SexIntimacyRevealPolicy.usesPrivateCoupleReveal(
+                pack.id,
+                pack.topic,
+                questionText
+            )
+        ) {
+            HarmonyImageChoiceKind.INTIMACY_PRIVATE_REVEAL
+        } else {
+            HarmonyImageChoiceKind.INTIMACY_COMPACT
+        }
+    }
+
     return when (FullscreenGameMechanicPolicy.resolve(pack, questionIndex)) {
         FullscreenGameMechanicKind.PERSON_ASSIGNMENT -> HarmonyImageChoiceKind.PERSON_ASSIGNMENT
         FullscreenGameMechanicKind.RANK_ORDER -> HarmonyImageChoiceKind.RANK_ORDER
@@ -81,7 +108,7 @@ internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): Har
 private fun stableVisualQuestionKind(packId: String, rawQuestion: String?): HarmonyImageChoiceKind? {
     val prompt = rawQuestion?.trim() ?: return null
     return when {
-        packId == "liebegleichgewicht" && prompt == HAPPY_COUPLE_PROMPT -> HarmonyImageChoiceKind.HAPPY_COUPLE
+        packId == "liebegleichgewicht" && prompt in HAPPY_COUPLE_PROMPTS -> HarmonyImageChoiceKind.HAPPY_COUPLE
         packId == "essenreden" && prompt == EGG_PROMPT -> HarmonyImageChoiceKind.EGG
         packId == "essenreden" && prompt == STEAK_PROMPT -> HarmonyImageChoiceKind.STEAK
         packId == "reisevor" && prompt == TRAVEL_PROMPT -> HarmonyImageChoiceKind.TRAVEL

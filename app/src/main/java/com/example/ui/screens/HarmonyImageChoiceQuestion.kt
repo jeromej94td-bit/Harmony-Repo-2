@@ -224,6 +224,22 @@ internal fun HarmonyImageChoiceQuestion(
             HarmonyImageChoiceKind.DEEP_TALK -> DeepTalkBoard(
                 question, options, selectedAnswer, effectiveProfile, onPick, modifier
             )
+            HarmonyImageChoiceKind.INTIMACY_COMPACT -> IntimacyCompactChoiceBoard(
+                question = question,
+                options = options,
+                selectedAnswer = selectedAnswer,
+                profile = effectiveProfile,
+                onPick = onPick,
+                modifier = modifier.fillMaxSize()
+            )
+            HarmonyImageChoiceKind.INTIMACY_PRIVATE_REVEAL -> IntimacyPrivateRevealBoard(
+                question = question,
+                options = options,
+                selectedAnswer = selectedAnswer,
+                profile = effectiveProfile,
+                onPick = onPick,
+                modifier = modifier.fillMaxSize()
+            )
             else -> Unit
         }
         return

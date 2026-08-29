@@ -1,9 +1,7 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,10 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -56,17 +51,17 @@ import com.example.data.model.ProposalPriorityRanking
 import com.example.data.model.ProposalReveal
 import com.example.data.model.ProposalRevealInput
 import com.example.data.model.ProposalRevealResult
-import com.example.data.model.ProposalRingImageDuel
 import com.example.data.model.ProposalRingImageDuels
 import com.example.data.model.ProposalRunnerPosition
 import com.example.data.model.ProposalScenarios
 import com.example.data.model.RankingAnswerCodec
+import com.example.data.model.toExperienceEitherOrRound
+import com.example.data.model.toExperienceImageDuelRound
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPinkSoft
 import com.example.ui.theme.HarmonyPurple
-import com.example.ui.theme.HarmonyPurpleLight
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
 
@@ -158,11 +153,9 @@ internal fun ProposalExperienceScreen(
                 when (step.kind) {
                     ProposalFlowStepKind.EITHER_OR -> {
                         val round = ProposalEitherOrRounds.roundsFor(step.id)[position.itemIndex]
-                        ProposalEitherOrPane(
-                            prompt = round.prompt,
-                            first = round.firstChoice,
-                            second = round.secondChoice,
-                            selected = eitherOrSelections[round.id],
+                        ExperienceEitherOrBoard(
+                            round = round.toExperienceEitherOrRound(),
+                            selectedChoice = eitherOrSelections[round.id],
                             onPick = { choice ->
                                 eitherOrSelections = eitherOrSelections + (round.id to choice)
                                 advance()
@@ -185,13 +178,21 @@ internal fun ProposalExperienceScreen(
                             )
                         } else {
                             val round = ProposalRingImageDuels.rounds[position.itemIndex]
-                            ProposalRingDuelPane(
-                                round = round,
-                                selectedAssetKey = ringSelections[round.id],
-                                onPick = { assetKey ->
-                                    ringSelections = ringSelections + (round.id to assetKey)
+                            val context = LocalContext.current
+                            ExperienceImageDuelBoard(
+                                round = round.toExperienceImageDuelRound(),
+                                selectedOptionId = ringSelections[round.id],
+                                imageResolver = { imageKey ->
+                                    context.resources.getIdentifier(imageKey, "drawable", context.packageName)
+                                },
+                                onPick = { option ->
+                                    ringSelections = ringSelections + (round.id to option.id)
                                     advance()
                                 },
+                                kicker = "💎  RING-DUELL",
+                                instruction = "",
+                                testTagPrefix = "proposal_ring",
+                                rootTestTag = "proposal_ring_duel",
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
@@ -327,172 +328,6 @@ private fun ProposalIntroPane(
         ) {
             Text("Reise beginnen", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
         }
-    }
-}
-
-@Composable
-private fun ProposalEitherOrPane(
-    prompt: String,
-    first: String,
-    second: String,
-    selected: String?,
-    onPick: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("✦  ENTWEDER ODER", color = HarmonyPinkSoft, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = prompt,
-            color = Color.White,
-            fontSize = 27.sp,
-            lineHeight = 33.sp,
-            fontWeight = FontWeight.Black,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(28.dp))
-        ProposalChoiceCard(first, selected == first, { onPick(first) }, Modifier.fillMaxWidth())
-        Spacer(Modifier.height(14.dp))
-        ProposalChoiceCard(second, selected == second, { onPick(second) }, Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-private fun ProposalChoiceCard(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(24.dp)
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        if (selected) HarmonyPink.copy(alpha = 0.55f) else HarmonyPurple.copy(alpha = 0.34f),
-                        HarmonySurface2
-                    )
-                )
-            )
-            .border(
-                if (selected) 2.dp else 1.dp,
-                if (selected) HarmonyPinkSoft else Color.White.copy(alpha = 0.15f),
-                shape
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-    }
-}
-
-@Composable
-private fun ProposalRingDuelPane(
-    round: ProposalRingImageDuel,
-    selectedAssetKey: String?,
-    onPick: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    val firstRes = remember(round.firstAssetKey) {
-        context.resources.getIdentifier(round.firstAssetKey, "drawable", context.packageName)
-    }
-    val secondRes = remember(round.secondAssetKey) {
-        context.resources.getIdentifier(round.secondAssetKey, "drawable", context.packageName)
-    }
-
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("💎  RING-DUELL", color = HarmonyPinkSoft, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
-        Spacer(Modifier.height(10.dp))
-        Text(
-            round.prompt,
-            color = Color.White,
-            fontSize = 25.sp,
-            lineHeight = 31.sp,
-            fontWeight = FontWeight.Black,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(18.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ProposalRingCard(
-                imageRes = firstRes,
-                label = round.firstLabel,
-                selected = selectedAssetKey == round.firstAssetKey,
-                onClick = { onPick(round.firstAssetKey) },
-                modifier = Modifier.weight(1f).fillMaxSize()
-            )
-            ProposalRingCard(
-                imageRes = secondRes,
-                label = round.secondLabel,
-                selected = selectedAssetKey == round.secondAssetKey,
-                onClick = { onPick(round.secondAssetKey) },
-                modifier = Modifier.weight(1f).fillMaxSize()
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProposalRingCard(
-    imageRes: Int,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(26.dp)
-    Column(
-        modifier = modifier
-            .clip(shape)
-            .background(HarmonySurface2)
-            .border(
-                if (selected) 2.dp else 1.dp,
-                if (selected) HarmonyPink else Color.White.copy(alpha = 0.16f),
-                shape
-            )
-            .clickable(onClick = onClick)
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .clip(RoundedCornerShape(20.dp))
-                .background(HarmonyPurple.copy(alpha = 0.24f)),
-            contentAlignment = Alignment.Center
-        ) {
-            if (imageRes != 0) {
-                Image(
-                    painter = painterResource(imageRes),
-                    contentDescription = label,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Text("💍", fontSize = 64.sp)
-            }
-        }
-        Spacer(Modifier.height(10.dp))
-        Text(
-            label,
-            color = HarmonyText,
-            fontSize = 15.sp,
-            lineHeight = 19.sp,
-            fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
-        )
     }
 }
 
