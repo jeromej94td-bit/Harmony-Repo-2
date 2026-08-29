@@ -7,7 +7,8 @@
 **Current substage:** 02.3 — Proposal-location image duels  
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY  
-**Next Stage-02 work package:** 24.8 — Stage 02.3 Proposal-location image duels
+**Next Stage-02 work package:** 24.8 — Stage 02.3 Proposal-location image duels  
+**Prepared follow-up:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #46)
 
 ## Source-of-truth rule
 
