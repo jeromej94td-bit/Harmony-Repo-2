@@ -37,7 +37,7 @@ object GeneratedContentRepairPolicy {
             result = neutralizeDrinkPack(result)
         }
 
-        return result
+        return neutralizeKnownLegacyBrandText(result)
     }
 
     private fun neutralizeMagicAcademyPack(pack: GenPack): GenPack = pack.copy(
@@ -102,6 +102,16 @@ object GeneratedContentRepairPolicy {
             } else {
                 pair
             }
+        }
+    )
+
+    private fun neutralizeKnownLegacyBrandText(pack: GenPack): GenPack = pack.copy(
+        questions = pack.questions.map { question ->
+            question.copy(
+                q = question.q
+                    .replace("mit Edding im Gesicht", "mit Permanentmarker im Gesicht")
+                    .replace("Spotify-Playlist", "Musik-Playlist")
+            )
         }
     )
 }
