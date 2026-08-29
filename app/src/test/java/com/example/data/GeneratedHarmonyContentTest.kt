@@ -1,6 +1,7 @@
 package com.example.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GeneratedHarmonyContentTest {
@@ -13,5 +14,13 @@ class GeneratedHarmonyContentTest {
         }
 
         assertEquals(listOf("Habe ich", "Habe ich noch nie"), malformedQuestion.options)
+    }
+
+    @Test
+    fun `all registered never-have-i-ever questions expose answer options`() {
+        val packs = GeneratedContentRegistry.PACKS.filter { "ichhabenochnie" in it.tags }
+
+        assertTrue(packs.isNotEmpty())
+        assertTrue(packs.flatMap { it.questions }.all { it.options.isNotEmpty() })
     }
 }
