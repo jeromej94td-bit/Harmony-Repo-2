@@ -433,3 +433,49 @@ Merge after the PR is confirmed mergeable, then continue with 24.11 / Stage 02.6
 ### Next action
 
 Merge after GitHub confirms the PR is mergeable, then continue with 24.12 / Stage 02.7 proposal scenarios.
+
+---
+
+## 2026-08-29 — 24.14.1 Stage 02 implementation-status correction
+
+**Work package:** 24.14.1 — Stage 02 control-state sync  
+**Status:** 🟡 PREPARED FOR MERGE  
+**Branch:** `360-rework/24-14-1-stage-02-status-sync`
+
+### Why this correction exists
+
+The central Stage-02 tracker had stopped at 02.3 even though the repository continued to receive and merge the dedicated proposal packages. Parallel work then started in Stage 05, making the stale handover especially risky for subsequent agents.
+
+This entry does not rewrite the historical entries above. It records the authoritative correction after checking current `main`, recent commits, open PRs and active branches.
+
+### Authoritative Stage-02 implementation state
+
+- **02.1 / 24.2** — flow model merged via PR #27; executable verification open.
+- **02.2 / 24.3** — mood/details content merged via PR #31; final runner/build/UI verification open.
+- **02.3 / 24.8** — proposal-location duels merged via replacement PR #55 and routed into the `antrag` game by merge/integration commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`.
+- **02.4 / 24.9** — refreshed ring-duel content merged via PR #48; runner wiring remains for 02.11.
+- **02.5 / 24.10** — priority-ranking content merged via PR #49; runner wiring remains for 02.11.
+- **02.6 / 24.11** — partner-prediction content merged via PR #50; runner wiring remains for 02.11.
+- **02.7 / 24.12** — six concrete proposal scenarios merged via PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`; focused Kotlin contract 3/3 PASS.
+- **02.8 / 24.13** — five open personal prompts merged via PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`; focused Kotlin contract 3/3 PASS.
+- **02.9 / 24.14** — qualitative perfect-proposal reveal builder merged via PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`; focused Kotlin contract 3/3 PASS.
+
+### Accounting decision
+
+Stage 02 remains **0/12 verified complete** because the roadmap defines completion through executable verification, and several 02.4–02.9 components still await their actual end-to-end runner wiring in 02.11. At the same time, the tracker now separately records **9/12 implementation coverage** so agents do not rebuild already-landed Stage-02 packages.
+
+### Parallel-work observation
+
+A separate agent has already begun Stage 05 `25.x` work, and Photo Rework PR #61 is also active. Neither track changes the Stage-02 Definition of Done. Before starting each remaining Stage-02 slice, active branches/PRs must be checked for overlap.
+
+### Verification performed
+
+- Fresh `main` check after PR #63: `c7873ad413129f9fd271a0320faa238b7d8a9091`.
+- Open PRs and active branches inspected for Stage-02 overlap.
+- No `24.14`/reveal competitor existed before PR #63; PR #63 was verified mergeable, exactly two files and 0 commits behind `main` before merge.
+- Documentation sync changes project-control files only; no Android code is changed by this package.
+- No GitHub Actions workflow was manually triggered.
+
+### Next exact action
+
+**24.15 / Stage 02.10:** inventory the existing proposal, engagement-ring and relevant wedding content, select only the strongest material that adds value beyond 02.2–02.9, and expose it for reuse by the perfect-proposal experience. Do not delete or hide legacy content yet; that belongs to Stage 04. Then proceed to 02.11 end-to-end wiring and 02.12 executable verification before moving the core-stage handover onward.
