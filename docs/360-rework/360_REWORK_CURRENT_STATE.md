@@ -7,8 +7,8 @@
 **Stage-02 package coverage:** 12/12 = 100%  
 **Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #81:** 1/7  
-**Current Stage-03 substage after PR #81:** 03.2 — Reusable `EitherOr` step  
+**Stage-03 progress after PR #85:** 2/7  
+**Current Stage-03 substage after PR #85:** 03.3 — Reusable `ImageDuel` step  
 **Stage-05 progress:** 1/5 = 20%  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
@@ -42,10 +42,10 @@ PR #79 adds UI/Robolectric, ring-asset and 35-subround end-to-end contracts and 
 
 ### 03.1 Generic mixed-step experience foundation
 
-**Status after PR #81 merges:** ✅ DONE  
-**Progress:** **1/7**
+**Status:** ✅ DONE  
+**Package:** 26.1 / PR #81  
 
-PR #81 / work package 26.1 introduces:
+PR #81 introduced:
 
 - generic `ExperienceStepKind`, `ExperienceStep` and `ExperienceDefinition`;
 - generic `ExperiencePosition` and deterministic `ExperienceNavigator`;
@@ -55,11 +55,27 @@ PR #81 / work package 26.1 introduces:
 - proposal navigation/progress delegation without moving proposal content or UI state;
 - contract/parity coverage locking the existing nine proposal steps, 35 navigable positions and shipped progress ratios.
 
-TDD evidence for 26.1 includes local Kotlin RED compilation before the generic types/adapter existed, followed by passing isolated Kotlin contract/parity harnesses. No green full Android/Gradle build is claimed while repository Actions remain blocked before executable step 1.
+### 03.2 Reusable Either-Or step
+
+**Status:** ✅ DONE  
+**Package:** 26.2 / PR #85  
+**Merge:** `4ef6d583144df4f59c59daef301ffe2596b89b7b`  
+**Stage-03 progress:** **2/7**
+
+PR #85 introduced:
+
+- reusable `ExperienceEitherOrRound` with fail-fast validation;
+- a narrow proposal-to-generic adapter so proposal content stays proposal-owned;
+- stateless `ExperienceEitherOrBoard` with caller-owned selection state;
+- explicit first/second choice tags and selection semantics;
+- proposal integration by replacing the old private Either-Or pane with the generic board;
+- model and Compose contracts while preserving the existing 11 proposal Either-Or rounds, text, order and direct advance behavior.
+
+TDD evidence for 26.2: the generic model contract was committed before production code; a focused Kotlin RED compile failed on the absent generic type, followed by a passing isolated Kotlin model/adapter harness. The existing `ProposalExperienceScreenUiTest` remains the integration contract that clicks all 11 Either-Or rounds and reaches the first location duel. No green full Android/Robolectric run is claimed while repository runner/credit execution remains unavailable.
 
 ### NEXT EXACT ACTION — core
 
-Begin **03.2 — Reusable `EitherOr` step** as its own narrow 26.x package. Reuse the generic definition/navigation core from 03.1; do not broaden 03.2 into ImageDuel, Ranking, Prediction or a generic full renderer.
+Begin **03.3 — Reusable `ImageDuel` step** as its own narrow 26.x package. Reuse the existing proposal location/ring duel behavior, but do not pull Ranking, PartnerPrediction, Scenario, OpenPrompt or Reveal into 03.3.
 
 ## Parallel Stage 05 — Questions Quality Rework
 
