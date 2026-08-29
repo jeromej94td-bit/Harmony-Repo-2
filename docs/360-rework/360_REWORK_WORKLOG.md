@@ -18,6 +18,7 @@ This file is the append-only project black box for **360 Rework**.
 **Work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>
 **Status:** 🟡 IN PROGRESS<br>
 **Branch:** `360-rework/24-8-proposal-location-duels`<br>
+**GitHub PR:** #46 — `[24.8] 360 Rework — Proposal location image duels` (draft)<br>
 
 ### Scope
 

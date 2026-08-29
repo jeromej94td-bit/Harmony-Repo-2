@@ -119,6 +119,7 @@ Do not infer logical work-package ownership from the historical branch names or 
 
 **Work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>
 **Branch:** `360-rework/24-8-proposal-location-duels`<br>
+**GitHub PR:** #46 — `[24.8] 360 Rework — Proposal location image duels` (draft)<br>
 **Scope:** add three deterministic proposal-location image duels, six local visual resources and the Aurora-Glass duel board used by the later proposal runner.<br>
 **Deliberately excluded:** navigation, runner integration, refreshed-ring duels, ranking, prediction, scenarios, open prompts, reveal and legacy cleanup.<br>
 **Verification status:** resource and whitespace validation pending. No tests are added or run by explicit operator instruction.<br>
