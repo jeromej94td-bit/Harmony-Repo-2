@@ -30,6 +30,9 @@ object GeneratedContentRepairPolicy {
         if (result.id == "cj_disney_quiz") {
             result = neutralizeAnimationPack(result)
         }
+        if (result.id == "cj_entertainment_quiz") {
+            result = neutralizeEntertainmentPack(result)
+        }
 
         return result
     }
@@ -75,6 +78,16 @@ object GeneratedContentRepairPolicy {
                     .replace("aus Toy Story", "aus einer Spielzeug-Abenteuergeschichte")
                     .replace("wie Elsa", "wie eine Eiszauberin")
                     .replace("Disney-Lied", "Animationsfilm-Lied")
+            )
+        }
+    )
+
+    private fun neutralizeEntertainmentPack(pack: GenPack): GenPack = pack.copy(
+        questions = pack.questions.map { question ->
+            question.copy(
+                q = question.q
+                    .replace("Netflix-Passwort", "Streaming-Passwort")
+                    .replace("Oscar-Verleihung", "große Filmpreis-Verleihung")
             )
         }
     )
