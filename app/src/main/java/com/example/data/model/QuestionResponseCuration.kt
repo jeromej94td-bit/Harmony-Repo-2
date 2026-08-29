@@ -16,6 +16,12 @@ object QuestionResponseCuration {
         key("schnapp", "Welches gemeinsame Foto ist dein Lieblingsfoto?") to
             QuestionResponseKind.PHOTO_ONLY,
         key("gespraechsanreger", "Wie würdest du unsere Beziehung in 3 Worten beschreiben?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("tiefe", "Was bedeutet Vertrauen für dich konkret?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("tiefe", "Gibt es etwas, das du mir schon immer sagen wolltest, aber dich nie getraut hast?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("tiefe", "Was war der Moment, in dem du wusstest, dass du mich liebst?") to
             QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT
     )
 
