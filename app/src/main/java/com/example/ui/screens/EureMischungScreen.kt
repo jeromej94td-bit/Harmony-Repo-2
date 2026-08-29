@@ -120,7 +120,7 @@ fun EureMischungScreen(
     profile: ProfileEntity,
     appLanguage: String = "de",
     onClose: () -> Unit,
-    onAddMoment: (title: String, content: String, emoji: String) -> Unit,
+    onAddMoment: (title: String, content: String, emoji: String, imagePath: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -128,20 +128,17 @@ fun EureMischungScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberScrollState()
 
-    // Photo Sources (Defaults to profile avatars, or custom picked Uris)
     var parent1CustomUri by remember { mutableStateOf<Uri?>(null) }
     var parent2CustomUri by remember { mutableStateOf<Uri?>(null) }
 
     val parent1Source = parent1CustomUri?.toString() ?: profile.userAvatarPath
     val parent2Source = parent2CustomUri?.toString() ?: profile.partnerAvatarPath
 
-    // Config options
     var selectedScenario by remember { mutableStateOf(BlendScenario.BABY) }
     var selectedStyle by remember { mutableStateOf(BlendStyle.ANIME) }
     var selectedGender by remember { mutableStateOf(BlendGender.SURPRISE) }
     var customNotes by remember { mutableStateOf("") }
 
-    // Generation State
     var isGenerating by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var technicalErrorDetails by remember { mutableStateOf<String?>(null) }
@@ -150,10 +147,8 @@ fun EureMischungScreen(
     var isFullscreenImageOpen by remember { mutableStateOf(false) }
     var isMomentSaved by remember { mutableStateOf(false) }
 
-    // Session History
     val historyList = remember { mutableStateListOf<GeneratedImageResult>() }
 
-    // Launchers for Gallery selection
     val pickParent1Launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) parent1CustomUri = uri
     }
@@ -185,7 +180,6 @@ fun EureMischungScreen(
                 .verticalScroll(scrollState)
                 .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
-            // Top Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -227,7 +221,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Intro Hero Card
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -289,7 +282,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Photo Selection Area
             Text(
                 text = LanguageManager.tr("1. Eltern-Fotos auswählen", appLanguage),
                 fontSize = 15.sp,
@@ -303,7 +295,6 @@ fun EureMischungScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Partner 1 Avatar Picker
                 ParentPhotoCard(
                     name = profile.userName,
                     roleLabel = LanguageManager.tr("Du", appLanguage),
@@ -312,7 +303,6 @@ fun EureMischungScreen(
                     testTag = "parent1_photo_picker"
                 )
 
-                // Love Fusion Badge
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -332,13 +322,9 @@ fun EureMischungScreen(
                         Text(text = "➕", fontSize = 16.sp, color = HarmonyPinkSoft)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "💞",
-                        fontSize = 14.sp
-                    )
+                    Text(text = "💞", fontSize = 14.sp)
                 }
 
-                // Partner 2 Avatar Picker
                 ParentPhotoCard(
                     name = profile.partnerName,
                     roleLabel = LanguageManager.tr("Partner", appLanguage),
@@ -350,7 +336,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Scenario Selection (Alter / Situation)
             Text(
                 text = LanguageManager.tr("2. Szenario & Alter wählen", appLanguage),
                 fontSize = 15.sp,
@@ -397,7 +382,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Style Selection
             Text(
                 text = LanguageManager.tr("3. Kunst- & Fotostil", appLanguage),
                 fontSize = 15.sp,
@@ -444,7 +428,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Gender Selection
             Text(
                 text = LanguageManager.tr("4. Geschlecht / Kinder", appLanguage),
                 fontSize = 15.sp,
@@ -491,7 +474,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Optional Wishes Input
             Text(
                 text = LanguageManager.tr("Besondere Wünsche (optional)", appLanguage),
                 fontSize = 13.5.sp,
@@ -528,7 +510,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(22.dp))
 
-            // Error Display if any
             if (errorMessage != null) {
                 Box(
                     modifier = Modifier
@@ -600,7 +581,6 @@ fun EureMischungScreen(
                 Spacer(modifier = Modifier.height(14.dp))
             }
 
-            // Generate Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -692,7 +672,6 @@ fun EureMischungScreen(
 
             Spacer(modifier = Modifier.height(26.dp))
 
-            // Result Display Area
             currentResult?.let { res ->
                 ResultCard(
                     result = res,
@@ -712,7 +691,8 @@ fun EureMischungScreen(
                             onAddMoment(
                                 "Eure Mischung: ${res.promptSummary}",
                                 res.aiDescription,
-                                "👶"
+                                "👶",
+                                res.localFilePath
                             )
                             isMomentSaved = true
                             Toast.makeText(context, "In Momente gespeichert 💞", Toast.LENGTH_SHORT).show()
@@ -729,7 +709,6 @@ fun EureMischungScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // History of this session if multiple
             if (historyList.size > 1) {
                 Text(
                     text = LanguageManager.tr("Weitere erstellte Mischungen", appLanguage),
@@ -774,7 +753,6 @@ fun EureMischungScreen(
         }
     }
 
-    // Fullscreen Zoom Dialog
     if (isFullscreenImageOpen && currentResult != null) {
         Dialog(
             onDismissRequest = { isFullscreenImageOpen = false },
@@ -857,7 +835,6 @@ private fun ParentPhotoCard(
                 )
             }
 
-            // Edit Overlay Badge
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -916,17 +893,13 @@ private fun ResultCard(
             .padding(14.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Title Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "👶",
-                        fontSize = 18.sp
-                    )
+                    Text(text = "👶", fontSize = 18.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = LanguageManager.tr("Euer Ergebnis", appLanguage),
@@ -953,7 +926,6 @@ private fun ResultCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Main Image Container
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -970,7 +942,6 @@ private fun ResultCard(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Zoom Indicator Badge
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -1000,7 +971,6 @@ private fun ResultCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // AI Description
             Text(
                 text = result.aiDescription,
                 fontSize = 13.sp,
@@ -1011,12 +981,10 @@ private fun ResultCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Action Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Save to Gallery
                 Button(
                     onClick = onSaveToGallery,
                     colors = ButtonDefaults.buttonColors(containerColor = HarmonySurface2),
@@ -1039,7 +1007,6 @@ private fun ResultCard(
                     )
                 }
 
-                // Save to Moments
                 Button(
                     onClick = onSaveToMoments,
                     colors = ButtonDefaults.buttonColors(
@@ -1064,7 +1031,6 @@ private fun ResultCard(
                     )
                 }
 
-                // Share
                 IconButton(
                     onClick = onShare,
                     modifier = Modifier
