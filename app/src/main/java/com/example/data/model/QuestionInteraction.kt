@@ -6,6 +6,21 @@ enum class QuestionInteractionKind {
     PERSON_ASSIGNMENT
 }
 
+enum class QuestionResponseKind {
+    FIXED_CHOICE,
+    CHOICE_WITH_OPTIONAL_TEXT,
+    OPEN_TEXT,
+    PHOTO_ONLY,
+    CHOICE_WITH_OPTIONAL_PHOTO
+}
+
+data class QuestionInteractionSpec(
+    val responseKind: QuestionResponseKind,
+    val allowCustomText: Boolean = false,
+    val allowSkip: Boolean = false,
+    val fullscreenMechanic: FullscreenGameMechanicKind? = null
+)
+
 enum class FullscreenGameMechanicKind {
     RANK_ORDER,
     PERSON_ASSIGNMENT,
@@ -32,6 +47,9 @@ enum class PersonSide(val token: String) {
 object QuestionInteractionPolicy {
     private const val PERSON_ASSIGNMENT_PREFIX = "interaction_person_assignment_"
     private const val RANK_ORDER_PREFIX = "interaction_rank_order_"
+    private const val ROLE_ASSIGNMENT_PACK = "h500_414_rollenverteilung_ranking"
+    private const val ROLE_ASSIGNMENT_QUESTION =
+        "Wer übernimmt welche Rolle bei gemeinsamen Plänen? Rank: Visionär/Ideen, Detailplaner, Ausführer, Qualitätsprüfer"
 
     fun resolve(pack: QuestionPack, questionIndex: Int): QuestionInteractionKind {
         if (pack.tags.any { it == "$PERSON_ASSIGNMENT_PREFIX$questionIndex" }) {
@@ -41,7 +59,8 @@ object QuestionInteractionPolicy {
             return QuestionInteractionKind.RANK_ORDER
         }
 
-        if (pack.id == "h500_414_rollenverteilung_ranking" && questionIndex == 1) {
+        val rawQuestion = pack.questions.getOrNull(questionIndex)?.q?.trim()
+        if (pack.id == ROLE_ASSIGNMENT_PACK && rawQuestion == ROLE_ASSIGNMENT_QUESTION) {
             return QuestionInteractionKind.PERSON_ASSIGNMENT
         }
 
@@ -51,11 +70,34 @@ object QuestionInteractionPolicy {
             QuestionInteractionKind.STANDARD
         }
     }
+
+    fun resolveSpec(
+        pack: QuestionPack,
+        questionIndex: Int,
+        question: Question
+    ): QuestionInteractionSpec {
+        val fullscreenMechanic = FullscreenGameMechanicPolicy.resolve(pack, questionIndex)
+        val curatedResponse = QuestionResponseCuration.resolve(pack.id, question.q)
+        val responseKind = curatedResponse ?: when {
+            pack.cat == "nie" -> QuestionResponseKind.FIXED_CHOICE
+            question.options.isEmpty() -> QuestionResponseKind.OPEN_TEXT
+            else -> QuestionResponseKind.FIXED_CHOICE
+        }
+        val allowCustomText = responseKind == QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT ||
+            responseKind == QuestionResponseKind.OPEN_TEXT
+
+        return QuestionInteractionSpec(
+            responseKind = responseKind,
+            allowCustomText = allowCustomText,
+            allowSkip = pack.cat == "nie",
+            fullscreenMechanic = fullscreenMechanic
+        )
+    }
 }
 
 /**
- * All full-screen game routing lives here. The old ranking dispatcher stays intentionally small
- * so the already shipped drag/drop implementation is not destabilized by the new game systems.
+ * All full-screen game routing lives here. Category fallbacks matter for remotely loaded content,
+ * because Supabase packs do not necessarily carry the generated source tags used by embedded data.
  */
 object FullscreenGameMechanicPolicy {
     fun resolve(pack: QuestionPack, questionIndex: Int): FullscreenGameMechanicKind? {
@@ -75,16 +117,16 @@ object FullscreenGameMechanicPolicy {
             pack.tags.any { it == "mechanik_skala" } || pack.cat == "h360_skala" ->
                 FullscreenGameMechanicKind.SCALE_MATCH
 
-            pack.tags.any { it == "mechanik_wer_eher" } ->
+            pack.tags.any { it == "mechanik_wer_eher" || it == "wer-wuerde-eher" } ->
                 FullscreenGameMechanicKind.WHO_WOULD
 
-            pack.tags.any { it == "mechanik_memory" } ->
+            pack.tags.any { it == "mechanik_memory" } || pack.cat == "h360_memory" ->
                 FullscreenGameMechanicKind.MEMORY_MATCH
 
             pack.tags.any { it == "mechanik_szenario" } || pack.cat == "h360_szenario" ->
                 FullscreenGameMechanicKind.SCENARIO
 
-            pack.tags.any { it == "mechanik_prioritaet" } ->
+            pack.tags.any { it == "mechanik_prioritaet" } || pack.cat == "h360_prioritaet" ->
                 FullscreenGameMechanicKind.PRIORITY_POKER
 
             pack.tags.any { it == "mechanik_entweder_oder" } ->

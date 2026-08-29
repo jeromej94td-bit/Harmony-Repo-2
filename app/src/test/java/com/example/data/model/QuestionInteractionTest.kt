@@ -27,6 +27,16 @@ class QuestionInteractionTest {
         questions = listOf(Question("Testfrage", listOf("A", "B", "C", "D")))
     )
 
+    private fun normalPack(question: Question, id: String = "normal_response_pack"): QuestionPack = QuestionPack(
+        id = id,
+        title = "Normal",
+        tags = listOf("unterhaltung"),
+        cat = "tief",
+        topic = "kennen",
+        type = "quiz",
+        questions = listOf(question)
+    )
+
     @Test
     fun `explicit person assignment overrides ranking pack default`() {
         val pack = QuestionPack(
@@ -98,6 +108,83 @@ class QuestionInteractionTest {
 
         assertEquals(QuestionInteractionKind.STANDARD, QuestionInteractionPolicy.resolve(pack, 0))
         assertNull(FullscreenGameMechanicPolicy.resolve(pack, 0))
+    }
+
+    @Test
+    fun `ordinary choice is fixed by default`() {
+        val question = Question("Was magst du?", listOf("A", "B"))
+        val spec = QuestionInteractionPolicy.resolveSpec(normalPack(question), 0, question)
+
+        assertEquals(QuestionResponseKind.FIXED_CHOICE, spec.responseKind)
+        assertEquals(false, spec.allowCustomText)
+    }
+
+    @Test
+    fun `curated optional text stays available`() {
+        val question = Question(
+            "Wie würdest du unsere Beziehung in 3 Worten beschreiben?",
+            listOf(
+                "Liebevoll, ehrlich, wild",
+                "Ruhig, sicher, warm",
+                "Spannend, witzig, tief",
+                "Ich brauche mehr Worte"
+            )
+        )
+        val spec = QuestionInteractionPolicy.resolveSpec(
+            normalPack(question, id = "gespraechsanreger"),
+            0,
+            question
+        )
+
+        assertEquals(QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT, spec.responseKind)
+        assertEquals(true, spec.allowCustomText)
+    }
+
+    @Test
+    fun `question without options is open text by default`() {
+        val question = Question("Was möchtest du mir sagen?")
+        val spec = QuestionInteractionPolicy.resolveSpec(normalPack(question), 0, question)
+
+        assertEquals(QuestionResponseKind.OPEN_TEXT, spec.responseKind)
+        assertEquals(true, spec.allowCustomText)
+    }
+
+    @Test
+    fun `never have I ever allows skip without custom text`() {
+        val question = Question("Ich habe noch nie getanzt.", listOf("Habe ich", "Habe ich noch nie"))
+        val pack = normalPack(question).copy(cat = "nie")
+        val spec = QuestionInteractionPolicy.resolveSpec(pack, 0, question)
+
+        assertEquals(QuestionResponseKind.FIXED_CHOICE, spec.responseKind)
+        assertEquals(true, spec.allowSkip)
+        assertEquals(false, spec.allowCustomText)
+    }
+
+    @Test
+    fun `photo semantics are explicit and ordinary photo mentions stay fixed`() {
+        val optionalPhoto = Question("Was ist dein Lieblingsfoto von uns? 📸", listOf("A", "B", "C"))
+        val photoOnly = Question("Welches gemeinsame Foto ist dein Lieblingsfoto?", listOf("A", "B"))
+        val ordinaryMention = Question(
+            "Wer würde eher das peinlichste Foto des Abends posten?",
+            listOf("Ich", "Mein Partner", "Beide", "Niemand")
+        )
+
+        assertEquals(
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_PHOTO,
+            QuestionInteractionPolicy.resolveSpec(
+                normalPack(optionalPhoto, "gespraechsanreger"),
+                1,
+                optionalPhoto
+            ).responseKind
+        )
+        assertEquals(
+            QuestionResponseKind.PHOTO_ONLY,
+            QuestionInteractionPolicy.resolveSpec(normalPack(photoOnly, "schnapp"), 1, photoOnly).responseKind
+        )
+        assertEquals(
+            QuestionResponseKind.FIXED_CHOICE,
+            QuestionInteractionPolicy.resolveSpec(normalPack(ordinaryMention), 0, ordinaryMention).responseKind
+        )
     }
 
     @Test

@@ -19,10 +19,37 @@ object PhotoQuestionPolicy {
     private const val LEGACY_OPTIONAL_QUESTION = "Was ist dein Lieblingsfoto von uns? 📸"
     private const val LEGACY_PHOTO_ONLY_QUESTION = "Welches gemeinsame Foto ist dein Lieblingsfoto?"
 
-    fun modeFor(packId: String, questionIndex: Int): PhotoQuestionMode? = when {
-        packId == OPTIONAL_PACK && questionIndex == 1 -> PhotoQuestionMode.CHOICE_WITH_OPTIONAL_PHOTO
-        packId == PHOTO_ONLY_PACK && questionIndex == 1 -> PhotoQuestionMode.PHOTO_ONLY
-        else -> null
+    /**
+     * Compatibility-only fallback for callers that do not have the raw question yet.
+     * New runtime routing should pass rawQuestion so a moved question cannot inherit behavior by index.
+     */
+    fun modeFor(packId: String, questionIndex: Int): PhotoQuestionMode? =
+        modeFor(packId, questionIndex, rawQuestion = null)
+
+    fun modeFor(
+        packId: String,
+        questionIndex: Int,
+        rawQuestion: String?
+    ): PhotoQuestionMode? {
+        if (!rawQuestion.isNullOrBlank()) {
+            return when (packId.trim()) {
+                OPTIONAL_PACK -> rawQuestion.trim()
+                    .takeIf { it == LEGACY_OPTIONAL_QUESTION }
+                    ?.let { PhotoQuestionMode.CHOICE_WITH_OPTIONAL_PHOTO }
+
+                PHOTO_ONLY_PACK -> rawQuestion.trim()
+                    .takeIf { it == LEGACY_PHOTO_ONLY_QUESTION }
+                    ?.let { PhotoQuestionMode.PHOTO_ONLY }
+
+                else -> null
+            }
+        }
+
+        return when {
+            packId == OPTIONAL_PACK && questionIndex == 1 -> PhotoQuestionMode.CHOICE_WITH_OPTIONAL_PHOTO
+            packId == PHOTO_ONLY_PACK && questionIndex == 1 -> PhotoQuestionMode.PHOTO_ONLY
+            else -> null
+        }
     }
 
     fun modeForQuestion(question: String): PhotoQuestionMode? = when (question.trim()) {
