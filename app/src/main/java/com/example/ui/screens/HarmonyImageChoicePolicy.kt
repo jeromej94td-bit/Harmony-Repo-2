@@ -24,6 +24,10 @@ internal enum class HarmonyImageChoiceKind {
 }
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
+    if (PhotoQuestionPolicy.modeFor(packId, questionIndex) != null) {
+        return HarmonyImageChoiceKind.MEMORY_MATCH
+    }
+
     when {
         packId == "essenreden" && questionIndex == 3 -> return HarmonyImageChoiceKind.EGG
         packId == "essenreden" && questionIndex == 4 -> return HarmonyImageChoiceKind.STEAK
