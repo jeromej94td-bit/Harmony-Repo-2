@@ -1,13 +1,14 @@
 package com.example.data.model
 
 /**
- * Explicit response semantics for legacy questions that do not carry their own metadata yet.
+ * Explicit response semantics for legacy questions and dynamic content.
  *
  * Runtime behavior never uses broad keyword inference. Each entry is bound to a stable pack id
  * plus normalized raw question text so inserting or moving another question cannot change it.
  */
 object QuestionResponseCuration {
     private val repeatedWhitespace = Regex("\\s+")
+    private val dynamicResponseKinds = linkedMapOf<String, QuestionResponseKind>()
 
     private val responseKinds: Map<String, QuestionResponseKind> = mapOf(
         key("gespraechsanreger", "Was ist dein Lieblingsfoto von uns? 📸") to
@@ -21,8 +22,38 @@ object QuestionResponseCuration {
     fun key(packId: String, rawQuestion: String): String =
         "${packId.trim()}|${normalizeQuestion(rawQuestion)}"
 
-    fun resolve(packId: String, rawQuestion: String): QuestionResponseKind? =
-        responseKinds[key(packId, rawQuestion)]
+    @Synchronized
+    fun resolve(packId: String, rawQuestion: String): QuestionResponseKind? {
+        val stableKey = key(packId, rawQuestion)
+        return dynamicResponseKinds[stableKey] ?: responseKinds[stableKey]
+    }
+
+    @Synchronized
+    fun replaceDynamic(entries: Map<String, QuestionResponseKind>) {
+        dynamicResponseKinds.clear()
+        dynamicResponseKinds.putAll(entries)
+    }
+
+    fun parseAnswerMode(rawMode: String?): QuestionResponseKind? = when (
+        rawMode?.trim()?.lowercase()?.replace('-', '_')?.replace(' ', '_')
+    ) {
+        "fixed_choice", "choice", "single_choice", "multiple_choice" ->
+            QuestionResponseKind.FIXED_CHOICE
+
+        "choice_with_optional_text", "choice_plus_text", "choice_text", "optional_text" ->
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT
+
+        "open_text", "free_text", "freetext", "text" ->
+            QuestionResponseKind.OPEN_TEXT
+
+        "photo_only", "photo", "image_only" ->
+            QuestionResponseKind.PHOTO_ONLY
+
+        "choice_with_optional_photo", "choice_plus_photo", "optional_photo" ->
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_PHOTO
+
+        else -> null
+    }
 
     private fun normalizeQuestion(rawQuestion: String): String =
         rawQuestion.trim().replace(repeatedWhitespace, " ")
