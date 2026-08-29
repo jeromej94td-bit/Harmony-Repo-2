@@ -2,75 +2,89 @@
 
 **Last updated:** 2026-08-29  
 **Project:** 360 Rework  
-**Completed core stages:** 1/8  
-**Current core stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Current substage:** 02.10 — stärkste bestehende Antrag-/Ring-/Wedding-Inhalte wiederverwenden  
-**Verified Stage-02 progress:** 0/12 complete (0%)  
-**Implementation coverage:** 9/12 substages have dedicated implementation merged  
-**Current status:** 🧪 IMPLEMENTATION THROUGH 02.9 MERGED; END-TO-END VERIFICATION OPEN  
-**Next Stage-02 work package:** 24.15 — Stage 02.10 content reuse  
-**Latest merged Stage-02 package:** 24.14 — Stage 02.9 qualitative reveal (PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`)
+**Completed green core stages:** 1/8  
+**Core Stage 02 status:** 🧪 IMPLEMENTATION + CONTRACT COVERAGE COMPLETE; GREEN ANDROID BUILD PENDING INFRASTRUCTURE  
+**Stage-02 package coverage:** 12/12 = 100%  
+**Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
+**Next functional core development:** Stage 03/08 — Reusable Harmony Experience Engine  
+**Parallel Stage-05 progress when PR #76 lands:** 1/5 = 20%  
+**Stage 05.1 when PR #76 lands:** ✅ 7/7 = 100%  
+**Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
 
 ## Source-of-truth rule
 
-PR #24 is an **umbrella/reference PR only** and must never be merged wholesale.
+PR #24 remains an **umbrella/reference PR only** and must never be merged wholesale. `24.x` and `25.x` are logical 360 Rework work-package IDs; real GitHub PR numbers remain integers.
 
-`24.x` IDs are logical 360 Rework work-package IDs. Every real change lands through its own small GitHub PR so it remains independently traceable and revertible.
+Parallel branches count only after they reach `main`. PR #76 must preserve all newer main changes and may not bundle unrelated runtime work.
 
-Implementation coverage and verified completion are deliberately separate. A substage can have its content/model/UI implementation on `main` while its checkbox remains open until Stage 02.12 records the required build/UI verification.
+## Stage 02 — latest authoritative state
 
-## Stage 02 — authoritative implementation state
+All twelve Stage-02 implementation/contract slices are now on `main`:
 
-| Substage | Implementation state | Evidence / remaining gap |
-|---|---|---|
-| 02.1 Experience flow model | 🧪 Merged | PR #27; final Gradle/UI verification still open |
-| 02.2 Mood/details Either-Or | 🧪 Merged | PR #31; final runner/build/UI verification open |
-| 02.3 Proposal-location image duels | 🧪 Merged + routed into `antrag` | PR #55 plus in-app integration commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`; final UI/build verification open |
-| 02.4 Refreshed ring-image duels | 🧪 Model/content merged | PR #48; end-to-end runner wiring remains part of 02.11 |
-| 02.5 Proposal priority ranking | 🧪 Model/content merged | PR #49; end-to-end runner wiring remains part of 02.11 |
-| 02.6 Partner prediction A → B → Reveal | 🧪 Model/content merged | PR #50; end-to-end runner wiring remains part of 02.11 |
-| 02.7 Concrete proposal scenarios | 🧪 Model/content merged | PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`; focused Kotlin contract 3/3 PASS |
-| 02.8 Open personal prompts | 🧪 Model/content merged | PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`; focused Kotlin contract 3/3 PASS |
-| 02.9 Qualitative `Euer perfekter Antrag` reveal | 🧪 Result builder merged | PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`; focused Kotlin contract 3/3 PASS; result-screen/runner wiring remains in 02.11 |
-| 02.10 Reuse strongest existing content | 🔵 NEXT | Not started in the authoritative Stage-02 line yet |
-| 02.11 Entry/navigation + complete playable runner | ⬜ PLANNED | Must wire all Stage-02 mechanics and reveal together |
-| 02.12 Tests/build/UI verification | ⬜ PLANNED | Required before Stage 02 can be marked complete |
+- 02.1 experience model / deterministic flow — PR #27.
+- 02.2 mood/details — PR #31.
+- 02.3 proposal-location image duels — PR #55 plus app routing.
+- 02.4 ring-image duels — PR #48.
+- 02.5 priority ranking — PR #49.
+- 02.6 partner prediction — PR #50.
+- 02.7 proposal scenarios — PR #56.
+- 02.8 personal open prompts — PR #58.
+- 02.9 qualitative reveal — PR #63.
+- 02.10 legacy proposal/ring/wedding reuse audit — PR #68.
+- 02.11 complete fullscreen runner + `antrag` entry routing — PR #77, merge `82c951c53e42f4d6a76a61ee3596d4e36ef4dd05`.
+- 02.12 final verification contracts — PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`.
 
-## NEXT EXACT ACTION — Stage 02
+PR #79 adds UI/Robolectric, ring-asset and 35-subround end-to-end contracts and records the deterministic path to `ProposalReveal`. It explicitly does **not** provide a green Android/Gradle build because repository Actions still fail before executable step 1. The later real Android build is therefore tracked as an infrastructure verification check, not another feature slice.
 
-**24.15 / Stage 02.10:** inventory the existing proposal, engagement-ring and relevant wedding content already present in the app, select only the strongest material that adds something not already covered by 02.2–02.9, and expose that selected content for the perfect-proposal experience.
+### NEXT EXACT ACTION — core
 
-Constraints for 02.10:
+Begin **Stage 03 — Reusable Harmony Experience Engine** only as its own small package sequence, while retaining a separate infrastructure note to execute the Android/Gradle suite when runners work again. Do not reopen Stage 02 feature implementation unless a regression is demonstrated.
 
-- reuse rather than duplicate;
-- do not delete, hide or archive legacy packs yet — that belongs to Stage 04;
-- do not broaden into navigation/end-to-end runner work — that belongs to 02.11;
-- do not touch unrelated Stage-05 or Photo-Rework work currently progressing in parallel.
+## Parallel Stage 05 — Questions Quality Rework
 
-## Parallel work observed
+### 05.1 Relationship / communication / everyday-life
 
-Parallel agents have already begun Stage 05 work (`25.x`) and Photo Rework PR #61. Those tracks are independent and do **not** make Stage 02 complete. The current core-stage handover remains Stage 02 until its Definition of Done is met.
+**Status when PR #76 lands:** ✅ DONE  
+**Progress:** **7/7 = 100%**  
+**Stage-05 overall:** **1/5 = 20%**
+
+Scope: Sections 01, 02, 06 and 12.
+
+- 72 raw packs.
+- 72/72 explicit Keep/Rewrite/Archive decisions.
+- Curated section counts: 16 / 17 / 16 / 17 = 66.
+- Six redundant/filler packs archived from the curated target output.
+- One additional Quick Game `h360_need_now_quick`, exactly 10 situations × 2 choices.
+- Final scoped target: 67 unique packs with canonical packs retained.
+- `NormensLoeschungen` currently targets only `h500_430_team_zukunft_offene_runde`, outside 05.1.
+
+Package trail: 25.0 PR #59, 25.1 PR #60, 25.2 PR #62, 25.3 PR #64, 25.4 PR #69, 25.5 PR #70, 25.6 PR #71, 25.7 PR #76.
+
+The detailed 25.x ledger is `docs/360-rework/360_REWORK_STAGE05_WORKLOG.md`.
+
+### NEXT EXACT ACTION — Stage 05
+
+After PR #76 reaches `main`, start **05.2 — Food / travel / leisure / culture** under a new narrow 25.x range. Do not reopen 05.1 unless a regression is proven.
+
+## Newer parallel main changes preserved
+
+The separately merged **Sex & Intimität** rework at `c15a18488f2eb269aa03a3620c1c569f316d6be2` is preserved by the final 25.7 rebase. It is not part of the 05.1 accounting and therefore does not increase Stage-05 percentages here.
+
+Open parallel PRs such as the app-wide Question Rework remain outside 360-Rework progress until merged and explicitly reconciled.
+
+## Stage 06
+
+Stage 06 remains 0/5 complete. Existing targeted cleanup packages are partial repairs, not completed defect classes.
 
 ## Verification caveat
 
-Repository-wide GitHub Actions have repeatedly failed before executable workflow step 1. This remains an infrastructure verification caveat:
-
-- it is not a green full-suite result;
-- it is not evidence of an application regression by itself;
-- focused local Kotlin checks are recorded per narrow work package;
-- Stage 02 stays unverified until 02.12 records executable build/UI evidence.
+The Stage-05.1 package history contains focused Kotlin verification for its individual slices plus the final cross-section regression contract. Repository-wide GitHub Actions still terminate before executable workflow step 1 in affected runs (`steps: null` / no usable job log), so no green full Android/Gradle result is claimed.
 
 ## DO NOT REPEAT
 
 - Do not merge umbrella PR #24 wholesale.
-- Do not rebuild or remerge 02.1–02.9 merely because this tracker was stale.
-- Do not replace the refreshed ring assets again unless a regression is proven.
-- Do not delete/hide proposal, ring or wedding legacy content during 02.10; consolidation belongs to Stage 04.
-- Do not jump to Stage 03/04/05 as the Stage-02 successor until 02.10–02.12 are resolved.
-- Do not manually trigger GitHub Actions for these small packages.
-
-## Handover
-
-Read `docs/360-rework/360_REWORK_MASTER_ROADMAP.md` for the complete stage plan and Definitions of Done.
-
-Read `docs/360-rework/360_REWORK_WORKLOG.md` for historical decisions and package evidence.
+- Do not combine unrelated substages in one PR.
+- Do not overwrite newer main changes while rebasing tracker work.
+- Do not count the separate Sex & Intimität rework as 05.1.
+- Do not restart 05.1 after PR #76 unless a regression is shown.
+- Do not claim a green Android build for Stage 02 until one actually executes.
