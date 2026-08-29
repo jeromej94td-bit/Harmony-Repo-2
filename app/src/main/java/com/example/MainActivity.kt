@@ -40,6 +40,7 @@ import com.example.data.DevExporter
 import com.example.data.OkHttpLinkPreviewResolver
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.MemoryEntryKind
+import com.example.data.model.ProposalExperienceEntryPolicy
 import com.example.data.repository.RoomMemoryRepository
 import com.example.ui.AppLanguage
 import com.example.ui.HarmonyViewModel
@@ -69,6 +70,7 @@ import com.example.ui.screens.PackListScreen
 import com.example.ui.screens.PANDA_EITHER_OR_PACK_ID
 import com.example.ui.screens.PandaEitherOrScreen
 import com.example.ui.screens.ProfileSheet
+import com.example.ui.screens.ProposalExperienceScreen
 import com.example.ui.screens.QuizRunnerScreen
 import com.example.ui.screens.liveChangeLongPressObserver
 import com.example.ui.theme.HarmonyTheme
@@ -165,6 +167,7 @@ fun HarmonyApp(
     var isPandaExitConfirmOpen by remember { mutableStateOf(false) }
     var isEureMischungOpen by remember { mutableStateOf(false) }
     var isKidGeneratorOpen by remember { mutableStateOf(false) }
+    var isProposalExperienceOpen by remember { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
     var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
@@ -197,11 +200,15 @@ fun HarmonyApp(
     }
 
     fun openPack(packId: String) {
-        if (packId == PANDA_EITHER_OR_PACK_ID) {
-            isPandaEitherOrOpen = true
-            isPandaExitConfirmOpen = false
-        } else {
-            viewModel.startPack(packId)
+        when {
+            packId == PANDA_EITHER_OR_PACK_ID -> {
+                isPandaEitherOrOpen = true
+                isPandaExitConfirmOpen = false
+            }
+            ProposalExperienceEntryPolicy.handlesPack(packId) -> {
+                isProposalExperienceOpen = true
+            }
+            else -> viewModel.startPack(packId)
         }
     }
 
@@ -211,7 +218,7 @@ fun HarmonyApp(
     val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
-    val canHandleBack = isIntrospectionOpen || isPandaEitherOrOpen || isEureMischungOpen || isKidGeneratorOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
+    val canHandleBack = isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isEureMischungOpen || isKidGeneratorOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
@@ -223,6 +230,9 @@ fun HarmonyApp(
             }
             isPandaEitherOrOpen -> {
                 isPandaExitConfirmOpen = true
+            }
+            isProposalExperienceOpen -> {
+                isProposalExperienceOpen = false
             }
             isEureMischungOpen -> {
                 isEureMischungOpen = false
@@ -280,7 +290,7 @@ fun HarmonyApp(
                 ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
-                if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isEureMischungOpen) {
+                if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
                     HarmonyTopBar(
                         userName = uiState.profile.userName,
                         partnerName = uiState.profile.partnerName,
@@ -293,7 +303,7 @@ fun HarmonyApp(
                 }
             },
             bottomBar = {
-                if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isEureMischungOpen) {
+                if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
                         6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
@@ -621,6 +631,13 @@ fun HarmonyApp(
                             isPandaExitConfirmOpen = false
                             isPandaEitherOrOpen = false
                         }
+                    )
+                }
+
+                if (isProposalExperienceOpen) {
+                    ProposalExperienceScreen(
+                        profile = uiState.profile,
+                        onClose = { isProposalExperienceOpen = false }
                     )
                 }
 
