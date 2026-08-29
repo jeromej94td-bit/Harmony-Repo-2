@@ -63,6 +63,11 @@ internal fun WhoWouldBoard(
     val nobodyItem = items.firstOrNull {
         it.label.equals("Niemand", true) || it.label.equals("Nobody", true) || it.label.equals("Neither", true)
     } ?: items.getOrNull(3)
+    val configuration = context.resources.configuration
+    val layoutMetrics = WhoWouldLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     FullscreenMechanicShell(
         kicker = tr("👤 PAARLABOR", "👤 COUPLE LAB"),
@@ -80,7 +85,7 @@ internal fun WhoWouldBoard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(layoutMetrics.rowGapDp.dp)
             ) {
                 PersonChoiceCard(
                     name = profile.userName,
@@ -93,7 +98,8 @@ internal fun WhoWouldBoard(
                         }
                     },
                     modifier = Modifier.weight(1f).fillMaxSize(),
-                    tag = "who_user"
+                    tag = "who_user",
+                    layoutMetrics = layoutMetrics
                 )
                 PersonChoiceCard(
                     name = profile.partnerName,
@@ -106,13 +112,14 @@ internal fun WhoWouldBoard(
                         }
                     },
                     modifier = Modifier.weight(1f).fillMaxSize(),
-                    tag = "who_partner"
+                    tag = "who_partner",
+                    layoutMetrics = layoutMetrics
                 )
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(layoutMetrics.rowGapDp.dp))
             Row(
-                modifier = Modifier.fillMaxWidth().height(94.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxWidth().height(layoutMetrics.bottomRowHeightDp.dp),
+                horizontalArrangement = Arrangement.spacedBy(layoutMetrics.rowGapDp.dp)
             ) {
                 bothItem?.let { item ->
                     LargeOptionCard(
@@ -151,7 +158,8 @@ private fun PersonChoiceCard(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier,
-    tag: String
+    tag: String,
+    layoutMetrics: WhoWouldLayoutMetrics
 ) {
     val shape = RoundedCornerShape(28.dp)
     Column(
@@ -172,14 +180,14 @@ private fun PersonChoiceCard(
                 shape
             )
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(layoutMetrics.cardPaddingDp.dp)
             .testTag(tag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
             modifier = Modifier
-                .size(122.dp)
+                .size(layoutMetrics.avatarSizeDp.dp)
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
                 .border(2.dp, Color.White.copy(alpha = 0.55f), CircleShape),
@@ -195,16 +203,16 @@ private fun PersonChoiceCard(
                 Text(
                     name.trim().take(1).uppercase().ifBlank { "?" },
                     color = Color.White,
-                    fontSize = 44.sp,
+                    fontSize = (layoutMetrics.nameSizeSp * 2).coerceAtMost(44).sp,
                     fontWeight = FontWeight.Black
                 )
             }
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(layoutMetrics.avatarNameGapDp.dp))
         Text(
             name,
             color = Color.White,
-            fontSize = 22.sp,
+            fontSize = layoutMetrics.nameSizeSp.sp,
             fontWeight = FontWeight.Black,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
