@@ -27,8 +27,8 @@ class QuestionInteractionTest {
         questions = listOf(Question("Testfrage", listOf("A", "B", "C", "D")))
     )
 
-    private fun normalPack(question: Question): QuestionPack = QuestionPack(
-        id = "normal_response_pack",
+    private fun normalPack(question: Question, id: String = "normal_response_pack"): QuestionPack = QuestionPack(
+        id = id,
         title = "Normal",
         tags = listOf("unterhaltung"),
         cat = "tief",
@@ -120,13 +120,21 @@ class QuestionInteractionTest {
     }
 
     @Test
-    fun `explicit optional text stays available`() {
+    fun `curated optional text stays available`() {
         val question = Question(
-            "Was fehlt dir?",
-            listOf("Zeit", "Ruhe"),
-            responseKind = QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT
+            "Wie würdest du unsere Beziehung in 3 Worten beschreiben?",
+            listOf(
+                "Liebevoll, ehrlich, wild",
+                "Ruhig, sicher, warm",
+                "Spannend, witzig, tief",
+                "Ich brauche mehr Worte"
+            )
         )
-        val spec = QuestionInteractionPolicy.resolveSpec(normalPack(question), 0, question)
+        val spec = QuestionInteractionPolicy.resolveSpec(
+            normalPack(question, id = "gespraechsanreger"),
+            0,
+            question
+        )
 
         assertEquals(QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT, spec.responseKind)
         assertEquals(true, spec.allowCustomText)
@@ -150,6 +158,33 @@ class QuestionInteractionTest {
         assertEquals(QuestionResponseKind.FIXED_CHOICE, spec.responseKind)
         assertEquals(true, spec.allowSkip)
         assertEquals(false, spec.allowCustomText)
+    }
+
+    @Test
+    fun `photo semantics are explicit and ordinary photo mentions stay fixed`() {
+        val optionalPhoto = Question("Was ist dein Lieblingsfoto von uns? 📸", listOf("A", "B", "C"))
+        val photoOnly = Question("Welches gemeinsame Foto ist dein Lieblingsfoto?", listOf("A", "B"))
+        val ordinaryMention = Question(
+            "Wer würde eher das peinlichste Foto des Abends posten?",
+            listOf("Ich", "Mein Partner", "Beide", "Niemand")
+        )
+
+        assertEquals(
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_PHOTO,
+            QuestionInteractionPolicy.resolveSpec(
+                normalPack(optionalPhoto, "gespraechsanreger"),
+                1,
+                optionalPhoto
+            ).responseKind
+        )
+        assertEquals(
+            QuestionResponseKind.PHOTO_ONLY,
+            QuestionInteractionPolicy.resolveSpec(normalPack(photoOnly, "schnapp"), 1, photoOnly).responseKind
+        )
+        assertEquals(
+            QuestionResponseKind.FIXED_CHOICE,
+            QuestionInteractionPolicy.resolveSpec(normalPack(ordinaryMention), 0, ordinaryMention).responseKind
+        )
     }
 
     @Test
