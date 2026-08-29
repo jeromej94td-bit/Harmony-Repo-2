@@ -8,7 +8,7 @@ package com.example.data
  * große Legacy-Datei destruktiv umzuschreiben.
  */
 object GeneratedHarmonySexIntimacyRework {
-    const val VERSION: Long = 1788034200000L
+    const val VERSION: Long = 1788039000000L
 
     val PACKS: List<GenPack> = listOf(
         GenPack(
@@ -84,8 +84,16 @@ object GeneratedHarmonySexIntimacyRework {
                     options = listOf("Direkt ansprechen", "Mit körperlicher Annäherung", "Erst Stimmung entstehen lassen", "Spontan und überraschend")
                 ),
                 GenQuestion(
+                    q = "Wie möchtest du am liebsten merken, dass ich gerade Lust auf dich habe?",
+                    options = listOf("Durch einen eindeutigen Blick", "Durch Berührungen", "Wenn du es direkt sagst", "Durch Flirten und Spannung im Alltag")
+                ),
+                GenQuestion(
                     q = "Zu welcher Tageszeit hast du am liebsten Sex?",
                     options = listOf("Morgens", "Tagsüber", "Abends", "Nachts", "Kommt ganz auf die Stimmung an")
+                ),
+                GenQuestion(
+                    q = "Wie oft würdest du dir Sex idealerweise wünschen – unabhängig davon, wie oft wir aktuell Sex haben?",
+                    options = listOf("Mehrmals pro Woche", "Etwa einmal pro Woche", "Ein paar Mal im Monat", "Seltener – dafür bewusst", "Das schwankt bei mir stark")
                 ),
                 GenQuestion(
                     q = "Was macht guten Sex für dich am stärksten aus?",
@@ -94,6 +102,26 @@ object GeneratedHarmonySexIntimacyRework {
                 GenQuestion(
                     q = "Welche Rolle spielt Vorspiel für dich bei gutem Sex?",
                     options = listOf("Sehr wichtig", "Oft wichtig, aber nicht immer", "Die Stimmung entscheidet", "Ich mag es lieber eher direkt")
+                ),
+                GenQuestion(
+                    q = "Was beeinflusst deine Lust im Alltag am stärksten?",
+                    options = listOf("Stress & Müdigkeit", "Emotionale Nähe", "Zeit & Privatsphäre", "Anziehung & Stimmung")
+                ),
+                GenQuestion(
+                    q = "Was lässt deine Lust am schnellsten verschwinden?",
+                    options = listOf("Stress im Kopf", "Zeitdruck", "Ein unausgesprochener Konflikt", "Das Gefühl von Erwartungsdruck", "Müdigkeit")
+                ),
+                GenQuestion(
+                    q = "Wenn einer von uns Lust auf Sex hat und der andere gerade nicht: Was fühlt sich für dich am besten an?",
+                    options = listOf("Offen und ohne Druck sagen", "Nähe ohne Erwartung anbieten", "Auf einen anderen Moment verschieben", "Kurz darüber reden, was gerade gebraucht wird")
+                ),
+                GenQuestion(
+                    q = "Was macht es dir leichter, zu sagen, dass du gerade keine Lust auf Sex hast?",
+                    options = listOf("Wenn ich keine Enttäuschung befürchten muss", "Wenn Nähe trotzdem okay ist", "Wenn wir offen darüber reden", "Wenn ein Nein einfach stehen darf")
+                ),
+                GenQuestion(
+                    q = "Magst du es lieber, wenn Sex spontan entsteht oder wenn wir uns bewusst Zeit dafür nehmen?",
+                    options = listOf("Ganz spontan", "Eher spontan", "Bewusst geplante Zeit", "Beides hat seinen Reiz")
                 ),
                 GenQuestion(
                     q = "Wie offen bist du dafür, neue Dinge beim Sex gemeinsam auszuprobieren?",
@@ -108,20 +136,12 @@ object GeneratedHarmonySexIntimacyRework {
                     options = listOf("Fände ich spannend", "Ab und zu okay", "Nur wenn wir beide Lust darauf haben", "Lieber nicht")
                 ),
                 GenQuestion(
-                    q = "Was beeinflusst deine Lust im Alltag am stärksten?",
-                    options = listOf("Stress & Müdigkeit", "Emotionale Nähe", "Zeit & Privatsphäre", "Anziehung & Stimmung")
-                ),
-                GenQuestion(
-                    q = "Wenn einer von uns Lust auf Sex hat und der andere gerade nicht: Was fühlt sich für dich am besten an?",
-                    options = listOf("Offen und ohne Druck sagen", "Nähe ohne Erwartung anbieten", "Auf einen anderen Moment verschieben", "Kurz darüber reden, was gerade gebraucht wird")
-                ),
-                GenQuestion(
                     q = "Was wünschst du dir bei sexuellen Wünschen am meisten von deinem Partner?",
                     options = listOf("Dass ich alles sagen darf", "Dass nachgefragt wird", "Dass Grenzen selbstverständlich respektiert werden", "Dass wir neugierig bleiben")
                 ),
                 GenQuestion(
-                    q = "Wie wichtig ist dir Spontanität bei Sex?",
-                    options = listOf("Sehr wichtig", "Schön, aber kein Muss", "Ich mag auch bewusst geplante Zeit", "Die Mischung macht es")
+                    q = "Über welches Thema rund um Sex sollten wir eigentlich öfter sprechen?",
+                    options = listOf("Was uns besonders gefällt", "Was wir ausprobieren möchten", "Was uns manchmal hemmt", "Wie oft und wann wir Lust haben", "Grenzen & Veränderungen")
                 ),
                 GenQuestion(
                     q = "Wie fühlst du dich nach dem Sex am liebsten?",
