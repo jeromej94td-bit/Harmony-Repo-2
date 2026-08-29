@@ -33,26 +33,32 @@ class Harmony360Stage053FutureCurationTest {
     )
 
     @Test
-    fun `all 18 raw future packs have explicit decisions without resurrecting archived filler`() {
+    fun `all 18 raw future packs have replacement content but canonical visibility remains 10 keep and 8 archive`() {
         assertEquals(18, raw.size)
         assertEquals(raw.map { it.id }.toSet(), Harmony360FutureSectionCuration.decisions.keys)
+        assertTrue(Harmony360FutureSectionCuration.decisions.values.all {
+            it == Harmony360FutureSectionCuration.CurationDecision.REWRITE
+        })
+
+        assertEquals(raw.map { it.id }.toSet(), Harmony360FutureCanonicalSelection.decisions.keys)
         assertEquals(
             10,
-            Harmony360FutureSectionCuration.decisions.values.count {
-                it == Harmony360FutureSectionCuration.CurationDecision.REWRITE
+            Harmony360FutureCanonicalSelection.decisions.values.count {
+                it == Harmony360FutureCanonicalSelection.VisibilityDecision.KEEP
             }
         )
         assertEquals(
             8,
-            Harmony360FutureSectionCuration.decisions.values.count {
-                it == Harmony360FutureSectionCuration.CurationDecision.ARCHIVE
+            Harmony360FutureCanonicalSelection.decisions.values.count {
+                it == Harmony360FutureCanonicalSelection.VisibilityDecision.ARCHIVE
             }
         )
     }
 
     @Test
-    fun `future curation keeps the 10 canonical packs in stable order and gives them six concrete questions`() {
-        val curated = Harmony360FutureSectionCuration.apply(raw)
+    fun `canonical future selection keeps 10 stable packs and every survivor has six concrete questions`() {
+        val rewritten = Harmony360FutureSectionCuration.apply(raw)
+        val curated = Harmony360FutureCanonicalSelection.apply(rewritten)
 
         assertEquals(canonicalIds, curated.map { it.id })
         assertTrue(curated.all { it.questions.size == 6 })
@@ -75,8 +81,8 @@ class Harmony360Stage053FutureCurationTest {
     }
 
     @Test
-    fun `future output removes known generator quartets and wording leftovers`() {
-        val curated = Harmony360FutureSectionCuration.apply(raw)
+    fun `canonical future output removes known generator quartets and wording leftovers`() {
+        val curated = Harmony360FutureCanonicalSelection.apply(Harmony360FutureSectionCuration.apply(raw))
         val forbidden = setOf(
             listOf("Nähe", "Freiheit", "Sicherheit", "Abenteuer"),
             listOf("Sicherheit", "Freiheit", "Abenteuer", "Komfort"),
@@ -97,7 +103,7 @@ class Harmony360Stage053FutureCurationTest {
     }
 
     @Test
-    fun `runtime registry still exposes only canonical future packs and uses the new curation`() {
+    fun `runtime registry exposes only canonical future packs and uses new future rewrites`() {
         val runtimeFuture = GeneratedHarmonyAdrenaline360.PACKS.filter {
             "h360_section_03_zukunft_lebensplanung" in it.tags
         }
