@@ -21,13 +21,15 @@ object GeneratedContentRegistry {
     }
 
     private fun runtimePack(pack: GenPack): GenPack {
+        var result = GeneratedContentRepairPolicy.repair(pack)
+
         // Deep Talk owns a dedicated full-screen, two-person reveal flow. The legacy
         // "disc" runner renders every question in one long discussion list and would
         // otherwise swallow this mechanic before the fullscreen router can see it.
-        var result = if (pack.type == "disc" && "mechanik_deep_talk" in pack.tags) {
-            pack.copy(type = "quiz")
+        result = if (result.type == "disc" && "mechanik_deep_talk" in result.tags) {
+            result.copy(type = "quiz")
         } else {
-            pack
+            result
         }
 
         // Fullscreen mechanics own their answer presentation. Some generated questions
