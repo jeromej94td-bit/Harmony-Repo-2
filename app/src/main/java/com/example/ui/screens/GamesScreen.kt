@@ -712,26 +712,13 @@ private fun UnansweredQuestionsDialog(
 fun CategoryRailCard(category: Category, onClick: () -> Unit) {
     val accent = Color(category.tagColorHex)
     val isPortalCategory = category.id == "unterbewusstsein"
-    val transition = rememberInfiniteTransition(label = "category_power_${category.id}")
-    val glowAlpha by transition.animateFloat(
-        initialValue = if (isPortalCategory) 0.68f else 0.42f,
-        targetValue = if (isPortalCategory) 1f else 0.72f,
-        animationSpec = infiniteRepeatable(tween(1900), RepeatMode.Reverse),
-        label = "category_glow_${category.id}"
-    )
-    val breathe by transition.animateFloat(
-        initialValue = if (isPortalCategory) 0.985f else 1f,
-        targetValue = if (isPortalCategory) 1.025f else 1.008f,
-        animationSpec = infiniteRepeatable(tween(2300), RepeatMode.Reverse),
-        label = "category_breathe_${category.id}"
-    )
+    // Keep the Aurora look, but do not run a separate infinite transition for
+    // every card in the horizontally scrollable rail. Those per-item animations
+    // caused continuous recomposition while the user was swiping.
+    val glowAlpha = if (isPortalCategory) 0.88f else 0.58f
     Box(
         modifier = Modifier
             .size(width = 124.dp, height = if (isPortalCategory) 154.dp else 136.dp)
-            .graphicsLayer {
-                scaleX = breathe
-                scaleY = breathe
-            }
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.linearGradient(
@@ -807,38 +794,17 @@ fun TopicProgressCard(
 ) {
     val accent = topicAccentColor(topic.id)
     val phase = remember(topic.id) { (topic.id.hashCode() and 0xFFFF) / 65535f }
-    val transition = rememberInfiniteTransition(label = "topic_power_${topic.id}")
-    val glowPulse by transition.animateFloat(
-        initialValue = 0.58f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(2100), RepeatMode.Reverse),
-        label = "topic_glow_${topic.id}"
-    )
-    val energyTravel by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(4200, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ),
-        label = "topic_energy_${topic.id}"
-    )
-    val breathe by transition.animateFloat(
-        initialValue = 0.997f,
-        targetValue = 1.012f,
-        animationSpec = infiniteRepeatable(tween(2500), RepeatMode.Reverse),
-        label = "topic_breathe_${topic.id}"
-    )
+    // Topic cards all live inside the parent verticalScroll column, so an
+    // infinite transition here used to animate every topic, including cards far
+    // outside the viewport. Keep the same rich artwork at a stable phase instead.
+    val glowPulse = 0.80f
+    val energyTravel = 0.52f
     val shape = RoundedCornerShape(24.dp)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp)
-            .graphicsLayer {
-                scaleX = breathe
-                scaleY = breathe
-            }
             .clip(shape)
             .background(
                 Brush.linearGradient(
