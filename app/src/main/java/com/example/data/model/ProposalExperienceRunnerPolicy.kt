@@ -38,6 +38,11 @@ object ProposalExperienceRunnerPolicy {
             .next(ProposalExperienceAdapter.toGenericPosition(position))
             ?.let(ProposalExperienceAdapter::toProposalPosition)
 
+    fun previous(position: ProposalRunnerPosition): ProposalRunnerPosition? =
+        ProposalExperienceAdapter.navigator
+            .previous(ProposalExperienceAdapter.toGenericPosition(position))
+            ?.let(ProposalExperienceAdapter::toProposalPosition)
+
     fun progress(position: ProposalRunnerPosition): Float =
         ProposalExperienceAdapter.navigator.progress(
             ProposalExperienceAdapter.toGenericPosition(position)

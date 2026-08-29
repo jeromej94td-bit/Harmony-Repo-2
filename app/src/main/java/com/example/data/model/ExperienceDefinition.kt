@@ -94,6 +94,22 @@ class ExperienceNavigator(
         )
     }
 
+    fun previous(position: ExperiencePosition): ExperiencePosition? {
+        currentStep(position) ?: return null
+
+        if (position.itemIndex > 0) {
+            return position.copy(itemIndex = position.itemIndex - 1)
+        }
+        if (position.stepIndex <= 0) return null
+
+        val previousStepIndex = position.stepIndex - 1
+        val previousStep = definition.steps[previousStepIndex]
+        return ExperiencePosition(
+            stepIndex = previousStepIndex,
+            itemIndex = countFor(previousStep) - 1
+        )
+    }
+
     fun progress(position: ExperiencePosition): Float {
         if (currentStep(position) == null) return 0f
 

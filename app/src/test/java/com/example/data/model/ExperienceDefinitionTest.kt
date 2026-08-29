@@ -110,6 +110,32 @@ class ExperienceDefinitionTest {
     }
 
     @Test
+    fun `navigator moves backward within step then to previous steps last item`() {
+        val definition = ExperienceDefinition(
+            "demo",
+            "Demo",
+            listOf(
+                ExperienceStep("choice", ExperienceStepKind.EITHER_OR),
+                ExperienceStep("ranking", ExperienceStepKind.RANKING),
+                ExperienceStep("result", ExperienceStepKind.REVEAL)
+            )
+        )
+        val navigator = ExperienceNavigator(definition) { stepId ->
+            when (stepId) {
+                "choice" -> 3
+                "ranking" -> 2
+                else -> 1
+            }
+        }
+
+        assertEquals(ExperiencePosition(1, 0), navigator.previous(ExperiencePosition(1, 1)))
+        assertEquals(ExperiencePosition(0, 2), navigator.previous(ExperiencePosition(1, 0)))
+        assertEquals(ExperiencePosition(1, 1), navigator.previous(ExperiencePosition(2, 0)))
+        assertNull(navigator.previous(ExperiencePosition(0, 0)))
+        assertNull(navigator.previous(ExperiencePosition(99, 0)))
+    }
+
+    @Test
     fun `navigator normalizes nonpositive item counts to one`() {
         val definition = ExperienceDefinition(
             "demo",
@@ -134,6 +160,7 @@ class ExperienceDefinitionTest {
         assertNull(navigator.currentStep(ExperiencePosition(0, -1)))
         assertNull(navigator.currentStep(ExperiencePosition(0, 99)))
         assertNull(navigator.next(ExperiencePosition(99, 0)))
+        assertNull(navigator.previous(ExperiencePosition(99, 0)))
         assertEquals(0f, navigator.progress(ExperiencePosition(99, 0)))
     }
 
