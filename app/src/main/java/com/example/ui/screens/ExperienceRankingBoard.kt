@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -24,14 +26,16 @@ internal fun ExperienceRankingBoard(
     val labels = round.items.map { it.label }
     val selectedAnswer = ExperienceRankingSelectionCodec.encodeOrNull(round, selectedItemIds)
 
-    RankingSlotBoard(
-        question = round.prompt,
-        options = labels,
-        selectedAnswer = selectedAnswer,
-        profile = profile,
-        onPick = { encoded ->
-            ExperienceRankingSelectionCodec.decode(round, encoded)?.let(onPick)
-        },
-        modifier = modifier.testTag("experience_ranking_board")
-    )
+    Box(modifier = modifier.testTag("experience_ranking_board")) {
+        RankingSlotBoard(
+            question = round.prompt,
+            options = labels,
+            selectedAnswer = selectedAnswer,
+            profile = profile,
+            onPick = { encoded ->
+                ExperienceRankingSelectionCodec.decode(round, encoded)?.let(onPick)
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }
