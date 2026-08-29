@@ -38,7 +38,7 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
         NormensLoeschungen.apply(
-            Harmony360RelationshipQualityRework.apply(
+            Harmony360RelationshipStage051Pipeline.apply(
                 raw
                     .map(GeneratedHarmony360ScenarioCleanup::apply)
                     .map(GeneratedHarmony360TextCleanup::apply)
