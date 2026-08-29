@@ -153,7 +153,7 @@ fun KidGeneratorScreen(
     }
 
     var isFullscreenImageOpen by remember { mutableStateOf(false) }
-    var isMomentSaved by remember { mutableStateOf(false) }
+    var isMomentSaved by remember(uiState.generatedLocalPath) { mutableStateOf(false) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
