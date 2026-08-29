@@ -7,9 +7,21 @@ import kotlin.test.assertFalse
 class GamesScreenPerformanceContractTest {
 
     @Test
-    fun `topic cards do not run continuous per-item animations`() {
+    fun `scrollable game cards do not run continuous per-item animations`() {
         val source = gamesScreenSource()
 
+        assertFalse(
+            source.contains("label = \"category_power_"),
+            "Category cards must not create their own infinite transition while users horizontally swipe the category rail."
+        )
+        assertFalse(
+            source.contains("label = \"category_glow_"),
+            "Category cards must not continuously pulse every visible category during a swipe."
+        )
+        assertFalse(
+            source.contains("label = \"category_breathe_"),
+            "Category cards must not continuously rescale while the category rail is being swiped."
+        )
         assertFalse(
             source.contains("label = \"topic_power_"),
             "Topic cards must not create their own infinite transition while the Games screen uses a non-lazy vertical scroll container."
