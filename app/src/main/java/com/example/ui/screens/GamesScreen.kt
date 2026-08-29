@@ -119,6 +119,7 @@ fun GamesScreen(
     var showUnansweredQuestions by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val answerCounts = remember(answers) { answerCountsByPack(answers) }
 
     LaunchedEffect(isSearchActive) {
         if (isSearchActive) {
@@ -156,7 +157,7 @@ fun GamesScreen(
             matchesTitle || matchesCat || matchesTopic || matchesTags || matchesQuestions || matchesPairs
         }.filter { pack ->
             val totalCount = if (pack.type == "tot") pack.pairs.size else pack.questions.size
-            val ansCount = answers.count { it.packId == pack.id }
+            val ansCount = answerCounts[pack.id] ?: 0
             val isDone = ansCount >= totalCount && totalCount > 0
             when (packFilter) {
                 "open" -> !isDone
@@ -509,7 +510,7 @@ fun GamesScreen(
                 val packsForTopic = HarmonyPacksData.PACKS.filter { it.topic == topic.id }
                 val donePacksCount = packsForTopic.count { pack ->
                     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
-                    val ansCount = answers.count { it.packId == pack.id }
+                    val ansCount = answerCounts[pack.id] ?: 0
                     ansCount >= totalLen && totalLen > 0
                 }
 
