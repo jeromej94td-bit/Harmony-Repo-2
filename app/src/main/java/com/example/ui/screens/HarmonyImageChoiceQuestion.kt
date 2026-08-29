@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.ProfileEntity
+import com.example.data.model.ProposalLocationDuels
 import com.example.data.model.QuestionInteractionKind
 import com.example.ui.contentText
 import com.example.ui.theme.HarmonyBg
@@ -135,6 +136,17 @@ private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImag
     else -> error("Fullscreen mechanics do not use image-choice visuals")
 }
 
+private fun proposalLocationAnswerSummary(selections: Map<String, String>): String {
+    val labels = ProposalLocationDuels.rounds.mapNotNull { round ->
+        when (selections[round.id]) {
+            round.firstOption.id -> round.firstOption.label
+            round.secondOption.id -> round.secondOption.label
+            else -> null
+        }
+    }
+    return labels.joinToString(separator = " · ").ifBlank { "Proposal location completed" }
+}
+
 @Composable
 internal fun HarmonyImageChoiceQuestion(
     kind: HarmonyImageChoiceKind,
@@ -156,6 +168,10 @@ internal fun HarmonyImageChoiceQuestion(
         )
 
         when (kind) {
+            HarmonyImageChoiceKind.PROPOSAL_LOCATION -> ProposalLocationDuelSequence(
+                onComplete = { selections -> onPick(proposalLocationAnswerSummary(selections)) },
+                modifier = modifier.fillMaxWidth()
+            )
             HarmonyImageChoiceKind.RANK_ORDER,
             HarmonyImageChoiceKind.PERSON_ASSIGNMENT -> QuestionInteractionBoard(
                 kind = if (kind == HarmonyImageChoiceKind.PERSON_ASSIGNMENT) {
