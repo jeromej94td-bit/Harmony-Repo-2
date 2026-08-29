@@ -216,9 +216,9 @@ fun HarmonyApp(
                 isProposalExperienceOpen = true
             }
             freshRun -> {
-                HarmonyPacksData.PACKS.firstOrNull { it.id == packId }?.let { pack ->
-                    viewModel.startPackForTest(pack, currentIndex = 0)
-                }
+                HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
+                    ?.let { com.example.data.model.LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(it) }
+                    ?.let { pack -> viewModel.startPackForTest(pack, currentIndex = 0) }
             }
             else -> viewModel.startPack(packId)
         }
@@ -547,7 +547,14 @@ fun HarmonyApp(
                         isExitConfirmOpen = uiState.isExitConfirmOpen,
                         isOwnAnswerDialogOpen = uiState.isOwnAnswerDialogOpen,
                         appLanguage = uiState.appLanguage,
-                        onPickAnswer = { optText -> viewModel.pickAnswer(optText) },
+                        onPickAnswer = { optText ->
+                            val skipLabel = com.example.util.LanguageManager.tr("Überspringen", uiState.appLanguage)
+                            if (optText == skipLabel) {
+                                viewModel.skipCurrentQuestion()
+                            } else {
+                                viewModel.pickAnswer(optText)
+                            }
+                        },
                         onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
                         onNextStep = { viewModel.nextStep() },
                         onAskExit = { viewModel.askExitRun() },
@@ -567,6 +574,7 @@ fun HarmonyApp(
                     if (
                         !activeRun.isFinished &&
                         activeRun.pack.type != "disc" &&
+                        activeRun.pack.cat != "nie" &&
                         !uiState.isExitConfirmOpen &&
                         !uiState.isOwnAnswerDialogOpen
                     ) {
@@ -760,7 +768,8 @@ fun HarmonyApp(
                                 onClick = { isPandaExitConfirmOpen = false }
                             ) {
                                 androidx.compose.material3.Text(
-                                    com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage)
+                                    com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage),
+                                    color = androidx.compose.ui.graphics.Color.Unspecified
                                 )
                             }
                         }
