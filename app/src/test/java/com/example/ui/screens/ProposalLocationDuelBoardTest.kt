@@ -13,6 +13,7 @@ import com.example.data.model.ProposalLocationDuels
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +53,7 @@ class ProposalLocationDuelBoardTest {
         composeRule.onNodeWithTag("proposal_location_${round.secondOption.id}").assertExists()
         composeRule.onNodeWithTag("proposal_location_question").assertDoesNotExist()
 
-        composeRule.mainClock.advanceTimeBy(760)
+        composeRule.mainClock.advanceTimeBy(1_000)
         composeRule.waitForIdle()
         composeRule.onNodeWithTag("proposal_location_question").assertExists()
 
@@ -64,6 +65,41 @@ class ProposalLocationDuelBoardTest {
         composeRule.mainClock.advanceTimeBy(1_300)
         composeRule.waitForIdle()
         assertEquals(1, transitionCount)
+    }
+
+    @Test
+    fun `sequence advances through all three location duels and completes`() {
+        val rounds = ProposalLocationDuels.rounds
+        var completedSelections: Map<String, String>? = null
+
+        composeRule.mainClock.autoAdvance = false
+        composeRule.setContent {
+            HarmonyTheme {
+                ProposalLocationDuelSequence(
+                    rounds = rounds,
+                    onComplete = { completedSelections = it }
+                )
+            }
+        }
+
+        rounds.forEachIndexed { index, round ->
+            composeRule.mainClock.advanceTimeBy(1_000)
+            composeRule.waitForIdle()
+            composeRule.onNodeWithTag("proposal_location_${round.firstOption.id}").performClick()
+            composeRule.mainClock.advanceTimeBy(1_300)
+            composeRule.waitForIdle()
+
+            if (index < rounds.lastIndex) {
+                val nextRound = rounds[index + 1]
+                composeRule.onNodeWithTag("proposal_location_${nextRound.firstOption.id}").assertExists()
+            }
+        }
+
+        val result = completedSelections
+        assertNotNull(result)
+        rounds.forEach { round ->
+            assertEquals(round.firstOption.id, result?.get(round.id))
+        }
     }
 
     @Test
