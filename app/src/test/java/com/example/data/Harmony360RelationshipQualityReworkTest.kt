@@ -44,21 +44,13 @@ class Harmony360RelationshipQualityReworkTest {
     @Test
     fun `unrelated section stays value equivalent`() {
         val original = pack("outside", "h360_section_10_arbeit_karriere")
-
-        assertEquals(
-            listOf(original),
-            Harmony360RelationshipQualityRework.apply(listOf(original))
-        )
+        assertEquals(listOf(original), Harmony360RelationshipQualityRework.apply(listOf(original)))
     }
 
     @Test
     fun `stage 05 1 pack stays unchanged when no explicit rule exists`() {
         val original = pack("keep_me", "h360_section_01_beziehung_naehe")
-
-        assertEquals(
-            listOf(original),
-            Harmony360RelationshipQualityRework.apply(listOf(original))
-        )
+        assertEquals(listOf(original), Harmony360RelationshipQualityRework.apply(listOf(original)))
     }
 
     @Test
@@ -82,7 +74,6 @@ class Harmony360RelationshipQualityReworkTest {
     @Test
     fun `section 01 has an explicit decision for every visible pack`() {
         val visibleIds = GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS.map { it.id }.toSet()
-
         assertEquals(visibleIds, Harmony360RelationshipQualityRework.section01Decisions.keys)
         assertEquals(18, visibleIds.size)
         assertEquals(
@@ -91,23 +82,14 @@ class Harmony360RelationshipQualityReworkTest {
                 .filterValues { it == Harmony360RelationshipQualityRework.CurationDecision.ARCHIVE }
                 .keys
         )
-        assertEquals(
-            Harmony360RelationshipQualityRework.CurationDecision.KEEP,
-            Harmony360RelationshipQualityRework.section01Decisions["h500_010_vertrauen_offene_runde"]
-        )
-        assertEquals(
-            Harmony360RelationshipQualityRework.CurationDecision.KEEP,
-            Harmony360RelationshipQualityRework.section01Decisions["h500_018_ueberraschungen_memory"]
-        )
+        assertEquals(Harmony360RelationshipQualityRework.CurationDecision.KEEP, Harmony360RelationshipQualityRework.section01Decisions["h500_010_vertrauen_offene_runde"])
+        assertEquals(Harmony360RelationshipQualityRework.CurationDecision.KEEP, Harmony360RelationshipQualityRework.section01Decisions["h500_018_ueberraschungen_memory"])
     }
 
     @Test
     fun `section 01 archives overlap and keeps canonical themes`() {
-        val curated = Harmony360RelationshipQualityRework.apply(
-            GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS
-        )
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS)
         val ids = curated.map { it.id }
-
         assertEquals(16, curated.size)
         assertFalse("h500_022_zaertlichkeit_wer_eher" in ids)
         assertFalse("h500_023_verbundenheit_skala" in ids)
@@ -117,13 +99,10 @@ class Harmony360RelationshipQualityReworkTest {
 
     @Test
     fun `body closeness ranking is touch specific instead of generic filler`() {
-        val curated = Harmony360RelationshipQualityRework.apply(
-            GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS
-        )
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS)
         val body = curated.single { it.id == "h500_004_koerpernaehe_ranking" }
         val allOptions = body.questions.flatMap { it.options }
         val generic = listOf("Sofort ansprechen", "Erst fühlen", "Nähe suchen", "Raum geben")
-
         assertTrue(body.questions.size in 6..8)
         assertFalse(body.questions.any { it.options == generic })
         assertTrue("Hand halten" in allOptions)
@@ -134,10 +113,7 @@ class Harmony360RelationshipQualityReworkTest {
 
     @Test
     fun `section 01 rewrites use concrete relationship language`() {
-        val curated = Harmony360RelationshipQualityRework.apply(
-            GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS
-        ).associateBy { it.id }
-
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS).associateBy { it.id }
         assertTrue(curated.getValue("h500_002_quality_time_wer_eher").questions.any { "Handy" in it.q })
         assertTrue(curated.getValue("h500_003_kleine_gesten_skala").questions.any { "Lieblingssnack" in it.q })
         assertTrue(curated.getValue("h500_005_komplimente_prognose").questions.any { "Kompliment" in it.q && "Partner" in it.q })
@@ -149,17 +125,58 @@ class Harmony360RelationshipQualityReworkTest {
     @Test
     fun `section 01 keep decisions preserve the strong source questions`() {
         val raw = GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS.associateBy { it.id }
-        val curated = Harmony360RelationshipQualityRework.apply(
-            GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS
-        ).associateBy { it.id }
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS).associateBy { it.id }
+        assertEquals(raw.getValue("h500_010_vertrauen_offene_runde").questions, curated.getValue("h500_010_vertrauen_offene_runde").questions)
+        assertEquals(raw.getValue("h500_018_ueberraschungen_memory").questions, curated.getValue("h500_018_ueberraschungen_memory").questions)
+    }
 
+    @Test
+    fun `section 02 has an explicit decision for every visible pack`() {
+        val visibleIds = GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS.map { it.id }.toSet()
+        assertEquals(18, visibleIds.size)
+        assertEquals(visibleIds, Harmony360RelationshipQualityRework.section02Decisions.keys)
         assertEquals(
-            raw.getValue("h500_010_vertrauen_offene_runde").questions,
-            curated.getValue("h500_010_vertrauen_offene_runde").questions
+            setOf("h500_027_missverstaendnisse_geheime_wahl"),
+            Harmony360RelationshipQualityRework.section02Decisions
+                .filterValues { it == Harmony360RelationshipQualityRework.CurationDecision.ARCHIVE }
+                .keys
         )
-        assertEquals(
-            raw.getValue("h500_018_ueberraschungen_memory").questions,
-            curated.getValue("h500_018_ueberraschungen_memory").questions
-        )
+        assertEquals(Harmony360RelationshipQualityRework.CurationDecision.KEEP, Harmony360RelationshipQualityRework.section02Decisions["h500_030_direkte_worte_offene_runde"])
+        assertEquals(Harmony360RelationshipQualityRework.CurationDecision.KEEP, Harmony360RelationshipQualityRework.section02Decisions["h500_040_schweigen_offene_runde"])
+    }
+
+    @Test
+    fun `section 02 archives absurd misunderstanding secret choice but keeps communication coverage`() {
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS)
+        val ids = curated.map { it.id }
+        assertEquals(17, curated.size)
+        assertFalse("h500_027_missverstaendnisse_geheime_wahl" in ids)
+        assertTrue("h500_026_zuhoeren_szenario" in ids)
+        assertTrue("h500_029_ehrlichkeit_prioritaet" in ids)
+        assertTrue("h500_030_direkte_worte_offene_runde" in ids)
+    }
+
+    @Test
+    fun `communication rewrites are concrete instead of noun substitution templates`() {
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS).associateBy { it.id }
+        val listeningOptions = curated.getValue("h500_026_zuhoeren_szenario").questions.flatMap { it.options }
+        assertTrue("Nur zuhören" in listeningOptions)
+        assertTrue("Fragen stellen" in listeningOptions)
+        assertTrue("Gemeinsam Lösung suchen" in listeningOptions)
+        assertTrue("Erst kurz Ruhe" in listeningOptions)
+        assertTrue(curated.getValue("h500_029_ehrlichkeit_prioritaet").questions.any { "Zeitpunkt" in it.q || "Wahrheit" in it.q })
+        assertTrue(curated.getValue("h500_032_textnachrichten_wer_eher").questions.any { "alles gut" in it.q.lowercase() || "Handy" in it.q })
+        assertTrue(curated.getValue("h500_038_grenzen_erklaeren_memory").questions.any { "Grenze" in it.q && ("Nein" in it.q || "respektiert" in it.q) })
+        assertTrue(curated.getValue("h500_039_humor_im_gespraech_prioritaet").questions.any { "Humor" in it.q && ("hilft" in it.q || "unpassend" in it.q) })
+        assertTrue(curated.getValue("h500_044_gefuehle_benennen_ranking").questions.any { "überfordert" in it.q.lowercase() || "Gefühl" in it.q })
+        assertTrue(curated.getValue("h500_049_tabuthemen_prioritaet").questions.any { "Geld" in it.options || "Eifersucht" in it.options || "Zukunft" in it.options })
+    }
+
+    @Test
+    fun `section 02 keep decisions preserve strong open rounds`() {
+        val raw = GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS.associateBy { it.id }
+        val curated = Harmony360RelationshipQualityRework.apply(GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS).associateBy { it.id }
+        assertEquals(raw.getValue("h500_030_direkte_worte_offene_runde").questions, curated.getValue("h500_030_direkte_worte_offene_runde").questions)
+        assertEquals(raw.getValue("h500_040_schweigen_offene_runde").questions, curated.getValue("h500_040_schweigen_offene_runde").questions)
     }
 }
