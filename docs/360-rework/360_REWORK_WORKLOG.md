@@ -13,6 +13,30 @@ This file is the append-only project black box for **360 Rework**.
 
 ---
 
+## 2026-08-29 — 24.7 proposal merge-status sync
+
+**Work package:** 24.7 — Proposal merge-status sync<br>
+**Status:** ✅ MERGED<br>
+**Branch:** `360-rework/24-7-control-state-sync`<br>
+**GitHub PR:** recorded by the merge of this package<br>
+
+### Correction to the earlier handover
+
+The earlier 24.3 entry still described PR #31 as a draft. PR #31 was subsequently marked ready and merged into `main` with merge commit `3012f1bbcb0c4406e4fb8b34258ddb2a4d88bd5f`.
+
+### Recorded state
+
+- 24.2 / Stage 02.1 and 24.3 / Stage 02.2 are both merged but remain `🧪 VERIFY` because no Gradle-capable environment has recorded the focused build result.
+- The active functional scope advances to 24.8 / Stage 02.3 proposal-location image duels.
+- Parallel Stage 06 updates from 24.4–24.6 remain documented separately and do not alter the active Stage 02 scope.
+
+### Verification
+
+- Documentation-only diff checked with `git diff --check`.
+- No Android build or tests were run; this package changes no application code.
+
+---
+
 ## 2026-08-29 — 24.3 started before 24.2 build verification
 
 **Work package:** 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds<br>

@@ -58,8 +58,8 @@ The ten intended refreshed ring assets are present on `main`, the merged diff co
 
 ### Substages
 
-- [ ] 02.1 Experience data model and deterministic proposal flow definition — implementation awaiting build verification
-- [ ] 02.2 Das-oder-Das proposal mood/details rounds — implementation awaiting verification
+- [ ] 02.1 Experience data model and deterministic proposal flow definition — merged implementation awaiting build verification
+- [ ] 02.2 Das-oder-Das proposal mood/details rounds — merged implementation awaiting verification
 - [ ] 02.3 Proposal-location image duels
 - [ ] 02.4 Refreshed ring-image duels integrated into the experience
 - [ ] 02.5 Drag-and-drop ranking for proposal priorities
@@ -70,6 +70,13 @@ The ten intended refreshed ring assets are present on `main`, the merged diff co
 - [ ] 02.10 Reuse the strongest existing proposal/ring/wedding content needed by this experience
 - [ ] 02.11 Experience entry/navigation and end-to-end playable flow
 - [ ] 02.12 Tests, build verification and UI verification
+
+### Merged implementation awaiting verification
+
+- **24.2 / 02.1:** PR #27, merge commit `919aee586977cebe9700360eaf3be29d4e4a697f`; defines the deterministic, UI-independent proposal flow contract.
+- **24.3 / 02.2:** PR #31, merge commit `3012f1bbcb0c4406e4fb8b34258ddb2a4d88bd5f`; adds the mood and detail Das-oder-Das round content bound to that contract.
+
+Both packages were explicitly merged with documented verification gaps. They remain unchecked until the focused Gradle build and later UI verification are recorded.
 
 ### Definition of Done
 

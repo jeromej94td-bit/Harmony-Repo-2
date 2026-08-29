@@ -4,14 +4,15 @@
 **Project:** 360 Rework  
 **Completed core stages:** 1/8  
 **Current stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Current substage:** 02.2 — Das-oder-Das proposal mood/details rounds<br>
+**Current substage:** 02.3 — Proposal-location image duels<br>
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY<br>
 **Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
+**Latest merged proposal packages awaiting verification:** 🧪 24.2, 🧪 24.3<br>
 **Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
-**Next work package:** 24.3 — Stage 02.2 Proposal mood/details rounds
+**Next work package:** 24.8 — Stage 02.3 Proposal-location image duels
 
 ## Merge strategy
 
@@ -69,7 +70,7 @@ The intended experience includes:
 
 These are **not** to be delivered in one PR. They are split into small `24.x` packages aligned with substages or another similarly narrow coherent change.
 
-## Previous work package awaiting verification
+## Merged proposal packages awaiting verification
 
 **Work package:** 24.2 — Stage 02.1 Experience data model / proposal flow<br>
 **Branch:** `360-rework/24-2-proposal-flow-model`<br>
@@ -79,15 +80,15 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 **Deliberately excluded:** UI, navigation, content/mechanic implementation, legacy migration and deletion.<br>
 **Verification status:** whitespace/diff validation passed. No tests were added or run by explicit instruction. A local Android build could not start because this repository checkout has no Gradle Wrapper and no system Gradle executable is installed.
 
-## Active work package
+### Work package 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds
 
-**Work package:** 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds<br>
 **Branch:** `360-rework/24-3-proposal-either-or`<br>
-**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` (draft)<br>
-**Commit:** `487bb671d89c2efd203601b31eb62f0ed2d1f48d`<br>
+**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` — merged<br>
+**Merge commit:** `3012f1bbcb0c4406e4fb8b34258ddb2a4d88bd5f`<br>
 **Scope:** add UI-independent rounds for the existing `proposal_mood` and `proposal_details` flow steps only.<br>
 **Deliberately excluded:** new UI, navigation, images, ranking, prediction, scenario, reveal, legacy migration and deletion.<br>
-**Ordering decision:** the operator explicitly authorized 24.3 to start while the Gradle build verification for merged 24.2 remains open. Neither substage is marked complete.
+**Verification status:** `git diff --check` passed before merge. No tests were added or run by explicit operator instruction; a local Android build remains unavailable without a Gradle Wrapper or compatible Gradle installation.<br>
+**Ordering decision:** the operator explicitly authorized the merge while the Gradle verification for 24.2 remains open. Neither substage is marked complete.
 
 ## Parallel Stage 06 cleanup already merged
 
@@ -103,15 +104,11 @@ These packages were intentionally developed in parallel because they do not touc
 
 ## NEXT EXACT ACTION
 
-**Work package 24.3 / Stage 02.2:** add and review the proposal mood/details round data against the two `EITHER_OR` flow steps, then record the branch, PR and verification gap. The Gradle verification for 24.2 remains a separate open requirement.
+**Work package 24.8 / Stage 02.3:** inspect the current image-duel runner and image-resource pipeline, then implement only proposal-location image duels in a new small package. The Gradle verification gaps for 24.2 and 24.3 remain separate open requirements.
 
-Do **not** include 02.2 Das-oder-Das UI, ring duels, ranking, partner prediction, legacy navigation cleanup, or other later substages in package 24.2.
+Do **not** bundle refreshed-ring duels, ranking, partner prediction, scenarios, reveal, broad navigation changes or legacy cleanup into package 24.8.
 
-Expected handover after 02.1 is completed, independently verified and merged:
-
-> `360 Rework → Stage 02/08 → 1/12 complete (8.3%) → next package 24.3`
-
-Then update this file, the master roadmap, and the worklog in the relevant small package.
+The merged 24.2 and 24.3 packages do not advance the Stage 02 completion fraction until their verification requirements are met.
 
 ## Current blockers / verification caveats
 
