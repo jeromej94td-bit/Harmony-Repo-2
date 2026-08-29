@@ -24,7 +24,9 @@ class RankingSlotBoardTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val question = "Was wäre der erste Schritt nach dem Gewinn?"
+    private val compactQuestion = "Was wäre der erste Schritt nach dem Gewinn?"
+    private val rawQuestion =
+        "$compactQuestion Ordne: Niemandem erzählen, Familie einladen, Champagner öffnen, Finanzberater suchen"
     private val options = listOf(
         "Niemandem erzählen",
         "Familie einladen",
@@ -37,7 +39,7 @@ class RankingSlotBoardTest {
         composeTestRule.setContent {
             HarmonyTheme {
                 RankingSlotBoard(
-                    question = question,
+                    question = rawQuestion,
                     options = options,
                     selectedAnswer = null,
                     profile = ProfileEntity(),
@@ -48,11 +50,14 @@ class RankingSlotBoardTest {
 
         composeTestRule.onNodeWithTag("ranking_slot_board").assertExists()
         composeTestRule.onNodeWithTag("ranking_slot_lane_0").assertExists()
-        composeTestRule.onNodeWithText(question).assertIsDisplayed()
+        composeTestRule.onNodeWithText(compactQuestion).assertIsDisplayed()
+        composeTestRule.onNodeWithText(rawQuestion).assertDoesNotExist()
 
+        composeTestRule.onNodeWithText("🏆 RANKING-DUELL").assertDoesNotExist()
         composeTestRule.onNodeWithText("DEINE RANGLISTE").assertDoesNotExist()
         composeTestRule.onNodeWithText("KARTEN").assertDoesNotExist()
         composeTestRule.onNodeWithText("Platz 1 · Karte hier ablegen").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Die Rangliste ist leer. Ziehe jede Karte von rechts auf Platz 1, 2, 3 …").assertDoesNotExist()
 
         options.forEach { option ->
             composeTestRule.onNodeWithText(option).assertIsDisplayed()
