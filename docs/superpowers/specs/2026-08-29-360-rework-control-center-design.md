@@ -96,6 +96,7 @@ Stage 05/08 — Harmony-360 Questions Quality Rework
 Status: 🟡 IN PROGRESS
 Progress: 2/5 complete (40%)
 Overall plan position: Stage 5 of 8
+Completed core stages: 4/8
 ```
 
 ### 3. `360_REWORK_CURRENT_STATE.md`
@@ -109,6 +110,7 @@ Required fields:
 - Current substage
 - Current progress fraction and percentage
 - Overall project stage position
+- Completed core-stage count
 - Last completed stage/substage
 - Last relevant PR
 - Last relevant commit
@@ -145,7 +147,12 @@ Old entries are not rewritten to make history look cleaner. Corrections are adde
 
 ### Stage-level progress
 
-The overall plan uses eight core stages. Global stage position is descriptive, not a naive percentage. Example: `Stage 5/8` means the team is currently working in the fifth defined stage.
+The overall plan uses eight core stages. Two values are shown:
+
+- `Current stage position`, e.g. `Stage 5/8`
+- `Completed core stages`, e.g. `4/8`
+
+The current position is descriptive. The completed-stage count tells how many entire core stages have actually met their Definition of Done. We do not pretend that every stage has identical effort.
 
 ### Substage progress
 
@@ -194,10 +201,10 @@ Initial status: `🔵 NEXT`
 
 Purpose: build the first flagship Harmony Experience as the reference implementation for mixed-mechanic experiences.
 
-Proposed substages:
+Substages:
 
-1. Experience data model and flow definition
-2. Das-oder-Das rounds and proposal mood/details
+1. Experience data model and proposal flow definition
+2. Das-oder-Das rounds for proposal mood/details
 3. Proposal-location image duels
 4. Refreshed ring-image duels integrated into the experience
 5. Drag-and-drop ranking
@@ -205,17 +212,19 @@ Proposed substages:
 7. Scenario rounds
 8. Open personal prompts
 9. Final `Euer perfekter Antrag` qualitative reveal
-10. Existing proposal/ring/wedding content migration
-11. Legacy standalone packs hidden/archived, not deleted
+10. Reuse the necessary strong proposal/ring/wedding content inside the new experience
+11. Integrate the experience into normal Harmony navigation without deleting legacy packs
 12. Tests/build/UI verification
 
 Progress at creation: `0/12 = 0%`
+
+Definition of Done: the new proposal experience is reachable in normal navigation, its mixed mechanics work as designed, the refreshed ring assets are used, verification evidence is recorded, and legacy packs remain available for safe follow-up consolidation.
 
 ### Stage 03/08 — Reusable Harmony Experience Engine
 
 Initial status: `⬜ PLANNED`
 
-Purpose: turn the proposal implementation into a reusable experience layer rather than a one-off special case.
+Purpose: generalize the proven proposal implementation into a reusable experience layer rather than creating future experiences as one-off special cases.
 
 Target mechanics include:
 
@@ -229,19 +238,31 @@ Target mechanics include:
 
 The design should preserve compatibility with existing content during migration.
 
-### Stage 04/08 — Existing Proposal/Ring Content Consolidation
+Definition of Done: the proposal uses the reusable abstractions and at least one additional test fixture or minimal second flow proves that the mechanics are not proposal-specific.
+
+### Stage 04/08 — Legacy Proposal/Ring Content Consolidation
 
 Initial status: `⬜ PLANNED`
 
-Purpose: remove duplicate presentation without throwing away useful content. Strong existing questions and image assets are reused inside the new experience; old standalone packs are hidden first and only deleted later if safe.
+Purpose: clean up duplication only after the new experience and reusable layer are stable.
+
+Substages:
+
+1. Inventory legacy proposal/ring/wedding packs against content already reused by the new experience
+2. Mark redundant standalone packs hidden/archive-first in normal navigation
+3. Preserve unique strong questions/assets not yet migrated
+4. Verify no useful content was lost and rollback remains possible
+5. Decide, with evidence, whether any obsolete legacy content can later be deleted
+
+This stage does not rebuild the proposal experience. It only consolidates the old presentation safely.
 
 ### Stage 05/08 — Harmony-360 Questions Quality Rework
 
 Initial status: `⬜ PLANNED`
 
-Purpose: replace template-generated pseudo-variety with authored, relationship-relevant interactions.
+Purpose: replace template-generated pseudo-variety with authored, relationship-relevant interactions. This stage is about rewriting/curating the substance of questions, not merely fixing malformed data.
 
-This stage must itself be trackable as `x/y`, not as a vague large task. Initial substage groups:
+Substage groups:
 
 1. Relationship / communication / everyday-life sections
 2. Food / travel / leisure / culture sections
@@ -255,9 +276,9 @@ Example during execution: `Stage 05/08 — 2/5 complete (40%)`.
 
 Initial status: `⬜ PLANNED`
 
-Purpose: systematically remove or repair content defects discovered in the audit.
+Purpose: perform the mechanical and defect-focused cleanup that is distinct from Stage 05's authored rewrites.
 
-Initial substages:
+Substages:
 
 1. Missing answer options and malformed questions
 2. English leftovers and language mismatches
@@ -265,7 +286,7 @@ Initial substages:
 4. Semantic duplicates / repeated question stems / repeated answer quartets
 5. Brand/franchise cleanup where IP-neutral replacements are preferred
 
-This is the stage that can be referred to exactly as, for example, `Stage 06/08 — 2/5 complete`.
+Example status: `Stage 06/08 — 2/5 complete (40%)`.
 
 ### Stage 07/08 — Additional Flagship Harmony Experiences
 
@@ -308,8 +329,10 @@ Initial checks:
 At the time this control system is introduced:
 
 - Stage 01 is complete and merged.
+- Completed core stages: `1/8`.
 - Stage 02 is the next active implementation target.
-- Stage 02 progress is `0/12` because its architecture/content was discussed but not yet implemented.
+- Stage 02 progress is `0/12 = 0%` because its architecture/content was discussed but not yet implemented.
+- The exact next planned substage is `02.1 — Experience data model and proposal flow definition`.
 - No later stage should be treated as completed merely because some isolated code or content exists.
 - The ring-quality PR is the most recent completed 360 Rework work package.
 
@@ -350,8 +373,8 @@ A model using the shorthand should locate `START_HERE_360_REWORK.md` and follow 
 The control center is successful when:
 
 1. The four live files exist on `main`.
-2. A new agent can identify the current stage, fraction, percentage, last completed work, blockers, and exact next action without prior conversation context.
+2. A new agent can identify the current stage, fraction, percentage, completed-stage count, last completed work, blockers, and exact next action without prior conversation context.
 3. Stage 01 correctly records the ring-image merge and its verification limitation.
-4. Stage 02 is visibly the next target at `0/12` until implementation begins.
+4. Stage 02 is visibly the next target at `0/12` with `02.1` as the next exact substage until implementation begins.
 5. Every later work package updates roadmap, current state, and worklog before handoff.
 6. The user can ask "Wo stehen wir beim 360 Rework?" and receive a repo-grounded answer such as `Stage 05/08 — 2/5 complete (40%)`.
