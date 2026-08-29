@@ -35,6 +35,7 @@ class HarmonyRepositoryAnswerPersistenceTest {
         assertEquals(beforeCount + 1, afterDuplicateSave.size)
 
         repository.saveAnswer(packId, questionIndex, "Antwort B")
+        repository.saveAnswer(packId, questionIndex, "Antwort B")
 
         val afterChangedAnswer = db.brainRoomDao().getAllAnswerHistory()
             .filter { it.questionId == questionId }
