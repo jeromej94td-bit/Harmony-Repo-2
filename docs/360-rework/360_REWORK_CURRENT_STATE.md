@@ -7,8 +7,8 @@
 **Stage-02 package coverage:** 12/12 = 100%  
 **Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #81:** 1/7  
-**Current Stage-03 substage after PR #81:** 03.2 — Reusable `EitherOr` step  
+**Stage-03 progress after PR #84:** 2/7  
+**Current Stage-03 substage after PR #84:** 03.3 — Reusable `ImageDuel` step  
 **Stage-05 progress:** 1/5 = 20%  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
@@ -42,24 +42,30 @@ PR #79 adds UI/Robolectric, ring-asset and 35-subround end-to-end contracts and 
 
 ### 03.1 Generic mixed-step experience foundation
 
-**Status after PR #81 merges:** ✅ DONE  
-**Progress:** **1/7**
+**Status:** ✅ DONE  
+**Package:** 26.1 / PR #81  
 
-PR #81 / work package 26.1 introduces:
+PR #81 introduced generic `ExperienceStepKind`, `ExperienceStep`, `ExperienceDefinition`, `ExperiencePosition` and `ExperienceNavigator`, plus the Proposal compatibility bridge. The shipped proposal journey remains nine steps / 35 positions with locked progress-ratio parity.
 
-- generic `ExperienceStepKind`, `ExperienceStep` and `ExperienceDefinition`;
-- generic `ExperiencePosition` and deterministic `ExperienceNavigator`;
-- fail-fast flow validation and safe invalid-position handling;
-- feature-owned item-count resolution with non-positive counts normalized to one;
-- `ProposalExperienceAdapter` compatibility layer;
-- proposal navigation/progress delegation without moving proposal content or UI state;
-- contract/parity coverage locking the existing nine proposal steps, 35 navigable positions and shipped progress ratios.
+### 03.2 Reusable EitherOr step
 
-TDD evidence for 26.1 includes local Kotlin RED compilation before the generic types/adapter existed, followed by passing isolated Kotlin contract/parity harnesses. No green full Android/Gradle build is claimed while repository Actions remain blocked before executable step 1.
+**Status after PR #84 merges:** ✅ DONE  
+**Progress:** **2/7**
+
+PR #84 / work package 26.2 introduces:
+
+- generic `EitherOrRound` with stable IDs, prompt and exactly two distinct nonblank choices;
+- immutable ordered `EitherOrStepContent` with safe indexed lookup and item count;
+- `ProposalEitherOrAdapter` mapping the shipped Proposal Either-Or content into the generic mechanic model;
+- proposal item-count resolution for Mood/Details through the reusable adapter;
+- parity coverage locking both Proposal Either-Or steps at 5 + 6 rounds and preserving every ID, prompt and answer pair;
+- focused Kotlin verification confirming the complete Proposal journey stays at 35 positions with the existing progress ratios.
+
+The Proposal Compose screen, copy, images, catalog routing, persistence and all non-EitherOr mechanics remain unchanged by 26.2.
 
 ### NEXT EXACT ACTION — core
 
-Begin **03.2 — Reusable `EitherOr` step** as its own narrow 26.x package. Reuse the generic definition/navigation core from 03.1; do not broaden 03.2 into ImageDuel, Ranking, Prediction or a generic full renderer.
+Begin **03.3 — Reusable `ImageDuel` step** as its own narrow 26.x package. Reuse the generic Stage-03 core and follow the same compatibility pattern for Proposal location/ring image duels without broadening into Ranking, Prediction or a generic full renderer.
 
 ## Parallel Stage 05 — Questions Quality Rework
 
