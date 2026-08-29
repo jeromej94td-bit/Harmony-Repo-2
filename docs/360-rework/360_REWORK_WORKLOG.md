@@ -7,8 +7,9 @@ This file is the append-only project black box for **360 Rework**.
 - Add a new dated entry for every meaningful completed work package or material project-control decision.
 - Do not rewrite older entries to make history look cleaner.
 - If an older entry is wrong or incomplete, append a correction entry.
-- Record what changed, why, branch, PR, commit/merge commit, verification performed, verification not performed, blockers, decision changes, and the next action.
+- Record work-package ID, real GitHub PR number, branch, commit/merge commit, verification performed, verification not performed, blockers, decision changes, and next action.
 - A code/content change is not considered complete merely because a commit exists.
+- Umbrella PR #24 is never merged wholesale; actual work lands via small `24.x` packages.
 
 ---
 
@@ -26,21 +27,16 @@ This file is the append-only project black box for **360 Rework**.
 - Preserved the existing image-precedence behavior so the compiled refreshed resources can win over legacy bundled/Drive sources.
 - The merged PR changed exactly 10 files, all ring WebPs.
 
-### Why
-
-The ring imagery was visibly lower quality than required for the planned proposal experience. Fixing these assets first prevents the later `Unser perfekter Antrag` experience from being built on weak visual material.
-
 ### Verification performed
 
 - PR #22 confirmed merged.
 - `changed_files = 10` confirmed on the PR.
 - The final diff was limited to the intended ring WebPs.
 
-### Verification not performed / gap
+### Verification gap
 
 - Two GitHub Actions jobs failed before executing their first workflow step.
 - No full green test-suite claim is valid for this work package.
-- This infrastructure behavior must be distinguished from an application-code test failure.
 
 ### Next action at that time
 
@@ -48,53 +44,70 @@ Create a persistent cross-chat/model tracking system, then begin Stage 02 — `U
 
 ---
 
-## 2026-08-29 — 360 Rework Control Center created
-
-**Status:** 🧪 VERIFY until PR merge is confirmed  
-**Active integration branch:** `docs/360-rework-control-center-current`
+## 2026-08-29 — 360 Rework Control Center designed
 
 ### Decision
 
-The permanent project name is **360 Rework**.
-
-The repository becomes the source of truth for project progress so work can continue across ChatGPT chats, Codex sessions, different models, devices, interruptions, or exhausted credits without relying on conversation history.
-
-### Tracking model
+The permanent project name is **360 Rework**. The repository becomes the source of truth for project progress so work can continue across chats, Codex sessions, models, devices, interruptions, or exhausted credits without relying on conversation history.
 
 Every active work package is represented with:
 
-- overall position such as `Stage 06/08`;
-- local progress such as `2/5 complete = 40%`;
+- overall stage position such as `Stage 06/08`;
+- local stage progress such as `2/5 complete = 40%`;
 - explicit status;
 - Definition of Done;
 - verification evidence;
 - exact next action.
 
-The roadmap also keeps an **Original plan reference** so user-facing references remain recognizable. For example, the earlier **Point 5 — schlechte Inhalte gezielt entfernen und reparieren** is tracked as technical `Stage 06/08`, because Stage 01 records the already-completed ring prerequisite.
+The roadmap keeps an **Original plan reference** so user-facing references remain recognizable. Example: earlier **Point 5 — schlechte Inhalte gezielt entfernen und reparieren** maps to technical `Stage 06/08` because Stage 01 records the already-completed ring prerequisite.
 
-### Design artifacts
-
-- Design spec: `docs/superpowers/specs/2026-08-29-360-rework-control-center-design.md`
-- Implementation plan: `docs/superpowers/plans/2026-08-29-360-rework-control-center.md`
-
-### Live files introduced
-
-- `START_HERE_360_REWORK.md`
-- `docs/360-rework/360_REWORK_MASTER_ROADMAP.md`
-- `docs/360-rework/360_REWORK_CURRENT_STATE.md`
-- `docs/360-rework/360_REWORK_WORKLOG.md`
-
-### Initial state encoded
+### Initial encoded state
 
 - Stage 01/08 — Ring Image Quality Rework: `✅ DONE`, `1/1 = 100%`.
 - Stage 02/08 — `Unser perfekter Antrag`: `🔵 NEXT`, `0/12 = 0%`.
 - Current exact substage: `02.1 — Experience data model and deterministic proposal flow definition`.
 - Completed core stages: `1/8`.
 
-### Integration note
+---
 
-The original documentation branch was created from an older `main` and later became 3 commits behind. Rather than force-moving it or risking loss of unrelated changes, the final documentation tree was rebuilt on the then-current `main` commit `c4024403c616d8394fdf3ee7efae342f77dfea9d` using `docs/360-rework-control-center-current`.
+## 2026-08-29 — Merge strategy changed to small 24.x slices
 
-### Next action
+**Parent / umbrella:** GitHub PR #24  
+**Umbrella policy:** **DO NOT MERGE WHOLE**
 
-Verify the current integration branch against `main`, open/verify the control-center PR, merge after fresh verification, then start `360 Rework → Stage 02/08 → 02.1`.
+### Why
+
+The 360 Rework contains many independent changes. Merging a large collection at once would make regressions harder to isolate, verify and revert.
+
+### New rule
+
+GitHub does not support decimal PR numbers. Therefore `24.1`, `24.2`, `24.3`, etc. are permanent **360 Rework work-package IDs**, while each package also gets its own real integer GitHub PR number.
+
+Each `24.x` package must have:
+
+- one dedicated branch;
+- one narrow coherent change/substage;
+- one independent diff and verification cycle;
+- one separate GitHub PR;
+- one separate merge to `main`;
+- one worklog entry with the real PR and merge commit.
+
+PR #24 remains an unmerged umbrella/reference surface and can later be closed without merging when its slices have landed.
+
+### Package 24.1
+
+**Name:** Control Center Foundation  
+**Branch:** `360-rework/24-1-control-center-foundation`
+
+Scope is intentionally documentation-only:
+
+- `START_HERE_360_REWORK.md`
+- `docs/360-rework/360_REWORK_MASTER_ROADMAP.md`
+- `docs/360-rework/360_REWORK_CURRENT_STATE.md`
+- `docs/360-rework/360_REWORK_WORKLOG.md`
+
+No app code, questions, images, mechanics or navigation changes belong in 24.1.
+
+### Next package after 24.1 reaches main
+
+**24.2 — Stage 02.1:** inspect current Harmony runner/content models and implement only the mixed-step data model plus deterministic proposal-flow definition. Later mechanics remain separate packages.
