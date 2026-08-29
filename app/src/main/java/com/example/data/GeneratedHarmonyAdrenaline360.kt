@@ -37,11 +37,13 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS)
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
-        Harmony360RelationshipQualityRework.apply(
-            raw
-                .map(GeneratedHarmony360ScenarioCleanup::apply)
-                .map(GeneratedHarmony360TextCleanup::apply)
-                .map(Harmony360ContentRework::apply)
+        NormensLoeschungen.apply(
+            Harmony360RelationshipQualityRework.apply(
+                raw
+                    .map(GeneratedHarmony360ScenarioCleanup::apply)
+                    .map(GeneratedHarmony360TextCleanup::apply)
+                    .map(Harmony360ContentRework::apply)
+            )
         )
     }
 }
