@@ -6,10 +6,10 @@ import org.junit.Test
 
 class DynamicQuestionMechanicsTest {
 
-    private fun pack(cat: String): QuestionPack = QuestionPack(
+    private fun pack(cat: String, tags: List<String> = listOf("supabase")): QuestionPack = QuestionPack(
         id = "dynamic_$cat",
         title = cat,
-        tags = listOf("supabase"),
+        tags = tags,
         cat = cat,
         topic = "beziehung",
         type = "quiz",
@@ -73,7 +73,7 @@ class DynamicQuestionMechanicsTest {
     }
 
     @Test
-    fun `dynamic harmony categories route without generated source tags`() {
+    fun `dynamic harmony categories with unambiguous semantics route without generated source tags`() {
         assertEquals(
             FullscreenGameMechanicKind.MEMORY_MATCH,
             FullscreenGameMechanicPolicy.resolve(pack("h360_memory"), 0)
@@ -82,9 +82,17 @@ class DynamicQuestionMechanicsTest {
             FullscreenGameMechanicKind.PRIORITY_POKER,
             FullscreenGameMechanicPolicy.resolve(pack("h360_prioritaet"), 0)
         )
+    }
+
+    @Test
+    fun `legacy wer category stays standard unless mechanic is explicitly tagged`() {
+        assertNull(FullscreenGameMechanicPolicy.resolve(pack("wer"), 0))
         assertEquals(
             FullscreenGameMechanicKind.WHO_WOULD,
-            FullscreenGameMechanicPolicy.resolve(pack("wer"), 0)
+            FullscreenGameMechanicPolicy.resolve(
+                pack("wer", tags = listOf("supabase", "mechanik_wer_eher")),
+                0
+            )
         )
     }
 }
