@@ -107,6 +107,11 @@ private fun PersonAssignmentBoard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val configuration = context.resources.configuration
+    val layoutMetrics = PersonAssignmentLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
     val initialAssignments = remember(selectedAnswer, options) {
@@ -144,7 +149,7 @@ private fun PersonAssignmentBoard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(layoutMetrics.columnGapDp.dp),
                 verticalAlignment = Alignment.Top
             ) {
                 AssignmentTarget(
@@ -160,6 +165,8 @@ private fun PersonAssignmentBoard(
                     partnerBounds = { partnerBounds },
                     onHover = { hoveredSide = it },
                     onDrop = dropRole,
+                    complete = complete,
+                    layoutMetrics = layoutMetrics,
                     modifier = Modifier.weight(1f).fillMaxSize()
                 )
 
@@ -170,14 +177,14 @@ private fun PersonAssignmentBoard(
                         .clip(RoundedCornerShape(24.dp))
                         .background(Color.White.copy(alpha = 0.035f))
                         .border(1.dp, HarmonyLine, RoundedCornerShape(24.dp))
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                        .padding(horizontal = 8.dp, vertical = layoutMetrics.centerVerticalPaddingDp.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(layoutMetrics.verticalSpacingDp.dp)
                 ) {
                     Text(
                         text = tr("KARTEN", "CARDS"),
                         color = HarmonyPinkSoft,
-                        fontSize = 14.sp,
+                        fontSize = layoutMetrics.headerSizeSp.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                     if (unassignedRoles.isEmpty()) {
@@ -188,7 +195,7 @@ private fun PersonAssignmentBoard(
                             Text(
                                 text = tr("Alles verteilt", "All assigned"),
                                 color = HarmonyPinkSoft,
-                                fontSize = 16.sp,
+                                fontSize = if (layoutMetrics.hideAvatarWhenComplete) 13.sp else 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center
                             )
@@ -202,7 +209,8 @@ private fun PersonAssignmentBoard(
                                     userBounds = { userBounds },
                                     partnerBounds = { partnerBounds },
                                     onHover = { hoveredSide = it },
-                                    onDrop = { side -> dropRole(role, side) }
+                                    onDrop = { side -> dropRole(role, side) },
+                                    layoutMetrics = layoutMetrics
                                 )
                             }
                         }
@@ -222,11 +230,13 @@ private fun PersonAssignmentBoard(
                     partnerBounds = { partnerBounds },
                     onHover = { hoveredSide = it },
                     onDrop = dropRole,
+                    complete = complete,
+                    layoutMetrics = layoutMetrics,
                     modifier = Modifier.weight(1f).fillMaxSize()
                 )
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(layoutMetrics.submitGapDp.dp))
             PrimaryMechanicButton(
                 text = if (complete) {
                     tr("Zuordnung speichern & weiter", "Save assignment & continue")
@@ -258,10 +268,13 @@ private fun AssignmentTarget(
     partnerBounds: () -> DropRect?,
     onHover: (PersonSide?) -> Unit,
     onDrop: (String, PersonSide) -> Unit,
+    complete: Boolean,
+    layoutMetrics: PersonAssignmentLayoutMetrics,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(26.dp)
     val accent = if (side == PersonSide.USER) HarmonyPink else HarmonyPurpleLight
+    val showAvatar = !(complete && layoutMetrics.hideAvatarWhenComplete)
 
     Column(
         modifier = modifier
@@ -284,21 +297,25 @@ private fun AssignmentTarget(
                 val rect = coordinates.boundsInRoot()
                 onBounds(DropRect(rect.left, rect.top, rect.right, rect.bottom))
             }
-            .padding(horizontal = 9.dp, vertical = 14.dp)
+            .padding(horizontal = 9.dp, vertical = layoutMetrics.targetVerticalPaddingDp.dp)
             .testTag(targetTag),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(layoutMetrics.verticalSpacingDp.dp)
     ) {
-        ProfileAvatar(name = name, avatarPath = avatarPath)
+        if (showAvatar) {
+            ProfileAvatar(name = name, avatarPath = avatarPath, layoutMetrics = layoutMetrics)
+        }
         Text(
             text = name,
             color = HarmonyText,
-            fontSize = 16.sp,
+            fontSize = layoutMetrics.nameSizeSp.sp,
             fontWeight = FontWeight.ExtraBold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Spacer(modifier = Modifier.height(2.dp))
+        if (!layoutMetrics.hideAvatarWhenComplete) {
+            Spacer(modifier = Modifier.height(2.dp))
+        }
         if (roles.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -331,7 +348,8 @@ private fun AssignmentTarget(
                         partnerBounds = partnerBounds,
                         onHover = onHover,
                         onDrop = { target -> onDrop(role, target) },
-                        assigned = true
+                        assigned = true,
+                        layoutMetrics = layoutMetrics
                     )
                 }
             }
@@ -340,10 +358,14 @@ private fun AssignmentTarget(
 }
 
 @Composable
-private fun ProfileAvatar(name: String, avatarPath: String?) {
+private fun ProfileAvatar(
+    name: String,
+    avatarPath: String?,
+    layoutMetrics: PersonAssignmentLayoutMetrics
+) {
     Box(
         modifier = Modifier
-            .size(86.dp)
+            .size(layoutMetrics.avatarSizeDp.dp)
             .clip(CircleShape)
             .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurpleLight)))
             .border(2.dp, Color.White.copy(alpha = 0.62f), CircleShape),
@@ -361,7 +383,7 @@ private fun ProfileAvatar(name: String, avatarPath: String?) {
             Text(
                 text = name.trim().take(1).uppercase().ifBlank { "?" },
                 color = Color.White,
-                fontSize = 32.sp,
+                fontSize = layoutMetrics.avatarInitialSizeSp.sp,
                 fontWeight = FontWeight.ExtraBold
             )
         }
@@ -376,7 +398,8 @@ private fun DraggableRoleChip(
     partnerBounds: () -> DropRect?,
     onHover: (PersonSide?) -> Unit,
     onDrop: (PersonSide) -> Unit,
-    assigned: Boolean = false
+    assigned: Boolean = false,
+    layoutMetrics: PersonAssignmentLayoutMetrics
 ) {
     val density = LocalDensity.current
     val hitSlop = with(density) { 24.dp.toPx() }
@@ -405,7 +428,13 @@ private fun DraggableRoleChip(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = if (assigned) 54.dp else 62.dp)
+            .heightIn(
+                min = if (assigned) {
+                    layoutMetrics.assignedChipMinHeightDp.dp
+                } else {
+                    layoutMetrics.unassignedChipMinHeightDp.dp
+                }
+            )
             .zIndex(if (dragging) 40f else 0f)
             .graphicsLayer {
                 translationX = dragOffset.x
@@ -474,7 +503,7 @@ private fun DraggableRoleChip(
                 if (dragging) HarmonyPinkSoft else HarmonyLine,
                 shape
             )
-            .padding(horizontal = 10.dp, vertical = 11.dp)
+            .padding(horizontal = 10.dp, vertical = layoutMetrics.chipVerticalPaddingDp.dp)
             .testTag("assignment_role_$roleIndex"),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -489,11 +518,11 @@ private fun DraggableRoleChip(
         Text(
             text = contentText(role),
             color = HarmonyText,
-            fontSize = if (assigned) 13.5.sp else 15.sp,
+            fontSize = if (assigned) layoutMetrics.assignedTextSizeSp.sp else layoutMetrics.unassignedTextSizeSp.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = if (assigned) 17.sp else 19.sp,
+            lineHeight = if (assigned) layoutMetrics.assignedLineHeightSp.sp else layoutMetrics.unassignedLineHeightSp.sp,
             textAlign = TextAlign.Start,
-            maxLines = 3,
+            maxLines = layoutMetrics.roleMaxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
@@ -501,7 +530,7 @@ private fun DraggableRoleChip(
         Text(
             text = "☰",
             color = if (dragging) HarmonyPinkSoft else HarmonyMuted,
-            fontSize = if (assigned) 19.sp else 23.sp,
+            fontSize = if (assigned) layoutMetrics.assignedHandleSizeSp.sp else layoutMetrics.unassignedHandleSizeSp.sp,
             fontWeight = FontWeight.Bold
         )
     }
