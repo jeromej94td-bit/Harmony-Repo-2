@@ -241,8 +241,7 @@ internal fun RankingSlotBoard(
                         onPick(RankingAnswerCodec.encode(order))
                     }
                 },
-                testTag = "ranking_submit",
-                compact = compactHeight
+                testTag = "ranking_submit"
             )
         }
     }
