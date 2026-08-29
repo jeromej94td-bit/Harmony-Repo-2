@@ -75,8 +75,8 @@ object Harmony360Stage052CrossSectionAudit {
         val target = stagePacks(packs)
         val violations = mutableListOf<String>()
 
-        target.forEach { pack ->
-            pack.questions.forEachIndexed { index, question ->
+        for (pack in target) {
+            for ((index, question) in pack.questions.withIndex()) {
                 val location = "${pack.id}#${index + 1}"
                 val normalized = normalizedOptions(question.options)
 
@@ -99,16 +99,13 @@ object Harmony360Stage052CrossSectionAudit {
             }
         }
 
-        val fourOptionUsage = buildMap<List<String>, MutableSet<String>> {
-            target.forEach { pack ->
-                pack.questions.forEach { question ->
-                    if (question.options.size != 4) return@forEach
-                    val normalized = normalizedOptions(question.options)
-                    if (normalized in intentionalMechanicSets || normalized in bannedGenericQuartets) {
-                        return@forEach
-                    }
-                    getOrPut(normalized) { linkedSetOf() }.add(pack.id)
-                }
+        val fourOptionUsage = linkedMapOf<List<String>, MutableSet<String>>()
+        for (pack in target) {
+            for (question in pack.questions) {
+                if (question.options.size != 4) continue
+                val normalized = normalizedOptions(question.options)
+                if (normalized in intentionalMechanicSets || normalized in bannedGenericQuartets) continue
+                fourOptionUsage.getOrPut(normalized) { linkedSetOf() }.add(pack.id)
             }
         }
 
