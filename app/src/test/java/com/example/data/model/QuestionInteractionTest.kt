@@ -27,6 +27,16 @@ class QuestionInteractionTest {
         questions = listOf(Question("Testfrage", listOf("A", "B", "C", "D")))
     )
 
+    private fun normalPack(question: Question): QuestionPack = QuestionPack(
+        id = "normal_response_pack",
+        title = "Normal",
+        tags = listOf("unterhaltung"),
+        cat = "tief",
+        topic = "kennen",
+        type = "quiz",
+        questions = listOf(question)
+    )
+
     @Test
     fun `explicit person assignment overrides ranking pack default`() {
         val pack = QuestionPack(
@@ -98,6 +108,48 @@ class QuestionInteractionTest {
 
         assertEquals(QuestionInteractionKind.STANDARD, QuestionInteractionPolicy.resolve(pack, 0))
         assertNull(FullscreenGameMechanicPolicy.resolve(pack, 0))
+    }
+
+    @Test
+    fun `ordinary choice is fixed by default`() {
+        val question = Question("Was magst du?", listOf("A", "B"))
+        val spec = QuestionInteractionPolicy.resolveSpec(normalPack(question), 0, question)
+
+        assertEquals(QuestionResponseKind.FIXED_CHOICE, spec.responseKind)
+        assertEquals(false, spec.allowCustomText)
+    }
+
+    @Test
+    fun `explicit optional text stays available`() {
+        val question = Question(
+            "Was fehlt dir?",
+            listOf("Zeit", "Ruhe"),
+            responseKind = QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT
+        )
+        val spec = QuestionInteractionPolicy.resolveSpec(normalPack(question), 0, question)
+
+        assertEquals(QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT, spec.responseKind)
+        assertEquals(true, spec.allowCustomText)
+    }
+
+    @Test
+    fun `question without options is open text by default`() {
+        val question = Question("Was möchtest du mir sagen?")
+        val spec = QuestionInteractionPolicy.resolveSpec(normalPack(question), 0, question)
+
+        assertEquals(QuestionResponseKind.OPEN_TEXT, spec.responseKind)
+        assertEquals(true, spec.allowCustomText)
+    }
+
+    @Test
+    fun `never have I ever allows skip without custom text`() {
+        val question = Question("Ich habe noch nie getanzt.", listOf("Habe ich", "Habe ich noch nie"))
+        val pack = normalPack(question).copy(cat = "nie")
+        val spec = QuestionInteractionPolicy.resolveSpec(pack, 0, question)
+
+        assertEquals(QuestionResponseKind.FIXED_CHOICE, spec.responseKind)
+        assertEquals(true, spec.allowSkip)
+        assertEquals(false, spec.allowCustomText)
     }
 
     @Test
