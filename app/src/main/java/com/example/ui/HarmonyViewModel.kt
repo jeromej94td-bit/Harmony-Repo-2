@@ -401,7 +401,9 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
     // --- QUIZ RUNNER ---
 
     fun startPack(packId: String) {
-        val pack = HarmonyPacksData.PACKS.find { it.id == packId } ?: return
+        val pack = HarmonyPacksData.PACKS.find { it.id == packId }
+            ?.let { com.example.data.model.LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(it) }
+            ?: return
         val currentAnswers = uiState.value.answers.filter { it.packId == packId }
             .associate { it.questionIndex to it.answerText }
         _activeRun.value = ActivePackRun(
