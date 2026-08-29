@@ -47,6 +47,9 @@ enum class PersonSide(val token: String) {
 object QuestionInteractionPolicy {
     private const val PERSON_ASSIGNMENT_PREFIX = "interaction_person_assignment_"
     private const val RANK_ORDER_PREFIX = "interaction_rank_order_"
+    private const val ROLE_ASSIGNMENT_PACK = "h500_414_rollenverteilung_ranking"
+    private const val ROLE_ASSIGNMENT_QUESTION =
+        "Wer übernimmt welche Rolle bei gemeinsamen Plänen? Rank: Visionär/Ideen, Detailplaner, Ausführer, Qualitätsprüfer"
 
     fun resolve(pack: QuestionPack, questionIndex: Int): QuestionInteractionKind {
         if (pack.tags.any { it == "$PERSON_ASSIGNMENT_PREFIX$questionIndex" }) {
@@ -56,7 +59,8 @@ object QuestionInteractionPolicy {
             return QuestionInteractionKind.RANK_ORDER
         }
 
-        if (pack.id == "h500_414_rollenverteilung_ranking" && questionIndex == 1) {
+        val rawQuestion = pack.questions.getOrNull(questionIndex)?.q?.trim()
+        if (pack.id == ROLE_ASSIGNMENT_PACK && rawQuestion == ROLE_ASSIGNMENT_QUESTION) {
             return QuestionInteractionKind.PERSON_ASSIGNMENT
         }
 
