@@ -65,6 +65,7 @@ internal fun WhoWouldBoard(
     } ?: items.getOrNull(3)
     val configuration = context.resources.configuration
     val layoutMetrics = WhoWouldLayoutPolicy.metrics(
+        screenWidthDp = configuration.screenWidthDp,
         screenHeightDp = configuration.screenHeightDp,
         fontScale = configuration.fontScale
     )

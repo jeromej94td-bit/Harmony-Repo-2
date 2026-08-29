@@ -13,14 +13,15 @@ internal data class WhoWouldLayoutMetrics(
 }
 
 /**
- * Protects the Paarlabor person cards from clipping when the fullscreen stage becomes short or
- * Android font scaling grows. Normal phones retain the current 122dp portrait proportions.
+ * Protects the Paarlabor person cards from clipping when the fullscreen stage becomes short,
+ * narrow or Android font scaling grows. Normal phones retain the current 122dp portrait
+ * proportions.
  */
 internal object WhoWouldLayoutPolicy {
-    fun metrics(screenHeightDp: Int, fontScale: Float): WhoWouldLayoutMetrics {
+    fun metrics(screenWidthDp: Int, screenHeightDp: Int, fontScale: Float): WhoWouldLayoutMetrics {
         val safeFontScale = fontScale.coerceAtLeast(1f)
-        val veryCompact = screenHeightDp < 600 || safeFontScale >= 1.30f
-        val compact = screenHeightDp < 700 || safeFontScale >= 1.15f
+        val veryCompact = screenHeightDp < 600 || screenWidthDp < 360 || safeFontScale >= 1.30f
+        val compact = screenHeightDp < 700 || screenWidthDp < 400 || safeFontScale >= 1.15f
 
         return when {
             veryCompact -> WhoWouldLayoutMetrics(
