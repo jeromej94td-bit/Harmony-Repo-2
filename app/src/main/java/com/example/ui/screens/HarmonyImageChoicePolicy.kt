@@ -45,9 +45,7 @@ private const val PROPOSAL_LOCATION_PROMPT = "Welche Umgebung w√ºrdest du dir f√
 internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
-    val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
-        ?: GeneratedContentRegistry.PACKS.firstOrNull { it.id == packId }
-        ?: HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
+    val pack = HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
 
     if (pack != null) return harmonyImageChoiceKind(pack, questionIndex)
 

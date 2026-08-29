@@ -1028,7 +1028,7 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
                 text = "Hallo! Ich bin euer Harmony Brain 🧠. Ich plane mit euch die schönsten Dates, finde leckere Restaurants und analysiere eure gemeinsamen Interessen mit Bildvorschlägen und Google Maps Verknüpfung.\n\nIhr könnt mir auch gerne eine **Sprachnachricht 🎙️** schicken!",
                 sender = "brain"
             )
-        }
+        )
     }
 
     fun answerBrainQuestion(questionId: String, answerText: String) {

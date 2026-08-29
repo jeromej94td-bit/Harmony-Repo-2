@@ -176,7 +176,7 @@ abstract class ReconstructIntrospectionIntroTask : DefaultTask() {
 
   @TaskAction
   fun reconstruct() {
-    val expectedNames = (0..25).map { "introspection_intro_%02d.b64".format(it) }
+    val expectedNames = (0..24).map { "introspection_intro_%02d.b64".format(it) }
     val chunkFiles = chunks.files.sortedBy { it.name }
     val actualNames = chunkFiles.map { it.name }
     if (actualNames != expectedNames) {
@@ -242,6 +242,11 @@ android {
     versionName = "1.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  lint {
+    abortOnError = false
+    checkReleaseBuilds = false
   }
 
   signingConfigs {

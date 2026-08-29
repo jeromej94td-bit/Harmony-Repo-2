@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -182,7 +181,7 @@ private fun ExperienceImageDuelBoardContent(
             modifier = Modifier.fillMaxWidth().height(154.dp),
             contentAlignment = Alignment.Center
         ) {
-            AnimatedVisibility(
+            this@Column.AnimatedVisibility(
                 visible = phase != ExperienceImageDuelPhase.IntroCards && phase != ExperienceImageDuelPhase.TransitionOut,
                 enter = fadeIn(tween(durationMillis = 320)) + slideInVertically(
                     animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),

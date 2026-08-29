@@ -40,6 +40,7 @@ object HarmonyGameNotifier {
         }
     }
 
+    @android.annotation.SuppressLint("MissingPermission")
     fun notifyNewGeneratedGame(
         context: Context,
         gameId: String,
@@ -48,6 +49,16 @@ object HarmonyGameNotifier {
     ) {
         try {
             createNotificationChannel(context)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (androidx.core.content.ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                ) {
+                    return
+                }
+            }
 
             if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
                 return
