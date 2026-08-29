@@ -61,9 +61,9 @@ The ten intended refreshed ring assets are present on `main`, the merged diff co
 - [ ] 02.1 Experience data model and deterministic proposal flow definition — merged implementation awaiting build verification
 - [ ] 02.2 Das-oder-Das proposal mood/details rounds — merged implementation awaiting verification
 - [ ] 02.3 Proposal-location image duels
-- [ ] 02.4 Refreshed ring-image duels integrated into the experience
-- [ ] 02.5 Drag-and-drop ranking for proposal priorities
-- [ ] 02.6 Partner prediction A → B → Reveal
+- [ ] 02.4 Refreshed ring-image duels integrated into the experience — implementation prepared in PR #46
+- [ ] 02.5 Drag-and-drop ranking for proposal priorities — implementation prepared in PR #49
+- [ ] 02.6 Partner prediction A → B → Reveal — implementation prepared in PR #50
 - [ ] 02.7 Concrete proposal scenario rounds
 - [ ] 02.8 Open personal prompts
 - [ ] 02.9 Final qualitative `Euer perfekter Antrag` reveal

@@ -13,6 +13,53 @@ This file is the append-only project black box for **360 Rework**.
 
 ---
 
+## 2026-08-29 — 24.6.4 parallel numbering correction and Stage 06 continuation record
+
+**Work package:** 24.6.4 — Project-control correction<br>
+**Status:** 🟡 PREPARED FOR MERGE<br>
+**Branch:** `360-rework/24-6-4-numbering-status-sync`
+
+### Why this correction exists
+
+Stage-02 work progressed concurrently while parallel Stage-06 cleanup was being prepared. PR #37 had already established logical **24.7** as the proposal merge-status sync and reserved **24.8** for Stage 02.3 proposal-location image duels. Two parallel cleanup PRs were created before that concurrent numbering change was noticed.
+
+No application code is being rewritten for this correction. The authoritative logical IDs are corrected in PR metadata and in the 360 Rework tracker while historical commit subjects remain unchanged.
+
+### Authoritative package mapping
+
+- **24.6.2 — Stage 06.4 repetition audit helper**
+  - GitHub PR: #39
+  - Merge commit: `d4dc969bf5a47d4be5b5470157fe3750cace21d1`
+  - Historical merge subject contains `[24.7]`; this is a superseded label only.
+  - Added `scripts/audit_harmony360_repetition.py` plus focused unit tests.
+  - Fresh focused local Python verification: 2/2 tests passed.
+- **24.6.3 — Stage 06.4 targeted scenario de-template cleanup**
+  - GitHub PR: #40
+  - Merge commit: `ee2ca1b8315be2a8a9db45e78328d49ba3706e39`
+  - Historical merge subject contains `[24.8]`; this is a superseded label only.
+  - Replaced only the repeated generic opener in the Morgenroutine, Sportliche Ziele and Bücher scenario packs with concrete topic-specific prompts/options.
+  - Fresh focused local Kotlin verification passed.
+
+### Number ownership after correction
+
+- **24.7 remains Stage-02 proposal merge-status sync** via PR #37.
+- **24.8 remains the active NEXT Stage-02 package** for proposal-location image duels.
+- Future parallel Stage-06 slices should use a non-conflicting `24.6.x` ID unless the tracker explicitly assigns another range.
+
+### Stage accounting
+
+Stage 06 remains `0/5 complete (0%)`. Packages 24.4, 24.5, 24.6, 24.6.2 and 24.6.3 repair confirmed defects and start the repeated-content audit, but none of 06.1–06.4 is marked complete until the wider defect class is audited and remaining exceptions are resolved or documented.
+
+### Verification caveat
+
+The repo-wide GitHub Actions for the affected code PRs again failed before executable workflow step 1 (`steps: null`). Those failures are not treated as green results or as proven application regressions. The focused local Python/Kotlin results above are separate evidence.
+
+### Next action
+
+Preserve the Stage-02 handover exactly as already established: **24.8 / Stage 02.3 proposal-location image duels**. Parallel cleanup may continue only under a non-conflicting package ID.
+
+---
+
 ## 2026-08-29 — 24.7 proposal merge-status sync
 
 **Work package:** 24.7 — Proposal merge-status sync<br>
@@ -313,3 +360,76 @@ Stage 06 remains `0/5 complete (0%)`. Packages 24.4, 24.5 and 24.6 fix confirmed
 ### Next action
 
 Continue the active Stage 02 work package 24.3 independently. Parallel Stage 06 work may continue with a new small package only when its scope does not collide with Stage 02 files.
+
+
+## 2026-08-29 — 24.9 Stage 02.4 prepared
+
+**Work package:** 24.9 — Refreshed ring-image duels  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-9-ring-image-duels-current`  
+**GitHub PR:** #46 — `[24.9] 360 Rework — Refreshed ring image duels`  
+**Implementation commit:** pending final PR commit
+
+### Scope
+
+- Added `ProposalRingImageDuels.kt` with five deterministic image duels for the existing `ring_style` step.
+- Bound all ten refreshed Stage-01 drawable keys exactly once.
+- Kept the package independent from the concurrent 24.8 proposal-location work.
+
+### Verification
+
+- Static source review and asset-key coverage completed.
+- No Gradle build or long-running GitHub test was started; the repository has no Gradle wrapper/system Gradle.
+- The previous PR #45 was closed because its documentation diff conflicted with the newer mainline control-state sync; no application code was lost.
+
+### Next action
+
+Merge this narrow PR, then continue with 24.10 / Stage 02.5 ranking after 24.8 coordination.
+
+
+## 2026-08-29 — 24.10 Stage 02.5 prepared
+
+**Work package:** 24.10 — Proposal priority ranking content  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-10-proposal-priorities`  
+**GitHub PR:** #49 — `[24.10] 360 Rework — Proposal priority ranking content`  
+**Implementation commit:** `4e7f8d1d89f162fbc4e657de9409546650cbf90b`
+
+### Scope
+
+- Added five deterministic proposal-priority items for the existing `proposal_priorities` ranking step.
+- Reuses the existing `RankingSlotBoard`, which already supports empty slots, drag-and-drop, restoring answers and a clear save/continue action.
+- No new UI design or image generation is needed for this narrow package.
+
+### Verification
+
+- Static source review completed.
+- No Gradle build or long-running GitHub test was started; the repository has no Gradle wrapper/system Gradle.
+
+### Next action
+
+Merge after the PR is confirmed mergeable, then continue with 24.11 / Stage 02.6 partner prediction.
+
+
+## 2026-08-29 — 24.11 Stage 02.6 prepared
+
+**Work package:** 24.11 — Partner prediction rounds  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-11-partner-prediction`  
+**GitHub PR:** #50 — `[24.11] 360 Rework — Partner prediction rounds`  
+**Implementation commit:** `0db95cd2cf602bbcd8094588d610c3657eeb44a9`
+
+### Scope
+
+- Added three deterministic A → B → Reveal prediction rounds.
+- Bound them to the existing `partner_prediction` flow step.
+- Reused the existing prediction UI; no new design or generated image is needed.
+
+### Verification
+
+- Static source review completed.
+- No Gradle build or long-running GitHub test was started.
+
+### Next action
+
+Merge after GitHub confirms the PR is mergeable, then continue with 24.12 / Stage 02.7 proposal scenarios.
