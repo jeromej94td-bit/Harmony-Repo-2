@@ -97,7 +97,8 @@ PR #24 remains an unmerged umbrella/reference surface and can later be closed wi
 ### Package 24.1
 
 **Name:** Control Center Foundation  
-**Branch:** `360-rework/24-1-control-center-foundation`
+**Branch:** `360-rework/24-1-control-center-foundation`  
+**GitHub PR:** #25 — `[24.1] 360 Rework — Control Center Foundation`
 
 Scope is intentionally documentation-only:
 
@@ -107,6 +108,13 @@ Scope is intentionally documentation-only:
 - `docs/360-rework/360_REWORK_WORKLOG.md`
 
 No app code, questions, images, mechanics or navigation changes belong in 24.1.
+
+### Verification before merge
+
+- Branch is 0 commits behind `main`.
+- Diff contains exactly 4 documentation files.
+- GitHub marks PR #25 mergeable.
+- Repo-wide Actions again fail before the first executable workflow step (`steps: null`), so this is recorded as an infrastructure verification caveat rather than an application-code test failure.
 
 ### Next package after 24.1 reaches main
 
