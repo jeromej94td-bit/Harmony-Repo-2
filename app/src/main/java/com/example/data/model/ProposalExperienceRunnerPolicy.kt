@@ -22,7 +22,7 @@ object ProposalExperienceRunnerPolicy {
     val steps: List<ProposalFlowStep> = ProposalExperienceDefinitions.perfectProposal.steps
 
     fun itemCount(stepId: String): Int = when (stepId) {
-        "proposal_mood", "proposal_details" -> ProposalEitherOrRounds.roundsFor(stepId).size
+        "proposal_mood", "proposal_details" -> ProposalEitherOrAdapter.contentFor(stepId)?.itemCount ?: 0
         "proposal_location" -> ProposalLocationDuels.rounds.size
         ProposalRingImageDuels.STEP_ID -> ProposalRingImageDuels.rounds.size
         ProposalPriorityRanking.STEP_ID -> 1
