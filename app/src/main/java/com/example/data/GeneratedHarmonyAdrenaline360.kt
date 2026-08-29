@@ -37,6 +37,8 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS)
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
-        raw.map(Harmony360ContentRework::apply)
+        raw
+            .map(GeneratedHarmony360TextCleanup::apply)
+            .map(Harmony360ContentRework::apply)
     }
 }
