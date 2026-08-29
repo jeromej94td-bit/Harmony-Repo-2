@@ -1,6 +1,7 @@
 package com.example.data
 
 import com.example.data.model.InteractionPromptPolicy
+import com.example.data.model.LoveBalanceQuestionPolicy
 
 /**
  * Vereinigt den bisherigen generierten Harmony-Content mit zusätzlichen
@@ -51,7 +52,30 @@ object GeneratedContentRegistry {
         return result
     }
 
-    val PACKS: List<GenPack> by lazy {
+    /**
+     * Old Dev-Studio exports can still contain the pre-image-question
+     * `liebegleichgewicht` pack with only ten questions. CUSTOM intentionally wins over
+     * GENERATED later in DeveloperDataManager, so repair that loaded custom copy before
+     * the merge instead of allowing it to hide the canonical 11-question pack again.
+     */
+    private fun normalizeLoadedCustomPacks() {
+        val customPacks = DeveloperDataManager._customPacks
+        for (index in customPacks.indices) {
+            val pack = customPacks[index]
+            if (
+                pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
+                pack.type == "quiz" &&
+                (
+                    pack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
+                        pack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
+                    )
+            ) {
+                customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(pack)
+            }
+        }
+    }
+
+    private val cachedPacks: List<GenPack> by lazy {
         val byId = LinkedHashMap<String, GenPack>()
         GeneratedHarmonyContent.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyNewPicGame.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
@@ -62,6 +86,12 @@ object GeneratedContentRegistry {
         GeneratedHarmonySexIntimacyRework.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         byId.values.toList()
     }
+
+    val PACKS: List<GenPack>
+        get() {
+            normalizeLoadedCustomPacks()
+            return cachedPacks
+        }
 
     val LINK_PACKS: List<GenLinkPack> by lazy {
         (GeneratedHarmonyContent.LINK_PACKS + GeneratedHarmonyNewPicGame.LINK_PACKS)
