@@ -360,3 +360,33 @@ Stage 06 remains `0/5 complete (0%)`. Packages 24.4, 24.5 and 24.6 fix confirmed
 ### Next action
 
 Continue the active Stage 02 work package 24.3 independently. Parallel Stage 06 work may continue with a new small package only when its scope does not collide with Stage 02 files.
+
+
+## 2026-08-29 — 24.9 Stage 02.4 prepared
+
+**Work package:** 24.9 — Refreshed ring-image duels<br>
+**Status:** 🧪 VERIFY / READY FOR REVIEW<br>
+**Branch:** `360-rework/24-9-ring-image-duels`<br>
+**GitHub PR:** #45 — `[24.9] 360 Rework — Refreshed ring image duels`<br>
+**Implementation commit:** `bcdff8dd21798341f9a2a1d4e9768813f7f4171d`
+
+### Scope
+
+- Added `ProposalRingImageDuels.kt` with five deterministic image duels for the existing `ring_style` step.
+- Bound all ten refreshed Stage-01 drawable keys exactly once.
+- Kept the package UI-independent; the later runner can render the stable asset keys with the existing image-choice UI.
+
+### Explicitly excluded
+
+- No navigation, new entry point, ranking, prediction, scenarios, reveal, legacy deletion or broad UI rewrite.
+- No new long-running GitHub test workflow.
+
+### Verification
+
+- Static source review completed.
+- Asset-key coverage checked against the ten refreshed ring drawable names on `main`.
+- No Gradle build claimed because the repository has no Gradle wrapper/system Gradle, as already documented.
+
+### Coordination
+
+The concurrent agent owns 24.8 / Stage 02.3. This PR is the next narrow package and should be merged after the 24.8 branch is coordinated, without bundling the two packages.
