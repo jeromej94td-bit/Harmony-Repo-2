@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -86,6 +87,11 @@ internal fun ProposalExperienceScreen(
         ProposalExperienceRunnerPolicy.next(position)?.let { position = it }
     }
 
+    val previousPosition = ProposalExperienceRunnerPolicy.previous(position)
+    BackHandler(enabled = started && previousPosition != null) {
+        previousPosition?.let { position = it }
+    }
+
     val step = ProposalExperienceRunnerPolicy.steps.getOrNull(position.stepIndex)
         ?: ProposalExperienceDefinitions.perfectProposal.steps.last()
     val progress = ProposalExperienceRunnerPolicy.progress(position)
@@ -136,8 +142,18 @@ internal fun ProposalExperienceScreen(
                         fontSize = 13.sp
                     )
                 }
-                TextButton(onClick = onClose) {
-                    Text("Schließen", color = HarmonyText)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (previousPosition != null) {
+                        TextButton(
+                            onClick = { position = previousPosition },
+                            modifier = Modifier.testTag("proposal_previous_button")
+                        ) {
+                            Text("Zurück", color = HarmonyPinkSoft)
+                        }
+                    }
+                    TextButton(onClick = onClose) {
+                        Text("Schließen", color = HarmonyText)
+                    }
                 }
             }
             Spacer(Modifier.height(8.dp))
