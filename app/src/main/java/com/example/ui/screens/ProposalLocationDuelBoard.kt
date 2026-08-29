@@ -35,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.ProposalImageDuelOption
 import com.example.data.model.ProposalImageDuelRound
+import com.example.data.model.ProposalLocationDuels
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonySurface2
@@ -76,12 +78,7 @@ private enum class ProposalDuelPhase {
     TransitionOut
 }
 
-/**
- * Aurora-Glass presentation for one Stage 02.3 proposal-location duel.
- *
- * This keeps the original non-orchestrated API available for previews and focused callers.
- * Stage 02.11 can use [AnimatedProposalLocationDuelBoard] when it wires the proposal runner.
- */
+/** Aurora-Glass presentation for one Stage 02.3 proposal-location duel. */
 @Composable
 internal fun ProposalLocationDuelBoard(
     round: ProposalImageDuelRound,
@@ -101,11 +98,47 @@ internal fun ProposalLocationDuelBoard(
 }
 
 /**
- * Staged Harmony duel choreography:
- * 1. the two visual cards arrive with a staggered 3D turn,
- * 2. the question is revealed after the images have had a short suspense beat,
- * 3. one choice locks with Harmony feedback,
- * 4. the question leaves while both cards flip away together.
+ * Plays the complete local Stage 02.3 location sequence without registering navigation.
+ * Stage 02.11 can embed this composable into the end-to-end proposal runner later.
+ */
+@Composable
+internal fun ProposalLocationDuelSequence(
+    rounds: List<ProposalImageDuelRound> = ProposalLocationDuels.rounds,
+    initialSelections: Map<String, String> = emptyMap(),
+    onRoundPicked: (roundId: String, option: ProposalImageDuelOption) -> Unit = { _, _ -> },
+    onComplete: (Map<String, String>) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    require(rounds.isNotEmpty()) { "Proposal location duel sequence needs at least one round." }
+
+    val sequenceKey = rounds.joinToString(separator = "|") { it.id }
+    var currentRoundIndex by remember(sequenceKey) { mutableStateOf(0) }
+    var selections by remember(sequenceKey) {
+        mutableStateOf(initialSelections.filterKeys { roundId -> rounds.any { it.id == roundId } })
+    }
+    val currentRound = rounds[currentRoundIndex]
+
+    AnimatedProposalLocationDuelBoard(
+        round = currentRound,
+        selectedOptionId = selections[currentRound.id],
+        onPick = { option ->
+            selections = selections + (currentRound.id to option.id)
+            onRoundPicked(currentRound.id, option)
+        },
+        onTransitionFinished = {
+            if (currentRoundIndex == rounds.lastIndex) {
+                onComplete(selections)
+            } else {
+                currentRoundIndex += 1
+            }
+        },
+        modifier = modifier.testTag("proposal_location_round_${currentRound.id}")
+    )
+}
+
+/**
+ * Staged Harmony choreography: cards first, question second, locked selection, then a
+ * coordinated question fade and 3D card flip before the next round.
  */
 @Composable
 internal fun AnimatedProposalLocationDuelBoard(
@@ -117,6 +150,8 @@ internal fun AnimatedProposalLocationDuelBoard(
 ) {
     var phase by remember(round.id) { mutableStateOf(ProposalDuelPhase.IntroCards) }
     var lockedSelectionId by remember(round.id) { mutableStateOf<String?>(null) }
+    val latestOnPick by rememberUpdatedState(onPick)
+    val latestOnTransitionFinished by rememberUpdatedState(onTransitionFinished)
 
     LaunchedEffect(round.id) {
         lockedSelectionId = null
@@ -132,7 +167,7 @@ internal fun AnimatedProposalLocationDuelBoard(
         delay(420)
         phase = ProposalDuelPhase.TransitionOut
         delay(760)
-        onTransitionFinished()
+        latestOnTransitionFinished()
     }
 
     val effectiveSelectionId = lockedSelectionId ?: selectedOptionId
@@ -144,7 +179,7 @@ internal fun AnimatedProposalLocationDuelBoard(
             if (phase == ProposalDuelPhase.AwaitingSelection && lockedSelectionId == null) {
                 lockedSelectionId = option.id
                 phase = ProposalDuelPhase.SelectionLocked
-                onPick(option)
+                latestOnPick(option)
             }
         },
         phase = phase,
@@ -165,70 +200,68 @@ private fun ProposalLocationDuelBoardContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag("proposal_location_duel"),
+        modifier = modifier.fillMaxWidth().testTag("proposal_location_duel"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AnimatedVisibility(
-            visible = phase != ProposalDuelPhase.IntroCards && phase != ProposalDuelPhase.TransitionOut,
-            enter = fadeIn(tween(durationMillis = 320)) +
-                slideInVertically(
+        // Keep a fixed question slot so the cards do not jump when the delayed prompt appears.
+        Box(
+            modifier = Modifier.fillMaxWidth().height(154.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            AnimatedVisibility(
+                visible = phase != ProposalDuelPhase.IntroCards && phase != ProposalDuelPhase.TransitionOut,
+                enter = fadeIn(tween(durationMillis = 320)) + slideInVertically(
                     animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
                     initialOffsetY = { it / 4 }
                 ),
-            exit = fadeOut(tween(durationMillis = 240)) +
-                slideOutVertically(
+                exit = fadeOut(tween(durationMillis = 240)) + slideOutVertically(
                     animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
                     targetOffsetY = { -it / 5 }
                 )
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                HarmonyPurple.copy(alpha = 0.52f),
-                                HarmonySurface2.copy(alpha = 0.97f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    HarmonyPurple.copy(alpha = 0.52f),
+                                    HarmonySurface2.copy(alpha = 0.97f)
+                                )
                             )
                         )
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = Color.White.copy(alpha = 0.18f),
-                        shape = RoundedCornerShape(30.dp)
-                    )
-                    .padding(horizontal = 20.dp, vertical = 18.dp)
-                    .testTag("proposal_location_question")
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "✦  Euer Ort",
-                        color = HarmonyPink,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Spacer(Modifier.height(7.dp))
-                    Text(
-                        text = round.prompt,
-                        color = Color.White,
-                        fontSize = 23.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = "Wählt den Ort, der sich für euren Moment am meisten nach euch anfühlt.",
-                        color = Color.White.copy(alpha = 0.72f),
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(30.dp))
+                        .padding(horizontal = 20.dp, vertical = 18.dp)
+                        .testTag("proposal_location_question")
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "✦  Euer Ort",
+                            color = HarmonyPink,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Spacer(Modifier.height(7.dp))
+                        Text(
+                            text = round.prompt,
+                            color = Color.White,
+                            fontSize = 23.sp,
+                            lineHeight = 28.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Wählt den Ort, der sich für euren Moment am meisten nach euch anfühlt.",
+                            color = Color.White.copy(alpha = 0.72f),
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
         }
@@ -236,9 +269,7 @@ private fun ProposalLocationDuelBoardContent(
         Spacer(Modifier.height(18.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(320.dp),
+            modifier = Modifier.fillMaxWidth().height(320.dp).testTag("proposal_location_cards"),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ProposalLocationOptionCard(
@@ -284,7 +315,6 @@ private fun ProposalLocationOptionCard(
 ) {
     val imageResId = proposalLocationImages.getValue(option.id)
     val shape = RoundedCornerShape(24.dp)
-
     var entered by remember(option.id, animateEntrance) { mutableStateOf(!animateEntrance) }
 
     LaunchedEffect(option.id, animateEntrance) {
@@ -299,7 +329,6 @@ private fun ProposalLocationOptionCard(
 
     val isExiting = phase == ProposalDuelPhase.TransitionOut
     val side = if (cardIndex == 0) -1f else 1f
-
     val horizontalOffset by animateDpAsState(
         targetValue = when {
             isExiting -> (16f * side).dp
@@ -355,42 +384,25 @@ private fun ProposalLocationOptionCard(
                 alpha = cardAlpha
                 cameraDistance = 14f * density
             }
-            .shadow(
-                elevation = if (selected) 18.dp else 7.dp,
-                shape = shape,
-                clip = false
-            )
+            .shadow(if (selected) 18.dp else 7.dp, shape, clip = false)
             .clip(shape)
             .background(HarmonySurface2)
-            .border(
-                width = if (selected) 3.dp else 1.dp,
-                color = borderColor,
-                shape = shape
-            )
+            .border(if (selected) 3.dp else 1.dp, borderColor, shape)
             .clickable(enabled = enabled, onClick = onClick)
             .testTag("proposal_location_${option.id}")
     ) {
-        ProposalLocationImage(
-            imageResId = imageResId,
-            contentDescription = option.label
-        )
+        ProposalLocationImage(imageResId = imageResId, contentDescription = option.label)
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Black.copy(alpha = 0.04f),
-                        0.52f to Color.Transparent,
-                        1f to Color.Black.copy(alpha = 0.82f)
-                    )
+            modifier = Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    0f to Color.Black.copy(alpha = 0.04f),
+                    0.52f to Color.Transparent,
+                    1f to Color.Black.copy(alpha = 0.82f)
                 )
+            )
         )
         if (selected) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(HarmonyPink.copy(alpha = 0.08f))
-            )
+            Box(Modifier.fillMaxSize().background(HarmonyPink.copy(alpha = 0.08f)))
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -411,9 +423,7 @@ private fun ProposalLocationOptionCard(
             lineHeight = 19.sp,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 14.dp, end = 14.dp, bottom = 62.dp)
+            modifier = Modifier.align(Alignment.BottomStart).padding(start = 14.dp, end = 14.dp, bottom = 62.dp)
         )
         Box(
             modifier = Modifier
