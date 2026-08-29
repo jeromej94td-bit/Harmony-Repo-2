@@ -579,13 +579,7 @@ fun HarmonyApp(
                         },
                         onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
                         onNextStep = { viewModel.nextStep() },
-                        onAskExit = {
-                            if (activeRun.isFinished) {
-                                viewModel.askExitRun()
-                            } else {
-                                viewModel.previousStep()
-                            }
-                        },
+                        onAskExit = { viewModel.previousStep() },
                         onCloseExitConfirm = { viewModel.closeExitConfirm() },
                         onCloseRunner = { viewModel.closeRunner() },
                         onOpenOwnAnswerDialog = { idx, mode ->
