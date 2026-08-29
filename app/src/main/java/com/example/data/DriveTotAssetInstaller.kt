@@ -155,6 +155,24 @@ object DriveTotAssetInstaller {
         "Weißgold" to "ring_drive_11_b.webp"
     )
 
+    /**
+     * These options now have real compiled drawable resources. The legacy extracted
+     * ring files must not be registered for them, otherwise they mask the refreshed
+     * WebP resource from TotImageProvider after every app start.
+     */
+    private val refreshedCompiledRingOptions = setOf(
+        "Klassisch Solitär",
+        "Vintage verspielt",
+        "Schmal & zart",
+        "Markant & breit",
+        "Vintage Art déco",
+        "Modern geometrisch",
+        "Moderner Solitär",
+        "Diamanten im Band",
+        "Ohne Stein",
+        "Statement-Ring"
+    )
+
     private fun applyEngagementRingPack() {
         val current = HarmonyPacksData.PACKS
         val ringPack = current.firstOrNull { it.id == "ringe" } ?: return
@@ -217,18 +235,45 @@ object DriveTotAssetInstaller {
             installMarker.writeText("1")
         }
 
+        // Developer/exported images are installed before this legacy bundle. Do not
+        // overwrite them afterwards just because an option has the same display name.
+        val generatedOptionKeys = DeveloperDataManager.getGeneratedImages().keys
         val result = LinkedHashMap<String, String>()
+
         driveOptionToFile.forEach { (option, fileName) ->
             val file = File(outputDir, fileName)
-            if (file.isFile && file.length() > 0L) result[option] = file.absolutePath
+            if (
+                file.isFile &&
+                file.length() > 0L &&
+                TotImageSourcePolicy.shouldUseBundledInstallerImage(option, generatedOptionKeys)
+            ) {
+                result[option] = file.absolutePath
+            }
         }
         brandOptionToFile.forEach { (option, fileName) ->
             val file = File(outputDir, fileName)
-            if (file.isFile && file.length() > 0L && option !in result) result[option] = file.absolutePath
+            if (
+                file.isFile &&
+                file.length() > 0L &&
+                option !in result &&
+                TotImageSourcePolicy.shouldUseBundledInstallerImage(option, generatedOptionKeys)
+            ) {
+                result[option] = file.absolutePath
+            }
         }
         ringOptionToFile.forEach { (option, fileName) ->
             val file = File(outputDir, fileName)
-            if (file.isFile && file.length() > 0L) result[option] = file.absolutePath
+            if (
+                file.isFile &&
+                file.length() > 0L &&
+                TotImageSourcePolicy.shouldUseBundledInstallerImage(
+                    option = option,
+                    generatedOptionKeys = generatedOptionKeys,
+                    preferCompiledResource = option in refreshedCompiledRingOptions
+                )
+            ) {
+                result[option] = file.absolutePath
+            }
         }
         return result
     }
