@@ -2,21 +2,25 @@ package com.example.data.repository
 
 import android.content.Context
 import android.net.Uri
+import com.example.data.brain.db.BrainAnswerHistoryEntity
+import com.example.data.brain.repository.BrainRepository
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.AnswerEntity
+import com.example.data.model.BrainInterestEntity
+import com.example.data.model.BrainQuestionEntity
+import com.example.data.model.BrainSuggestionEntity
 import com.example.data.model.ChatMessageEntity
 import com.example.data.model.CoupleStatsEntity
+import com.example.data.model.EitherOrAnswerCodec
 import com.example.data.model.MomentEntity
 import com.example.data.model.ProfileEntity
 import com.example.data.model.SharedPicEntity
-import com.example.data.model.BrainInterestEntity
-import com.example.data.model.BrainSuggestionEntity
-import com.example.data.model.BrainQuestionEntity
-import com.example.data.brain.repository.BrainRepository
 import com.example.widget.PicShareWidgetProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
@@ -37,6 +41,7 @@ class HarmonyRepository(
     val brainQuestionsFlow: Flow<List<BrainQuestionEntity>> = db.brainDao().getAllQuestionsFlow()
 
     val brainRepository = BrainRepository(db.brainRoomDao(), context)
+    private val answerSaveMutex = Mutex()
 
     suspend fun ensureInitialData() {
         // Initialize profile if not present
@@ -112,14 +117,48 @@ class HarmonyRepository(
     }
 
     suspend fun saveAnswer(packId: String, questionIndex: Int, answerText: String) {
-        db.answerDao().insertAnswer(
-            AnswerEntity(
-                packId = packId,
-                questionIndex = questionIndex,
-                answerText = answerText
+        answerSaveMutex.withLock {
+            val existing = db.answerDao().getAllAnswersDirect().firstOrNull {
+                it.packId == packId && it.questionIndex == questionIndex
+            }
+
+            if (existing?.answerText == answerText) {
+                val latestBrainAnswer = db.brainRoomDao()
+                    .getLatestAnswerForQuestion("$packId-$questionIndex")
+                if (brainHistoryMatches(latestBrainAnswer, answerText)) {
+                    return@withLock
+                }
+
+                // The durable answer exists but its Brain history may have been interrupted
+                // between the Room write and the append-only Brain write. Repair only the
+                // missing signal; do not replace the user's answer or create duplicates.
+                brainRepository.recordAnswer(packId, questionIndex, answerText)
+                return@withLock
+            }
+
+            db.answerDao().insertAnswer(
+                AnswerEntity(
+                    packId = packId,
+                    questionIndex = questionIndex,
+                    answerText = answerText
+                )
             )
-        )
-        brainRepository.recordAnswer(packId, questionIndex, answerText)
+            brainRepository.recordAnswer(packId, questionIndex, answerText)
+        }
+    }
+
+    private fun brainHistoryMatches(
+        history: BrainAnswerHistoryEntity?,
+        answerText: String
+    ): Boolean {
+        history ?: return false
+        val coupleChoice = EitherOrAnswerCodec.decode(answerText)
+        return if (coupleChoice != null) {
+            history.answerPersonA == coupleChoice.userChoice &&
+                history.answerPersonB == coupleChoice.partnerChoice
+        } else {
+            history.answerPersonA == answerText && history.answerPersonB == null
+        }
     }
 
     suspend fun recordBrainSkip(packId: String, questionIndex: Int) {
