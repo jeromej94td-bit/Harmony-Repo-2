@@ -412,6 +412,11 @@ internal fun ScenarioBoard(
     }
     var journeyChoices by remember { mutableStateOf(emptyList<Int>()) }
     var showJourneyResult by remember(question) { mutableStateOf(false) }
+    val configuration = context.resources.configuration
+    val resultMetrics = ScenarioResultLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     val sceneEmoji = when {
         journeyChoices.size >= 7 -> "🏝️"
@@ -457,12 +462,11 @@ internal fun ScenarioBoard(
         if (showJourneyResult) {
             Column(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(150.dp)
+                        .size(resultMetrics.trophyContainerDp.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.radialGradient(
@@ -473,45 +477,51 @@ internal fun ScenarioBoard(
                                 )
                             )
                         )
-                        .border(2.dp, Color.White.copy(alpha = 0.30f), CircleShape),
+                        .border(2.dp, Color.White.copy(alpha = 0.30f), CircleShape)
+                        .testTag("scenario_result_trophy"),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("🏆", fontSize = 72.sp)
+                    Text("🏆", fontSize = resultMetrics.trophySizeSp.sp)
                 }
+                Spacer(Modifier.height(resultMetrics.gapDp.dp))
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .weight(1f)
                         .clip(RoundedCornerShape(26.dp))
                         .background(HarmonyPurple.copy(alpha = 0.25f))
                         .border(1.dp, HarmonyPink.copy(alpha = 0.36f), RoundedCornerShape(26.dp))
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(resultMetrics.cardPaddingDp.dp)
+                        .testTag("scenario_result_card"),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = resultTitle,
                         color = Color.White,
-                        fontSize = 27.sp,
-                        lineHeight = 32.sp,
+                        fontSize = resultMetrics.titleSizeSp.sp,
+                        lineHeight = resultMetrics.titleLineHeightSp.sp,
                         fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(resultMetrics.gapDp.dp))
                     Text(
                         text = resultText,
                         color = Color.White.copy(alpha = 0.78f),
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp,
+                        fontSize = resultMetrics.bodySizeSp.sp,
+                        lineHeight = resultMetrics.bodyLineHeightSp.sp,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(resultMetrics.gapDp.dp))
                     Text(
                         text = tr("8 Entscheidungen · 1 gemeinsamer Weg", "8 decisions · 1 shared path"),
                         color = HarmonyPinkSoft,
-                        fontSize = 14.sp,
+                        fontSize = resultMetrics.metaSizeSp.sp,
                         fontWeight = FontWeight.ExtraBold,
                         textAlign = TextAlign.Center
                     )
                 }
+                Spacer(Modifier.height(resultMetrics.gapDp.dp))
                 PrimaryMechanicButton(
                     text = tr("Geschichte speichern & weiter", "Save story & continue"),
                     onClick = {
