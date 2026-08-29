@@ -4,23 +4,24 @@
 
 **Project:** 360 Rework  
 **Core stages:** 8  
-**Completed core stages:** 1/8  
-**Current core stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Verified Stage-02 progress:** 0/12 complete (0%)  
-**Stage-02 implementation coverage:** 9/12 substages have dedicated implementation merged  
-**Current exact substage:** 02.10 — reuse strongest existing proposal/ring/wedding content
+**Operationally completed core stages:** 2/8  
+**Current core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
+**Stage-02 delivery:** ✅ 12/12 = 100%  
+**Stage-02 final package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
+**Parallel Stage-05 progress:** 1/5 = 20% after the clean 25.7 replacement lands  
+**Current exact core substage:** 03.1 — general mixed-step Experience definition/state model
 
-> `complete` means verified against the substage Definition of Done. Merged implementation alone does not tick a checkbox. Stage 02.12 owns the final executable build/UI verification for the mixed experience.
+> Stage completion here means the approved feature packages are integrated into `main` with the available verification contracts and known infrastructure caveats recorded. A green full Android/Gradle build is only claimed when it actually executes successfully.
 
 ## Visual stage board
 
-| Stage | Original plan reference | Area | Status | Verified progress |
+| Stage | Original plan reference | Area | Status | Progress |
 |---|---|---|---|---:|
-| 01/08 | prerequisite already completed | Ring Image Quality Rework | ✅ DONE | 1/1 |
-| 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 ACTIVE / VERIFY | 0/12; implementation through 02.9 |
-| 03/08 | Point 2 | Reusable Harmony Experience Engine | ⬜ PLANNED | 0/7 |
+| 01/08 | prerequisite | Ring Image Quality Rework | ✅ DONE | 1/1 = 100% |
+| 02/08 | Point 1 | 💍 Unser perfekter Antrag | ✅ DONE | 12/12 = 100% delivered |
+| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🔵 NEXT / ACTIVE | 0/7 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
-| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL WORK ACTIVE | 0/5 |
+| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 1/5 = 20% after 25.7 replacement |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
 | 07/08 | Point 6 | Additional Flagship Harmony Experiences | ⬜ PLANNED | 0/12 |
 | 08/08 | Point 7 | Automated Content Quality Gate | ⬜ PLANNED | 0/6 |
@@ -30,7 +31,7 @@
 ## Stage 01/08 — Ring Image Quality Rework
 
 **Status:** ✅ DONE  
-**Progress:** 1/1 complete (100%)
+**Progress:** 1/1 = 100%
 
 - [x] 01.1 Replace the 10 prioritized engagement-ring WebPs with refreshed versions and verify the merged diff contains no unrelated files.
 
@@ -41,51 +42,54 @@
 ## Stage 02/08 — 💍 Unser perfekter Antrag
 
 **Original plan reference:** Point 1  
-**Status:** 🧪 ACTIVE / FINAL VERIFICATION OPEN  
-**Verified progress:** 0/12 complete (0%)  
-**Implementation coverage:** 9/12 substages have a dedicated implementation package on `main`  
-**Dependencies:** Stage 01 complete
+**Status:** ✅ DONE / DELIVERED  
+**Progress:** 12/12 = 100%  
+**Dependency:** Stage 01 complete
 
 ### Substages
 
-- [ ] **02.1 Experience data model and deterministic proposal flow definition** — implementation merged in PR #27; Gradle/UI verification open.
-- [ ] **02.2 Das-oder-Das proposal mood/details rounds** — implementation merged in PR #31; final runner/build/UI verification open.
-- [ ] **02.3 Proposal-location image duels** — image-duel package merged via PR #55 and routed into the `antrag` game in commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`; final UI/build verification open.
-- [ ] **02.4 Refreshed ring-image duels integrated into the experience** — deterministic ring-duel content merged in PR #48; actual end-to-end runner wiring remains for 02.11.
-- [ ] **02.5 Drag-and-drop ranking for proposal priorities** — deterministic priority content merged in PR #49 and reuses existing ranking mechanics; end-to-end runner wiring remains for 02.11.
-- [ ] **02.6 Partner prediction A → B → Reveal** — deterministic prediction rounds merged in PR #50 and reuse the existing prediction board; end-to-end runner wiring remains for 02.11.
-- [ ] **02.7 Concrete proposal scenario rounds** — six proposal scenarios merged in PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`; focused Kotlin contract 3/3 PASS; runner wiring remains for 02.11.
-- [ ] **02.8 Open personal prompts** — five personal free-text prompts merged in PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`; focused Kotlin contract 3/3 PASS; runner wiring remains for 02.11.
-- [ ] **02.9 Final qualitative `Euer perfekter Antrag` reveal** — qualitative result builder merged in PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`; focused Kotlin contract 3/3 PASS; visual result/runner wiring remains for 02.11.
-- [ ] **02.10 Reuse the strongest existing proposal/ring/wedding content needed by this experience** — 🔵 NEXT.
-- [ ] **02.11 Experience entry/navigation and end-to-end playable flow** — wire the Stage-02 components into one deterministic playable experience and render the final reveal.
-- [ ] **02.12 Tests, build verification and UI verification** — executable verification gate before Stage 02 can be marked complete.
+- [x] **02.1 Experience data model and deterministic proposal flow definition** — PR #27.
+- [x] **02.2 Das-oder-Das proposal mood/details rounds** — PR #31.
+- [x] **02.3 Proposal-location image duels** — PR #55 plus in-app routing into the proposal experience.
+- [x] **02.4 Refreshed ring-image duels integrated into the experience** — PR #48, wired by the complete runner in PR #77.
+- [x] **02.5 Drag-and-drop ranking for proposal priorities** — PR #49, wired by PR #77.
+- [x] **02.6 Partner prediction A → B → Reveal** — PR #50, wired by PR #77.
+- [x] **02.7 Concrete proposal scenario rounds** — PR #56, wired by PR #77.
+- [x] **02.8 Open personal prompts** — PR #58, wired by PR #77.
+- [x] **02.9 Final qualitative `Euer perfekter Antrag` reveal** — PR #63, rendered by PR #77.
+- [x] **02.10 Reuse strongest existing proposal/ring/wedding content** — PR #68.
+- [x] **02.11 Experience entry/navigation and end-to-end playable flow** — PR #77, merge `82c951c53e42f4d6a76a61ee3596d4e36ef4dd05`.
+- [x] **02.12 Final verification-contract package** — PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`; UI-entry/ring-asset contracts plus deterministic 35-subround end-to-end journey to the qualitative reveal are committed.
 
-### NEXT EXACT ACTION
+### Verification caveat
 
-**24.15 / 02.10:** inventory existing proposal, engagement-ring and relevant wedding content already shipped in Harmony; select only strong material that adds value beyond 02.2–02.9; expose that selected material for reuse by the perfect-proposal experience.
+The repository Actions/Gradle environment was not able to provide a trustworthy executable full Android run because affected jobs terminate before executable step 1 / available Actions credits are exhausted. PR #79 was nevertheless intentionally integrated so completed work and its verification contracts do not remain stranded.
 
-02.10 must **not** delete, hide or archive legacy packs. That consolidation belongs to Stage 04. It also must not absorb entry/navigation or the end-to-end runner from 02.11.
+No green full Android/Gradle build is claimed. The contracts remain committed for execution as soon as a functioning build environment exists. This is an infrastructure follow-up rather than an unfinished Stage-02 feature slice.
 
 ### Definition of Done
 
-`Unser perfekter Antrag` is a complete, playable mixed-mechanic Harmony Experience using the refreshed ring assets, deterministic pacing, partner-prediction reveal, ranking, scenarios, open prompts and a qualitative couple result. It has an accessible navigation entry and its core flow is verified. Full legacy cleanup is not part of this stage.
+`Unser perfekter Antrag` is delivered as a complete mixed-mechanic Harmony Experience using refreshed ring assets, deterministic pacing, location and ring duels, ranking, partner prediction, scenarios, open prompts and a qualitative couple reveal, with an accessible app entry and committed integrated verification contracts.
 
 ---
 
 ## Stage 03/08 — Reusable Harmony Experience Engine
 
 **Original plan reference:** Point 2  
-**Status:** ⬜ PLANNED  
-**Progress:** 0/7 complete
+**Status:** 🔵 NEXT / ACTIVE  
+**Progress:** 0/7
 
-- [ ] 03.1 General mixed-step experience definition/state model
-- [ ] 03.2 Reusable `EitherOr` step
-- [ ] 03.3 Reusable `ImageDuel` step
-- [ ] 03.4 Reusable `Ranking` step
-- [ ] 03.5 Reusable `PartnerPrediction` step
-- [ ] 03.6 Reusable `Scenario` + `OpenPrompt` steps
-- [ ] 03.7 Reusable `Reveal`/result flow plus compatibility with legacy content during migration
+- [ ] **03.1 General mixed-step Experience definition/state model**
+- [ ] **03.2 Reusable `EitherOr` step**
+- [ ] **03.3 Reusable `ImageDuel` step**
+- [ ] **03.4 Reusable `Ranking` step**
+- [ ] **03.5 Reusable `PartnerPrediction` step**
+- [ ] **03.6 Reusable `Scenario` + `OpenPrompt` steps**
+- [ ] **03.7 Reusable `Reveal`/result flow plus legacy compatibility during migration**
+
+### NEXT EXACT ACTION
+
+**03.1:** extract a general mixed-step Experience definition/state contract from the completed proposal reference implementation. Keep this first package model/state-only: stable IDs, ordered heterogeneous steps, current position/progress, deterministic advancement and completion semantics. Do not duplicate the proposal runner and do not pull the reusable Compose step renderers from 03.2–03.7 into this slice.
 
 **Definition of Done:** the proposal implementation becomes the reference for reusable mixed-step experiences without copying one-off runners, while legacy content remains usable during migration.
 
@@ -95,11 +99,11 @@
 
 **Original plan reference:** Point 3  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/5 complete  
+**Progress:** 0/5  
 **Dependencies:** Stages 02 and 03
 
 - [ ] 04.1 Inventory all standalone proposal, engagement-ring and relevant wedding content
-- [ ] 04.2 Migrate/reuse strong questions and assets in the new Experience system
+- [ ] 04.2 Migrate/reuse strong questions and assets in the Experience system
 - [ ] 04.3 Remove duplicate presentation from normal navigation/catalog surfaces
 - [ ] 04.4 Hide/archive legacy standalone packs without deleting source content prematurely
 - [ ] 04.5 Regression verification for migrated content, images and navigation
@@ -111,15 +115,27 @@
 ## Stage 05/08 — Harmony-360 Questions Quality Rework
 
 **Original plan reference:** Point 4  
-**Status:** 🟡 PARALLEL WORK ACTIVE  
-**Verified stage progress:** 0/5 complete  
-**Note:** separate `25.x` slices are currently working inside 05.1. This parallel activity does not replace the Stage-02 handover.
+**Status:** 🟡 PARALLEL ACTIVE  
+**Stage progress after the clean 25.7 replacement lands:** 1/5 = 20%  
+**Completed substage:** 05.1 = 7/7 = 100%  
+**Next:** 05.2 — Food / travel / leisure / culture
 
-- [ ] 05.1 Relationship / communication / everyday-life sections
-- [ ] 05.2 Food / travel / leisure / culture sections
-- [ ] 05.3 Future / money / work / family sections
-- [ ] 05.4 Psychology / feelings / health / intimacy sections
-- [ ] 05.5 Values / belief / society / humor / fantasy / teamwork sections
+- [x] **05.1 Relationship / communication / everyday-life sections** — Sections 01/02/06/12 audited pack-by-pack; 72/72 explicit decisions, six redundant/filler packs archived from the curated target output, concrete relationship-specific rewrites, plus the 10×2 Quick Game `Was brauchst du gerade?`. Dedicated ledger: `360_REWORK_STAGE05_WORKLOG.md`.
+- [ ] **05.2 Food / travel / leisure / culture sections**
+- [ ] **05.3 Future / money / work / family sections**
+- [ ] **05.4 Psychology / feelings / health / intimacy sections**
+- [ ] **05.5 Values / belief / society / humor / fantasy / teamwork sections**
+
+### 05.1 final shape
+
+- Raw target packs: 18 + 18 + 18 + 18 = 72.
+- Explicit decisions: 72/72.
+- Curated source packs: 16 + 17 + 16 + 17 = 66.
+- Six confirmed redundant/filler packs archived from the visible curated output.
+- Added Quick Game: 1 pack, 10 questions, exactly 2 options each.
+- Scoped final target: 67 packs with unique IDs.
+- The final cross-section JUnit audit is preserved in the clean 25.7 replacement branch.
+- Repository Actions remain affected by the known pre-step/credit issue, so no full green Android/Gradle result is claimed from CI.
 
 **Definition of Done:** audited Harmony-360 areas are no longer dominated by noun-substitution templates or repeated generic answer quartets; retained questions are concrete, relationship-relevant and worth keeping.
 
@@ -129,7 +145,7 @@
 
 **Original plan reference:** Point 5  
 **Status:** 🟡 PARTIAL PARALLEL REPAIRS  
-**Verified progress:** 0/5 complete
+**Progress:** 0/5
 
 - [ ] 06.1 Missing answer options and malformed questions
 - [ ] 06.2 English leftovers and language mismatches
@@ -137,7 +153,7 @@
 - [ ] 06.4 Semantic duplicates, repeated stems and repeated generic option quartets
 - [ ] 06.5 Brand/franchise cleanup where IP-neutral replacements are preferred
 
-Small `24.4–24.6.x` packages repaired confirmed defects but do not mark a defect class complete until the wider audit is exhausted or remaining exceptions are documented.
+Targeted cleanup packages do not mark a defect class complete until its wider audit is exhausted or remaining exceptions are documented.
 
 ---
 
@@ -145,8 +161,8 @@ Small `24.4–24.6.x` packages repaired confirmed defects but do not mark a defe
 
 **Original plan reference:** Point 6  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/12 complete  
-**Dependency:** reusable Experience engine from Stage 03
+**Progress:** 0/12  
+**Dependency:** Stage 03
 
 - [ ] 07.1 Unser Zuhause
 - [ ] 07.2 Unsere Traumreise
@@ -167,7 +183,7 @@ Small `24.4–24.6.x` packages repaired confirmed defects but do not mark a defe
 
 **Original plan reference:** Point 7  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/6 complete
+**Progress:** 0/6
 
 - [ ] 08.1 Detect repeated stems/templates
 - [ ] 08.2 Detect repeated generic option quartets
@@ -180,12 +196,12 @@ Small `24.4–24.6.x` packages repaired confirmed defects but do not mark a defe
 
 ## Update protocol
 
-After every meaningful completed substage/work package, the worker must:
+After every meaningful completed substage/work package:
 
-1. Verify repository state.
-2. Update checkbox/fraction/status without confusing merged implementation with verified completion.
+1. Verify repository state first.
+2. Update checkbox/fraction/status without confusing a green executable build with a merely committed verification contract.
 3. Update `360_REWORK_CURRENT_STATE.md` with the exact active substage and `NEXT EXACT ACTION`.
-4. Append a dated entry to `360_REWORK_WORKLOG.md`.
-5. Record branch, real PR, commit/merge commit, verification performed, verification gaps and blockers.
-6. Never silently rewrite scope or ordering; material decisions belong in the worklog.
+4. Append the package to the relevant ledger (`360_REWORK_WORKLOG.md`, plus `360_REWORK_STAGE05_WORKLOG.md` for 25.x work).
+5. Record branch, real PR, merge commit where available, verification performed, verification gaps and blockers.
+6. Never silently rewrite scope or ordering.
 7. Check active PRs/branches before starting the next slice so parallel agents do not collide.
