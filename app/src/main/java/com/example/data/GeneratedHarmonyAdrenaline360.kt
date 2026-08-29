@@ -37,22 +37,20 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS)
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
-        Harmony360FutureCanonicalSelection.apply(
-            Harmony360FutureSectionCuration.apply(
-                Harmony360CultureMediaSectionCuration.apply(
-                    Harmony360LeisureSectionCuration.apply(
-                        Harmony360FoodSectionCuration.apply(
-                            Harmony360FoodTravelLeisureCultureQualityRework.apply(
-                                Harmony360ScenarioJourneyCuration.apply(
-                                    Harmony360RelationshipTopicCuration.apply(
-                                        Harmony360TopicNormalizationCuration.apply(
-                                            NormensLoeschungen.apply(
-                                                Harmony360RelationshipStage051Pipeline.apply(
-                                                    raw
-                                                        .map(GeneratedHarmony360ScenarioCleanup::apply)
-                                                        .map(GeneratedHarmony360TextCleanup::apply)
-                                                        .map(Harmony360ContentRework::apply)
-                                                )
+        Harmony360FutureSectionCuration.apply(
+            Harmony360CultureMediaSectionCuration.apply(
+                Harmony360LeisureSectionCuration.apply(
+                    Harmony360FoodSectionCuration.apply(
+                        Harmony360FoodTravelLeisureCultureQualityRework.apply(
+                            Harmony360ScenarioJourneyCuration.apply(
+                                Harmony360RelationshipTopicCuration.apply(
+                                    Harmony360TopicNormalizationCuration.apply(
+                                        NormensLoeschungen.apply(
+                                            Harmony360RelationshipStage051Pipeline.apply(
+                                                raw
+                                                    .map(GeneratedHarmony360ScenarioCleanup::apply)
+                                                    .map(GeneratedHarmony360TextCleanup::apply)
+                                                    .map(Harmony360ContentRework::apply)
                                             )
                                         )
                                     )
