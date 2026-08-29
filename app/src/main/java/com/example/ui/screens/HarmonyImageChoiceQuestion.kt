@@ -144,6 +144,17 @@ internal fun HarmonyImageChoiceQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind == HarmonyImageChoiceKind.HAPPY_COUPLE) {
+        HarmonyHappyCoupleQuestion(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     if (!isLegacyImageChoice(kind)) {
         val context = LocalContext.current
         val profileFlow = remember(context.applicationContext) {
