@@ -117,7 +117,7 @@ object FullscreenGameMechanicPolicy {
             pack.tags.any { it == "mechanik_skala" } || pack.cat == "h360_skala" ->
                 FullscreenGameMechanicKind.SCALE_MATCH
 
-            pack.tags.any { it == "mechanik_wer_eher" } || pack.cat == "wer" ->
+            pack.tags.any { it == "mechanik_wer_eher" } ->
                 FullscreenGameMechanicKind.WHO_WOULD
 
             pack.tags.any { it == "mechanik_memory" } || pack.cat == "h360_memory" ->
