@@ -9,7 +9,7 @@
 **Current status:** 🧪 VERIFY<br>
 **Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
 **Latest merged proposal packages awaiting verification:** 🧪 24.2, 🧪 24.3<br>
-**Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6<br>
+**Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6, ✅ 24.6.2, ✅ 24.6.3<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
 **Next work package:** 24.8 — Stage 02.3 Proposal-location image duels
@@ -97,10 +97,23 @@ These packages were intentionally developed in parallel because they do not touc
 - **24.4 — Stage 06.1 partial cleanup:** PR #35 merged into `main`; merge commit `817d0a0c002aeac7a560f31513092957d242880a`. Adds a narrow runtime repair for missing options in `ichhabenochnie` content plus regression coverage. Old draft PR #28 was closed as superseded.
 - **24.5 — Stage 06.2 partial cleanup:** PR #33 merged into `main`; merge commit `4e49989504824987933ebcf4587b58a7a8f8d0c1`. Removes the confirmed accidental English ranking-template prompt before the existing Harmony 360 runtime rework. Old draft PR #29 was closed as superseded.
 - **24.6 — Stage 06.3 partial cleanup:** PR #34 merged into `main`; merge commit `cf8b18a319613919d2f50d5853ac25a4ce065016`. Repairs the confirmed `Schlagwewohnheiten` and `is deinem Partner` wording defects with regression coverage.
+- **24.6.2 — Stage 06.4 repetition audit helper:** PR #39 merged into `main`; merge commit `d4dc969bf5a47d4be5b5470157fe3750cace21d1`. Adds `scripts/audit_harmony360_repetition.py` plus focused tests. Fresh focused Python verification passed 2/2 tests.
+- **24.6.3 — Stage 06.4 targeted de-template cleanup:** PR #40 merged into `main`; merge commit `ee2ca1b8315be2a8a9db45e78328d49ba3706e39`. Replaces the repeated generic opening scenario in exactly three packs: Morgenroutine, Sportliche Ziele and Bücher. Fresh focused Kotlin verification passed.
 
-**Important:** Stage 06 remains **0/5 complete**. These packages fix confirmed defects, but 06.1, 06.2 and 06.3 stay unchecked until a broader audit confirms that the corresponding defect class is actually exhausted or remaining exceptions are documented.
+### Parallel numbering correction
 
-**Verification caveat:** the relevant repo-wide GitHub Actions again failed before executable step 1 (`steps: null`). The merges were explicitly authorized despite that infrastructure limitation. Do not describe 24.4–24.6 as having a green full test suite.
+A concurrent Stage-02 status package already owns **24.7** (PR #37) and reserves **24.8** for Stage 02.3. PR #39 and PR #40 were initially created with those two logical labels before that concurrent change was noticed. Their GitHub titles/bodies were corrected after merge without rewriting `main` history:
+
+- PR #39 authoritative logical ID = **24.6.2**. Its historical merge commit message still contains `[24.7]`.
+- PR #40 authoritative logical ID = **24.6.3**. Its historical merge commit message still contains `[24.8]`.
+- **24.7 remains the Stage-02 merge-status sync.**
+- **24.8 remains the NEXT Stage-02 package for proposal-location image duels.**
+
+Do not infer logical work-package ownership from the historical branch names or those two merge-commit subjects; use this tracker and the corrected PR metadata.
+
+**Important:** Stage 06 remains **0/5 complete**. These packages fix confirmed defects and begin the 06.4 audit, but 06.1–06.4 stay unchecked until a broader audit confirms that the corresponding defect class is exhausted or remaining exceptions are documented.
+
+**Verification caveat:** the relevant repo-wide GitHub Actions again failed before executable step 1 (`steps: null`). The merges were explicitly authorized despite that infrastructure limitation. Do not describe 24.4–24.6.3 as having a green full test suite. The focused 24.6.2 Python tests and focused 24.6.3 Kotlin verification are separate local evidence only.
 
 ## NEXT EXACT ACTION
 
@@ -123,13 +136,14 @@ The merged 24.2 and 24.3 packages do not advance the Stage 02 completion fractio
 - Do not combine several unrelated 360 Rework substages into one PR.
 - Do not rebuild or re-merge 24.1; it is already in `main` via PR #25.
 - Do not rebuild obsolete draft PR #28 or #29; their clean mainline replacements are already merged via PR #35 and PR #33.
+- Do not reuse logical IDs 24.7 or 24.8 for parallel Stage-06 work; 24.7 belongs to the Stage-02 status sync and 24.8 belongs to Stage 02.3.
 - Do not replace the ten refreshed ring assets again unless a regression is proven.
 - Do not delete existing proposal/ring/wedding source content yet.
 - Do not hide all legacy proposal packs during Stage 02.1; full consolidation belongs to Stage 04/08.
 - Do not add Daily to this 360 Rework scope.
 - Do not add unrelated new categories while the quality/experience rework is in progress.
 - Do not mark Stage 02 progress based on design discussion alone; only verified implementation substages count.
-- Do not mark Stage 06.1–06.3 complete merely because 24.4–24.6 landed; complete the corresponding audit first.
+- Do not mark Stage 06.1–06.4 complete merely because partial cleanup packages landed; complete the corresponding audit first.
 
 ## Handover rule
 
