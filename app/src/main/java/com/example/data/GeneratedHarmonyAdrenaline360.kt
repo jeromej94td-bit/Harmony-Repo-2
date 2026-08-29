@@ -38,6 +38,7 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
         raw
+            .map(GeneratedHarmony360ScenarioCleanup::apply)
             .map(GeneratedHarmony360TextCleanup::apply)
             .map(Harmony360ContentRework::apply)
     }
