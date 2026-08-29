@@ -245,7 +245,9 @@ class HarmonyRepository(
     }
 
     suspend fun updateStats(cities: Int, countries: Int) {
-        db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = cities, countries = countries))
+        db.coupleStatsDao().insertOrUpdateStats(
+            CoupleStatsEntity(id = 1, visitedCities = cities, visitedCountries = countries)
+        )
     }
 
     suspend fun getAllInterests(): List<BrainInterestEntity> = db.brainDao().getAllInterests()
