@@ -2,6 +2,8 @@ package com.example.ui
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import com.example.data.brain.db.BrainInteractionEntity
+import com.example.data.db.HarmonyDatabase
 import com.example.data.model.AnswerEntity
 import com.example.data.model.EitherOrAnswerCodec
 import com.example.data.model.Question
@@ -38,7 +40,7 @@ class PackResultsAndSkipFlowTest {
     )
 
     @Test
-    fun `completed pack routes to results only when every question has an answer`() {
+    fun `all answered legacy pack can still route directly to results`() {
         val complete = listOf(
             AnswerEntity(pack.id, 0, "A"),
             AnswerEntity(pack.id, 1, "D")
@@ -83,5 +85,32 @@ class PackResultsAndSkipFlowTest {
 
         assertEquals(1, activeRunFlow.value?.currentIndex)
         assertTrue(activeRunFlow.value?.currentAnswers?.isEmpty() == true)
+    }
+
+    @Test
+    fun `finished marker survives skipped questions and replay reset clears current result state`() = runTest {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val db = HarmonyDatabase.getInstance(app)
+        val packId = "results_replay_reset_test"
+
+        db.answerDao().deleteAnswersForPack(packId)
+        db.brainRoomDao().clearFinishedPack(packId)
+        db.answerDao().insertAnswer(AnswerEntity(packId, 0, "A"))
+        db.brainRoomDao().insertInteraction(
+            BrainInteractionEntity(
+                contentId = packId,
+                contentType = "PACK",
+                action = "FINISHED_PACK"
+            )
+        )
+
+        assertTrue(db.brainRoomDao().hasFinishedPack(packId))
+        assertTrue(db.answerDao().getAllAnswersDirect().any { it.packId == packId })
+
+        db.answerDao().deleteAnswersForPack(packId)
+        db.brainRoomDao().clearFinishedPack(packId)
+
+        assertFalse(db.brainRoomDao().hasFinishedPack(packId))
+        assertFalse(db.answerDao().getAllAnswersDirect().any { it.packId == packId })
     }
 }
