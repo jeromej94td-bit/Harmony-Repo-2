@@ -61,7 +61,17 @@ object GeneratedContentRegistry {
     private fun normalizeLoadedCustomPacks() {
         val customPacks = DeveloperDataManager._customPacks
         for (index in customPacks.indices) {
-            customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(customPacks[index])
+            val pack = customPacks[index]
+            if (
+                pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
+                pack.type == "quiz" &&
+                (
+                    pack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
+                        pack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
+                    )
+            ) {
+                customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(pack)
+            }
         }
     }
 
