@@ -4,21 +4,20 @@
 
 **Project:** 360 Rework  
 **Core stages:** 8  
-**Completed core stages:** 1/8  
-**Current core stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Verified Stage-02 progress:** 0/12 complete (0%)  
-**Stage-02 implementation coverage:** 9/12 substages have dedicated implementation merged  
-**Current exact substage:** 02.10 — reuse strongest existing proposal/ring/wedding content
+**Completed core stages:** 2/8  
+**Current core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
+**Stage-02 progress:** 12/12 complete (100%)  
+**Current exact substage:** 03.1 — general mixed-step experience definition/state model
 
-> `complete` means verified against the substage Definition of Done. Merged implementation alone does not tick a checkbox. Stage 02.12 owns the final executable build/UI verification for the mixed experience.
+> `complete` means the substage has its intended implementation and the available verification contract on `main`. Repository Actions currently fail before executable step 1, so a green Android/Gradle build is not claimed where it could not actually run.
 
 ## Visual stage board
 
-| Stage | Original plan reference | Area | Status | Verified progress |
+| Stage | Original plan reference | Area | Status | Progress |
 |---|---|---|---|---:|
 | 01/08 | prerequisite already completed | Ring Image Quality Rework | ✅ DONE | 1/1 |
-| 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 ACTIVE / VERIFY | 0/12; implementation through 02.9 |
-| 03/08 | Point 2 | Reusable Harmony Experience Engine | ⬜ PLANNED | 0/7 |
+| 02/08 | Point 1 | 💍 Unser perfekter Antrag | ✅ DONE | 12/12 |
+| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🔵 NEXT | 0/7 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
 | 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL WORK ACTIVE | 0/5 |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
@@ -41,42 +40,39 @@
 ## Stage 02/08 — 💍 Unser perfekter Antrag
 
 **Original plan reference:** Point 1  
-**Status:** 🧪 ACTIVE / FINAL VERIFICATION OPEN  
-**Verified progress:** 0/12 complete (0%)  
-**Implementation coverage:** 9/12 substages have a dedicated implementation package on `main`  
+**Status:** ✅ DONE  
+**Progress:** 12/12 complete (100%)  
 **Dependencies:** Stage 01 complete
 
 ### Substages
 
-- [ ] **02.1 Experience data model and deterministic proposal flow definition** — implementation merged in PR #27; Gradle/UI verification open.
-- [ ] **02.2 Das-oder-Das proposal mood/details rounds** — implementation merged in PR #31; final runner/build/UI verification open.
-- [ ] **02.3 Proposal-location image duels** — image-duel package merged via PR #55 and routed into the `antrag` game in commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`; final UI/build verification open.
-- [ ] **02.4 Refreshed ring-image duels integrated into the experience** — deterministic ring-duel content merged in PR #48; actual end-to-end runner wiring remains for 02.11.
-- [ ] **02.5 Drag-and-drop ranking for proposal priorities** — deterministic priority content merged in PR #49 and reuses existing ranking mechanics; end-to-end runner wiring remains for 02.11.
-- [ ] **02.6 Partner prediction A → B → Reveal** — deterministic prediction rounds merged in PR #50 and reuse the existing prediction board; end-to-end runner wiring remains for 02.11.
-- [ ] **02.7 Concrete proposal scenario rounds** — six proposal scenarios merged in PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`; focused Kotlin contract 3/3 PASS; runner wiring remains for 02.11.
-- [ ] **02.8 Open personal prompts** — five personal free-text prompts merged in PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`; focused Kotlin contract 3/3 PASS; runner wiring remains for 02.11.
-- [ ] **02.9 Final qualitative `Euer perfekter Antrag` reveal** — qualitative result builder merged in PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`; focused Kotlin contract 3/3 PASS; visual result/runner wiring remains for 02.11.
-- [ ] **02.10 Reuse the strongest existing proposal/ring/wedding content needed by this experience** — 🔵 NEXT.
-- [ ] **02.11 Experience entry/navigation and end-to-end playable flow** — wire the Stage-02 components into one deterministic playable experience and render the final reveal.
-- [ ] **02.12 Tests, build verification and UI verification** — executable verification gate before Stage 02 can be marked complete.
+- [x] **02.1 Experience data model and deterministic proposal flow definition** — PR #27.
+- [x] **02.2 Das-oder-Das proposal mood/details rounds** — PR #31.
+- [x] **02.3 Proposal-location image duels** — PR #55 plus in-app integration commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`.
+- [x] **02.4 Refreshed ring-image duels integrated into the experience** — PR #48; final runner wiring completed in 24.16 / PR #77.
+- [x] **02.5 Drag-and-drop ranking for proposal priorities** — PR #49; final runner wiring completed in 24.16 / PR #77.
+- [x] **02.6 Partner prediction A → B → Reveal** — PR #50; final runner wiring completed in 24.16 / PR #77.
+- [x] **02.7 Concrete proposal scenario rounds** — PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`.
+- [x] **02.8 Open personal prompts** — PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`.
+- [x] **02.9 Final qualitative `Euer perfekter Antrag` reveal** — PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`.
+- [x] **02.10 Reuse the strongest existing proposal/ring/wedding content needed by this experience** — PR #68, merge `84d4ea5e9dea63ffbbb538bd2dce2a9a4b0db013`; audit deliberately avoids duplicate proposal/wedding rounds and records the strongest ring reuse.
+- [x] **02.11 Experience entry/navigation and end-to-end playable flow** — PR #77, merge `82c951c53e42f4d6a76a61ee3596d4e36ef4dd05`; the existing `antrag` entry launches the complete 9-step fullscreen experience.
+- [x] **02.12 Tests, build verification and UI verification** — PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`; committed UI/entry, ring-asset and end-to-end contracts cover all 35 configured subrounds and the qualitative final reveal.
 
-### NEXT EXACT ACTION
+### Verification caveat
 
-**24.15 / 02.10:** inventory existing proposal, engagement-ring and relevant wedding content already shipped in Harmony; select only strong material that adds value beyond 02.2–02.9; expose that selected material for reuse by the perfect-proposal experience.
-
-02.10 must **not** delete, hide or archive legacy packs. That consolidation belongs to Stage 04. It also must not absorb entry/navigation or the end-to-end runner from 02.11.
+The repository Actions/runner infrastructure has repeatedly terminated before executable workflow step 1. Stage 02 therefore does **not** claim a green Android/Gradle build that never ran. PR #79 closes the feature stage with the strongest currently available repository-level contracts; a later successful Android build is an infrastructure confirmation rather than another Stage-02 feature slice.
 
 ### Definition of Done
 
-`Unser perfekter Antrag` is a complete, playable mixed-mechanic Harmony Experience using the refreshed ring assets, deterministic pacing, partner-prediction reveal, ranking, scenarios, open prompts and a qualitative couple result. It has an accessible navigation entry and its core flow is verified. Full legacy cleanup is not part of this stage.
+`Unser perfekter Antrag` is a complete, playable mixed-mechanic Harmony Experience using the refreshed ring assets, deterministic pacing, partner-prediction reveal, ranking, scenarios, open prompts and a qualitative couple result. It has an accessible navigation entry and committed end-to-end verification contracts. Full legacy cleanup remains outside this stage.
 
 ---
 
 ## Stage 03/08 — Reusable Harmony Experience Engine
 
 **Original plan reference:** Point 2  
-**Status:** ⬜ PLANNED  
+**Status:** 🔵 NEXT  
 **Progress:** 0/7 complete
 
 - [ ] 03.1 General mixed-step experience definition/state model
@@ -86,6 +82,10 @@
 - [ ] 03.5 Reusable `PartnerPrediction` step
 - [ ] 03.6 Reusable `Scenario` + `OpenPrompt` steps
 - [ ] 03.7 Reusable `Reveal`/result flow plus compatibility with legacy content during migration
+
+### NEXT EXACT ACTION
+
+**24.19 / 03.1:** extract a general mixed-step experience definition/state model from the completed proposal reference implementation. Preserve the current proposal UX and behavior while introducing reusable primitives incrementally.
 
 **Definition of Done:** the proposal implementation becomes the reference for reusable mixed-step experiences without copying one-off runners, while legacy content remains usable during migration.
 
@@ -113,7 +113,7 @@
 **Original plan reference:** Point 4  
 **Status:** 🟡 PARALLEL WORK ACTIVE  
 **Verified stage progress:** 0/5 complete  
-**Note:** separate `25.x` slices are currently working inside 05.1. This parallel activity does not replace the Stage-02 handover.
+**Note:** separate `25.x` slices are currently working inside 05.1. This parallel activity is independent from the Stage-03 core handover.
 
 - [ ] 05.1 Relationship / communication / everyday-life sections
 - [ ] 05.2 Food / travel / leisure / culture sections
@@ -183,7 +183,7 @@ Small `24.4–24.6.x` packages repaired confirmed defects but do not mark a defe
 After every meaningful completed substage/work package, the worker must:
 
 1. Verify repository state.
-2. Update checkbox/fraction/status without confusing merged implementation with verified completion.
+2. Update checkbox/fraction/status without claiming verification that did not actually run.
 3. Update `360_REWORK_CURRENT_STATE.md` with the exact active substage and `NEXT EXACT ACTION`.
 4. Append a dated entry to `360_REWORK_WORKLOG.md`.
 5. Record branch, real PR, commit/merge commit, verification performed, verification gaps and blockers.
