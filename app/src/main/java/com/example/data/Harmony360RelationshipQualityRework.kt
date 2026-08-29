@@ -47,6 +47,27 @@ object Harmony360RelationshipQualityRework {
         "h500_023_verbundenheit_skala" to CurationDecision.ARCHIVE
     )
 
+    internal val section02Decisions: Map<String, CurationDecision> = linkedMapOf(
+        "h500_026_zuhoeren_szenario" to CurationDecision.REWRITE,
+        "h500_027_missverstaendnisse_geheime_wahl" to CurationDecision.ARCHIVE,
+        "h500_028_schwierige_gespraeche_memory" to CurationDecision.REWRITE,
+        "h500_029_ehrlichkeit_prioritaet" to CurationDecision.REWRITE,
+        "h500_030_direkte_worte_offene_runde" to CurationDecision.KEEP,
+        "h500_031_zwischen_den_zeilen_entweder_oder" to CurationDecision.REWRITE,
+        "h500_032_textnachrichten_wer_eher" to CurationDecision.REWRITE,
+        "h500_033_telefonieren_skala" to CurationDecision.REWRITE,
+        "h500_034_streitkultur_ranking" to CurationDecision.REWRITE,
+        "h500_035_entschuldigungen_prognose" to CurationDecision.REWRITE,
+        "h500_036_kritik_annehmen_szenario" to CurationDecision.REWRITE,
+        "h500_037_beduerfnisse_aussprechen_geheime_wahl" to CurationDecision.REWRITE,
+        "h500_038_grenzen_erklaeren_memory" to CurationDecision.REWRITE,
+        "h500_039_humor_im_gespraech_prioritaet" to CurationDecision.REWRITE,
+        "h500_040_schweigen_offene_runde" to CurationDecision.KEEP,
+        "h500_043_respekt_im_streit_skala" to CurationDecision.REWRITE,
+        "h500_044_gefuehle_benennen_ranking" to CurationDecision.REWRITE,
+        "h500_049_tabuthemen_prioritaet" to CurationDecision.REWRITE
+    )
+
     private val section01Overrides: Map<String, List<GenQuestion>> = mapOf(
         "h500_001_zuneigung_im_alltag_entweder_oder" to listOf(
             q("Was fühlt sich im Alltag für dich mehr nach Zuneigung an?", "Eine kleine Berührung", "Eine liebe Nachricht"),
@@ -166,12 +187,138 @@ object Harmony360RelationshipQualityRework {
         )
     )
 
+    private val section02Overrides: Map<String, List<GenQuestion>> = mapOf(
+        "h500_026_zuhoeren_szenario" to listOf(
+            q("Du erzählst deinem Partner von einem Problem. Was brauchst du zuerst?", "Nur zuhören", "Fragen stellen", "Gemeinsam Lösung suchen", "Erst kurz Ruhe"),
+            q("Du bist sichtbar aufgewühlt, findest aber noch keine Worte. Was wäre am hilfreichsten?", "Ruhig dableiben", "Sanft nachfragen", "Eine Umarmung anbieten", "Später noch einmal fragen"),
+            q("Du erzählst etwas Wichtiges und dein Partner schaut aufs Handy. Was trifft deinen Wunsch am besten?", "Handy weg und Blickkontakt", "Kurz sagen, wann er zuhören kann", "Nachfragen, was dir wichtig ist", "Gespräch bewusst später fortsetzen"),
+            q("Du brauchst keinen Rat, bekommst aber sofort Lösungen. Was wäre die beste Korrektur?", "„Bitte hör nur kurz zu“", "Frage stellen statt lösen", "Kurz Pause machen", "Später gemeinsam Lösungen sammeln"),
+            q("Woran merkst du am ehesten, dass dir wirklich zugehört wurde?", "Rückfrage zum Detail", "Gefühl wird benannt", "Späteres Nachfragen", "Nichts wird sofort bewertet"),
+            q("Wann redest du über etwas Schwieriges am liebsten?", "Sofort", "Nach kurzem Runterkommen", "Beim Spaziergang", "Wenn wirklich Zeit dafür ist")
+        ),
+        "h500_028_schwierige_gespraeche_memory" to listOf(
+            GenQuestion("Welches schwierige Gespräch zwischen euch hat im Nachhinein wirklich etwas verbessert?"),
+            GenQuestion("Wann hast du dich in einem ernsten Gespräch einmal überraschend verstanden gefühlt?"),
+            GenQuestion("Welcher Satz deines Partners hat in einem schwierigen Gespräch mehr geholfen als jede Lösung?"),
+            GenQuestion("Gab es ein Gespräch, vor dem du lange Angst hattest und das dann viel besser lief als gedacht?"),
+            GenQuestion("Welche Art, ein schwieriges Thema anzusprechen, hat bei euch schon einmal besonders gut funktioniert?"),
+            GenQuestion("Was würdest du bei eurem nächsten schwierigen Gespräch bewusst anders machen?")
+        ),
+        "h500_029_ehrlichkeit_prioritaet" to listOf(
+            q("Was ist dir bei einer unangenehmen Wahrheit am wichtigsten?", "Früh sagen", "Vollständig sagen", "Taktvoll sagen", "Privat sagen"),
+            q("Welche Wahrheit sollte in einer Beziehung am wenigsten aufgeschoben werden?", "Geldproblem", "Zweifel an einer Entscheidung", "Verletzte Grenze", "Etwas, das Vertrauen betrifft"),
+            q("Was wiegt bei Ehrlichkeit schwerer?", "Der richtige Zeitpunkt", "Die ganze Wahrheit", "Der richtige Ton", "Mut, es überhaupt zu sagen"),
+            q("Was wäre für dich eher noch okay?", "Kleine Überraschung verschweigen", "Zeit brauchen vor einem Gespräch", "Details aus Privatsphäre behalten", "Nichts davon, wenn es uns betrifft"),
+            q("Wann sollte Ehrlichkeit für dich sofort kommen?", "Wenn eine Entscheidung uns beide betrifft", "Wenn Vertrauen gefährdet ist", "Wenn Geld betroffen ist", "Wenn eine Grenze verletzt wurde"),
+            q("Was macht eine schwierige Wahrheit für dich leichter annehmbar?", "Konkrete Verantwortung", "Keine Ausreden", "Ruhiger Zeitpunkt", "Danach gemeinsam überlegen")
+        ),
+        "h500_031_zwischen_den_zeilen_entweder_oder" to listOf(
+            q("Wenn dich etwas stört: Was ist eher dein natürlicher Weg?", "Direkt sagen", "Erst vorsichtig andeuten"),
+            q("Wenn dein Partner ungewöhnlich kurz antwortet: Was machst du eher?", "Direkt nachfragen", "Erst Stimmung beobachten"),
+            q("Was verrät bei dir mehr als deine Worte?", "Tonfall", "Körpersprache"),
+            q("Bei einem sensiblen Thema: Was ist dir lieber?", "Klar und direkt", "Behutsam und Schritt für Schritt"),
+            q("Wenn du „alles gut“ sagst, obwohl nicht alles gut ist: Was wünschst du dir eher?", "Noch einmal nachfragen", "Mir erst Raum geben"),
+            q("Was verhindert bei euch eher Missverständnisse?", "Fragen statt vermuten", "Gefühle direkt benennen")
+        ),
+        "h500_032_textnachrichten_wer_eher" to listOf(
+            whoQ("Wer schreibt eher zuerst „alles gut“, obwohl man merkt, dass nicht alles gut ist?"),
+            whoQ("Wer schickt eher eine Sprachnachricht, weil der Text sonst viel zu lang würde?"),
+            whoQ("Wer schaut eher aufs Handy und denkt sich: Ich antworte gleich – und vergisst es dann?"),
+            whoQ("Wer merkt eher an einem Punkt statt einem Emoji, dass irgendetwas anders ist?"),
+            whoQ("Wer schreibt eher noch eine Gute-Nacht-Nachricht, obwohl ihr euch am nächsten Morgen seht?"),
+            whoQ("Wer würde ein wirklich wichtiges Thema eher nicht per Text klären wollen?"),
+            whoQ("Wer schickt eher ein Foto aus dem Alltag nur mit „musste an dich denken“?")
+        ),
+        "h500_033_telefonieren_skala" to listOf(
+            scaleQ("Wie wichtig sind dir spontane kurze Anrufe im Alltag?"),
+            scaleQ("Wie sehr stört es dich, wenn beim Telefonieren nebenbei etwas anderes gemacht wird?"),
+            scaleQ("Wie gern besprichst du schwierige Themen lieber am Telefon als per Nachricht?"),
+            scaleQ("Wie wichtig ist dir ein fester Anruf, wenn ihr euch mehrere Tage nicht seht?"),
+            scaleQ("Wie wohl fühlst du dich mit längerer gemeinsamer Stille am Telefon?"),
+            scaleQ("Wie sehr bevorzugst du einen kurzen Anruf gegenüber zehn einzelnen Nachrichten?")
+        ),
+        "h500_034_streitkultur_ranking" to listOf(
+            q("Was sollte in einem Streit für dich zuerst geschützt werden? Ordne.", "Respekt", "Ehrlichkeit", "Zuhören", "Lösungswille"),
+            q("Was hilft dir am meisten, wenn die Stimmung hochkocht? Ordne.", "Kurze Pause", "Ruhiger Ton", "Konkretes Thema behalten", "Erst ausreden lassen"),
+            q("Was macht einen Streit für dich am schnellsten unfair? Ordne.", "Beleidigungen", "Alte Themen hervorholen", "Unterbrechen", "Mit Trennung drohen"),
+            q("Woran merkst du am ehesten, dass ein Streit wirklich vorbei ist? Ordne.", "Beide verstanden", "Entschuldigung", "Konkrete Lösung", "Nähe wieder möglich"),
+            q("Was sollte nach einem Streit eher passieren? Ordne.", "Kurz nachfragen, wie es geht", "Verabredete Änderung", "Gemeinsam runterkommen", "Später noch einmal prüfen"),
+            q("Welche Fähigkeit würdest du für eure Streitkultur am liebsten verstärken? Ordne.", "Früher stoppen", "Besser zuhören", "Klarer sagen, was weh tut", "Schneller wieder verbinden")
+        ),
+        "h500_035_entschuldigungen_prognose" to listOf(
+            q("Welche Entschuldigung würde dein Partner vermutlich am ehesten glauben?", "Klare Verantwortung", "Konkretes Bedauern", "Verhalten wirklich ändern", "Fragen, was jetzt hilft"),
+            q("Was macht eine Entschuldigung für deinen Partner vermutlich unglaubwürdig?", "„Aber du…“", "Zu spät", "Nur schnell Ruhe wollen", "Dasselbe wiederholen"),
+            q("Wann will dein Partner eine Entschuldigung vermutlich lieber hören?", "Sofort", "Nach kurzer Pause", "Erst wenn beide ruhig sind", "Wenn auch über die Lösung geredet wird"),
+            q("Was ist deinem Partner nach einer Entschuldigung wahrscheinlich wichtiger?", "Umarmung", "Zeit", "Konkrete Veränderung", "Noch einmal darüber reden"),
+            q("Welche Form passt vermutlich besser zu deinem Partner?", "Kurz und direkt", "Ausführlich erklären", "Schriftlich, wenn Worte schwerfallen", "Mit einer Handlung zeigen"),
+            q("Womit könntest du deinen Partner bei einer Entschuldigung positiv überraschen?", "Ohne Rechtfertigung", "Ein Detail wirklich verstanden haben", "Selbst eine Lösung vorschlagen", "Später noch einmal nachfragen")
+        ),
+        "h500_036_kritik_annehmen_szenario" to listOf(
+            q("Dein Partner kritisiert etwas, das du ganz anders siehst. Was hilft dir am ehesten, nicht sofort dichtzumachen?", "Konkretes Beispiel", "Ruhiger Ton", "Erst meine Sicht hören", "Kurz Zeit zum Nachdenken"),
+            q("Du merkst, dass du dich sofort verteidigst. Was wäre dein sinnvollster nächster Schritt?", "Eine Rückfrage stellen", "Kurz Pause machen", "Zusammenfassen, was angekommen ist", "Erst später antworten"),
+            q("Die Kritik trifft einen wunden Punkt. Was würdest du lieber sagen?", "„Das tut gerade weh“", "„Ich brauche kurz Zeit“", "„Was genau meinst du?“", "„Lass uns später weiterreden“"),
+            q("Dein Partner kritisiert dein Verhalten. Was sollte möglichst nicht passieren?", "Aus Verhalten wird Charakter", "Alte Fehler kommen dazu", "Ton wird abwertend", "Es geht nur ums Gewinnen"),
+            q("Du verstehst die Kritik, bist aber noch nicht einverstanden. Was ist fair?", "Verständnis zeigen", "Eigene Sicht ruhig erklären", "Konkrete Änderung testen", "Später erneut besprechen"),
+            q("Was macht Feedback für dich am ehesten annehmbar?", "Konkreter Wunsch", "Ein Thema zur Zeit", "Guter Zeitpunkt", "Keine Verallgemeinerungen")
+        ),
+        "h500_037_beduerfnisse_aussprechen_geheime_wahl" to listOf(
+            q("Welches Bedürfnis fällt dir am schwersten direkt auszusprechen?", "Mehr Nähe", "Mehr Ruhe", "Mehr Hilfe", "Mehr Zeit für mich"),
+            q("Wenn du etwas brauchst: Wie sagst du es am liebsten?", "Direkt", "Mit konkretem Wunsch", "Erst erklären, warum", "Im richtigen ruhigen Moment"),
+            q("Was lässt dich ein Bedürfnis eher verschweigen?", "Angst vor Ablehnung", "Nicht belasten wollen", "Selbst noch unsicher", "Hoffen, dass es bemerkt wird"),
+            q("Welcher Satz wäre für dich am hilfreichsten?", "„Ich brauche gerade…“", "„Kannst du mir helfen mit…?“", "„Ich wünsche mir mehr…“", "„Heute schaffe ich das nicht allein“"),
+            q("Was wäre mutiger für dich?", "Um Nähe bitten", "Um Raum bitten", "Um Unterstützung bitten", "Ein klares Nein sagen"),
+            q("Wann fällt es dir leichter, Bedürfnisse auszusprechen?", "Sofort", "Wenn ich ruhig bin", "Beim Spaziergang", "Wenn der Partner zuerst fragt")
+        ),
+        "h500_038_grenzen_erklaeren_memory" to listOf(
+            GenQuestion("Welche Grenze von dir wurde einmal sofort respektiert, sodass du dich besonders sicher gefühlt hast?"),
+            GenQuestion("Wann musstest du ein klares Nein wiederholen, obwohl du dachtest, es sei schon verstanden?"),
+            GenQuestion("Welche frühere Erfahrung erklärt eine Grenze von dir heute am besten?"),
+            GenQuestion("Welche Grenze fällt dir besonders schwer zu erklären, obwohl sie dir wichtig ist?"),
+            GenQuestion("Wann hat dein Partner eine Grenze von dir besser verstanden, nachdem du erklärt hast, warum sie wichtig ist?"),
+            GenQuestion("Welche Grenze soll dein Partner niemals erraten müssen, sondern von dir klar hören?")
+        ),
+        "h500_039_humor_im_gespraech_prioritaet" to listOf(
+            q("Wann hilft Humor in einem schwierigen Gespräch am meisten?", "Wenn Spannung raus muss", "Wenn beide schon ruhiger sind", "Wenn es ein gemeinsamer Insider ist", "Wenn er niemanden lächerlich macht"),
+            q("Wann ist Humor für dich eher unpassend?", "Wenn ich mich verletzlich zeige", "Bei einer klaren Grenze", "Bei echter Angst", "Wenn ich mich nicht ernst genommen fühle"),
+            q("Was soll Humor im Gespräch eher leisten?", "Nähe schaffen", "Druck rausnehmen", "Uns selbst nicht zu ernst nehmen", "Einen Neustart ermöglichen"),
+            q("Was ist die wichtigste Grenze bei Witzen zwischen euch?", "Kein Spott über Unsicherheiten", "Kein Publikum für private Themen", "Stopp heißt Stopp", "Nicht statt einer Entschuldigung"),
+            q("Welche Art Humor verbindet euch am stärksten?", "Insider", "Selbstironie", "Alberne Beobachtungen", "Gemeinsames Necken"),
+            q("Woran merkst du, dass Humor gerade wirklich hilft?", "Beide lachen", "Ton wird weicher", "Nähe kommt zurück", "Das Thema kann danach weitergehen")
+        ),
+        "h500_043_respekt_im_streit_skala" to listOf(
+            scaleQ("Wie wichtig ist dir, dass im Streit niemand unterbrochen wird?"),
+            scaleQ("Wie wichtig ist dir, dass alte Fehler nicht als Munition hervorgeholt werden?"),
+            scaleQ("Wie stark trifft dich ein abwertender Ton, selbst wenn der Inhalt berechtigt ist?"),
+            scaleQ("Wie wichtig ist dir, dass ein Stopp oder eine Pause im Streit akzeptiert wird?"),
+            scaleQ("Wie wichtig ist dir, dass niemals mit Trennung gedroht wird, nur um Druck zu machen?"),
+            scaleQ("Wie zufrieden bist du damit, wie respektvoll ihr in angespannten Momenten bleibt?")
+        ),
+        "h500_044_gefuehle_benennen_ranking" to listOf(
+            q("Welche Sätze helfen dir am meisten, ein Gefühl statt einen Vorwurf auszusprechen? Ordne.", "Ich bin gerade überfordert", "Ich bin verletzt", "Ich bin unsicher", "Ich brauche kurz Ruhe"),
+            q("Welche Gefühle kannst du am leichtesten direkt benennen? Ordne.", "Freude", "Traurigkeit", "Angst", "Wut"),
+            q("Was hilft dir am ehesten herauszufinden, was du eigentlich fühlst? Ordne.", "Kurz allein sein", "Darüber reden", "Körperreaktion beachten", "Aufschreiben"),
+            q("Welche Aussage öffnet eher ein Gespräch? Ordne.", "Ich fühle mich übergangen", "Ich brauche Unterstützung", "Ich bin gerade angespannt", "Ich weiß noch nicht genau, was los ist"),
+            q("Welche Reaktion deines Partners hilft dir beim Benennen von Gefühlen? Ordne.", "Geduldig warten", "Nachfragen", "Nicht sofort lösen", "Gefühl spiegeln"),
+            q("Was würdest du gern früher aussprechen, bevor daraus Streit wird? Ordne.", "Überforderung", "Enttäuschung", "Eifersucht", "Bedürfnis nach Abstand")
+        ),
+        "h500_049_tabuthemen_prioritaet" to listOf(
+            q("Welche schwierigen Themen sollten Paare deiner Meinung nach am wenigsten dauerhaft vermeiden?", "Geld", "Eifersucht", "Intimität", "Zukunft"),
+            q("Was braucht ein Tabuthema zuerst, damit du darüber reden kannst?", "Vertrauen", "Zeit", "Privatsphäre", "Kein Urteil"),
+            q("Welches Thema würdest du lieber früh als erst im Konflikt klären?", "Familiengrenzen", "Finanzen", "Kinderwunsch", "Kontakt zu Ex-Partnern"),
+            q("Was ist dir bei einem sehr persönlichen Thema am wichtigsten?", "Nicht drängen", "Ehrlich antworten", "Vertraulich bleiben", "Pausieren dürfen"),
+            q("Wann sollte ein unangenehmes Thema trotzdem angesprochen werden?", "Wenn es Verhalten beeinflusst", "Wenn Vertrauen betroffen ist", "Wenn es eine gemeinsame Entscheidung betrifft", "Wenn einer dauerhaft darunter leidet"),
+            q("Was macht ein Tabuthema für dich eher besprechbar?", "Konkrete Frage", "Ruhiger Moment", "Eigene Gefühle zuerst nennen", "Keine schnelle Lösung erwarten")
+        )
+    )
+
     private val archivedIds: Set<String> = buildSet {
         addAll(section01Decisions.filterValues { it == CurationDecision.ARCHIVE }.keys)
+        addAll(section02Decisions.filterValues { it == CurationDecision.ARCHIVE }.keys)
     }
 
     private val questionOverrides: Map<String, List<GenQuestion>> = buildMap {
         putAll(section01Overrides)
+        putAll(section02Overrides)
     }
 
     internal fun isStage051(pack: GenPack): Boolean =
