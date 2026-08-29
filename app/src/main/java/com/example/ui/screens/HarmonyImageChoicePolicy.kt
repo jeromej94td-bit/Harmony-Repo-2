@@ -1,8 +1,10 @@
 package com.example.ui.screens
 
+import com.example.data.GeneratedContentRegistry
 import com.example.data.model.FullscreenGameMechanicKind
 import com.example.data.model.FullscreenGameMechanicPolicy
 import com.example.data.model.HarmonyPacksData
+import com.example.data.model.SexIntimacyRevealPolicy
 
 internal enum class HarmonyImageChoiceKind {
     EGG,
@@ -21,7 +23,9 @@ internal enum class HarmonyImageChoiceKind {
     SCENARIO,
     PRIORITY_POKER,
     MATCH_TOURNAMENT,
-    DEEP_TALK
+    DEEP_TALK,
+    INTIMACY_COMPACT,
+    INTIMACY_PRIVATE_REVEAL
 }
 
 internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
@@ -40,6 +44,24 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
         packId == "reisevor" && questionIndex == 4 -> return HarmonyImageChoiceKind.TRAVEL
         packId == "aussen" -> return HarmonyImageChoiceKind.TRAUMHAUS
         packId == "antrag" && questionIndex == 0 -> return HarmonyImageChoiceKind.PROPOSAL_LOCATION
+    }
+
+    val intimacyPack = GeneratedContentRegistry.PACKS.firstOrNull {
+        it.id == packId && SexIntimacyRevealPolicy.isSexIntimacyPack(it.id, it.topic)
+    }
+    val intimacyQuestion = intimacyPack?.questions?.getOrNull(questionIndex)
+    if (intimacyPack != null && intimacyQuestion != null) {
+        return if (
+            SexIntimacyRevealPolicy.usesPrivateCoupleReveal(
+                intimacyPack.id,
+                intimacyPack.topic,
+                intimacyQuestion.q
+            )
+        ) {
+            HarmonyImageChoiceKind.INTIMACY_PRIVATE_REVEAL
+        } else {
+            HarmonyImageChoiceKind.INTIMACY_COMPACT
+        }
     }
 
     val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId } ?: return null
