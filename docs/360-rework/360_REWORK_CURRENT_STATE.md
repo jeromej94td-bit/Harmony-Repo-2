@@ -8,7 +8,7 @@
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY  
 **Next Stage-02 work package:** 24.8 — Stage 02.3 Proposal-location image duels  
-**Prepared follow-up:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #46)
+**Latest merged Stage-02 package:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #48)<br>**Prepared follow-up:** 24.10 — Stage 02.5 Proposal priority ranking content (PR #49)
 
 ## Source-of-truth rule
 
@@ -39,7 +39,11 @@ Parallel Stage-06 work must not reuse logical IDs reserved by Stage 02. In parti
 **Scope:** proposal mood/details Either-Or data only.  
 **Verification gap:** no Gradle-capable environment has recorded the focused Android build result.
 
-### NEXT EXACT ACTION — Stage 02
+### Prepared next package
+
+**Work package 24.10 / Stage 02.5:** PR #49 adds five deterministic proposal-priority items bound to the existing `proposal_priorities` ranking step. The existing `RankingSlotBoard` is reused; no new UI surface is introduced.
+
+## NEXT EXACT ACTION — Stage 02
 
 **24.8 / Stage 02.3:** inspect the current image-duel runner and image-resource pipeline, then implement only proposal-location image duels.
 
