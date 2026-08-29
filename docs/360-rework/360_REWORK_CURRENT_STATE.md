@@ -7,8 +7,8 @@
 **Stage-02 package coverage:** 12/12 = 100%  
 **Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #87:** 3/7  
-**Current Stage-03 substage after PR #87:** 03.4 — Reusable `Ranking` step  
+**Stage-03 progress after PR #99:** 4/7  
+**Current Stage-03 substage after PR #99:** 03.5 — Reusable `PartnerPrediction` step  
 **Stage-05 progress:** 1/5 = 20%  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
@@ -75,7 +75,6 @@ PR #85 introduced:
 **Status:** ✅ DONE  
 **Package:** 26.3 / PR #87  
 **Merge:** `704fa2a14732ed8141abb7d98da2018d27853aeb`  
-**Stage-03 progress:** **3/7**
 
 PR #87 introduced:
 
@@ -89,9 +88,27 @@ PR #87 introduced:
 
 TDD/verification evidence for 26.3: generic model contracts landed before production code; focused Kotlin RED compilation failed on the absent generic image-duel types, followed by a passing isolated Kotlin model/adapter harness. Existing proposal-location tests continue to specify legacy tags, timing, selection-lock and the three-round sequence. A new Robolectric Compose contract covers generic rendering, stable tags and the pick callback. GitHub reported the final PR conflict-free and 0 commits behind `main`; no green full Android/Gradle/Robolectric run is claimed because repository CI has no runnable status checks/credits.
 
+### 03.4 Reusable Ranking step
+
+**Status:** ✅ DONE  
+**Package:** 26.4 / PR #99  
+**Merge:** `958ba77670958d34ff2eecb581ab159114e310bd`  
+**Stage-03 progress:** **4/7**
+
+PR #99 introduced:
+
+- reusable `ExperienceRankingItem` and validated `ExperienceRankingRound` with stable item IDs;
+- `ExperienceRankingSelectionCodec` as the compatibility bridge to the existing label-based `RankingAnswerCodec`;
+- the existing persisted ranking payload format remains unchanged and decodable;
+- stateless `ExperienceRankingBoard` wrapping the shipped drag/drop `RankingSlotBoard` instead of copying its gestures or layout;
+- proposal priorities now use the generic ranking board while preserving the same five priority IDs, labels, order semantics and reveal input;
+- a dedicated wrapper test tag plus existing `ranking_slot_*` tags remain available for UI contracts.
+
+TDD/verification evidence for 26.4: RED isolated Kotlin compilation confirmed the generic ranking API was absent; GREEN isolated Kotlin model/adapter verification produced `EXPERIENCE_RANKING_MODEL_PASS`. A Robolectric/Compose contract for the wrapper is present but was not executed here because repository GitHub Actions/credits are unavailable. No green full Android/Gradle build is claimed.
+
 ### NEXT EXACT ACTION — core
 
-Begin **03.4 — Reusable `Ranking` step** as its own narrow 26.x package. Reuse the existing drag/drop ranking behavior and answer codec, preserve the proposal priority-ranking semantics, and do not pull PartnerPrediction, Scenario, OpenPrompt or Reveal into 03.4.
+Begin **03.5 — Reusable `PartnerPrediction` step** as its own narrow 26.x package. Preserve the existing A predicts B → B answers → reveal semantics and existing encoded answers while moving only the mechanic into the reusable experience layer. Do not pull Scenario, OpenPrompt or Reveal into 03.5.
 
 ## Parallel Stage 05 — Questions Quality Rework
 
