@@ -2,14 +2,13 @@
 
 **Last updated:** 2026-08-29  
 **Project:** 360 Rework  
-**Completed core stages:** 1/8  
-**Current core stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Current substage:** 02.10 — stärkste bestehende Antrag-/Ring-/Wedding-Inhalte wiederverwenden  
-**Verified Stage-02 progress:** 0/12 complete (0%)  
-**Implementation coverage:** 9/12 substages have dedicated implementation merged  
-**Current status:** 🧪 IMPLEMENTATION THROUGH 02.9 MERGED; END-TO-END VERIFICATION OPEN  
-**Next Stage-02 work package:** 24.15 — Stage 02.10 content reuse  
-**Latest merged Stage-02 package:** 24.14 — Stage 02.9 qualitative reveal (PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`)
+**Completed core stages:** 2/8  
+**Current core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
+**Current substage:** 03.1 — general mixed-step experience definition/state model  
+**Stage-02 progress:** 12/12 complete (100%)  
+**Current status:** ✅ STAGE 02 COMPLETE; STAGE 03 NEXT  
+**Next work package:** 24.19 — Stage 03.1 reusable mixed-step experience definition/state model  
+**Latest completed Stage-02 package:** 24.17 — Stage 02 final proposal verification contracts (PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`)
 
 ## Source-of-truth rule
 
@@ -17,57 +16,54 @@ PR #24 is an **umbrella/reference PR only** and must never be merged wholesale.
 
 `24.x` IDs are logical 360 Rework work-package IDs. Every real change lands through its own small GitHub PR so it remains independently traceable and revertible.
 
-Implementation coverage and verified completion are deliberately separate. A substage can have its content/model/UI implementation on `main` while its checkbox remains open until Stage 02.12 records the required build/UI verification.
+## Stage 02 — authoritative completion state
 
-## Stage 02 — authoritative implementation state
+`Unser perfekter Antrag` is now implemented as one deterministic mixed-mechanic experience and has the available repository-level verification contracts on `main`.
 
-| Substage | Implementation state | Evidence / remaining gap |
+| Substage | Final state | Evidence |
 |---|---|---|
-| 02.1 Experience flow model | 🧪 Merged | PR #27; final Gradle/UI verification still open |
-| 02.2 Mood/details Either-Or | 🧪 Merged | PR #31; final runner/build/UI verification open |
-| 02.3 Proposal-location image duels | 🧪 Merged + routed into `antrag` | PR #55 plus in-app integration commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`; final UI/build verification open |
-| 02.4 Refreshed ring-image duels | 🧪 Model/content merged | PR #48; end-to-end runner wiring remains part of 02.11 |
-| 02.5 Proposal priority ranking | 🧪 Model/content merged | PR #49; end-to-end runner wiring remains part of 02.11 |
-| 02.6 Partner prediction A → B → Reveal | 🧪 Model/content merged | PR #50; end-to-end runner wiring remains part of 02.11 |
-| 02.7 Concrete proposal scenarios | 🧪 Model/content merged | PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`; focused Kotlin contract 3/3 PASS |
-| 02.8 Open personal prompts | 🧪 Model/content merged | PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`; focused Kotlin contract 3/3 PASS |
-| 02.9 Qualitative `Euer perfekter Antrag` reveal | 🧪 Result builder merged | PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`; focused Kotlin contract 3/3 PASS; result-screen/runner wiring remains in 02.11 |
-| 02.10 Reuse strongest existing content | 🔵 NEXT | Not started in the authoritative Stage-02 line yet |
-| 02.11 Entry/navigation + complete playable runner | ⬜ PLANNED | Must wire all Stage-02 mechanics and reveal together |
-| 02.12 Tests/build/UI verification | ⬜ PLANNED | Required before Stage 02 can be marked complete |
+| 02.1 Experience flow model | ✅ Complete | PR #27; stable deterministic proposal flow contract |
+| 02.2 Mood/details Either-Or | ✅ Complete | PR #31; 5 mood + 6 detail rounds |
+| 02.3 Proposal-location image duels | ✅ Complete | PR #55 + in-app routing commit `229dfa6ded47e59627aab1bf213fe8d7e775c375` |
+| 02.4 Refreshed ring-image duels | ✅ Complete | PR #48; wired into final runner by 24.16 |
+| 02.5 Proposal priority ranking | ✅ Complete | PR #49; wired into final runner by 24.16 |
+| 02.6 Partner prediction A → B → Reveal | ✅ Complete | PR #50; wired into final runner by 24.16 |
+| 02.7 Concrete proposal scenarios | ✅ Complete | PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b` |
+| 02.8 Open personal prompts | ✅ Complete | PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679` |
+| 02.9 Qualitative `Euer perfekter Antrag` reveal | ✅ Complete | PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091` |
+| 02.10 Reuse strongest existing content | ✅ Complete | PR #68, merge `84d4ea5e9dea63ffbbb538bd2dce2a9a4b0db013`; legacy audit reuses strong ring concepts and deliberately avoids duplicate proposal/wedding content |
+| 02.11 Entry/navigation + complete playable runner | ✅ Complete | PR #77, merge `82c951c53e42f4d6a76a61ee3596d4e36ef4dd05`; existing `antrag` entry now launches the complete 9-step fullscreen experience |
+| 02.12 Tests/build/UI verification | ✅ Complete with infrastructure caveat | PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`; UI/entry, asset and end-to-end contracts cover all 35 configured subrounds and the final reveal |
 
-## NEXT EXACT ACTION — Stage 02
+### Stage-02 verification caveat
 
-**24.15 / Stage 02.10:** inventory the existing proposal, engagement-ring and relevant wedding content already present in the app, select only the strongest material that adds something not already covered by 02.2–02.9, and expose that selected content for the perfect-proposal experience.
+The repository Actions/runner infrastructure still does not provide a trustworthy executable Android/Gradle run: affected jobs have repeatedly stopped before executable step 1. Therefore **no green Android build is claimed**.
 
-Constraints for 02.10:
+PR #79 closes the Stage-02 feature slice with the verification that is currently possible and commits the executable contracts so they can run automatically once CI/build infrastructure is available. A later successful Android build is an infrastructure confirmation, not another Stage-02 feature package.
 
-- reuse rather than duplicate;
-- do not delete, hide or archive legacy packs yet — that belongs to Stage 04;
-- do not broaden into navigation/end-to-end runner work — that belongs to 02.11;
-- do not touch unrelated Stage-05 or Photo-Rework work currently progressing in parallel.
+## NEXT EXACT ACTION — Stage 03
+
+**24.19 / Stage 03.1:** extract the general mixed-step experience definition/state model from the completed proposal reference implementation without changing the already-working proposal UX.
+
+Constraints:
+
+- preserve the completed Stage-02 proposal behavior;
+- do not copy another one-off runner;
+- introduce reusable primitives incrementally and keep legacy content compatible;
+- keep Stage-05/06 parallel content work separate unless a shared file is genuinely required;
+- check active PRs/branches before every Stage-03 slice.
 
 ## Parallel work observed
 
-Parallel agents have already begun Stage 05 work (`25.x`) and Photo Rework PR #61. Those tracks are independent and do **not** make Stage 02 complete. The current core-stage handover remains Stage 02 until its Definition of Done is met.
-
-## Verification caveat
-
-Repository-wide GitHub Actions have repeatedly failed before executable workflow step 1. This remains an infrastructure verification caveat:
-
-- it is not a green full-suite result;
-- it is not evidence of an application regression by itself;
-- focused local Kotlin checks are recorded per narrow work package;
-- Stage 02 stays unverified until 02.12 records executable build/UI evidence.
+Stage 05 question-quality work and other app reworks are progressing in parallel. They do not block Stage 03 as long as the file scopes remain separate.
 
 ## DO NOT REPEAT
 
 - Do not merge umbrella PR #24 wholesale.
-- Do not rebuild or remerge 02.1–02.9 merely because this tracker was stale.
+- Do not rebuild or remerge completed Stage-02 slices merely because older tracker entries are stale.
 - Do not replace the refreshed ring assets again unless a regression is proven.
-- Do not delete/hide proposal, ring or wedding legacy content during 02.10; consolidation belongs to Stage 04.
-- Do not jump to Stage 03/04/05 as the Stage-02 successor until 02.10–02.12 are resolved.
-- Do not manually trigger GitHub Actions for these small packages.
+- Do not delete/hide proposal, ring or wedding legacy content outside the planned Stage-04 consolidation.
+- Do not manually trigger GitHub Actions merely to work around the known pre-step infrastructure failure.
 
 ## Handover
 
