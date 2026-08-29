@@ -59,6 +59,18 @@ internal fun MemoryMatchBoard(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val photoMode = PhotoQuestionPolicy.modeForQuestion(question)
+    if (photoMode != null) {
+        PhotoQuestionBoard(
+            mode = photoMode,
+            rawQuestion = question,
+            selectedAnswer = selectedAnswer,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val appLanguage = LocalAppLanguage.current.code

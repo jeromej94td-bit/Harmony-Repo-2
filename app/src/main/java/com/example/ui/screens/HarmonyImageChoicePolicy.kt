@@ -29,6 +29,10 @@ internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
 internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
+    if (PhotoQuestionPolicy.modeFor(packId, questionIndex) != null) {
+        return HarmonyImageChoiceKind.MEMORY_MATCH
+    }
+
     when {
         packId == "liebegleichgewicht" && questionIndex == 0 -> return HarmonyImageChoiceKind.HAPPY_COUPLE
         packId == "essenreden" && questionIndex == 3 -> return HarmonyImageChoiceKind.EGG
