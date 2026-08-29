@@ -1,5 +1,6 @@
 package com.example.data.model
 
+import com.example.data.GeneratedContentRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -10,11 +11,11 @@ class SexIntimacyContentReworkTest {
 
     @Test
     fun sexAndIntimacyPacks_haveDeepAndEverydayRelevantQuestions() {
-        val intimacy = HarmonyPacksData.DEFAULT_PACKS.firstOrNull { it.id == "naehe" }
-        val sex = HarmonyPacksData.DEFAULT_PACKS.firstOrNull { it.id == "intimleben" }
+        val intimacy = GeneratedContentRegistry.PACKS.firstOrNull { it.id == "naehe" }
+        val sex = GeneratedContentRegistry.PACKS.firstOrNull { it.id == "intimleben" }
 
-        assertNotNull("Nähe & Intimität pack must exist", intimacy)
-        assertNotNull("Unser Intimleben pack must exist", sex)
+        assertNotNull("Nähe & Intimität rework pack must exist", intimacy)
+        assertNotNull("Unser Intimleben rework pack must exist", sex)
         intimacy!!
         sex!!
 
