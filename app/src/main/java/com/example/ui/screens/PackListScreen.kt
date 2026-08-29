@@ -2,14 +2,15 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,8 +38,6 @@ fun PackListScreen(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
-
     val topic = HarmonyPacksData.TOPICS.find { it.id == selectedTopicId }
     val category = HarmonyPacksData.CATEGORIES.find { it.id == selectedCategoryId }
     val titleText = when {
@@ -69,63 +68,69 @@ fun PackListScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(bottom = 90.dp)
+    // Important for scroll performance: only compose the pack cards that are
+    // actually on screen. The previous verticalScroll + forEach implementation
+    // instantiated every animated pack card at once.
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 90.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = titleText,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = HarmonyText
-            )
-            TextButton(
-                onClick = onClose,
-                modifier = Modifier.testTag("close_pack_list_button")
+        item(key = "pack_list_header") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "✕ " + LanguageManager.tr("Schließen", appLanguage),
-                    color = HarmonyMuted,
-                    fontSize = 13.sp
+                    text = titleText,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = HarmonyText
                 )
+                TextButton(
+                    onClick = onClose,
+                    modifier = Modifier.testTag("close_pack_list_button")
+                ) {
+                    Text(
+                        text = "✕ " + LanguageManager.tr("Schließen", appLanguage),
+                        color = HarmonyMuted,
+                        fontSize = 13.sp
+                    )
+                }
             }
         }
 
-        FilterChipsRow(
-            selectedFilter = packFilter,
-            onFilterSelected = onSetFilter,
-            appLanguage = appLanguage,
-            modifier = Modifier.padding(horizontal = 18.dp)
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
+        item(key = "pack_list_filters") {
+            FilterChipsRow(
+                selectedFilter = packFilter,
+                onFilterSelected = onSetFilter,
+                appLanguage = appLanguage,
+                modifier = Modifier.padding(horizontal = 18.dp)
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+        }
 
         if (list.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 44.dp, horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = LanguageManager.tr("Hier ist gerade nichts.\nWechsle den Filter oder wähle ein anderes Thema.", appLanguage),
-                    color = HarmonyMuted,
-                    fontSize = 13.5.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Medium
-                )
+            item(key = "pack_list_empty") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 44.dp, horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = LanguageManager.tr("Hier ist gerade nichts.\nWechsle den Filter oder wähle ein anderes Thema.", appLanguage),
+                        color = HarmonyMuted,
+                        fontSize = 13.5.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         } else {
-            list.forEach { rawPack ->
+            items(items = list, key = { it.id }) { rawPack ->
                 val pack = LanguageManager.translatePack(rawPack, appLanguage)
                 PaddingPackCard(
                     appLanguage = appLanguage,
