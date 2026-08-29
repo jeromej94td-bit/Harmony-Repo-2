@@ -1,8 +1,10 @@
 # 360 Rework — Stage 05.2 Food / Travel / Leisure / Culture
 
 **Stage:** 05.2 — Food / travel / leisure / culture  
+**Status:** ✅ COMPLETE via 25.8–25.13  
 **Scope:** Harmony-360 Sections 04, 05, 07 and 14  
-**Raw target:** 4 generated section objects, expected 18 packs each / 72 packs total  
+**Raw target:** 4 generated section objects, 18 packs each / 72 packs total  
+**Final runtime target:** 72 unique stable packs, six curated questions per pack  
 **Policy:** generated source remains intact; curation is explicit by stable pack ID in narrow 25.x packages.
 
 ## Scope
@@ -14,76 +16,108 @@
 | 07 | `GeneratedHarmonyAdrenaline360Section07FreizeitHobbys` | `h360_section_07_freizeit_hobbys` | Freizeit & Hobbys |
 | 14 | `GeneratedHarmonyAdrenaline360Section14KulturMedien` | `h360_section_14_kultur_medien` | Kultur & Medien |
 
-## Audit findings that define the rework
+## Audit findings that defined the rework
 
-The first source pass confirms the same generator artifacts that Stage 05 is intended to remove:
+The source pass confirmed the same generator artifacts that Stage 05 was intended to remove:
 
-- **Travel:** otherwise useful topics are repeatedly wrapped in generic scenario, memory, priority and deep-talk templates rather than travel-specific decisions.
-- **Food:** several packs reuse generic relationship/value options that do not match the food topic. Examples include broad `Nähe / Freiheit / Sicherheit / Abenteuer` prediction choices and generic ranking quartets around Fine Dining.
-- **Leisure:** raw Section 07 still contains an English sentence in the `Serien & Filme` source and multiple noun-substitution templates. Existing runtime cleanup must be preserved rather than duplicated.
-- **Culture/media:** `Musikgeschmack` and other packs reuse generic value/planning quartets; the raw `Museen` ranking contains the known English ranking template that is already handled by `GeneratedHarmony360TextCleanup` at runtime.
+- **Travel:** otherwise useful topics were repeatedly wrapped in generic scenario, memory, priority and deep-talk templates rather than travel-specific decisions.
+- **Food:** several packs reused generic relationship/value options that did not match the food topic, including broad `Nähe / Freiheit / Sicherheit / Abenteuer` prediction choices and generic ranking quartets.
+- **Leisure:** raw Section 07 contained an English sentence in the `Serien & Filme` source and multiple noun-substitution templates.
+- **Culture/media:** `Musikgeschmack` and other packs reused generic value/planning quartets; the raw `Museen` ranking contained the known English ranking template.
 
-These findings are inventory evidence, not final Keep/Rewrite/Archive decisions. Every archive decision must be explicit and must retain a stronger canonical alternative.
+The completed Stage-05.2 pipeline now replaces those artifacts in curated runtime output without destructively editing the four generated source files.
 
-## Package sequence
+## Completed package sequence
 
 ### 25.8 / 05.2a — Scope + curation infrastructure
 
-- Add `Harmony360FoodTravelLeisureCultureQualityRework` as the explicit Stage-05.2 boundary.
-- Lock the four section tags in a focused unit contract.
-- Verify unrelated and not-yet-curated target packs remain value-equivalent.
-- Add a raw inventory contract for the four source sections and unique IDs.
-- Do not wire behavior-changing overrides yet.
+**PR #97 — merged.**
 
-Expected Stage-05.2 progress after merge: **1/6 = 16.7%**.
+- Added `Harmony360FoodTravelLeisureCultureQualityRework` as the explicit Stage-05.2 boundary.
+- Locked the four section tags in a focused unit contract.
+- Added a raw inventory contract for four 18-pack sections / 72 unique raw IDs.
+- Kept the first infrastructure transform behavior-neutral.
+
+Progress after merge: **1/6 = 16.7%**.
 
 ### 25.9 / 05.2b — Reisen & Abenteuer
 
-- Make an explicit Keep / Rewrite / Archive decision for every Section-04 pack.
-- Replace generic scenario/memory/priority wording with real travel choices: pace, planning, budget comfort, accommodation, transport, exploration, rest, risk tolerance and compromise during trips.
-- Preserve distinct trip formats instead of collapsing genuinely different travel preferences.
+**PR #108 — merged.**
 
-Expected progress after merge: **2/6 = 33.3%**.
+- 18/18 explicit `REWRITE` decisions.
+- Six real travel questions per pack covering pace, planning, budget, comfort, accommodation, transport, exploration, rest, risk tolerance and compromise.
+- Stable IDs and order retained.
+
+Progress after merge: **2/6 = 33.3%**.
 
 ### 25.10 / 05.2c — Essen & Genuss
 
-- Make an explicit decision for every Section-05 pack.
-- Replace generic relationship quartets with food-specific preferences: taste, sharing, cooking roles, restaurant style, adventurousness, dietary boundaries, comfort food, spice, breakfast/brunch and special-occasion dining.
-- Remove or merge filler only where a stronger canonical food pack covers the same decision space.
+**PR #114 — merged.**
 
-Expected progress after merge: **3/6 = 50%**.
+- 18/18 explicit `REWRITE` decisions.
+- Six food-specific questions per pack covering taste, sharing, cooking roles, restaurant style, adventurousness, dietary boundaries, comfort food, coffee and special-occasion dining.
+- Generic relationship/value quartets removed from curated output.
+
+Progress after merge: **3/6 = 50%**.
 
 ### 25.11 / 05.2d — Freizeit & Hobbys
 
-- Make an explicit decision for every Section-07 pack.
-- Curate around actual leisure compatibility: active/passive time, gaming, sport, books, concerts, festivals, museums, solo-vs-shared hobbies and trying the partner's interests.
-- Preserve the existing runtime English-cleanup behavior and eliminate the underlying low-quality wording from curated output without creating a second cleanup system.
+**PR #117 — merged.**
 
-Expected progress after merge: **4/6 = 66.7%**.
+- 18/18 explicit `REWRITE` decisions.
+- Six concrete hobby/leisure questions per pack.
+- English generator leftovers and known generic option templates removed from curated output while preserving the existing cleanup architecture.
+
+Progress after merge: **4/6 = 66.7%**.
 
 ### 25.12 / 05.2e — Kultur & Medien
 
-- Make an explicit decision for every Section-14 pack.
-- Replace generic safety/freedom/adventure/comfort substitutions with concrete media/culture questions covering music, streaming, cinema, books, museums, concerts, social media and cultural discovery.
-- Keep strong distinctions from Section 07; merge/archive only true semantic duplicates.
+**PR #132 — merged.**
 
-Expected progress after merge: **5/6 = 83.3%**.
+- 18/18 explicit `REWRITE` decisions.
+- Six concrete media/culture questions per pack across music, streaming, cinema, books, museums, concerts, social media, information sources and cultural discovery.
+- Stable IDs/order retained and raw source left intact.
+
+Progress after merge: **5/6 = 83.3%**.
 
 ### 25.13 / 05.2f — Cross-section audit + tracker
 
-- Assert 72/72 raw target packs have explicit decisions.
-- Assert curated IDs are unique, archived IDs are absent and canonical replacements remain.
-- Reject known generic filler quartets and English leftovers in curated Stage-05.2 output.
-- Verify non-05.2 content remains unchanged by the Stage-05.2 transform.
-- Update master roadmap, current state and Stage-05 worklog with verified final counts.
+**PR #136 — final completion slice.**
 
-Expected progress after merge: **6/6 = 100%**; Stage 05 overall becomes **2/5 = 40%**.
+- Assert 72 final target packs and unique stable IDs across the four section tags.
+- Reject the known generic filler quartets from the final curated output, including `Sicherheit / Freiheit / Abenteuer / Komfort` and `Kopf / Herz / Bauch / Erfahrung`.
+- Reject known English generator fragments and raw-source typos that must never resurface in curated output.
+- Detect ordinary identical 4-option sets reused across three or more distinct packs; intentional mechanic sets are explicitly exempt.
+- Negative fixtures prove each detector actually fails on the defect it is intended to guard.
+- Isolated Kotlin verification: `STAGE052_AUDIT_HARNESS_PASS`, warnungsfrei after cleanup.
+- Synchronize master roadmap, current state and Stage-05 worklog.
 
-## Constraints
+On merge: **6/6 = 100%**; Stage 05 overall becomes **2/5 = 40%**.
+
+## Completion criteria
+
+- [x] Four target sections are explicitly scoped.
+- [x] 18/18 Travel packs curated.
+- [x] 18/18 Food packs curated.
+- [x] 18/18 Leisure packs curated.
+- [x] 18/18 Culture/Media packs curated.
+- [x] Raw generated section files remain non-destructively preserved.
+- [x] Runtime wiring applies all four curation layers.
+- [x] Stable IDs remain unique across the 72 target packs.
+- [x] Known generic quartet regressions are centrally rejected.
+- [x] English generator residue and known typos are centrally rejected.
+- [x] Excessive cross-pack reuse of ordinary 4-option sets is centrally rejected.
+- [x] Tracker files identify the exact next Stage-05 action.
+
+## Constraints preserved
 
 - Do not edit the four large generated source files destructively.
-- Do not absorb Stage 03 Experience-engine work or the active Ranking branch.
-- Do not reopen completed Stage 05.1 unless a regression is proven.
-- Do not undo current topic-normalization, relationship curation, scenario-journey curation, `NormensLoeschungen`, or runtime text/scenario cleanup.
-- No archive by heuristic. Pack IDs and reasons must be explicit and regression-tested.
-- Prefer fewer strong, concrete questions over eight repetitive template questions.
+- Do not absorb Stage 03 Experience-engine work.
+- Do not reopen completed Stage 05.1 or Stage 05.2 unless a regression is proven.
+- Do not undo topic normalization, relationship curation, scenario-journey curation, `NormensLoeschungen`, or runtime text/scenario cleanup.
+- No archive by heuristic. Pack IDs and reasons remain explicit and regression-tested.
+- Prefer fewer strong, concrete questions over repetitive template questions.
+
+## Next
+
+Start **Stage 05.3 — Future / money / work / family** as a new narrow 25.x package sequence.

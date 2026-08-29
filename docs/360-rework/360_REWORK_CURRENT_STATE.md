@@ -1,6 +1,6 @@
 # 360 Rework — Current State
 
-**Last updated:** 2026-08-29  
+**Last updated:** 2026-08-30  
 **Project:** 360 Rework  
 **Completed green core stages:** 1/8  
 **Core Stage 02 status:** 🧪 IMPLEMENTATION + CONTRACT COVERAGE COMPLETE; GREEN ANDROID BUILD PENDING INFRASTRUCTURE  
@@ -9,9 +9,10 @@
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
 **Stage-03 progress after PR #126:** 6/7  
 **Current Stage-03 substage after PR #126:** 03.7 — Reusable `Reveal`/result flow  
-**Stage-05 progress:** 1/5 = 20%  
+**Stage-05 progress:** 2/5 = 40%  
 **Stage 05.1:** ✅ 7/7 = 100%  
-**Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
+**Stage 05.2:** ✅ 6/6 = 100%  
+**Next Stage-05 substage:** 05.3 — Future / money / work / family
 
 ## Source-of-truth rule
 
@@ -131,8 +132,7 @@ Begin **03.7 — Reusable `Reveal`/result flow plus legacy compatibility during 
 ### 05.1 Relationship / communication / everyday-life
 
 **Status:** ✅ DONE  
-**Progress:** **7/7 = 100%**  
-**Stage-05 overall:** **1/5 = 20%**
+**Progress:** **7/7 = 100%**
 
 Scope: Sections 01, 02, 06 and 12.
 
@@ -146,11 +146,29 @@ Scope: Sections 01, 02, 06 and 12.
 
 Package trail: 25.0 PR #59, 25.1 PR #60, 25.2 PR #62, 25.3 PR #64, 25.4 PR #69, 25.5 PR #70, 25.6 PR #71, 25.7 PR #76.
 
+### 05.2 Food / travel / leisure / culture
+
+**Status:** ✅ DONE  
+**Progress:** **6/6 = 100%**  
+**Stage-05 overall after 25.13:** **2/5 = 40%**
+
+Scope: Sections 04, 05, 07 and 14.
+
+- 72 raw target packs: 18 each in travel, food, leisure and culture/media.
+- 72 stable runtime packs retained; every target pack has an explicit `REWRITE` decision.
+- Six concrete, subject-specific questions per pack replace the generator filler.
+- Final cross-section gate rejects the known generic answer quartets, including `Sicherheit / Freiheit / Abenteuer / Komfort` and `Kopf / Herz / Bauch / Erfahrung`.
+- The gate also rejects known English generator fragments, source typos and identical ordinary four-option sets reused across three or more different packs.
+- The intentional mechanic set `{user} / {partner} / Beide / Niemand` remains allowed.
+- Generated raw section files remain intact; curation stays isolated by stable pack ID.
+
+Package trail: 25.8 PR #97, 25.9 PR #108, 25.10 PR #114, 25.11 PR #117, 25.12 PR #132, 25.13 PR #136.
+
 The detailed 25.x ledger is `docs/360-rework/360_REWORK_STAGE05_WORKLOG.md`.
 
 ### NEXT EXACT ACTION — Stage 05
 
-Start **05.2 — Food / travel / leisure / culture** under a new narrow 25.x range. Do not reopen 05.1 unless a regression is proven.
+Start **05.3 — Future / money / work / family** under the next narrow 25.x range. Do not reopen 05.1 or 05.2 unless a regression is proven.
 
 ## Newer parallel main changes preserved
 
@@ -173,4 +191,5 @@ Repository-wide GitHub Actions continue to terminate before executable workflow 
 - Do not overwrite newer main changes while reconciling tracker work.
 - Do not count unrelated content reworks toward Stage-03 engine progress.
 - Do not reopen Stage 02 feature implementation unless a regression is demonstrated.
+- Do not reopen completed Stage 05.1/05.2 unless a regression is demonstrated.
 - Do not claim a green Android build until one actually executes.
