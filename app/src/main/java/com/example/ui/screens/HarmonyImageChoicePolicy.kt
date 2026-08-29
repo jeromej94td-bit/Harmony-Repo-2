@@ -10,6 +10,7 @@ internal enum class HarmonyImageChoiceKind {
     TRAVEL,
     TRAUMHAUS,
     PROPOSAL_LOCATION,
+    HAPPY_COUPLE,
     RANK_ORDER,
     PERSON_ASSIGNMENT,
     PARTNER_PREDICTION,
@@ -23,8 +24,13 @@ internal enum class HarmonyImageChoiceKind {
     DEEP_TALK
 }
 
+internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
+
+internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
+
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
     when {
+        packId == "liebegleichgewicht" && questionIndex == 0 -> return HarmonyImageChoiceKind.HAPPY_COUPLE
         packId == "essenreden" && questionIndex == 3 -> return HarmonyImageChoiceKind.EGG
         packId == "essenreden" && questionIndex == 4 -> return HarmonyImageChoiceKind.STEAK
         packId == "reisevor" && questionIndex == 4 -> return HarmonyImageChoiceKind.TRAVEL

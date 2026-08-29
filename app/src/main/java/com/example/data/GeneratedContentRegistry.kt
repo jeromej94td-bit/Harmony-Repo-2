@@ -13,7 +13,10 @@ import com.example.data.model.InteractionPromptPolicy
  */
 object GeneratedContentRegistry {
     val VERSION: Long =
-        (GeneratedHarmonyContent.VERSION * 31L) xor GeneratedHarmonyNewPicGame.VERSION xor GeneratedHarmonyAdrenaline360.VERSION
+        (GeneratedHarmonyContent.VERSION * 31L) xor
+            GeneratedHarmonyNewPicGame.VERSION xor
+            GeneratedHarmonyAdrenaline360.VERSION xor
+            GeneratedHarmonyHappyCouple.VERSION
 
     val CATEGORIES: List<GenCategory> by lazy {
         (GeneratedHarmonyContent.CATEGORIES + GeneratedHarmonyNewPicGame.CATEGORIES + GeneratedHarmonyAdrenaline360.CATEGORIES)
@@ -52,6 +55,7 @@ object GeneratedContentRegistry {
         GeneratedHarmonyContent.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyNewPicGame.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyAdrenaline360.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
+        GeneratedHarmonyHappyCouple.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         byId.values.toList()
     }
 
