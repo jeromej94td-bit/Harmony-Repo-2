@@ -23,8 +23,7 @@ object ProposalExperienceRunnerPolicy {
 
     fun itemCount(stepId: String): Int = when (stepId) {
         "proposal_mood", "proposal_details" -> ProposalEitherOrRounds.roundsFor(stepId).size
-        "proposal_location" -> ProposalLocationDuels.rounds.size
-        ProposalRingImageDuels.STEP_ID -> ProposalRingImageDuels.rounds.size
+        "proposal_location", ProposalRingImageDuels.STEP_ID -> ProposalImageDuelAdapter.roundsFor(stepId).size
         ProposalPriorityRanking.STEP_ID -> 1
         ProposalPartnerPrediction.STEP_ID -> ProposalPartnerPrediction.rounds.size
         ProposalScenarios.STEP_ID -> ProposalScenarios.rounds.size
