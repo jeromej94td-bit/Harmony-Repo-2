@@ -96,8 +96,8 @@ object QuestionInteractionPolicy {
 }
 
 /**
- * All full-screen game routing lives here. The old ranking dispatcher stays intentionally small
- * so the already shipped drag/drop implementation is not destabilized by the new game systems.
+ * All full-screen game routing lives here. Category fallbacks matter for remotely loaded content,
+ * because Supabase packs do not necessarily carry the generated source tags used by embedded data.
  */
 object FullscreenGameMechanicPolicy {
     fun resolve(pack: QuestionPack, questionIndex: Int): FullscreenGameMechanicKind? {
@@ -117,16 +117,16 @@ object FullscreenGameMechanicPolicy {
             pack.tags.any { it == "mechanik_skala" } || pack.cat == "h360_skala" ->
                 FullscreenGameMechanicKind.SCALE_MATCH
 
-            pack.tags.any { it == "mechanik_wer_eher" } ->
+            pack.tags.any { it == "mechanik_wer_eher" } || pack.cat == "wer" ->
                 FullscreenGameMechanicKind.WHO_WOULD
 
-            pack.tags.any { it == "mechanik_memory" } ->
+            pack.tags.any { it == "mechanik_memory" } || pack.cat == "h360_memory" ->
                 FullscreenGameMechanicKind.MEMORY_MATCH
 
             pack.tags.any { it == "mechanik_szenario" } || pack.cat == "h360_szenario" ->
                 FullscreenGameMechanicKind.SCENARIO
 
-            pack.tags.any { it == "mechanik_prioritaet" } ->
+            pack.tags.any { it == "mechanik_prioritaet" } || pack.cat == "h360_prioritaet" ->
                 FullscreenGameMechanicKind.PRIORITY_POKER
 
             pack.tags.any { it == "mechanik_entweder_oder" } ->
