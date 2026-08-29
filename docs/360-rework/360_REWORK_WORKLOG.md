@@ -18,7 +18,7 @@ This file is the append-only project black box for **360 Rework**.
 **Work package:** 24.7 — Proposal merge-status sync<br>
 **Status:** ✅ MERGED<br>
 **Branch:** `360-rework/24-7-control-state-sync`<br>
-**GitHub PR:** recorded by the merge of this package<br>
+**GitHub PR:** #37 — `[24.7] 360 Rework — Sync merged proposal status`<br>
 
 ### Correction to the earlier handover
 
