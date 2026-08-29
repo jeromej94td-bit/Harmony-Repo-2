@@ -479,3 +479,30 @@ A separate agent has already begun Stage 05 `25.x` work, and Photo Rework PR #61
 ### Next exact action
 
 **24.15 / Stage 02.10:** inventory the existing proposal, engagement-ring and relevant wedding content, select only the strongest material that adds value beyond 02.2–02.9, and expose it for reuse by the perfect-proposal experience. Do not delete or hide legacy content yet; that belongs to Stage 04. Then proceed to 02.11 end-to-end wiring and 02.12 executable verification before moving the core-stage handover onward.
+
+
+---
+
+## 2026-08-29 — 26.5 and 26.6 reusable experience mechanics merged
+
+**Work packages:** 26.5 / Stage 03.5 and 26.6 / Stage 03.6  
+**Status:** ✅ MERGED  
+**Branches:** `360-rework/26-5-reusable-partner-prediction`, `360-rework/26-6-reusable-scenario-open-prompt`  
+**GitHub PRs:** #120 and #126  
+**Merge commits:** `8100488082eacf1313d2aa88891c049335b5e6d1`, `9470b8c84d15463a2076320c967c970d6be3854d`
+
+### Scope
+
+- 26.5 added a typed reusable PartnerPrediction round/selection model and compatibility codec while preserving the existing encoded answer format and A → B → Reveal behavior.
+- 26.6 added validated reusable Scenario and OpenPrompt rounds, proposal adapters and thin reusable boards. The proposal runner uses the reusable surfaces while preserving existing scenario journey/result choreography, open-prompt copy, gating and tags.
+- No Reveal redesign, navigation redesign, content deletion or generated imagery was included.
+
+### Verification
+
+- Current-main static source review completed.
+- Direct commit comparison for PR #126: one commit ahead, zero behind, four intended files.
+- No long-running GitHub Action or full Android/Gradle build was run because the repository has no reliable runnable test environment and the operator requested minimal credit usage.
+
+### Next exact action
+
+Implement **03.7 — Reusable Reveal/result flow plus legacy compatibility during migration** as a separate narrow package. Preserve the current reveal output and keep legacy content usable.
