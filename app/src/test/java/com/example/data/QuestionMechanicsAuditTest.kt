@@ -1,8 +1,6 @@
 package com.example.data
 
 import com.example.data.model.Question
-import com.example.data.model.QuestionAuditKind
-import com.example.data.model.QuestionMechanicsAudit
 import com.example.data.model.QuestionPack
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
