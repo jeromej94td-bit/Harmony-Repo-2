@@ -12,7 +12,7 @@
 **Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6, ✅ 24.6.2, ✅ 24.6.3<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
-**Next work package:** 24.8 — Stage 02.3 Proposal-location image duels
+**Next work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>**Prepared follow-up:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #45)
 
 ## Merge strategy
 
@@ -114,6 +114,10 @@ Do not infer logical work-package ownership from the historical branch names or 
 **Important:** Stage 06 remains **0/5 complete**. These packages fix confirmed defects and begin the 06.4 audit, but 06.1–06.4 stay unchecked until a broader audit confirms that the corresponding defect class is exhausted or remaining exceptions are documented.
 
 **Verification caveat:** the relevant repo-wide GitHub Actions again failed before executable step 1 (`steps: null`). The merges were explicitly authorized despite that infrastructure limitation. Do not describe 24.4–24.6.3 as having a green full test suite. The focused 24.6.2 Python tests and focused 24.6.3 Kotlin verification are separate local evidence only.
+
+## Prepared parallel follow-up
+
+**Work package 24.9 / Stage 02.4:** PR #45 (`360-rework/24-9-ring-image-duels`) adds five deterministic ring-image duels bound to the ten refreshed Stage-01 ring drawable keys. It is intentionally limited to the model/content contract and should be merged only after the concurrent 24.8 package is coordinated.
 
 ## NEXT EXACT ACTION
 
