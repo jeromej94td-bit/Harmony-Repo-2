@@ -12,9 +12,11 @@ data class ProposalRunnerPosition(
 )
 
 /**
- * Pure deterministic navigation for the Stage-02 proposal experience.
- * UI state stays in the Compose runner; this policy is the single source for step order,
- * subround counts and progress so the legacy `antrag` pack can open one coherent experience.
+ * Deterministic navigation for the Stage-02 proposal experience.
+ *
+ * Proposal-specific content still owns the item counts. Navigation/progress delegate to the
+ * reusable Stage-03 experience core through [ProposalExperienceAdapter] so existing callers keep
+ * the same public API and behavior.
  */
 object ProposalExperienceRunnerPolicy {
     val steps: List<ProposalFlowStep> = ProposalExperienceDefinitions.perfectProposal.steps
@@ -31,28 +33,13 @@ object ProposalExperienceRunnerPolicy {
         else -> 0
     }
 
-    fun next(position: ProposalRunnerPosition): ProposalRunnerPosition? {
-        val step = steps.getOrNull(position.stepIndex) ?: return null
-        val count = itemCount(step.id).coerceAtLeast(1)
-        if (position.itemIndex + 1 < count) {
-            return position.copy(itemIndex = position.itemIndex + 1)
-        }
-        if (position.stepIndex + 1 >= steps.size) return null
-        return ProposalRunnerPosition(stepIndex = position.stepIndex + 1, itemIndex = 0)
-    }
+    fun next(position: ProposalRunnerPosition): ProposalRunnerPosition? =
+        ProposalExperienceAdapter.navigator
+            .next(ProposalExperienceAdapter.toGenericPosition(position))
+            ?.let(ProposalExperienceAdapter::toProposalPosition)
 
-    fun progress(position: ProposalRunnerPosition): Float {
-        if (steps.isEmpty()) return 0f
-        if (position.stepIndex >= steps.lastIndex) return 1f
-
-        val totalItems = steps.sumOf { itemCount(it.id).coerceAtLeast(1) }
-        if (totalItems <= 1) return 1f
-
-        val completedBefore = steps.take(position.stepIndex)
-            .sumOf { itemCount(it.id).coerceAtLeast(1) }
-        val currentCount = itemCount(steps[position.stepIndex].id).coerceAtLeast(1)
-        val currentItem = position.itemIndex.coerceIn(0, currentCount - 1)
-        return ((completedBefore + currentItem).toFloat() / (totalItems - 1).toFloat())
-            .coerceIn(0f, 1f)
-    }
+    fun progress(position: ProposalRunnerPosition): Float =
+        ProposalExperienceAdapter.navigator.progress(
+            ProposalExperienceAdapter.toGenericPosition(position)
+        )
 }
