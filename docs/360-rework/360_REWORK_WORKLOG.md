@@ -217,3 +217,75 @@ The repo-wide GitHub Action again failed before the first executable workflow st
 - Stage 01/08 remains ✅ DONE.
 - Stage 02/08 remains 🔵 NEXT at `0/12 = 0%` because 24.1 changed only project-control documentation.
 - The next functional work package is **24.2 — Stage 02.1 Experience data model / deterministic proposal flow**.
+
+---
+
+## 2026-08-29 — Parallel Stage 06 cleanup packages 24.4–24.6 merged separately
+
+These packages were intentionally developed independently of the active Stage 02 proposal work. Each authoritative mainline package was rebuilt on the then-current `main` before merge so no stacked cleanup was accidentally bundled into another work package.
+
+### 24.4 — Stage 06.1 partial cleanup
+
+**Status:** ✅ MERGED TO MAIN  
+**Authoritative GitHub PR:** #35 — `[24.4] Repair malformed Never Have I Ever answer options`  
+**Merge commit:** `817d0a0c002aeac7a560f31513092957d242880a`
+
+What changed:
+
+- Added a narrow generated-content repair policy for `ichhabenochnie` packs.
+- Questions with an empty options list receive `Habe ich` / `Habe ich noch nie`.
+- Existing non-empty option lists remain unchanged.
+- `GeneratedContentRegistry` applies the repair before its existing runtime transformations.
+- Regression coverage checks the known malformed Hogwarts question and all registered Never Have I Ever questions.
+
+Historical cleanup:
+
+- Old draft PR #28 was closed as superseded after #35 reached `main`.
+
+### 24.5 — Stage 06.2 partial cleanup
+
+**Status:** ✅ MERGED TO MAIN  
+**Authoritative GitHub PR:** #33 — `[24.5] Remove accidental English Harmony 360 prompts`  
+**Merge commit:** `4e49989504824987933ebcf4587b58a7a8f8d0c1`
+
+What changed:
+
+- Added a narrowly scoped cleanup for the confirmed generated `What decides whether … is special for you? Rank:` template.
+- Translates that template to a German ranking prompt before the existing Harmony 360 runtime rework.
+- Includes regression coverage for the raw Museen ranking pack plus an unchanged-German control case.
+
+Historical cleanup:
+
+- Old draft PR #29 was closed as superseded after #33 reached `main`.
+
+### 24.6 — Stage 06.3 partial cleanup
+
+**Status:** ✅ MERGED TO MAIN  
+**Authoritative GitHub PR:** #34 — `[24.6] Repair known Harmony 360 wording typos`  
+**Merge commit:** `cf8b18a319613919d2f50d5853ac25a4ce065016`
+
+What changed:
+
+- Repairs `Schlagwewohnheiten` → `Schlafgewohnheiten`.
+- Repairs `is deinem Partner` → `ist deinem Partner`.
+- Adds regression coverage for both confirmed defects.
+
+Historical note:
+
+- Draft PR #30 could not be switched to ready-for-review because of a GitHub connector GraphQL schema error and was closed without discarding code.
+- A stacked replacement was used only to preserve work while 24.5 was still isolated; the authoritative direct-to-main merge is PR #34.
+
+### Verification caveat for 24.4–24.6
+
+For the authoritative direct-to-main PRs, the repository-wide GitHub Actions jobs again failed before executable workflow step 1 (`steps: null`, no job logs). The operator explicitly authorized merging work that GitHub marked mergeable despite that infrastructure limitation. Therefore:
+
+- do not claim a green full test suite for 24.4–24.6;
+- do not record those pre-step Action failures as application regressions either.
+
+### Stage accounting after these merges
+
+Stage 06 remains `0/5 complete (0%)`. Packages 24.4, 24.5 and 24.6 fix confirmed defects inside 06.1, 06.2 and 06.3, but those substages remain open until a broader audit confirms the relevant defect class is exhausted or remaining exceptions are explicitly documented.
+
+### Next action
+
+Continue the active Stage 02 work package 24.3 independently. Parallel Stage 06 work may continue with a new small package only when its scope does not collide with Stage 02 files.
