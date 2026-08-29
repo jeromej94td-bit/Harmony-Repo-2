@@ -13,35 +13,6 @@ This file is the append-only project black box for **360 Rework**.
 
 ---
 
-## 2026-08-29 — 24.8 proposal-location image duels prepared
-
-**Work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>
-**Status:** 🟡 IN PROGRESS<br>
-**Branch:** `360-rework/24-8-proposal-location-duels`<br>
-**GitHub PR:** #46 — `[24.8] 360 Rework — Proposal location image duels` (draft)<br>
-
-### Scope
-
-- Adds three deterministic image-duel rounds bound exclusively to the existing `proposal_location` flow step.
-- Adds six local, offline-ready location visuals: home, lake, garden, view, city and coast.
-- Adds the Aurora-Glass Compose board that renders one location duel and returns the selected stable option id.
-
-### Deliberately excluded
-
-- No navigation entry or proposal runner integration; Stage 02.11 owns end-to-end wiring.
-- No refreshed-ring duels, ranking, partner prediction, scenarios, open prompts, reveal or legacy cleanup.
-
-### Verification plan
-
-- Check the generated WebP resource set and `git diff --check`.
-- No tests or Android build are planned by explicit operator instruction; the existing Gradle tooling gap remains documented.
-
-### Next action
-
-Open the isolated 24.8 PR, review the narrow diff, then record the requested merge decision.
-
----
-
 ## 2026-08-29 — 24.6.4 parallel numbering correction and Stage 06 continuation record
 
 **Work package:** 24.6.4 — Project-control correction<br>
@@ -389,3 +360,76 @@ Stage 06 remains `0/5 complete (0%)`. Packages 24.4, 24.5 and 24.6 fix confirmed
 ### Next action
 
 Continue the active Stage 02 work package 24.3 independently. Parallel Stage 06 work may continue with a new small package only when its scope does not collide with Stage 02 files.
+
+
+## 2026-08-29 — 24.9 Stage 02.4 prepared
+
+**Work package:** 24.9 — Refreshed ring-image duels  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-9-ring-image-duels-current`  
+**GitHub PR:** #46 — `[24.9] 360 Rework — Refreshed ring image duels`  
+**Implementation commit:** pending final PR commit
+
+### Scope
+
+- Added `ProposalRingImageDuels.kt` with five deterministic image duels for the existing `ring_style` step.
+- Bound all ten refreshed Stage-01 drawable keys exactly once.
+- Kept the package independent from the concurrent 24.8 proposal-location work.
+
+### Verification
+
+- Static source review and asset-key coverage completed.
+- No Gradle build or long-running GitHub test was started; the repository has no Gradle wrapper/system Gradle.
+- The previous PR #45 was closed because its documentation diff conflicted with the newer mainline control-state sync; no application code was lost.
+
+### Next action
+
+Merge this narrow PR, then continue with 24.10 / Stage 02.5 ranking after 24.8 coordination.
+
+
+## 2026-08-29 — 24.10 Stage 02.5 prepared
+
+**Work package:** 24.10 — Proposal priority ranking content  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-10-proposal-priorities`  
+**GitHub PR:** #49 — `[24.10] 360 Rework — Proposal priority ranking content`  
+**Implementation commit:** `4e7f8d1d89f162fbc4e657de9409546650cbf90b`
+
+### Scope
+
+- Added five deterministic proposal-priority items for the existing `proposal_priorities` ranking step.
+- Reuses the existing `RankingSlotBoard`, which already supports empty slots, drag-and-drop, restoring answers and a clear save/continue action.
+- No new UI design or image generation is needed for this narrow package.
+
+### Verification
+
+- Static source review completed.
+- No Gradle build or long-running GitHub test was started; the repository has no Gradle wrapper/system Gradle.
+
+### Next action
+
+Merge after the PR is confirmed mergeable, then continue with 24.11 / Stage 02.6 partner prediction.
+
+
+## 2026-08-29 — 24.11 Stage 02.6 prepared
+
+**Work package:** 24.11 — Partner prediction rounds  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-11-partner-prediction`  
+**GitHub PR:** #50 — `[24.11] 360 Rework — Partner prediction rounds`  
+**Implementation commit:** `0db95cd2cf602bbcd8094588d610c3657eeb44a9`
+
+### Scope
+
+- Added three deterministic A → B → Reveal prediction rounds.
+- Bound them to the existing `partner_prediction` flow step.
+- Reused the existing prediction UI; no new design or generated image is needed.
+
+### Verification
+
+- Static source review completed.
+- No Gradle build or long-running GitHub test was started.
+
+### Next action
+
+Merge after GitHub confirms the PR is mergeable, then continue with 24.12 / Stage 02.7 proposal scenarios.

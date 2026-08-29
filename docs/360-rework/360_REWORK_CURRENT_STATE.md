@@ -4,158 +4,94 @@
 **Project:** 360 Rework  
 **Completed core stages:** 1/8  
 **Current stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
-**Current substage:** 02.3 — Proposal-location image duels<br>
+**Current substage:** 02.3 — Proposal-location image duels  
 **Current stage progress:** 0/12 complete (0%)  
-**Current status:** 🟡 IN PROGRESS<br>
-**Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
-**Latest merged proposal packages awaiting verification:** 🧪 24.2, 🧪 24.3<br>
-**Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6, ✅ 24.6.2, ✅ 24.6.3<br>
-**GitHub PR:** #25  
-**Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
-**Next work package:** 24.8 — Stage 02.3 Proposal-location image duels
+**Current status:** 🧪 VERIFY  
+**Next Stage-02 work package:** 24.8 — Stage 02.3 Proposal-location image duels  
+**Latest merged Stage-02 package:** 24.9 — Stage 02.4 Refreshed ring-image duels (PR #48)<br>**Latest merged Stage-02 package:** 24.10 — Stage 02.5 Proposal priority ranking content (PR #49)  
+**Prepared follow-up:** 24.11 — Stage 02.6 Partner prediction rounds (PR #50)
 
-## Merge strategy
+## Source-of-truth rule
 
-PR #24 is an **umbrella/reference PR only** and must not be merged wholesale.
+PR #24 is an **umbrella/reference PR only** and must never be merged wholesale.
 
-`24.1`, `24.2`, `24.3`, etc. are logical **360 Rework work-package IDs**. GitHub itself assigns a separate integer PR number to each package.
+`24.x` IDs are logical **360 Rework work-package IDs**. Every real change lands through its own small GitHub PR so it remains independently traceable and revertible.
 
-Every package must be narrow, independently verifiable, independently mergeable, and independently traceable/revertible. A finished package is merged into `main` before the next risky package is treated as complete.
+Parallel Stage-06 work must not reuse logical IDs reserved by Stage 02. In particular:
 
-## Last completed 360 Rework package
+- **24.7** = Stage-02 proposal merge-status sync via PR #37.
+- **24.8** = reserved/next Stage-02 package for proposal-location image duels.
+- Parallel Stage-06 continuation uses the non-conflicting **24.6.x** range.
 
-**Work package:** 24.1 — Control Center Foundation  
-**Status:** ✅ MERGED  
-**GitHub PR:** #25 — `[24.1] 360 Rework — Control Center Foundation`  
-**Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
-**Merged scope:** exactly 4 documentation files; no app code, questions, images, mechanics or navigation changes.
+## Stage 02 — active functional path
 
-Verification facts:
+### 24.2 — Stage 02.1 Experience data model / deterministic proposal flow
 
-- PR #25 was merged into `main`.
-- The PR changed exactly 4 documentation files.
-- No product-code file was part of the merge.
-- The repo-wide GitHub Action failed before the first executable workflow step (`steps: null`).
-- Therefore this remains an infrastructure verification caveat, not a recorded application-code failure and not a green-suite claim.
+**Status:** 🧪 MERGED, BUILD VERIFICATION OPEN  
+**PR:** #27  
+**Scope:** UI-independent proposal-flow model only.  
+**Verification gap:** no Gradle-capable environment has recorded the focused Android build result.
 
-## Last completed product work
+### 24.3 — Stage 02.2 Proposal mood/details rounds
 
-**Stage:** 01/08 — Ring Image Quality Rework  
-**Status:** ✅ DONE  
-**PR:** #22 — `Refresh engagement ring image assets`  
-**Merge commit:** `b696acb25f8f9b52235a6fba256ec9dc041edab9`
+**Status:** 🧪 MERGED, BUILD VERIFICATION OPEN  
+**PR:** #31  
+**Merge commit:** `3012f1bbcb0c4406e4fb8b34258ddb2a4d88bd5f`  
+**Scope:** proposal mood/details Either-Or data only.  
+**Verification gap:** no Gradle-capable environment has recorded the focused Android build result.
 
-Verified facts:
+### Prepared next package
 
-- PR #22 is merged into `main`.
-- The merged change contains exactly 10 changed files.
-- Those 10 files are the intended engagement-ring WebPs.
-- Two GitHub Actions jobs failed before executing their first workflow step.
-- Therefore: **do not claim the full test suite was green for Stage 01.**
+**Work package 24.10 / Stage 02.5:** PR #49 adds five deterministic proposal-priority items bound to the existing `proposal_priorities` ranking step. The existing `RankingSlotBoard` is reused; no new UI surface is introduced.
 
-## Current objective
+## NEXT EXACT ACTION — Stage 02
 
-Build `Unser perfekter Antrag` as the first flagship mixed-mechanic Harmony Experience and reference implementation for the later reusable Experience system.
+**24.8 / Stage 02.3:** inspect the current image-duel runner and image-resource pipeline, then implement only proposal-location image duels.
 
-The intended experience includes:
-
-- proposal mood/details Das-oder-Das rounds
-- proposal-location image duels
-- refreshed engagement-ring image duels
-- drag-and-drop ranking
-- partner prediction A → B → Reveal
-- concrete proposal scenarios
-- open personal prompts
-- qualitative `Euer perfekter Antrag` reveal
-
-These are **not** to be delivered in one PR. They are split into small `24.x` packages aligned with substages or another similarly narrow coherent change.
-
-## Merged proposal packages awaiting verification
-
-**Work package:** 24.2 — Stage 02.1 Experience data model / proposal flow<br>
-**Branch:** `360-rework/24-2-proposal-flow-model`<br>
-**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model`<br>
-**Commit:** `9984b449ae9c6325396d1f247e46564b26011c7f`<br>
-**Implemented scope:** `ProposalExperienceDefinition.kt` defines the UI-independent proposal step contract, validates stable flow IDs and reveal placement, and records the deterministic Stage 02 sequence.<br>
-**Deliberately excluded:** UI, navigation, content/mechanic implementation, legacy migration and deletion.<br>
-**Verification status:** whitespace/diff validation passed. No tests were added or run by explicit instruction. A local Android build could not start because this repository checkout has no Gradle Wrapper and no system Gradle executable is installed.
-
-### Work package 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds
-
-**Branch:** `360-rework/24-3-proposal-either-or`<br>
-**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` — merged<br>
-**Merge commit:** `3012f1bbcb0c4406e4fb8b34258ddb2a4d88bd5f`<br>
-**Scope:** add UI-independent rounds for the existing `proposal_mood` and `proposal_details` flow steps only.<br>
-**Deliberately excluded:** new UI, navigation, images, ranking, prediction, scenario, reveal, legacy migration and deletion.<br>
-**Verification status:** `git diff --check` passed before merge. No tests were added or run by explicit operator instruction; a local Android build remains unavailable without a Gradle Wrapper or compatible Gradle installation.<br>
-**Ordering decision:** the operator explicitly authorized the merge while the Gradle verification for 24.2 remains open. Neither substage is marked complete.
+Do **not** bundle refreshed-ring duels, ranking, partner prediction, scenarios, reveal, broad navigation changes or legacy cleanup into 24.8.
 
 ## Parallel Stage 06 cleanup already merged
 
-These packages were intentionally developed in parallel because they do not touch the Stage 02 Experience model/runtime work.
+Stage 06 is allowed to progress in parallel only where its files/scope do not collide with active Stage-02 work.
 
-- **24.4 — Stage 06.1 partial cleanup:** PR #35 merged into `main`; merge commit `817d0a0c002aeac7a560f31513092957d242880a`. Adds a narrow runtime repair for missing options in `ichhabenochnie` content plus regression coverage. Old draft PR #28 was closed as superseded.
-- **24.5 — Stage 06.2 partial cleanup:** PR #33 merged into `main`; merge commit `4e49989504824987933ebcf4587b58a7a8f8d0c1`. Removes the confirmed accidental English ranking-template prompt before the existing Harmony 360 runtime rework. Old draft PR #29 was closed as superseded.
-- **24.6 — Stage 06.3 partial cleanup:** PR #34 merged into `main`; merge commit `cf8b18a319613919d2f50d5853ac25a4ce065016`. Repairs the confirmed `Schlagwewohnheiten` and `is deinem Partner` wording defects with regression coverage.
-- **24.6.2 — Stage 06.4 repetition audit helper:** PR #39 merged into `main`; merge commit `d4dc969bf5a47d4be5b5470157fe3750cace21d1`. Adds `scripts/audit_harmony360_repetition.py` plus focused tests. Fresh focused Python verification passed 2/2 tests.
-- **24.6.3 — Stage 06.4 targeted de-template cleanup:** PR #40 merged into `main`; merge commit `ee2ca1b8315be2a8a9db45e78328d49ba3706e39`. Replaces the repeated generic opening scenario in exactly three packs: Morgenroutine, Sportliche Ziele and Bücher. Fresh focused Kotlin verification passed.
+- **24.4 — 06.1 partial:** PR #35, merge `817d0a0c002aeac7a560f31513092957d242880a` — repairs missing options in `ichhabenochnie` content.
+- **24.5 — 06.2 partial:** PR #33, merge `4e49989504824987933ebcf4587b58a7a8f8d0c1` — removes the confirmed accidental English ranking-template prompt.
+- **24.6 — 06.3 partial:** PR #34, merge `cf8b18a319613919d2f50d5853ac25a4ce065016` — repairs confirmed wording/typo defects.
+- **24.6.2 — 06.4 audit helper:** PR #39, merge `d4dc969bf5a47d4be5b5470157fe3750cace21d1` — repetition audit helper; focused Python tests 2/2 passed.
+- **24.6.3 — 06.4 targeted cleanup:** PR #40, merge `ee2ca1b8315be2a8a9db45e78328d49ba3706e39` — de-templates the repeated opener in Morgenroutine, Sportliche Ziele and Bücher; focused Kotlin verification passed.
+- **24.6.4 — project-control correction:** PR #41, merge `963fb04aee6b9b9899c61819e764f96b67eb5aa1` — resolves the concurrent 24.7/24.8 numbering collision without changing app code.
+- **24.6.5 — 06.5 partial:** PR #43, merge `785e93c94f93cb43903b2247e677920839f9f2af` — turns the user-facing `cj_hogwarts_quiz` content into the IP-neutral `Magische Akademie` presentation while retaining the internal pack id; focused Kotlin red/green verification passed.
+- **24.6.6 — 06.5 partial:** PR #44, merge `6a160ff1a5724ddf4789ad7419e095dadac277f2` — neutralizes the user-facing franchise references in `cj_disney_quiz`; all 15 actual questions passed the focused Kotlin neutralization check.
 
-### Parallel numbering correction
+### Stage 06 accounting
 
-A concurrent Stage-02 status package already owns **24.7** (PR #37) and reserves **24.8** for Stage 02.3. PR #39 and PR #40 were initially created with those two logical labels before that concurrent change was noticed. Their GitHub titles/bodies were corrected after merge without rewriting `main` history:
+**Stage 06 remains 0/5 complete (0%).**
 
-- PR #39 authoritative logical ID = **24.6.2**. Its historical merge commit message still contains `[24.7]`.
-- PR #40 authoritative logical ID = **24.6.3**. Its historical merge commit message still contains `[24.8]`.
-- **24.7 remains the Stage-02 merge-status sync.**
-- **24.8 remains the NEXT Stage-02 package for proposal-location image duels.**
+The packages above are confirmed partial repairs. Do not mark 06.1–06.5 complete until the corresponding wider audit shows that the defect class is exhausted or remaining exceptions are explicitly documented.
 
-Do not infer logical work-package ownership from the historical branch names or those two merge-commit subjects; use this tracker and the corrected PR metadata.
+For 06.5 specifically, two known high-franchise legacy packs are now neutralized, but the rest of the generated/legacy catalogue still needs a brand/franchise audit before 06.5 can be checked off.
 
-**Important:** Stage 06 remains **0/5 complete**. These packages fix confirmed defects and begin the 06.4 audit, but 06.1–06.4 stay unchecked until a broader audit confirms that the corresponding defect class is exhausted or remaining exceptions are documented.
+## Verification caveat
 
-**Verification caveat:** the relevant repo-wide GitHub Actions again failed before executable step 1 (`steps: null`). The merges were explicitly authorized despite that infrastructure limitation. Do not describe 24.4–24.6.3 as having a green full test suite. The focused 24.6.2 Python tests and focused 24.6.3 Kotlin verification are separate local evidence only.
+The repo-wide GitHub Actions repeatedly fail before executable workflow step 1 (`steps: null`, no job logs). This remains an infrastructure verification caveat:
 
-## Active work package
-
-**Work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>
-**Branch:** `360-rework/24-8-proposal-location-duels`<br>
-**GitHub PR:** #46 — `[24.8] 360 Rework — Proposal location image duels` (draft)<br>
-**Scope:** add three deterministic proposal-location image duels, six local visual resources and the Aurora-Glass duel board used by the later proposal runner.<br>
-**Deliberately excluded:** navigation, runner integration, refreshed-ring duels, ranking, prediction, scenarios, open prompts, reveal and legacy cleanup.<br>
-**Verification status:** resource and whitespace validation pending. No tests are added or run by explicit operator instruction.<br>
-
-## NEXT EXACT ACTION
-
-**Work package 24.8 / Stage 02.3:** review the prepared proposal-location image duels, then open and merge the small package. The Gradle verification gaps for 24.2 and 24.3 remain separate open requirements.
-
-Do **not** bundle refreshed-ring duels, ranking, partner prediction, scenarios, reveal, broad navigation changes or legacy cleanup into package 24.8.
-
-The merged 24.2 and 24.3 packages do not advance the Stage 02 completion fraction until their verification requirements are met.
-
-## Current blockers / verification caveats
-
-- No known product-code blocker prevents Stage 02.1 verification.
-- The local checkout exposes no `gradlew` / `gradlew.bat`, and this environment has no `gradle` executable. This prevents local build verification without being evidence of an application-code failure.
-- Existing GitHub Actions infrastructure has recently produced failures before workflow step 1. Treat this as a verification caveat; do not silently convert it into an application-code failure or a green-test claim.
-- Before Stage 02 implementation, inspect the actual current runner/model files rather than assuming the planned mechanic interfaces already exist.
+- it is **not** a green full-suite result;
+- it is **not** evidence of an application regression by itself;
+- focused local tests/verifications are recorded separately per small package.
 
 ## DO NOT REPEAT
 
 - Do not merge umbrella PR #24 wholesale.
-- Do not combine several unrelated 360 Rework substages into one PR.
-- Do not rebuild or re-merge 24.1; it is already in `main` via PR #25.
-- Do not rebuild obsolete draft PR #28 or #29; their clean mainline replacements are already merged via PR #35 and PR #33.
-- Do not reuse logical IDs 24.7 or 24.8 for parallel Stage-06 work; 24.7 belongs to the Stage-02 status sync and 24.8 belongs to Stage 02.3.
-- Do not replace the ten refreshed ring assets again unless a regression is proven.
-- Do not delete existing proposal/ring/wedding source content yet.
-- Do not hide all legacy proposal packs during Stage 02.1; full consolidation belongs to Stage 04/08.
-- Do not add Daily to this 360 Rework scope.
-- Do not add unrelated new categories while the quality/experience rework is in progress.
-- Do not mark Stage 02 progress based on design discussion alone; only verified implementation substages count.
-- Do not mark Stage 06.1–06.4 complete merely because partial cleanup packages landed; complete the corresponding audit first.
+- Do not combine unrelated 360 Rework substages into one PR.
+- Do not reuse logical IDs 24.7 or 24.8 for Stage-06 work.
+- Do not rebuild/remerge completed cleanup packages 24.4–24.6.6 unless a regression is proven.
+- Do not replace the refreshed ring assets again unless a regression is proven.
+- Do not delete proposal/ring/wedding source content yet; consolidation belongs to Stage 04.
+- Do not add Daily back into this scope.
+- Do not mark Stage 02 or Stage 06 progress complete from implementation alone when required verification remains open.
 
-## Handover rule
+## Handover
 
-For historical detail, read `docs/360-rework/360_REWORK_WORKLOG.md`.
+Read `docs/360-rework/360_REWORK_MASTER_ROADMAP.md` for the full stage plan and Definitions of Done.
 
-For the full stage plan and Definitions of Done, read `docs/360-rework/360_REWORK_MASTER_ROADMAP.md`.
+Read `docs/360-rework/360_REWORK_WORKLOG.md` for historical detail. PRs #43 and #44 are the authoritative merge records for the latest 06.5 partial cleanup until their full append-only worklog entries are added in a later documentation-safe sync.
