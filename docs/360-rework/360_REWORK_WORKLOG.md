@@ -385,3 +385,27 @@ Continue the active Stage 02 work package 24.3 independently. Parallel Stage 06 
 ### Next action
 
 Merge this narrow PR, then continue with 24.10 / Stage 02.5 ranking after 24.8 coordination.
+
+
+## 2026-08-29 — 24.10 Stage 02.5 prepared
+
+**Work package:** 24.10 — Proposal priority ranking content  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-10-proposal-priorities`  
+**GitHub PR:** #49 — `[24.10] 360 Rework — Proposal priority ranking content`  
+**Implementation commit:** `4e7f8d1d89f162fbc4e657de9409546650cbf90b`
+
+### Scope
+
+- Added five deterministic proposal-priority items for the existing `proposal_priorities` ranking step.
+- Reuses the existing `RankingSlotBoard`, which already supports empty slots, drag-and-drop, restoring answers and a clear save/continue action.
+- No new UI design or image generation is needed for this narrow package.
+
+### Verification
+
+- Static source review completed.
+- No Gradle build or long-running GitHub test was started; the repository has no Gradle wrapper/system Gradle.
+
+### Next action
+
+Merge after the PR is confirmed mergeable, then continue with 24.11 / Stage 02.6 partner prediction.
