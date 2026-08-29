@@ -119,3 +119,42 @@ No app code, questions, images, mechanics or navigation changes belong in 24.1.
 ### Next package after 24.1 reaches main
 
 **24.2 — Stage 02.1:** inspect current Harmony runner/content models and implement only the mixed-step data model plus deterministic proposal-flow definition. Later mechanics remain separate packages.
+
+---
+
+## 2026-08-29 — 24.1 final merge confirmed
+
+**Work package:** 24.1 — Control Center Foundation  
+**Status:** ✅ MERGED  
+**GitHub PR:** #25 — `[24.1] 360 Rework — Control Center Foundation`  
+**Source branch:** `360-rework/24-1-control-center-foundation`  
+**Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`
+
+### Final merged scope
+
+Exactly 4 documentation files were merged:
+
+- `START_HERE_360_REWORK.md`
+- `docs/360-rework/360_REWORK_MASTER_ROADMAP.md`
+- `docs/360-rework/360_REWORK_CURRENT_STATE.md`
+- `docs/360-rework/360_REWORK_WORKLOG.md`
+
+No app code, questions, images, mechanics, navigation or legacy content were changed by 24.1.
+
+### Verification performed
+
+- GitHub reports PR #25 as `merged: true`.
+- Final merge commit is `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`.
+- The PR changed exactly 4 files.
+- The files were documentation-only.
+
+### Verification caveat
+
+The repo-wide GitHub Action again failed before the first executable workflow step (`steps: null`). This is recorded as an infrastructure verification caveat. It is not evidence of an application-code regression and is not treated as a green test result either.
+
+### Project state after merge
+
+- Umbrella PR #24 remains open and must not be merged wholesale.
+- Stage 01/08 remains ✅ DONE.
+- Stage 02/08 remains 🔵 NEXT at `0/12 = 0%` because 24.1 changed only project-control documentation.
+- The next functional work package is **24.2 — Stage 02.1 Experience data model / deterministic proposal flow**.

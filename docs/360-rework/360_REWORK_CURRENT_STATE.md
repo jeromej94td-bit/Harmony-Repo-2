@@ -7,7 +7,9 @@
 **Current substage:** 02.1 — Experience data model and deterministic proposal flow definition  
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🔵 NEXT  
-**Foundation work package:** 24.1 — Control Center Foundation  
+**Latest landed work package:** ✅ 24.1 — Control Center Foundation  
+**GitHub PR:** #25  
+**Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
 **Next work package:** 24.2 — Stage 02.1 Experience data model / proposal flow
 
 ## Merge strategy
@@ -17,6 +19,22 @@ PR #24 is an **umbrella/reference PR only** and must not be merged wholesale.
 `24.1`, `24.2`, `24.3`, etc. are logical **360 Rework work-package IDs**. GitHub itself assigns a separate integer PR number to each package.
 
 Every package must be narrow, independently verifiable, independently mergeable, and independently traceable/revertible. A finished package is merged into `main` before the next risky package is treated as complete.
+
+## Last completed 360 Rework package
+
+**Work package:** 24.1 — Control Center Foundation  
+**Status:** ✅ MERGED  
+**GitHub PR:** #25 — `[24.1] 360 Rework — Control Center Foundation`  
+**Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
+**Merged scope:** exactly 4 documentation files; no app code, questions, images, mechanics or navigation changes.
+
+Verification facts:
+
+- PR #25 was merged into `main`.
+- The PR changed exactly 4 documentation files.
+- No product-code file was part of the merge.
+- The repo-wide GitHub Action failed before the first executable workflow step (`steps: null`).
+- Therefore this remains an infrastructure verification caveat, not a recorded application-code failure and not a green-suite claim.
 
 ## Last completed product work
 
@@ -72,6 +90,7 @@ Then update this file, the master roadmap, and the worklog in the relevant small
 
 - Do not merge umbrella PR #24 wholesale.
 - Do not combine several unrelated 360 Rework substages into one PR.
+- Do not rebuild or re-merge 24.1; it is already in `main` via PR #25.
 - Do not replace the ten refreshed ring assets again unless a regression is proven.
 - Do not delete existing proposal/ring/wedding source content yet.
 - Do not hide all legacy proposal packs during Stage 02.1; full consolidation belongs to Stage 04/08.
