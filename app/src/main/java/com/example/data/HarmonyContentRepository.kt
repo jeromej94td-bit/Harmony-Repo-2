@@ -5,6 +5,8 @@ import android.util.Log
 import com.example.data.model.Category
 import com.example.data.model.Question
 import com.example.data.model.QuestionPack
+import com.example.data.model.QuestionResponseCuration
+import com.example.data.model.QuestionResponseKind
 import com.example.ui.components.TotImageProvider
 import com.example.ui.TranslationCatalog
 import kotlinx.coroutines.Dispatchers
@@ -222,6 +224,7 @@ object HarmonyContentRepository {
 
             // 4. Map packages
             val newPacks = mutableListOf<QuestionPack>()
+            val dynamicResponseKinds = linkedMapOf<String, QuestionResponseKind>()
             for (i in 0 until packagesJson.length()) {
                 val obj = packagesJson.getJSONObject(i)
                 val isActive = obj.optBoolean("is_active", true)
@@ -271,12 +274,20 @@ object HarmonyContentRepository {
                                     val itemOpts = optionsByItem[itemId] ?: emptyList()
                                     val sortedOpts = itemOpts.sortedBy { it.optInt("option_index", 0) }
                                     val optionsList = sortedOpts.map { it.optString("option_text", it.optString("text", "")) }
+                                    QuestionResponseCuration.parseAnswerMode(itemObj.optString("answer_mode", ""))
+                                        ?.let { responseKind ->
+                                            dynamicResponseKinds[QuestionResponseCuration.key(id, qText)] = responseKind
+                                        }
                                     questions.add(Question(q = qText, options = optionsList))
                                 }
                             } else {
                                 // Default/disc/fallback
                                 val qText = itemObj.optString("prompt", itemObj.optString("text", ""))
                                 if (qText.isNotBlank()) {
+                                    QuestionResponseCuration.parseAnswerMode(itemObj.optString("answer_mode", ""))
+                                        ?.let { responseKind ->
+                                            dynamicResponseKinds[QuestionResponseCuration.key(id, qText)] = responseKind
+                                        }
                                     questions.add(Question(q = qText, options = emptyList()))
                                 }
                             }
@@ -307,6 +318,7 @@ object HarmonyContentRepository {
                 cachedPacks.clear()
                 cachedPacks.addAll(newPacks)
             }
+            QuestionResponseCuration.replaceDynamic(dynamicResponseKinds)
 
             // Sync with active UI models layer
             withContext(Dispatchers.Main) {

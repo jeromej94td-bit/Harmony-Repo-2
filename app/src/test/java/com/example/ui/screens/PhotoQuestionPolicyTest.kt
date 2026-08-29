@@ -9,17 +9,54 @@ import org.junit.Test
 class PhotoQuestionPolicyTest {
 
     @Test
-    fun `routes only explicitly approved photo question positions`() {
+    fun `photo routing follows stable question identity instead of position`() {
         assertEquals(
             PhotoQuestionMode.CHOICE_WITH_OPTIONAL_PHOTO,
-            PhotoQuestionPolicy.modeFor("gespraechsanreger", 1)
+            PhotoQuestionPolicy.modeFor(
+                "gespraechsanreger",
+                5,
+                "Was ist dein Lieblingsfoto von uns? 📸"
+            )
         )
         assertEquals(
             PhotoQuestionMode.PHOTO_ONLY,
-            PhotoQuestionPolicy.modeFor("schnapp", 1)
+            PhotoQuestionPolicy.modeFor(
+                "schnapp",
+                0,
+                "Welches gemeinsame Foto ist dein Lieblingsfoto?"
+            )
         )
-        assertNull(PhotoQuestionPolicy.modeFor("gespraechsanreger", 0))
-        assertNull(PhotoQuestionPolicy.modeFor("schnapp", 0))
+    }
+
+    @Test
+    fun `ordinary question at former photo index does not inherit gallery behavior`() {
+        assertNull(
+            PhotoQuestionPolicy.modeFor(
+                "gespraechsanreger",
+                1,
+                "Was möchtest du, dass dein Partner öfter tut?"
+            )
+        )
+        assertNull(
+            PhotoQuestionPolicy.modeFor(
+                "schnapp",
+                1,
+                "Was war dein schönster Moment mit mir bisher?"
+            )
+        )
+    }
+
+    @Test
+    fun `legacy position fallback exists only when raw question is unavailable`() {
+        assertEquals(
+            PhotoQuestionMode.CHOICE_WITH_OPTIONAL_PHOTO,
+            PhotoQuestionPolicy.modeFor("gespraechsanreger", 1, null)
+        )
+        assertEquals(
+            PhotoQuestionMode.PHOTO_ONLY,
+            PhotoQuestionPolicy.modeFor("schnapp", 1, null)
+        )
+        assertNull(PhotoQuestionPolicy.modeFor("gespraechsanreger", 0, null))
     }
 
     @Test
