@@ -8,8 +8,8 @@
 **Stage 02 package coverage:** 12/12 = 100%  
 **Stage 02 status:** 🧪 IMPLEMENTATION/CONTRACT COMPLETE; GREEN ANDROID BUILD PENDING INFRASTRUCTURE  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #99:** 4/7  
-**Next core substage after PR #99:** 03.5 — Reusable `PartnerPrediction` step  
+**Stage-03 progress after PR #126:** 6/7  
+**Next core substage after PR #126:** 03.7 — Reusable `Reveal`/result flow  
 **Stage-05 progress:** 1/5 = 20%
 
 > Stage 02 has all twelve feature/contract slices on `main`. PR #79 closes 02.12 with available static/UI/end-to-end contracts but explicitly does not claim a green Android/Gradle build because Actions still fail before step 1. A later successful Android build is an infrastructure verification check, not a new feature slice.
@@ -20,7 +20,7 @@
 |---|---|---|---|---:|
 | 01/08 | prerequisite | Ring Image Quality Rework | ✅ DONE | 1/1 = 100% |
 | 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 CONTRACT-COMPLETE / BUILD CAVEAT | 12/12 slices = 100% |
-| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 4/7 after PR #99 |
+| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 6/7 after PR #126 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
 | 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 1/5 = 20% |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
@@ -75,13 +75,13 @@ Feature implementation and available contract coverage are complete. A genuine A
 - [x] **03.2 Reusable `EitherOr` step** — 26.2 / PR #85, merge `4ef6d583144df4f59c59daef301ffe2596b89b7b`. Adds validated generic two-choice rounds, proposal adapter, stateless reusable Compose board, explicit selection semantics and proposal integration while preserving all 11 shipped proposal Either-Or rounds.
 - [x] **03.3 Reusable `ImageDuel` step** — 26.3 / PR #87, merge `704fa2a14732ed8141abb7d98da2018d27853aeb`. Adds generic image-duel options/rounds, shared static + animated boards, location/ring adapters, keeps the shipped location timing/tags through compatibility wrappers, and moves proposal ring duels onto the same reusable visual mechanic while preserving saved asset-key answers.
 - [x] **03.4 Reusable `Ranking` step** — 26.4 / PR #99, merge `958ba77670958d34ff2eecb581ab159114e310bd`. Adds validated generic ranking rounds with stable item IDs, a compatibility codec that preserves the existing `RankingAnswerCodec` label payload, a thin generic board around the shipped drag/drop `RankingSlotBoard`, and moves proposal priorities onto the reusable mechanic without changing IDs, labels or reveal input.
-- [ ] **03.5 Reusable `PartnerPrediction` step** — 🔵 NEXT.
-- [ ] 03.6 Reusable `Scenario` + `OpenPrompt` steps
-- [ ] 03.7 Reusable `Reveal`/result flow plus legacy compatibility during migration
+- [x] **03.5 Reusable `PartnerPrediction` step** — 26.5 / PR #120, merge `8100488082eacf1313d2aa88891c049335b5e6d1`. Adds a typed reusable A → B → Reveal selection model and a compatibility adapter that preserves the existing encoded prediction payload.
+- [x] **03.6 Reusable `Scenario` + `OpenPrompt` steps** — 26.6 / PR #126, merge `9470b8c84d15463a2076320c967c970d6be3854d`. Adds validated generic rounds, thin reusable boards and proposal adapters while preserving the existing scenario journey/result choreography and open-prompt UI behavior.
+- [ ] **03.7 Reusable `Reveal`/result flow plus legacy compatibility during migration**
 
-### 03.1–03.4 verification note
+### 03.1–03.6 verification note
 
-26.1–26.4 follow test-first sequencing. Focused Kotlin RED compilation confirmed each generic API was absent before implementation; subsequent isolated Kotlin harnesses pass the model/navigation/adapter contracts. Existing proposal-location tests remain the compatibility contract for the shipped staged image-duel choreography. 26.3 and 26.4 add Robolectric Compose contracts for the generic image-duel and ranking surfaces respectively. The 26.4 focused model/adapter smoke produced `EXPERIENCE_RANKING_MODEL_PASS`. The full Android/Gradle/Robolectric suite is not claimed green while GitHub Actions/runners remain unavailable or expose no runnable status checks.
+26.1–26.6 follow focused model/adapter sequencing. Focused Kotlin RED compilation confirmed each generic API was absent before implementation; subsequent isolated Kotlin harnesses pass the model/navigation/adapter contracts. Existing proposal-location tests remain the compatibility contract for the shipped staged image-duel choreography. 26.3 and 26.4 add Robolectric Compose contracts for the generic image-duel and ranking surfaces respectively. The 26.4 focused model/adapter smoke produced `EXPERIENCE_RANKING_MODEL_PASS`. For 26.5/26.6, static source review confirmed typed adapters, preserved encoded payloads, validated inputs and unchanged proposal choreography. The full Android/Gradle/Robolectric suite is not claimed green while GitHub Actions/runners remain unavailable or expose no runnable status checks.
 
 ### NEXT EXACT ACTION
 

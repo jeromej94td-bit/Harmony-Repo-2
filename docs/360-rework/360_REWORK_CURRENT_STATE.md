@@ -7,8 +7,8 @@
 **Stage-02 package coverage:** 12/12 = 100%  
 **Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #99:** 4/7  
-**Current Stage-03 substage after PR #99:** 03.5 — Reusable `PartnerPrediction` step  
+**Stage-03 progress after PR #126:** 6/7  
+**Current Stage-03 substage after PR #126:** 03.7 — Reusable `Reveal`/result flow  
 **Stage-05 progress:** 1/5 = 20%  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
@@ -106,9 +106,25 @@ PR #99 introduced:
 
 TDD/verification evidence for 26.4: RED isolated Kotlin compilation confirmed the generic ranking API was absent; GREEN isolated Kotlin model/adapter verification produced `EXPERIENCE_RANKING_MODEL_PASS`. A Robolectric/Compose contract for the wrapper is present but was not executed here because repository GitHub Actions/credits are unavailable. No green full Android/Gradle build is claimed.
 
+### 26.5 — Reusable `PartnerPrediction` step
+
+**Status:** ✅ DONE  
+**Package:** 26.5 / PR #120  
+**Merge:** `8100488082eacf1313d2aa88891c049335b5e6d1`
+
+Adds the typed reusable prediction round/selection model and adapter, routes the proposal screen through the reusable board, and preserves the existing A → B → Reveal flow and encoded persistence format. Static compatibility review passed; no full Android build is claimed.
+
+### 26.6 — Reusable `Scenario` + `OpenPrompt` steps
+
+**Status:** ✅ DONE  
+**Package:** 26.6 / PR #126  
+**Merge:** `9470b8c84d15463a2076320c967c970d6be3854d`
+
+Adds validated generic Scenario/OpenPrompt rounds, proposal adapters and reusable boards. Existing scenario result choreography, open-prompt copy, answer gating and test tags remain unchanged. Static source review passed; no long-running GitHub test was run.
+
 ### NEXT EXACT ACTION — core
 
-Begin **03.5 — Reusable `PartnerPrediction` step** as its own narrow 26.x package. Preserve the existing A predicts B → B answers → reveal semantics and existing encoded answers while moving only the mechanic into the reusable experience layer. Do not pull Scenario, OpenPrompt or Reveal into 03.5.
+Begin **03.7 — Reusable `Reveal`/result flow plus legacy compatibility during migration** as the next narrow 26.x package. Keep the current reveal output stable, preserve legacy compatibility and avoid navigation redesign or deletions.
 
 ## Parallel Stage 05 — Questions Quality Rework
 
