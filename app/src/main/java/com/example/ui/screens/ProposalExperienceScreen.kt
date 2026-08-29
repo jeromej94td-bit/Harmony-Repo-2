@@ -54,9 +54,9 @@ import com.example.data.model.ProposalRevealResult
 import com.example.data.model.ProposalRingImageDuels
 import com.example.data.model.ProposalRunnerPosition
 import com.example.data.model.ProposalScenarios
-import com.example.data.model.RankingAnswerCodec
 import com.example.data.model.toExperienceEitherOrRound
 import com.example.data.model.toExperienceImageDuelRound
+import com.example.data.model.toExperienceRankingRound
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
@@ -77,7 +77,6 @@ internal fun ProposalExperienceScreen(
     var locationSelections by remember { mutableStateOf(emptyMap<String, String>()) }
     var ringSelections by remember { mutableStateOf(emptyMap<String, String>()) }
     var rankedPriorityIds by remember { mutableStateOf(emptyList<String>()) }
-    var rankingEncoded by remember { mutableStateOf<String?>(null) }
     var predictionAnswers by remember { mutableStateOf(emptyMap<String, String>()) }
     var scenarioSelections by remember { mutableStateOf(emptyMap<String, String>()) }
     var personalWishAnswers by remember { mutableStateOf(emptyMap<String, String>()) }
@@ -199,17 +198,12 @@ internal fun ProposalExperienceScreen(
                     }
 
                     ProposalFlowStepKind.RANKING -> {
-                        val labels = ProposalPriorityRanking.priorities.map { it.label }
-                        RankingSlotBoard(
-                            question = "Was muss für euren Antrag am meisten stimmen?",
-                            options = labels,
-                            selectedAnswer = rankingEncoded,
+                        ExperienceRankingBoard(
+                            round = ProposalPriorityRanking.toExperienceRankingRound(),
+                            selectedItemIds = rankedPriorityIds,
                             profile = profile,
-                            onPick = { encoded ->
-                                rankingEncoded = encoded
-                                val order = RankingAnswerCodec.decode(encoded, labels).orEmpty()
-                                val idByLabel = ProposalPriorityRanking.priorities.associate { it.label to it.id }
-                                rankedPriorityIds = order.mapNotNull(idByLabel::get)
+                            onPick = { orderedIds ->
+                                rankedPriorityIds = orderedIds
                                 advance()
                             },
                             modifier = Modifier.fillMaxSize()
