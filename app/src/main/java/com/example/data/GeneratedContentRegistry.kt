@@ -53,15 +53,25 @@ object GeneratedContentRegistry {
     }
 
     /**
-     * Old Dev-Studio exports can still contain the pre-image-question
-     * `liebegleichgewicht` pack with only ten questions. CUSTOM intentionally wins over
-     * GENERATED later in DeveloperDataManager, so repair that loaded custom copy before
-     * the merge instead of allowing it to hide the canonical 11-question pack again.
+     * Old Dev-Studio exports can still contain stale copies of generated packs. CUSTOM
+     * intentionally wins over GENERATED later in DeveloperDataManager, so repair those
+     * loaded custom copies before the merge instead of allowing old metadata/content to
+     * hide the curated runtime versions again.
      */
     private fun normalizeLoadedCustomPacks() {
         val customPacks = DeveloperDataManager._customPacks
         for (index in customPacks.indices) {
             val pack = customPacks[index]
+
+            // Familienplanung is a Familie topic. Older Dev-Studio exports still stored
+            // this pack under Beziehung and would otherwise win over the curated topic.
+            if (
+                pack.id == "h500_061_familienplanung_entweder_oder" &&
+                pack.topic != "familie"
+            ) {
+                customPacks[index] = pack.copy(topic = "familie")
+            }
+
             if (
                 pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
                 pack.type == "quiz" &&
