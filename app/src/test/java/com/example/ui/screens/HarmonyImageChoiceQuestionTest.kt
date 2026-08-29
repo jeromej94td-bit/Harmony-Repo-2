@@ -3,6 +3,7 @@ package com.example.ui.screens
 import com.example.data.model.HarmonyPacksData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HarmonyImageChoiceQuestionTest {
@@ -72,6 +73,30 @@ class HarmonyImageChoiceQuestionTest {
             ),
             travelPack.questions[4].options
         )
+    }
+
+    @Test
+    fun `love balance starts with the happy couple image question`() {
+        val loveBalancePack = HarmonyPacksData.PACKS.first { it.id == "liebegleichgewicht" }
+        val firstQuestion = loveBalancePack.questions.first()
+
+        assertEquals("Welches Paar ist GLÜCKLICH?", firstQuestion.q)
+        assertEquals(listOf("1", "2", "3", "4"), firstQuestion.options)
+        assertEquals(
+            HarmonyImageChoiceKind.HAPPY_COUPLE,
+            harmonyImageChoiceKind("liebegleichgewicht", 0)
+        )
+        assertNull(harmonyImageChoiceKind("liebegleichgewicht", 1))
+    }
+
+    @Test
+    fun `happy couple cards reveal every 700ms and flip slower than egg cards`() {
+        assertEquals(
+            listOf(0L, 700L, 1_400L, 2_100L),
+            (0 until 4).map(::happyCoupleRevealDelayMillis)
+        )
+        assertEquals(620, HAPPY_COUPLE_REVEAL_DURATION_MILLIS)
+        assertTrue(HAPPY_COUPLE_REVEAL_DURATION_MILLIS > 430)
     }
 
     @Test
