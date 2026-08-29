@@ -67,6 +67,11 @@ internal fun PartnerPredictionBoard(
     var actual by remember(question, selectedAnswer) { mutableStateOf(restored?.actual) }
     var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
     var predictionSeries by remember { mutableStateOf(emptyList<Boolean>()) }
+    val configuration = context.resources.configuration
+    val revealMetrics = PairMechanicRevealLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     FullscreenMechanicShell(
         kicker = tr("🔮 PARTNER-PROGNOSE", "🔮 PARTNER PREDICTION"),
@@ -130,12 +135,18 @@ internal fun PartnerPredictionBoard(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(result, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+                        Text(
+                            result,
+                            color = Color.White,
+                            fontSize = revealMetrics.predictionTitleSizeSp.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center
+                        )
                         Spacer(Modifier.height(7.dp))
                         Text(
                             text = tr("$currentHits/$currentTotal richtig", "$currentHits/$currentTotal correct"),
                             color = HarmonyPinkSoft,
-                            fontSize = 17.sp,
+                            fontSize = revealMetrics.predictionCountSizeSp.sp,
                             fontWeight = FontWeight.ExtraBold,
                             textAlign = TextAlign.Center
                         )
@@ -144,7 +155,7 @@ internal fun PartnerPredictionBoard(
                             Text(
                                 text = "✦  ✧  ✦  ✧  ✦",
                                 color = Color.White,
-                                fontSize = 21.sp,
+                                fontSize = revealMetrics.sparkleSizeSp.sp,
                                 modifier = Modifier.graphicsLayer {
                                     alpha = sparkle.value.coerceIn(0f, 1f)
                                     scaleX = 0.72f + sparkle.value * 0.28f
@@ -163,14 +174,16 @@ internal fun PartnerPredictionBoard(
                             selected = hit,
                             onClick = {},
                             badge = tr("Dein Tipp", "Your prediction"),
-                            modifier = Modifier.weight(1f).heightIn(min = 155.dp)
+                            modifier = Modifier.weight(1f).heightIn(min = revealMetrics.predictionCardMinHeightDp.dp),
+                            testTag = "prediction_result_guess"
                         )
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == actual } ?: MechanicOption("", "–"),
                             selected = true,
                             onClick = {},
                             badge = profile.partnerName,
-                            modifier = Modifier.weight(1f).heightIn(min = 155.dp)
+                            modifier = Modifier.weight(1f).heightIn(min = revealMetrics.predictionCardMinHeightDp.dp),
+                            testTag = "prediction_result_actual"
                         )
                     }
                     if (finale != null) {
@@ -181,12 +194,13 @@ internal fun PartnerPredictionBoard(
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(HarmonyPurple.copy(alpha = 0.25f))
                                 .border(1.dp, HarmonyPink.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
-                                .padding(12.dp)
+                                .padding(revealMetrics.finalePaddingDp.dp)
+                                .testTag("prediction_finale_card")
                         ) {
                             Text(
                                 text = tr("Wie gut kennst du deinen Partner?", "How well do you know your partner?"),
                                 color = Color.White,
-                                fontSize = 17.sp,
+                                fontSize = revealMetrics.finaleTitleSizeSp.sp,
                                 fontWeight = FontWeight.Black,
                                 textAlign = TextAlign.Center
                             )
@@ -194,8 +208,8 @@ internal fun PartnerPredictionBoard(
                             Text(
                                 text = finale,
                                 color = HarmonyMuted,
-                                fontSize = 14.sp,
-                                lineHeight = 18.sp,
+                                fontSize = revealMetrics.finaleBodySizeSp.sp,
+                                lineHeight = revealMetrics.finaleBodyLineHeightSp.sp,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -234,6 +248,11 @@ internal fun SecretChoiceBoard(
     var first by remember(question, selectedAnswer) { mutableStateOf(restored?.first) }
     var second by remember(question, selectedAnswer) { mutableStateOf(restored?.second) }
     var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    val configuration = context.resources.configuration
+    val revealMetrics = PairMechanicRevealLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     FullscreenMechanicShell(
         kicker = tr("🤫 GEHEIME WAHL", "🤫 SECRET CHOICE"),
@@ -281,7 +300,7 @@ internal fun SecretChoiceBoard(
                     Text(
                         text = if (same) tr("🧲 Gleiche Wellenlänge", "🧲 Same wavelength") else tr("↔ Zwei Perspektiven", "↔ Two perspectives"),
                         color = Color.White,
-                        fontSize = 27.sp,
+                        fontSize = revealMetrics.secretTitleSizeSp.sp,
                         fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center
                     )
@@ -296,11 +315,12 @@ internal fun SecretChoiceBoard(
                             badge = profile.userName,
                             modifier = Modifier
                                 .weight(1f)
-                                .heightIn(min = 160.dp)
+                                .heightIn(min = revealMetrics.secretCardMinHeightDp.dp)
                                 .graphicsLayer {
                                     translationX = if (same) 24f * travel else -18f * travel
                                     rotationZ = if (same) -1.5f * travel else -3f * travel
-                                }
+                                },
+                            testTag = "secret_result_first"
                         )
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == second } ?: MechanicOption("", "–"),
@@ -309,11 +329,12 @@ internal fun SecretChoiceBoard(
                             badge = profile.partnerName,
                             modifier = Modifier
                                 .weight(1f)
-                                .heightIn(min = 160.dp)
+                                .heightIn(min = revealMetrics.secretCardMinHeightDp.dp)
                                 .graphicsLayer {
                                     translationX = if (same) -24f * travel else 18f * travel
                                     rotationZ = if (same) 1.5f * travel else 3f * travel
-                                }
+                                },
+                            testTag = "secret_result_second"
                         )
                     }
                     PrimaryMechanicButton(
@@ -349,6 +370,11 @@ internal fun ScaleMatchBoard(
     var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
     var sliderValue by remember(question, selectedAnswer) { mutableStateOf(1f) }
     val max = items.size.coerceAtLeast(2)
+    val configuration = context.resources.configuration
+    val revealMetrics = PairMechanicRevealLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     FullscreenMechanicShell(
         kicker = tr("🎚️ SKALEN-MATCH", "🎚️ SCALE MATCH"),
@@ -373,7 +399,7 @@ internal fun ScaleMatchBoard(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
+                            .height(revealMetrics.scaleInputHeightDp.dp)
                             .clip(RoundedCornerShape(26.dp))
                             .background(HarmonyPurple.copy(alpha = 0.22f))
                             .border(1.dp, HarmonyPink.copy(alpha = 0.35f), RoundedCornerShape(26.dp)),
@@ -382,11 +408,11 @@ internal fun ScaleMatchBoard(
                         Text(
                             text = selected?.label ?: sliderValue.roundToInt().toString(),
                             color = Color.White,
-                            fontSize = 27.sp,
-                            lineHeight = 32.sp,
+                            fontSize = revealMetrics.scaleInputTextSizeSp.sp,
+                            lineHeight = (revealMetrics.scaleInputTextSizeSp + 5).sp,
                             fontWeight = FontWeight.Black,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(18.dp)
+                            modifier = Modifier.padding(revealMetrics.scaleCardPaddingDp.dp)
                         )
                     }
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -447,19 +473,20 @@ internal fun ScaleMatchBoard(
                     Text(
                         text = tr("$match % auf einer Wellenlänge", "$match% on the same wavelength"),
                         color = Color.White,
-                        fontSize = 28.sp,
-                        lineHeight = 34.sp,
+                        fontSize = revealMetrics.scaleTitleSizeSp.sp,
+                        lineHeight = (revealMetrics.scaleTitleSizeSp + 6).sp,
                         fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center
                     )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(175.dp)
+                            .height(revealMetrics.scaleRevealHeightDp.dp)
                             .clip(RoundedCornerShape(28.dp))
                             .background(HarmonyPurple.copy(alpha = 0.22f))
                             .border(1.dp, HarmonyPink.copy(alpha = 0.4f), RoundedCornerShape(28.dp))
-                            .padding(20.dp)
+                            .padding(revealMetrics.scaleCardPaddingDp.dp)
+                            .testTag("scale_result_card")
                     ) {
                         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceEvenly) {
                             ScaleRevealLine(profile.userName, items.getOrNull(firstIndex)?.label ?: "–", firstIndex, items.size)
