@@ -1,6 +1,7 @@
 package com.example.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -53,17 +54,22 @@ class DevExportLogicTest {
     }
 
     @Test
-    fun `zipPaths keep original basename even for duplicates`() {
+    fun `zipPaths keep every image flat and make duplicate basenames unique`() {
         val assets = listOf(
             ExportAssetAssignment("A", "same.png", "pack", "Pack", 0, 0),
-            ExportAssetAssignment("B", "same.png", "pack", "Pack", 0, 1)
+            ExportAssetAssignment("B", "same.png", "pack", "Pack", 0, 1),
+            ExportAssetAssignment("C", "pretty ring.webp", "second pack", "Second", 1, 0)
         )
 
         val paths = DevExportLogic.zipPaths(assets)
 
-        assertEquals("images/pack/pair-001/a/same.png", paths[assets[0]])
-        assertEquals("images/pack/pair-001/b/same.png", paths[assets[1]])
-        assertTrue(paths.values.all { it.endsWith("/same.png") })
+        assertEquals("images/pack__pair-001__a__same.png", paths[assets[0]])
+        assertEquals("images/pack__pair-001__b__same.png", paths[assets[1]])
+        assertEquals("images/second_pack__pair-002__a__pretty ring.webp", paths[assets[2]])
+        assertEquals(paths.values.size, paths.values.toSet().size)
+        assertTrue(paths.values.all { it.startsWith("images/") })
+        assertTrue(paths.values.all { it.removePrefix("images/").contains('/') == false })
+        assertFalse(paths.values.any { it.contains("/a/") || it.contains("/b/") })
     }
 
     @Test
@@ -80,6 +86,7 @@ class DevExportLogicTest {
         assertTrue(manifest.contains("\"originalFileName\": \"original A.png\""))
         assertTrue(manifest.contains("\"pairIndex\": 0"))
         assertTrue(manifest.contains("\"side\": 0"))
+        assertTrue(manifest.contains("\"zipPath\": \"images/p1__pair-001__a__original A.png\""))
     }
 
     @Test
