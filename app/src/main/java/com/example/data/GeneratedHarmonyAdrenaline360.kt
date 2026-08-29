@@ -2,7 +2,7 @@ package com.example.data
 
 /** Small aggregator; content is split into 20 section objects to avoid JVM <clinit> size limits. */
 object GeneratedHarmonyAdrenaline360 {
-    const val VERSION: Long = 1787868780000L
+    const val VERSION: Long = 1787868780003L
 
     val CATEGORIES: List<GenCategory> = listOf(
         GenCategory(id="h360_skala", name="Skalen-Match", emoji="🎚️", color=0xFF9DB2FF),
@@ -37,12 +37,18 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS)
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
-        NormensLoeschungen.apply(
-            Harmony360RelationshipStage051Pipeline.apply(
-                raw
-                    .map(GeneratedHarmony360ScenarioCleanup::apply)
-                    .map(GeneratedHarmony360TextCleanup::apply)
-                    .map(Harmony360ContentRework::apply)
+        Harmony360ScenarioJourneyCuration.apply(
+            Harmony360RelationshipTopicCuration.apply(
+                Harmony360TopicNormalizationCuration.apply(
+                    NormensLoeschungen.apply(
+                        Harmony360RelationshipStage051Pipeline.apply(
+                            raw
+                                .map(GeneratedHarmony360ScenarioCleanup::apply)
+                                .map(GeneratedHarmony360TextCleanup::apply)
+                                .map(Harmony360ContentRework::apply)
+                        )
+                    )
+                )
             )
         )
     }
