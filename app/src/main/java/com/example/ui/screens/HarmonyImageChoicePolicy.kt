@@ -9,6 +9,7 @@ internal enum class HarmonyImageChoiceKind {
     STEAK,
     TRAVEL,
     TRAUMHAUS,
+    PROPOSAL_LOCATION,
     RANK_ORDER,
     PERSON_ASSIGNMENT,
     PARTNER_PREDICTION,
@@ -28,6 +29,7 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
         packId == "essenreden" && questionIndex == 4 -> return HarmonyImageChoiceKind.STEAK
         packId == "reisevor" && questionIndex == 4 -> return HarmonyImageChoiceKind.TRAVEL
         packId == "aussen" -> return HarmonyImageChoiceKind.TRAUMHAUS
+        packId == "antrag" && questionIndex == 0 -> return HarmonyImageChoiceKind.PROPOSAL_LOCATION
     }
 
     val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId } ?: return null
