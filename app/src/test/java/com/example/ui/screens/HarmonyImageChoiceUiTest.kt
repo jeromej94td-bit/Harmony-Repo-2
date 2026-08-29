@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -63,6 +64,50 @@ class HarmonyImageChoiceUiTest {
         assertEquals(question.options.first(), pickedAnswer)
         composeRule.onNodeWithTag("harmony_image_choice_question").captureRoboImage(
             filePath = "build/harmony-image-choice-preview/travel-question.png"
+        )
+    }
+
+    @Test
+    fun `happy couple question reveals four tappable image cards without helper footer`() {
+        val question = HarmonyPacksData.PACKS
+            .first { it.id == "liebegleichgewicht" }
+            .questions.first()
+        var pickedAnswer by mutableStateOf<String?>(null)
+
+        composeRule.mainClock.autoAdvance = false
+        composeRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                AmbientBackground {
+                    HarmonyImageChoiceQuestion(
+                        kind = HarmonyImageChoiceKind.HAPPY_COUPLE,
+                        question = question.q,
+                        options = question.options,
+                        selectedAnswer = pickedAnswer,
+                        onPick = { pickedAnswer = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        composeRule.mainClock.advanceTimeBy(3_000L)
+        composeRule.onNodeWithText("Welches Paar ist GLÜCKLICH?").assertExists()
+        composeRule.onNodeWithText("Wähle das Paar, das für dich am glücklichsten wirkt.").assertExists()
+        composeRule.onNodeWithText("Die Optionen erscheinen nacheinander – wie Karten, die sich nach und nach aufdecken.").assertDoesNotExist()
+        composeRule.onNodeWithText("Bitte wähle ein Paar").assertDoesNotExist()
+
+        (0 until 4).forEach { index ->
+            composeRule.onNodeWithTag("happy_couple_option_$index").assertExists()
+        }
+
+        composeRule.onNodeWithTag("happy_couple_option_2").performClick()
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("happy_couple_option_2_selected").assertExists()
+        assertEquals("3", pickedAnswer)
+
+        composeRule.onNodeWithTag("harmony_happy_couple_question").captureRoboImage(
+            filePath = "build/harmony-image-choice-preview/happy-couple-question.png"
         )
     }
 
