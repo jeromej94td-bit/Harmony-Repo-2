@@ -17,7 +17,9 @@ This file is the append-only project black box for **360 Rework**.
 
 **Work package:** 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds<br>
 **Status:** 🟡 IN PROGRESS<br>
-**Branch:** `360-rework/24-3-proposal-either-or`
+**Branch:** `360-rework/24-3-proposal-either-or`<br>
+**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` (draft)<br>
+**Implementation commit:** `487bb671d89c2efd203601b31eb62f0ed2d1f48d`
 
 ### Ordering decision
 
@@ -30,7 +32,7 @@ The operator explicitly authorized 24.3 to begin while 24.2 remains `🧪 VERIFY
 
 ### Next action
 
-Review the exact round content and open a small 24.3 PR with the verification gap recorded.
+Review the draft PR and record the requested merge decision. The Gradle verification gap remains open.
 
 ---
 

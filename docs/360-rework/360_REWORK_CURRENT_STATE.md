@@ -82,6 +82,8 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 
 **Work package:** 24.3 — Stage 02.2 Proposal mood/details Das-oder-Das rounds<br>
 **Branch:** `360-rework/24-3-proposal-either-or`<br>
+**GitHub PR:** #31 — `[24.3] 360 Rework — Proposal mood and detail rounds` (draft)<br>
+**Commit:** `487bb671d89c2efd203601b31eb62f0ed2d1f48d`<br>
 **Scope:** add UI-independent rounds for the existing `proposal_mood` and `proposal_details` flow steps only.<br>
 **Deliberately excluded:** new UI, navigation, images, ranking, prediction, scenario, reveal, legacy migration and deletion.<br>
 **Ordering decision:** the operator explicitly authorized 24.3 to start while the Gradle build verification for merged 24.2 remains open. Neither substage is marked complete.
