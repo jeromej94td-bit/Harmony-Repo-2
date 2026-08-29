@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -99,6 +100,9 @@ fun LiveChangeLauncher(
     onStart: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isVisible by remember { mutableStateOf(true) }
+    if (!isVisible) return
+
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
@@ -109,7 +113,23 @@ fun LiveChangeLauncher(
             modifier = Modifier.padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("⚡ Live Change", color = HarmonyText, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    "⚡ Live Change",
+                    color = HarmonyText,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+                TextButton(
+                    onClick = { isVisible = false },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .testTag("live_change_dismiss_button")
+                ) {
+                    Text("✕", color = HarmonyMuted, fontWeight = FontWeight.Bold)
+                }
+            }
             Spacer(Modifier.height(4.dp))
             Text(
                 "Spiel öffnen · aktuelle Frage gedrückt halten · direkt ändern",
