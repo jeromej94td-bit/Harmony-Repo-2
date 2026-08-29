@@ -3,8 +3,9 @@ package com.example.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -58,10 +59,7 @@ class ProposalLocationDuelBoardTest {
         composeRule.onNodeWithTag("proposal_location_${round.firstOption.id}").performClick()
         composeRule.waitForIdle()
         assertEquals(round.firstOption.id, pickedOptionId)
-
-        composeRule.onNodeWithTag("proposal_location_${round.secondOption.id}").performClick()
-        composeRule.waitForIdle()
-        assertEquals(round.firstOption.id, pickedOptionId)
+        composeRule.onNodeWithTag("proposal_location_${round.secondOption.id}").assertIsNotEnabled()
 
         composeRule.mainClock.advanceTimeBy(1_300)
         composeRule.waitForIdle()
