@@ -6,6 +6,21 @@ enum class QuestionInteractionKind {
     PERSON_ASSIGNMENT
 }
 
+enum class QuestionResponseKind {
+    FIXED_CHOICE,
+    CHOICE_WITH_OPTIONAL_TEXT,
+    OPEN_TEXT,
+    PHOTO_ONLY,
+    CHOICE_WITH_OPTIONAL_PHOTO
+}
+
+data class QuestionInteractionSpec(
+    val responseKind: QuestionResponseKind,
+    val allowCustomText: Boolean = false,
+    val allowSkip: Boolean = false,
+    val fullscreenMechanic: FullscreenGameMechanicKind? = null
+)
+
 enum class FullscreenGameMechanicKind {
     RANK_ORDER,
     PERSON_ASSIGNMENT,
@@ -50,6 +65,29 @@ object QuestionInteractionPolicy {
         } else {
             QuestionInteractionKind.STANDARD
         }
+    }
+
+    fun resolveSpec(
+        pack: QuestionPack,
+        questionIndex: Int,
+        question: Question
+    ): QuestionInteractionSpec {
+        val fullscreenMechanic = FullscreenGameMechanicPolicy.resolve(pack, questionIndex)
+        val curatedResponse = QuestionResponseCuration.resolve(pack.id, question.q)
+        val responseKind = curatedResponse ?: when {
+            pack.cat == "nie" -> QuestionResponseKind.FIXED_CHOICE
+            question.options.isEmpty() -> QuestionResponseKind.OPEN_TEXT
+            else -> QuestionResponseKind.FIXED_CHOICE
+        }
+        val allowCustomText = responseKind == QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT ||
+            responseKind == QuestionResponseKind.OPEN_TEXT
+
+        return QuestionInteractionSpec(
+            responseKind = responseKind,
+            allowCustomText = allowCustomText,
+            allowSkip = pack.cat == "nie",
+            fullscreenMechanic = fullscreenMechanic
+        )
     }
 }
 
