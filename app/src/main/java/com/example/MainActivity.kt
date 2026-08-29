@@ -176,6 +176,7 @@ fun HarmonyApp(
     var isIntrospectionOpen by remember { mutableStateOf(false) }
     var isPandaEitherOrOpen by remember { mutableStateOf(false) }
     var isPandaExitConfirmOpen by remember { mutableStateOf(false) }
+    var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
     var isEureMischungOpen by remember { mutableStateOf(false) }
     var isKidGeneratorOpen by remember { mutableStateOf(false) }
     var isProposalExperienceOpen by remember { mutableStateOf(false) }
@@ -278,13 +279,13 @@ fun HarmonyApp(
                 isPandaExitConfirmOpen = true
             }
             isProposalExperienceOpen -> {
-                isProposalExperienceOpen = false
+                isSpecialFlowExitConfirmOpen = true
             }
             isEureMischungOpen -> {
-                isEureMischungOpen = false
+                isSpecialFlowExitConfirmOpen = true
             }
             isKidGeneratorOpen -> {
-                isKidGeneratorOpen = false
+                isSpecialFlowExitConfirmOpen = true
             }
             isQuizActive -> {
                 if (uiState.isExitConfirmOpen) {
@@ -793,6 +794,51 @@ fun HarmonyApp(
                         dismissButton = {
                             androidx.compose.material3.TextButton(
                                 onClick = { isPandaExitConfirmOpen = false }
+                            ) {
+                                androidx.compose.material3.Text(
+                                    com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage),
+                                    color = androidx.compose.ui.graphics.Color.Unspecified
+                                )
+                            }
+                        }
+                    )
+                }
+
+                if (isSpecialFlowExitConfirmOpen) {
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest = { isSpecialFlowExitConfirmOpen = false },
+                        title = {
+                            androidx.compose.material3.Text(
+                                com.example.util.LanguageManager.tr("Spiel verlassen?", uiState.appLanguage)
+                            )
+                        },
+                        text = {
+                            androidx.compose.material3.Text(
+                                com.example.util.LanguageManager.tr(
+                                    "Möchtet ihr das Spiel wirklich verlassen? Nicht gespeicherter Fortschritt geht verloren.",
+                                    uiState.appLanguage
+                                )
+                            )
+                        },
+                        confirmButton = {
+                            androidx.compose.material3.TextButton(
+                                onClick = {
+                                    isSpecialFlowExitConfirmOpen = false
+                                    when {
+                                        isProposalExperienceOpen -> isProposalExperienceOpen = false
+                                        isEureMischungOpen -> isEureMischungOpen = false
+                                        isKidGeneratorOpen -> isKidGeneratorOpen = false
+                                    }
+                                }
+                            ) {
+                                androidx.compose.material3.Text(
+                                    com.example.util.LanguageManager.tr("Verlassen", uiState.appLanguage)
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            androidx.compose.material3.TextButton(
+                                onClick = { isSpecialFlowExitConfirmOpen = false }
                             ) {
                                 androidx.compose.material3.Text(
                                     com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage),
