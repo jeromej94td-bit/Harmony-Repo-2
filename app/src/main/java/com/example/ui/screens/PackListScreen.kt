@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -38,6 +39,7 @@ fun PackListScreen(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val answerCounts = remember(answers) { answerCountsByPack(answers) }
     val topic = HarmonyPacksData.TOPICS.find { it.id == selectedTopicId }
     val category = HarmonyPacksData.CATEGORIES.find { it.id == selectedCategoryId }
     val titleText = when {
@@ -57,13 +59,13 @@ fun PackListScreen(
     if (packFilter == "open") {
         list = list.filter { pack ->
             val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
-            val ansCount = answers.count { it.packId == pack.id }
+            val ansCount = answerCounts[pack.id] ?: 0
             ansCount < totalLen
         }
     } else if (packFilter == "done") {
         list = list.filter { pack ->
             val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
-            val ansCount = answers.count { it.packId == pack.id }
+            val ansCount = answerCounts[pack.id] ?: 0
             ansCount >= totalLen && totalLen > 0
         }
     }
