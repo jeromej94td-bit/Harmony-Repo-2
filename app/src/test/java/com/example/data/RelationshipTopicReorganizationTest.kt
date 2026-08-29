@@ -1,5 +1,6 @@
 package com.example.data
 
+import com.example.data.model.HarmonyPacksData
 import com.example.data.model.QuestionPack
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -49,20 +50,23 @@ class RelationshipTopicReorganizationTest {
     )
 
     @After
-    fun resetCustomPacks() {
+    fun resetRuntimeState() {
         DeveloperDataManager._customPacks.clear()
+        HarmonyPacksData.setDynamicPacks(emptyList())
+        HarmonyPacksData.setDynamicCategories(emptyList())
     }
 
     @Test
     fun `relationship overflow packs are assigned to their semantic top level topics`() {
-        val generatedById = GeneratedHarmonyAdrenaline360.PACKS.associateBy { it.id }
+        val generatedById = GeneratedContentRegistry.PACKS.associateBy { it.id }
         expectedGeneratedTopics.forEach { (id, expectedTopic) ->
             assertEquals("generated pack $id", expectedTopic, generatedById.getValue(id).topic)
         }
 
-        val defaultById = com.example.data.model.HarmonyPacksData.DEFAULT_PACKS.associateBy { it.id }
+        DeveloperDataManager.syncWithHarmonyData()
+        val visibleById = HarmonyPacksData.PACKS.associateBy { it.id }
         expectedDefaultTopics.forEach { (id, expectedTopic) ->
-            assertEquals("default pack $id", expectedTopic, defaultById.getValue(id).topic)
+            assertEquals("visible default pack $id", expectedTopic, visibleById.getValue(id).topic)
         }
     }
 
