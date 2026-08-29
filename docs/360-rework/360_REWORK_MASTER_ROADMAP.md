@@ -10,7 +10,7 @@
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
 **Stage-03 progress after PR #126:** 6/7  
 **Next core substage after PR #126:** 03.7 — Reusable `Reveal`/result flow  
-**Stage-05 progress:** 1/5 = 20%
+**Stage-05 progress:** 2/5 = 40%
 
 > Stage 02 has all twelve feature/contract slices on `main`. PR #79 closes 02.12 with available static/UI/end-to-end contracts but explicitly does not claim a green Android/Gradle build because Actions still fail before step 1. A later successful Android build is an infrastructure verification check, not a new feature slice.
 
@@ -22,7 +22,7 @@
 | 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 CONTRACT-COMPLETE / BUILD CAVEAT | 12/12 slices = 100% |
 | 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 6/7 after PR #126 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
-| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 1/5 = 20% |
+| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 2/5 = 40% |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
 | 07/08 | Point 6 | Additional Flagship Harmony Experiences | ⬜ PLANNED | 0/12 |
 | 08/08 | Point 7 | Automated Content Quality Gate | ⬜ PLANNED | 0/6 |
@@ -69,7 +69,7 @@ Feature implementation and available contract coverage are complete. A genuine A
 
 **Original plan reference:** Point 2  
 **Status:** 🟣 ACTIVE  
-**Progress after PR #99:** 4/7
+**Progress after PR #126:** 6/7
 
 - [x] **03.1 General mixed-step experience definition/state model** — 26.1 / PR #81. Adds generic step kinds, immutable validated experience definitions, generic position/navigation/progress, safe invalid-position handling, content-owned item-count resolution, and a proposal compatibility adapter. Proposal remains nine steps / 35 positions with locked ratio parity.
 - [x] **03.2 Reusable `EitherOr` step** — 26.2 / PR #85, merge `4ef6d583144df4f59c59daef301ffe2596b89b7b`. Adds validated generic two-choice rounds, proposal adapter, stateless reusable Compose board, explicit selection semantics and proposal integration while preserving all 11 shipped proposal Either-Or rounds.
@@ -85,7 +85,7 @@ Feature implementation and available contract coverage are complete. A genuine A
 
 ### NEXT EXACT ACTION
 
-Implement **03.5 — Reusable `PartnerPrediction` step** as a narrow package. Preserve the shipped A predicts B → B answers → reveal behavior and encoded answer semantics while extracting only the reusable mechanic. Do not pull Scenario, OpenPrompt or Reveal into that slice.
+Implement **03.7 — Reusable `Reveal`/result flow plus legacy compatibility during migration** as the next narrow 26.x package. Keep the current reveal output stable and do not redesign navigation while extracting the reusable result surface.
 
 Definition of Done: the proposal implementation becomes the reference for reusable mixed-step experiences without copying one-off runners; legacy content remains usable during migration.
 
@@ -110,11 +110,11 @@ Definition of Done: the proposal implementation becomes the reference for reusab
 
 **Original plan reference:** Point 4  
 **Status:** 🟡 PARALLEL ACTIVE  
-**Progress:** 1/5 = 20%  
-**Next:** 05.2 — Food / travel / leisure / culture
+**Progress:** 2/5 = 40%  
+**Next:** 05.3 — Future / money / work / family
 
 - [x] **05.1 Relationship / communication / everyday-life** — 7/7 = 100%. Sections 01/02/06/12: 72/72 explicit decisions; six archived fillers; curated counts 16/17/16/17; plus Quick Game `Was brauchst du gerade?` with 10×2 choices. Final audit PR #76.
-- [ ] **05.2 Food / travel / leisure / culture**
+- [x] **05.2 Food / travel / leisure / culture** — 6/6 = 100%. Sections 04/05/07/14: 72 stable packs, 18/18 explicit rewrites in each section, six concrete questions per pack, and a final cross-section regression gate for generic quartets, English generator residue, known typos and repeated unrelated 4-option sets. Package trail: PR #97, #108, #114, #117, #132, final audit PR #136.
 - [ ] **05.3 Future / money / work / family**
 - [ ] **05.4 Psychology / feelings / health / intimacy**
 - [ ] **05.5 Values / belief / society / humor / fantasy / teamwork**
