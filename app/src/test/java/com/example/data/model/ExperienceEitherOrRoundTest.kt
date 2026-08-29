@@ -1,7 +1,6 @@
 package com.example.data.model
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFailsWith
 import org.junit.Test
 
 class ExperienceEitherOrRoundTest {
@@ -23,21 +22,11 @@ class ExperienceEitherOrRoundTest {
 
     @Test
     fun `malformed rounds fail fast`() {
-        assertFailsWith<IllegalArgumentException> {
-            ExperienceEitherOrRound("", "Frage", "A", "B")
-        }
-        assertFailsWith<IllegalArgumentException> {
-            ExperienceEitherOrRound("id", "", "A", "B")
-        }
-        assertFailsWith<IllegalArgumentException> {
-            ExperienceEitherOrRound("id", "Frage", "", "B")
-        }
-        assertFailsWith<IllegalArgumentException> {
-            ExperienceEitherOrRound("id", "Frage", "A", "")
-        }
-        assertFailsWith<IllegalArgumentException> {
-            ExperienceEitherOrRound("id", "Frage", "Gleich", "Gleich")
-        }
+        expectIllegal { ExperienceEitherOrRound("", "Frage", "A", "B") }
+        expectIllegal { ExperienceEitherOrRound("id", "", "A", "B") }
+        expectIllegal { ExperienceEitherOrRound("id", "Frage", "", "B") }
+        expectIllegal { ExperienceEitherOrRound("id", "Frage", "A", "") }
+        expectIllegal { ExperienceEitherOrRound("id", "Frage", "Gleich", "Gleich") }
     }
 
     @Test
@@ -49,6 +38,15 @@ class ExperienceEitherOrRoundTest {
             assertEquals(proposalRound.prompt, generic.prompt)
             assertEquals(proposalRound.firstChoice, generic.firstChoice)
             assertEquals(proposalRound.secondChoice, generic.secondChoice)
+        }
+    }
+
+    private fun expectIllegal(block: () -> Unit) {
+        try {
+            block()
+            throw AssertionError("Expected IllegalArgumentException")
+        } catch (_: IllegalArgumentException) {
+            // Expected.
         }
     }
 }
