@@ -18,12 +18,17 @@ class Harmony360RelationshipTopicCurationTest {
         assertEquals("aufwaermen", requirePack("h500_391_zeitreise_entweder_oder").topic)
         assertEquals("aufwaermen", requirePack("h500_392_superkraefte_wer_eher").topic)
         assertEquals("aufwaermen", requirePack("h500_425_gemeinsamer_sieg_prognose").topic)
+        assertEquals("kennen", requirePack("h500_211_arbeitszeiten_entweder_oder").topic)
+        assertEquals("essen", requirePack("h500_231_ernaehrung_entweder_oder").topic)
+        assertEquals("hobbys", requirePack("h500_236_sportliche_ziele_szenario").topic)
     }
 
     @Test
     fun communicationAndStrongPairContentStayInRelationship() {
         assertEquals("beziehung", requirePack("h500_026_zuhoeren_szenario").topic)
         assertEquals("beziehung", requirePack("h500_251_streitkultur_entweder_oder").topic)
+        assertEquals("beziehung", requirePack("h500_216_work_life_balance_szenario").topic)
+        assertEquals("beziehung", requirePack("h500_238_krank_sein_memory").topic)
         assertEquals("beziehung", requirePack("h500_402_telepathie_wer_eher").topic)
         assertEquals("beziehung", requirePack("h500_410_unsere_traumwelt_offene_runde").topic)
         assertEquals("beziehung", requirePack("h500_411_zusammenhalt_entweder_oder").topic)
@@ -32,6 +37,15 @@ class Harmony360RelationshipTopicCurationTest {
     @Test
     fun lowValueOrDuplicateFillerIsArchivedInsteadOfCreatingNewTopics() {
         listOf(
+            "h500_212_ueberstunden_wer_eher",
+            "h500_213_karriere_skala",
+            "h500_218_erster_job_memory",
+            "h500_222_chef_sein_wer_eher",
+            "h500_223_weiterbildung_skala",
+            "h500_232_schlafgewohnheiten_wer_eher",
+            "h500_233_mental_health_skala",
+            "h500_234_arztbesuche_ranking",
+            "h500_235_stressbewaeltigung_prognose",
             "h500_401_tierverwandlung_entweder_oder",
             "h500_406_alien_begegnung_szenario",
             "h500_397_paralleluniversum_geheime_wahl",
@@ -49,6 +63,17 @@ class Harmony360RelationshipTopicCurationTest {
         assertEquals("moral", requirePack("h500_284_moral_ranking").topic)
         assertEquals("kennen", requirePack("h500_272_charaktereigenschaften_wer_eher").topic)
         assertEquals("kennen", requirePack("h500_278_praegende_momente_memory").topic)
+        assertEquals("kennen", requirePack("h500_230_beruflicher_erfolg_offene_runde").topic)
+    }
+
+    @Test
+    fun legacy360TopicsAreMappedToExistingAppTopics() {
+        assertEquals("filme_serien", requirePack("h500_151_serien_und_filme_entweder_oder").topic)
+        assertEquals("hobbys", requirePack("h500_152_buecher_wer_eher").topic)
+        assertEquals("familie", requirePack("h500_171_paarabende_entweder_oder").topic)
+        assertEquals("hobbys", requirePack("h500_291_musikgeschmack_entweder_oder").topic)
+        assertEquals("filme_serien", requirePack("h500_292_streaming_wer_eher").topic)
+        assertEquals("aufwaermen", requirePack("h500_371_humor_entweder_oder").topic)
     }
 
     @Test
@@ -61,6 +86,9 @@ class Harmony360RelationshipTopicCurationTest {
         val auditedIds = setOf(
             "h500_051_unser_naechstes_jahr_entweder_oder",
             "h500_054_traumhaus_ranking",
+            "h500_211_arbeitszeiten_entweder_oder",
+            "h500_231_ernaehrung_entweder_oder",
+            "h500_239_gesunder_lebensstil_prioritaet",
             "h500_271_werte_im_alltag_entweder_oder",
             "h500_284_moral_ranking",
             "h500_313_glaube_skala",
