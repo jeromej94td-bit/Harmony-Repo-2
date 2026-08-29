@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -77,6 +78,15 @@ internal fun RankingSlotBoard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp
+    val compactScreen = screenHeight < 700
+    val reservedChrome = when {
+        screenHeight < 600 -> 92
+        compactScreen -> 110
+        else -> 132
+    }
+    val boardHeight = (screenHeight - reservedChrome).coerceIn(360, 720).dp
     val hitSlop = with(LocalDensity.current) { 22.dp.toPx() }
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
@@ -122,7 +132,8 @@ internal fun RankingSlotBoard(
 
     BoxWithConstraints(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .height(boardHeight)
             .testTag("ranking_slot_board")
     ) {
         val compactHeight = maxHeight < 620.dp
