@@ -26,6 +26,7 @@ class SexIntimacyRevealPolicyTest {
             "Wie oft würdest du dir Sex idealerweise wünschen – unabhängig davon, wie oft wir aktuell Sex haben?",
             "Welche Rolle spielt Vorspiel für dich bei gutem Sex?",
             "Was beeinflusst deine Lust im Alltag am stärksten?",
+            "Was lässt deine Lust am schnellsten verschwinden?",
             "Magst du es lieber, wenn Sex spontan entsteht oder wenn wir uns bewusst Zeit dafür nehmen?",
             "Wie möchtest du am liebsten merken, dass ich gerade Lust auf dich habe?"
         )
