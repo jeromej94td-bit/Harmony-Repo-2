@@ -1,0 +1,35 @@
+name: Ranking UI Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'app/src/main/java/com/example/ui/screens/RankingSlotBoard.kt'
+      - 'app/src/test/java/com/example/ui/screens/RankingSlotBoardTest.kt'
+      - '.github/workflows/ranking-ui-verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ranking-ui-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Run compact ranking UI test
+        run: gradle :app:testDebugUnitTest --tests com.example.ui.screens.RankingSlotBoardTest --stacktrace
