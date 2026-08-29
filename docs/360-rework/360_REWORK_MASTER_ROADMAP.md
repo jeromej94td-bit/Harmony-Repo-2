@@ -5,82 +5,71 @@
 **Project:** 360 Rework  
 **Core stages:** 8  
 **Completed core stages:** 1/8  
-**Current stage:** Stage 02/08 — Unser perfekter Antrag  
-**Current stage progress:** 0/12 complete (0%)
+**Current core stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
+**Verified Stage-02 progress:** 0/12 complete (0%)  
+**Stage-02 implementation coverage:** 9/12 substages have dedicated implementation merged  
+**Current exact substage:** 02.10 — reuse strongest existing proposal/ring/wedding content
 
-> Global stage position tells us *where* we are in the plan. The x/y fraction and percentage tell us *how far* we are inside that stage.
+> `complete` means verified against the substage Definition of Done. Merged implementation alone does not tick a checkbox. Stage 02.12 owns the final executable build/UI verification for the mixed experience.
 
 ## Visual stage board
 
-| Stage | Original plan reference | Area | Status | Progress | Percent |
-|---|---|---|---|---:|---:|
-| 01/08 | prerequisite already completed | Ring Image Quality Rework | ✅ DONE | 1/1 | 100% |
-| 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🔵 NEXT | 0/12 | 0% |
-| 03/08 | Point 2 | Reusable Harmony Experience Engine | ⬜ PLANNED | 0/7 | 0% |
-| 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 | 0% |
-| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | ⬜ PLANNED | 0/5 | 0% |
-| 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | ⬜ PLANNED | 0/5 | 0% |
-| 07/08 | Point 6 | Additional Flagship Harmony Experiences | ⬜ PLANNED | 0/12 | 0% |
-| 08/08 | Point 7 | Automated Content Quality Gate | ⬜ PLANNED | 0/6 | 0% |
+| Stage | Original plan reference | Area | Status | Verified progress |
+|---|---|---|---|---:|
+| 01/08 | prerequisite already completed | Ring Image Quality Rework | ✅ DONE | 1/1 |
+| 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 ACTIVE / VERIFY | 0/12; implementation through 02.9 |
+| 03/08 | Point 2 | Reusable Harmony Experience Engine | ⬜ PLANNED | 0/7 |
+| 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
+| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL WORK ACTIVE | 0/5 |
+| 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
+| 07/08 | Point 6 | Additional Flagship Harmony Experiences | ⬜ PLANNED | 0/12 |
+| 08/08 | Point 7 | Automated Content Quality Gate | ⬜ PLANNED | 0/6 |
 
 ---
 
 ## Stage 01/08 — Ring Image Quality Rework
 
-**Original plan reference:** prerequisite completed before the formal stage board  
 **Status:** ✅ DONE  
-**Progress:** 1/1 complete (100%)  
-**Dependencies:** none
+**Progress:** 1/1 complete (100%)
 
-### Substages
+- [x] 01.1 Replace the 10 prioritized engagement-ring WebPs with refreshed versions and verify the merged diff contains no unrelated files.
 
-- [x] 01.1 Replace the 10 prioritized engagement-ring WebPs with the refreshed versions and verify the merged diff contains no unrelated files.
-
-### Evidence
-
-- PR: `#22 — Refresh engagement ring image assets`
-- Merge commit: `b696acb25f8f9b52235a6fba256ec9dc041edab9`
-- Changed files: exactly 10 ring WebPs
-- Verification limitation: two GitHub Actions jobs failed before executing their first workflow step, therefore this stage must **not** be described as having a fully green test suite.
-
-### Definition of Done
-
-The ten intended refreshed ring assets are present on `main`, the merged diff contains only those ten ring WebPs, and the verification limitation is documented.
+**Evidence:** PR #22, merge `b696acb25f8f9b52235a6fba256ec9dc041edab9`; exactly 10 ring WebPs changed. Repository-wide Actions did not execute their first workflow step, so no full green-suite claim is attached to this stage.
 
 ---
 
 ## Stage 02/08 — 💍 Unser perfekter Antrag
 
 **Original plan reference:** Point 1  
-**Status:** 🧪 VERIFY<br>
-**Progress:** 0/12 complete (0%)  
-**Dependencies:** Stage 01 complete; uses refreshed ring assets
+**Status:** 🧪 ACTIVE / FINAL VERIFICATION OPEN  
+**Verified progress:** 0/12 complete (0%)  
+**Implementation coverage:** 9/12 substages have a dedicated implementation package on `main`  
+**Dependencies:** Stage 01 complete
 
 ### Substages
 
-- [ ] 02.1 Experience data model and deterministic proposal flow definition — merged implementation awaiting build verification
-- [ ] 02.2 Das-oder-Das proposal mood/details rounds — merged implementation awaiting verification
-- [ ] 02.3 Proposal-location image duels
-- [ ] 02.4 Refreshed ring-image duels integrated into the experience — implementation prepared in PR #46
-- [ ] 02.5 Drag-and-drop ranking for proposal priorities — implementation prepared in PR #49
-- [ ] 02.6 Partner prediction A → B → Reveal — implementation prepared in PR #50
-- [ ] 02.7 Concrete proposal scenario rounds
-- [ ] 02.8 Open personal prompts
-- [ ] 02.9 Final qualitative `Euer perfekter Antrag` reveal
-- [ ] 02.10 Reuse the strongest existing proposal/ring/wedding content needed by this experience
-- [ ] 02.11 Experience entry/navigation and end-to-end playable flow
-- [ ] 02.12 Tests, build verification and UI verification
+- [ ] **02.1 Experience data model and deterministic proposal flow definition** — implementation merged in PR #27; Gradle/UI verification open.
+- [ ] **02.2 Das-oder-Das proposal mood/details rounds** — implementation merged in PR #31; final runner/build/UI verification open.
+- [ ] **02.3 Proposal-location image duels** — image-duel package merged via PR #55 and routed into the `antrag` game in commit `229dfa6ded47e59627aab1bf213fe8d7e775c375`; final UI/build verification open.
+- [ ] **02.4 Refreshed ring-image duels integrated into the experience** — deterministic ring-duel content merged in PR #48; actual end-to-end runner wiring remains for 02.11.
+- [ ] **02.5 Drag-and-drop ranking for proposal priorities** — deterministic priority content merged in PR #49 and reuses existing ranking mechanics; end-to-end runner wiring remains for 02.11.
+- [ ] **02.6 Partner prediction A → B → Reveal** — deterministic prediction rounds merged in PR #50 and reuse the existing prediction board; end-to-end runner wiring remains for 02.11.
+- [ ] **02.7 Concrete proposal scenario rounds** — six proposal scenarios merged in PR #56, merge `123059397aa9dddd42ef39303d60414fa023c25b`; focused Kotlin contract 3/3 PASS; runner wiring remains for 02.11.
+- [ ] **02.8 Open personal prompts** — five personal free-text prompts merged in PR #58, merge `69bd969bacccd414f4ea8bd06ae33aa0f33f3679`; focused Kotlin contract 3/3 PASS; runner wiring remains for 02.11.
+- [ ] **02.9 Final qualitative `Euer perfekter Antrag` reveal** — qualitative result builder merged in PR #63, merge `c7873ad413129f9fd271a0320faa238b7d8a9091`; focused Kotlin contract 3/3 PASS; visual result/runner wiring remains for 02.11.
+- [ ] **02.10 Reuse the strongest existing proposal/ring/wedding content needed by this experience** — 🔵 NEXT.
+- [ ] **02.11 Experience entry/navigation and end-to-end playable flow** — wire the Stage-02 components into one deterministic playable experience and render the final reveal.
+- [ ] **02.12 Tests, build verification and UI verification** — executable verification gate before Stage 02 can be marked complete.
 
-### Merged implementation awaiting verification
+### NEXT EXACT ACTION
 
-- **24.2 / 02.1:** PR #27, merge commit `919aee586977cebe9700360eaf3be29d4e4a697f`; defines the deterministic, UI-independent proposal flow contract.
-- **24.3 / 02.2:** PR #31, merge commit `3012f1bbcb0c4406e4fb8b34258ddb2a4d88bd5f`; adds the mood and detail Das-oder-Das round content bound to that contract.
+**24.15 / 02.10:** inventory existing proposal, engagement-ring and relevant wedding content already shipped in Harmony; select only strong material that adds value beyond 02.2–02.9; expose that selected material for reuse by the perfect-proposal experience.
 
-Both packages were explicitly merged with documented verification gaps. They remain unchecked until the focused Gradle build and later UI verification are recorded.
+02.10 must **not** delete, hide or archive legacy packs. That consolidation belongs to Stage 04. It also must not absorb entry/navigation or the end-to-end runner from 02.11.
 
 ### Definition of Done
 
-`Unser perfekter Antrag` is a complete, playable mixed-mechanic Harmony Experience using the refreshed ring assets, with deterministic pacing, partner-prediction reveal, ranking, scenarios, open prompts, and a qualitative couple result. It has an accessible navigation entry and its core flow is verified. Full legacy cleanup is **not** part of this stage.
+`Unser perfekter Antrag` is a complete, playable mixed-mechanic Harmony Experience using the refreshed ring assets, deterministic pacing, partner-prediction reveal, ranking, scenarios, open prompts and a qualitative couple result. It has an accessible navigation entry and its core flow is verified. Full legacy cleanup is not part of this stage.
 
 ---
 
@@ -88,10 +77,7 @@ Both packages were explicitly merged with documented verification gaps. They rem
 
 **Original plan reference:** Point 2  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/7 complete (0%)  
-**Dependencies:** Stage 02 reference implementation
-
-### Substages
+**Progress:** 0/7 complete
 
 - [ ] 03.1 General mixed-step experience definition/state model
 - [ ] 03.2 Reusable `EitherOr` step
@@ -101,9 +87,7 @@ Both packages were explicitly merged with documented verification gaps. They rem
 - [ ] 03.6 Reusable `Scenario` + `OpenPrompt` steps
 - [ ] 03.7 Reusable `Reveal`/result flow plus compatibility with legacy content during migration
 
-### Definition of Done
-
-The proposal implementation no longer depends on one-off mechanics. The listed step types can be composed into another Harmony Experience without copying the proposal runner, while existing legacy content remains usable during migration.
+**Definition of Done:** the proposal implementation becomes the reference for reusable mixed-step experiences without copying one-off runners, while legacy content remains usable during migration.
 
 ---
 
@@ -111,10 +95,8 @@ The proposal implementation no longer depends on one-off mechanics. The listed s
 
 **Original plan reference:** Point 3  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/5 complete (0%)  
+**Progress:** 0/5 complete  
 **Dependencies:** Stages 02 and 03
-
-### Substages
 
 - [ ] 04.1 Inventory all standalone proposal, engagement-ring and relevant wedding content
 - [ ] 04.2 Migrate/reuse strong questions and assets in the new Experience system
@@ -122,20 +104,16 @@ The proposal implementation no longer depends on one-off mechanics. The listed s
 - [ ] 04.4 Hide/archive legacy standalone packs without deleting source content prematurely
 - [ ] 04.5 Regression verification for migrated content, images and navigation
 
-### Definition of Done
-
-Users no longer see redundant proposal/ring experiences as separate competing entries, strong content is preserved, legacy packs are safely hidden/archived rather than destructively deleted, and navigation is verified.
+**Definition of Done:** users no longer see redundant proposal/ring experiences as competing entries; strong content is preserved and navigation is verified.
 
 ---
 
 ## Stage 05/08 — Harmony-360 Questions Quality Rework
 
 **Original plan reference:** Point 4  
-**Status:** ⬜ PLANNED  
-**Progress:** 0/5 complete (0%)  
-**Dependencies:** content architecture can remain legacy-compatible; no requirement to finish Stage 07 first
-
-### Substages
+**Status:** 🟡 PARALLEL WORK ACTIVE  
+**Verified stage progress:** 0/5 complete  
+**Note:** separate `25.x` slices are currently working inside 05.1. This parallel activity does not replace the Stage-02 handover.
 
 - [ ] 05.1 Relationship / communication / everyday-life sections
 - [ ] 05.2 Food / travel / leisure / culture sections
@@ -143,26 +121,15 @@ Users no longer see redundant proposal/ring experiences as separate competing en
 - [ ] 05.4 Psychology / feelings / health / intimacy sections
 - [ ] 05.5 Values / belief / society / humor / fantasy / teamwork sections
 
-### Progress example
-
-If 05.1 and 05.2 are complete:
-
-> `360 Rework → Stage 05/08 → 2/5 complete (40%)`
-
-### Definition of Done
-
-The audited Harmony-360 areas are no longer dominated by noun-substitution templates or repeated generic answer quartets. Retained questions are relationship-relevant, concrete, appropriately toned, and worth keeping.
+**Definition of Done:** audited Harmony-360 areas are no longer dominated by noun-substitution templates or repeated generic answer quartets; retained questions are concrete, relationship-relevant and worth keeping.
 
 ---
 
 ## Stage 06/08 — Broken, Duplicate & Low-Quality Content Cleanup
 
-**Original plan reference:** **Point 5 — schlechte Inhalte gezielt entfernen und reparieren**  
-**Status:** ⬜ PLANNED  
-**Progress:** 0/5 complete (0%)  
-**Dependencies:** can run alongside Stage 05 where defects are unambiguous
-
-### Substages
+**Original plan reference:** Point 5  
+**Status:** 🟡 PARTIAL PARALLEL REPAIRS  
+**Verified progress:** 0/5 complete
 
 - [ ] 06.1 Missing answer options and malformed questions
 - [ ] 06.2 English leftovers and language mismatches
@@ -170,15 +137,7 @@ The audited Harmony-360 areas are no longer dominated by noun-substitution templ
 - [ ] 06.4 Semantic duplicates, repeated stems and repeated generic option quartets
 - [ ] 06.5 Brand/franchise cleanup where IP-neutral replacements are preferred
 
-### Progress example requested for handover
-
-If two of these five groups are complete:
-
-> `360 Rework → Stage 06/08 (Original Point 5) → 2/5 complete (40%)`
-
-### Definition of Done
-
-Known malformed, duplicated, linguistically broken and clearly low-quality content from the audit has either been corrected, intentionally removed/archived, or documented as a deliberate exception. No completion claim is made without verification of the affected source/runtime path.
+Small `24.4–24.6.x` packages repaired confirmed defects but do not mark a defect class complete until the wider audit is exhausted or remaining exceptions are documented.
 
 ---
 
@@ -186,10 +145,8 @@ Known malformed, duplicated, linguistically broken and clearly low-quality conte
 
 **Original plan reference:** Point 6  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/12 complete (0%)  
-**Dependencies:** reusable Experience engine from Stage 03
-
-### Candidate experiences / initial substages
+**Progress:** 0/12 complete  
+**Dependency:** reusable Experience engine from Stage 03
 
 - [ ] 07.1 Unser Zuhause
 - [ ] 07.2 Unsere Traumreise
@@ -204,22 +161,13 @@ Known malformed, duplicated, linguistically broken and clearly low-quality conte
 - [ ] 07.11 Wir als Team
 - [ ] 07.12 Unser Humor
 
-When an experience becomes active, it may receive its own deeper sub-plan rather than being treated as one undifferentiated bulk task.
-
-### Definition of Done
-
-Each listed flagship experience that remains in scope has a polished mixed-mechanic flow or is explicitly removed from scope with the decision recorded in the worklog.
-
 ---
 
 ## Stage 08/08 — Automated Content Quality Gate
 
 **Original plan reference:** Point 7  
 **Status:** ⬜ PLANNED  
-**Progress:** 0/6 complete (0%)  
-**Dependencies:** quality rules established through Stages 05 and 06
-
-### Substages
+**Progress:** 0/6 complete
 
 - [ ] 08.1 Detect repeated stems/templates
 - [ ] 08.2 Detect repeated generic option quartets
@@ -228,19 +176,16 @@ Each listed flagship experience that remains in scope has a polished mixed-mecha
 - [ ] 08.5 Detect tiny or suspiciously thin packs
 - [ ] 08.6 Produce a report usable in CI or local verification
 
-### Definition of Done
-
-The repository has repeatable automated checks that detect the main quality failures identified during 360 Rework and produce an actionable result for local or CI verification.
-
 ---
 
 ## Update protocol
 
 After every meaningful completed substage/work package, the worker must:
 
-1. Verify the repository state.
-2. Update the checkbox, x/y fraction, percentage and status here.
-3. Update `360_REWORK_CURRENT_STATE.md` with the exact current substage and `NEXT EXACT ACTION`.
+1. Verify repository state.
+2. Update checkbox/fraction/status without confusing merged implementation with verified completion.
+3. Update `360_REWORK_CURRENT_STATE.md` with the exact active substage and `NEXT EXACT ACTION`.
 4. Append a dated entry to `360_REWORK_WORKLOG.md`.
-5. Record branch, PR, commit/merge commit, tests/build state, verification gaps and blockers.
-6. Never silently rewrite the master plan; record scope/ordering changes in the worklog.
+5. Record branch, real PR, commit/merge commit, verification performed, verification gaps and blockers.
+6. Never silently rewrite scope or ordering; material decisions belong in the worklog.
+7. Check active PRs/branches before starting the next slice so parallel agents do not collide.
