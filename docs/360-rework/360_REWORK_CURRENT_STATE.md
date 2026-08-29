@@ -72,6 +72,8 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 
 **Work package:** 24.2 — Stage 02.1 Experience data model / proposal flow<br>
 **Branch:** `360-rework/24-2-proposal-flow-model`<br>
+**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model` (draft)<br>
+**Commit:** `9984b449ae9c6325396d1f247e46564b26011c7f`<br>
 **Implemented scope:** `ProposalExperienceDefinition.kt` defines the UI-independent proposal step contract, validates stable flow IDs and reveal placement, and records the deterministic Stage 02 sequence.<br>
 **Deliberately excluded:** UI, navigation, content/mechanic implementation, legacy migration and deletion.<br>
 **Verification status:** whitespace/diff validation passed. No tests were added or run by explicit instruction. A local Android build could not start because this repository checkout has no Gradle Wrapper and no system Gradle executable is installed.

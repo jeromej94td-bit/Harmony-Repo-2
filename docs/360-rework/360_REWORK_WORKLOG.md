@@ -18,7 +18,8 @@ This file is the append-only project black box for **360 Rework**.
 **Work package:** 24.2 — Experience data model / deterministic proposal flow<br>
 **Status:** 🧪 VERIFY<br>
 **Branch:** `360-rework/24-2-proposal-flow-model`<br>
-**GitHub PR:** not opened yet
+**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model` (draft)<br>
+**Implementation commit:** `9984b449ae9c6325396d1f247e46564b26011c7f`
 
 ### What changed
 
