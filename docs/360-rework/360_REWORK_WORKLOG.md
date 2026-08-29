@@ -18,7 +18,7 @@ This file is the append-only project black box for **360 Rework**.
 **Work package:** 24.2 — Experience data model / deterministic proposal flow<br>
 **Status:** 🧪 VERIFY<br>
 **Branch:** `360-rework/24-2-proposal-flow-model`<br>
-**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model` (draft)<br>
+**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model`<br>
 **Implementation commit:** `9984b449ae9c6325396d1f247e46564b26011c7f`
 
 ### What changed
@@ -39,9 +39,13 @@ This file is the append-only project black box for **360 Rework**.
 - A local Android build could not start: the checkout has no Gradle Wrapper and this environment has no system `gradle` executable.
 - This is an environment/tooling limitation, not a recorded application-code build result.
 
+### Merge decision
+
+The operator explicitly authorized the small package to merge despite the unavailable local build. Stage 02.1 remains `🧪 VERIFY` after merge until a Gradle-capable environment records the focused build result.
+
 ### Next action
 
-Run the focused build in a Gradle-capable environment. If it succeeds, record the result, mark 02.1 complete, open/merge the small package PR, and advance to 24.3.
+Run the focused build in a Gradle-capable environment. If it succeeds, record the result, mark 02.1 complete, and advance to 24.3.
 
 ---
 

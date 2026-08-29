@@ -7,7 +7,7 @@
 **Current substage:** 02.1 — Experience data model and deterministic proposal flow definition  
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY<br>
-**Latest landed work package:** ✅ 24.1 — Control Center Foundation  
+**Latest fully verified work package:** ✅ 24.1 — Control Center Foundation  
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
 **Next work package:** 24.2 — Stage 02.1 Experience data model / proposal flow
@@ -72,7 +72,7 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 
 **Work package:** 24.2 — Stage 02.1 Experience data model / proposal flow<br>
 **Branch:** `360-rework/24-2-proposal-flow-model`<br>
-**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model` (draft)<br>
+**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model`<br>
 **Commit:** `9984b449ae9c6325396d1f247e46564b26011c7f`<br>
 **Implemented scope:** `ProposalExperienceDefinition.kt` defines the UI-independent proposal step contract, validates stable flow IDs and reveal placement, and records the deterministic Stage 02 sequence.<br>
 **Deliberately excluded:** UI, navigation, content/mechanic implementation, legacy migration and deletion.<br>
@@ -80,7 +80,7 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 
 ## NEXT EXACT ACTION
 
-**Work package 24.2 / Stage 02.1:** run the focused build in an environment that provides the project's Gradle Wrapper or a compatible Gradle installation. Only after that verification succeeds may 02.1 be marked complete, the package merged, and the next work package 24.3 started.
+**Work package 24.2 / Stage 02.1:** run the focused build in an environment that provides the project's Gradle Wrapper or a compatible Gradle installation. Only after that verification succeeds may 02.1 be marked complete and the next work package 24.3 started.
 
 Do **not** include 02.2 Das-oder-Das UI, ring duels, ranking, partner prediction, legacy navigation cleanup, or other later substages in package 24.2.
 
