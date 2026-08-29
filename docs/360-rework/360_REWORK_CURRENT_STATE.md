@@ -8,6 +8,7 @@
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY<br>
 **Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
+**Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
 **Next work package:** 24.3 — Stage 02.2 Proposal mood/details rounds
@@ -88,6 +89,18 @@ These are **not** to be delivered in one PR. They are split into small `24.x` pa
 **Deliberately excluded:** new UI, navigation, images, ranking, prediction, scenario, reveal, legacy migration and deletion.<br>
 **Ordering decision:** the operator explicitly authorized 24.3 to start while the Gradle build verification for merged 24.2 remains open. Neither substage is marked complete.
 
+## Parallel Stage 06 cleanup already merged
+
+These packages were intentionally developed in parallel because they do not touch the Stage 02 Experience model/runtime work.
+
+- **24.4 — Stage 06.1 partial cleanup:** PR #35 merged into `main`; merge commit `817d0a0c002aeac7a560f31513092957d242880a`. Adds a narrow runtime repair for missing options in `ichhabenochnie` content plus regression coverage. Old draft PR #28 was closed as superseded.
+- **24.5 — Stage 06.2 partial cleanup:** PR #33 merged into `main`; merge commit `4e49989504824987933ebcf4587b58a7a8f8d0c1`. Removes the confirmed accidental English ranking-template prompt before the existing Harmony 360 runtime rework. Old draft PR #29 was closed as superseded.
+- **24.6 — Stage 06.3 partial cleanup:** PR #34 merged into `main`; merge commit `cf8b18a319613919d2f50d5853ac25a4ce065016`. Repairs the confirmed `Schlagwewohnheiten` and `is deinem Partner` wording defects with regression coverage.
+
+**Important:** Stage 06 remains **0/5 complete**. These packages fix confirmed defects, but 06.1, 06.2 and 06.3 stay unchecked until a broader audit confirms that the corresponding defect class is actually exhausted or remaining exceptions are documented.
+
+**Verification caveat:** the relevant repo-wide GitHub Actions again failed before executable step 1 (`steps: null`). The merges were explicitly authorized despite that infrastructure limitation. Do not describe 24.4–24.6 as having a green full test suite.
+
 ## NEXT EXACT ACTION
 
 **Work package 24.3 / Stage 02.2:** add and review the proposal mood/details round data against the two `EITHER_OR` flow steps, then record the branch, PR and verification gap. The Gradle verification for 24.2 remains a separate open requirement.
@@ -112,12 +125,14 @@ Then update this file, the master roadmap, and the worklog in the relevant small
 - Do not merge umbrella PR #24 wholesale.
 - Do not combine several unrelated 360 Rework substages into one PR.
 - Do not rebuild or re-merge 24.1; it is already in `main` via PR #25.
+- Do not rebuild obsolete draft PR #28 or #29; their clean mainline replacements are already merged via PR #35 and PR #33.
 - Do not replace the ten refreshed ring assets again unless a regression is proven.
 - Do not delete existing proposal/ring/wedding source content yet.
 - Do not hide all legacy proposal packs during Stage 02.1; full consolidation belongs to Stage 04/08.
 - Do not add Daily to this 360 Rework scope.
 - Do not add unrelated new categories while the quality/experience rework is in progress.
 - Do not mark Stage 02 progress based on design discussion alone; only verified implementation substages count.
+- Do not mark Stage 06.1–06.3 complete merely because 24.4–24.6 landed; complete the corresponding audit first.
 
 ## Handover rule
 
