@@ -207,13 +207,13 @@ class HarmonyRepository(
     }
 
     suspend fun updateSharedPicture(pic: SharedPicEntity) {
-        db.sharedPicDao().updateSharedPicture(pic)
+        db.sharedPicDao().updatePic(pic)
         PicShareWidgetProvider.refreshAll(context)
     }
 
     suspend fun addMoment(title: String, content: String, imageUris: List<Uri> = emptyList(), emoji: String = "💕") {
         val paths = imageUris.mapNotNull { uri ->
-            copyMediaToApp(uri, "moments") ?: return@mapNotNull null
+            copyMediaToApp(uri, "moments")
         }
         val pathsJson = paths.joinToString(prefix = "[", postfix = "]") { "\"${it.replace("\\", "\\\\").replace("\"", "\\\"")}\"" }
         db.momentDao().insertMoment(
