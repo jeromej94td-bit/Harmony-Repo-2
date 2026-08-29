@@ -13,6 +13,34 @@ This file is the append-only project black box for **360 Rework**.
 
 ---
 
+## 2026-08-29 — 24.8 proposal-location image duels prepared
+
+**Work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>
+**Status:** 🟡 IN PROGRESS<br>
+**Branch:** `360-rework/24-8-proposal-location-duels`<br>
+
+### Scope
+
+- Adds three deterministic image-duel rounds bound exclusively to the existing `proposal_location` flow step.
+- Adds six local, offline-ready location visuals: home, lake, garden, view, city and coast.
+- Adds the Aurora-Glass Compose board that renders one location duel and returns the selected stable option id.
+
+### Deliberately excluded
+
+- No navigation entry or proposal runner integration; Stage 02.11 owns end-to-end wiring.
+- No refreshed-ring duels, ranking, partner prediction, scenarios, open prompts, reveal or legacy cleanup.
+
+### Verification plan
+
+- Check the generated WebP resource set and `git diff --check`.
+- No tests or Android build are planned by explicit operator instruction; the existing Gradle tooling gap remains documented.
+
+### Next action
+
+Open the isolated 24.8 PR, review the narrow diff, then record the requested merge decision.
+
+---
+
 ## 2026-08-29 — 24.6.4 parallel numbering correction and Stage 06 continuation record
 
 **Work package:** 24.6.4 — Project-control correction<br>

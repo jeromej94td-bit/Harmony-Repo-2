@@ -6,7 +6,7 @@
 **Current stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
 **Current substage:** 02.3 — Proposal-location image duels<br>
 **Current stage progress:** 0/12 complete (0%)  
-**Current status:** 🧪 VERIFY<br>
+**Current status:** 🟡 IN PROGRESS<br>
 **Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
 **Latest merged proposal packages awaiting verification:** 🧪 24.2, 🧪 24.3<br>
 **Latest merged parallel cleanup packages:** ✅ 24.4, ✅ 24.5, ✅ 24.6, ✅ 24.6.2, ✅ 24.6.3<br>
@@ -115,9 +115,17 @@ Do not infer logical work-package ownership from the historical branch names or 
 
 **Verification caveat:** the relevant repo-wide GitHub Actions again failed before executable step 1 (`steps: null`). The merges were explicitly authorized despite that infrastructure limitation. Do not describe 24.4–24.6.3 as having a green full test suite. The focused 24.6.2 Python tests and focused 24.6.3 Kotlin verification are separate local evidence only.
 
+## Active work package
+
+**Work package:** 24.8 — Stage 02.3 Proposal-location image duels<br>
+**Branch:** `360-rework/24-8-proposal-location-duels`<br>
+**Scope:** add three deterministic proposal-location image duels, six local visual resources and the Aurora-Glass duel board used by the later proposal runner.<br>
+**Deliberately excluded:** navigation, runner integration, refreshed-ring duels, ranking, prediction, scenarios, open prompts, reveal and legacy cleanup.<br>
+**Verification status:** resource and whitespace validation pending. No tests are added or run by explicit operator instruction.<br>
+
 ## NEXT EXACT ACTION
 
-**Work package 24.8 / Stage 02.3:** inspect the current image-duel runner and image-resource pipeline, then implement only proposal-location image duels in a new small package. The Gradle verification gaps for 24.2 and 24.3 remain separate open requirements.
+**Work package 24.8 / Stage 02.3:** review the prepared proposal-location image duels, then open and merge the small package. The Gradle verification gaps for 24.2 and 24.3 remain separate open requirements.
 
 Do **not** bundle refreshed-ring duels, ranking, partner prediction, scenarios, reveal, broad navigation changes or legacy cleanup into package 24.8.
 
