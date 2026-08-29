@@ -81,6 +81,14 @@ class GeneratedHarmonyContentTest {
     }
 
     @Test
+    fun `drink pack avoids direct soda brands`() {
+        val pack = GeneratedContentRegistry.PACKS.single { it.id == "getraenke" }
+
+        assertFalse(("Coca-Cola" to "Fanta") in pack.pairs)
+        assertTrue(("Cola" to "Orangenlimonade") in pack.pairs)
+    }
+
+    @Test
     fun `all registered never-have-i-ever questions expose answer options`() {
         val packs = GeneratedContentRegistry.PACKS.filter { "ichhabenochnie" in it.tags }
 

@@ -33,6 +33,9 @@ object GeneratedContentRepairPolicy {
         if (result.id == "cj_entertainment_quiz") {
             result = neutralizeEntertainmentPack(result)
         }
+        if (result.id == "getraenke") {
+            result = neutralizeDrinkPack(result)
+        }
 
         return result
     }
@@ -89,6 +92,16 @@ object GeneratedContentRepairPolicy {
                     .replace("Netflix-Passwort", "Streaming-Passwort")
                     .replace("Oscar-Verleihung", "große Filmpreis-Verleihung")
             )
+        }
+    )
+
+    private fun neutralizeDrinkPack(pack: GenPack): GenPack = pack.copy(
+        pairs = pack.pairs.map { pair ->
+            if (pair == ("Coca-Cola" to "Fanta")) {
+                "Cola" to "Orangenlimonade"
+            } else {
+                pair
+            }
         }
     )
 }
