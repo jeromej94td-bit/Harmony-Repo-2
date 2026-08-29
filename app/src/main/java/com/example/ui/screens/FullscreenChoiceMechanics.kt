@@ -275,6 +275,11 @@ internal fun MatchTournamentBoard(
     var championIndex by remember(question, selectedAnswer) { mutableStateOf(existingIndex.coerceAtLeast(0)) }
     var challengerIndex by remember(question, selectedAnswer) { mutableStateOf(1) }
     var finished by remember(question, selectedAnswer) { mutableStateOf(existingIndex >= 0) }
+    val configuration = context.resources.configuration
+    val resultMetrics = MatchTournamentResultLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     FullscreenMechanicShell(
         kicker = tr("⚔️ MATCHCHECK", "⚔️ MATCH CHECK"),
@@ -311,17 +316,26 @@ internal fun MatchTournamentBoard(
                 val winner = items.getOrNull(championIndex) ?: items.first()
                 Column(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("🏆", fontSize = 64.sp)
+                    Text(
+                        text = "🏆",
+                        fontSize = resultMetrics.trophySizeSp.sp,
+                        modifier = Modifier.testTag("tournament_trophy")
+                    )
+                    Spacer(Modifier.height(resultMetrics.gapDp.dp))
                     LargeOptionCard(
                         item = winner,
                         selected = true,
                         onClick = {},
                         badge = tr("Dein Sieger", "Your winner"),
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 190.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .heightIn(min = resultMetrics.winnerMinHeightDp.dp),
+                        testTag = "tournament_winner"
                     )
+                    Spacer(Modifier.height(resultMetrics.gapDp.dp))
                     PrimaryMechanicButton(
                         tr("Sieger speichern & weiter", "Save winner & continue"),
                         onClick = { onPick(winner.raw) },
