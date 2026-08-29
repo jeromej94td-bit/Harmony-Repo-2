@@ -89,6 +89,18 @@ class GeneratedHarmonyContentTest {
     }
 
     @Test
+    fun `registered legacy questions avoid direct party brands`() {
+        val visibleText = GeneratedContentRegistry.PACKS
+            .flatMap { it.questions }
+            .joinToString("\n") { it.q }
+
+        assertFalse("Edding" in visibleText)
+        assertFalse("Spotify" in visibleText)
+        assertTrue("Permanentmarker" in visibleText)
+        assertTrue("Musik-Playlist" in visibleText)
+    }
+
+    @Test
     fun `all registered never-have-i-ever questions expose answer options`() {
         val packs = GeneratedContentRegistry.PACKS.filter { "ichhabenochnie" in it.tags }
 
