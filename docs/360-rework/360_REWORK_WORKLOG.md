@@ -409,3 +409,27 @@ Merge this narrow PR, then continue with 24.10 / Stage 02.5 ranking after 24.8 c
 ### Next action
 
 Merge after the PR is confirmed mergeable, then continue with 24.11 / Stage 02.6 partner prediction.
+
+
+## 2026-08-29 — 24.11 Stage 02.6 prepared
+
+**Work package:** 24.11 — Partner prediction rounds  
+**Status:** 🧪 VERIFY / READY FOR REVIEW  
+**Branch:** `360-rework/24-11-partner-prediction`  
+**GitHub PR:** #50 — `[24.11] 360 Rework — Partner prediction rounds`  
+**Implementation commit:** `0db95cd2cf602bbcd8094588d610c3657eeb44a9`
+
+### Scope
+
+- Added three deterministic A → B → Reveal prediction rounds.
+- Bound them to the existing `partner_prediction` flow step.
+- Reused the existing prediction UI; no new design or generated image is needed.
+
+### Verification
+
+- Static source review completed.
+- No Gradle build or long-running GitHub test was started.
+
+### Next action
+
+Merge after GitHub confirms the PR is mergeable, then continue with 24.12 / Stage 02.7 proposal scenarios.
