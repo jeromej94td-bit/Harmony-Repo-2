@@ -8,10 +8,18 @@ import androidx.compose.ui.test.performClick
 import com.example.data.model.ExperienceImageDuelOption
 import com.example.data.model.ExperienceImageDuelRound
 import com.example.ui.theme.HarmonyTheme
+import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.LEGACY)
+@Config(qualifiers = RobolectricDeviceQualifiers.Pixel8, sdk = [35])
 class ExperienceImageDuelBoardTest {
 
     @get:Rule
