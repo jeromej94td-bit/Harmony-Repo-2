@@ -6,8 +6,8 @@
 **Current stage:** Stage 02/08 — 💍 Unser perfekter Antrag  
 **Current substage:** 02.1 — Experience data model and deterministic proposal flow definition  
 **Current stage progress:** 0/12 complete (0%)  
-**Current status:** 🔵 NEXT  
-**Latest landed work package:** ✅ 24.1 — Control Center Foundation  
+**Current status:** 🧪 VERIFY<br>
+**Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
 **Next work package:** 24.2 — Stage 02.1 Experience data model / proposal flow
@@ -68,9 +68,19 @@ The intended experience includes:
 
 These are **not** to be delivered in one PR. They are split into small `24.x` packages aligned with substages or another similarly narrow coherent change.
 
+## Active work package
+
+**Work package:** 24.2 — Stage 02.1 Experience data model / proposal flow<br>
+**Branch:** `360-rework/24-2-proposal-flow-model`<br>
+**GitHub PR:** #27 — `[24.2] 360 Rework — Deterministic proposal flow model`<br>
+**Commit:** `9984b449ae9c6325396d1f247e46564b26011c7f`<br>
+**Implemented scope:** `ProposalExperienceDefinition.kt` defines the UI-independent proposal step contract, validates stable flow IDs and reveal placement, and records the deterministic Stage 02 sequence.<br>
+**Deliberately excluded:** UI, navigation, content/mechanic implementation, legacy migration and deletion.<br>
+**Verification status:** whitespace/diff validation passed. No tests were added or run by explicit instruction. A local Android build could not start because this repository checkout has no Gradle Wrapper and no system Gradle executable is installed.
+
 ## NEXT EXACT ACTION
 
-**Work package 24.2 / Stage 02.1:** create a fresh branch from current `main`, inspect the actual Harmony runner/content models, and implement only the mixed-step data model plus deterministic first proposal-flow definition needed for 02.1.
+**Work package 24.2 / Stage 02.1:** run the focused build in an environment that provides the project's Gradle Wrapper or a compatible Gradle installation. Only after that verification succeeds may 02.1 be marked complete and the next work package 24.3 started.
 
 Do **not** include 02.2 Das-oder-Das UI, ring duels, ranking, partner prediction, legacy navigation cleanup, or other later substages in package 24.2.
 
@@ -82,7 +92,8 @@ Then update this file, the master roadmap, and the worklog in the relevant small
 
 ## Current blockers / verification caveats
 
-- No known product-code blocker prevents starting Stage 02.1.
+- No known product-code blocker prevents Stage 02.1 verification.
+- The local checkout exposes no `gradlew` / `gradlew.bat`, and this environment has no `gradle` executable. This prevents local build verification without being evidence of an application-code failure.
 - Existing GitHub Actions infrastructure has recently produced failures before workflow step 1. Treat this as a verification caveat; do not silently convert it into an application-code failure or a green-test claim.
 - Before Stage 02 implementation, inspect the actual current runner/model files rather than assuming the planned mechanic interfaces already exist.
 
