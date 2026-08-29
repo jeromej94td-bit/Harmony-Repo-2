@@ -61,6 +61,7 @@ import com.example.data.model.ProposalRingImageDuels
 import com.example.data.model.ProposalRunnerPosition
 import com.example.data.model.ProposalScenarios
 import com.example.data.model.RankingAnswerCodec
+import com.example.data.model.toExperienceEitherOrRound
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
@@ -158,11 +159,9 @@ internal fun ProposalExperienceScreen(
                 when (step.kind) {
                     ProposalFlowStepKind.EITHER_OR -> {
                         val round = ProposalEitherOrRounds.roundsFor(step.id)[position.itemIndex]
-                        ProposalEitherOrPane(
-                            prompt = round.prompt,
-                            first = round.firstChoice,
-                            second = round.secondChoice,
-                            selected = eitherOrSelections[round.id],
+                        ExperienceEitherOrBoard(
+                            round = round.toExperienceEitherOrRound(),
+                            selectedChoice = eitherOrSelections[round.id],
                             onPick = { choice ->
                                 eitherOrSelections = eitherOrSelections + (round.id to choice)
                                 advance()
@@ -327,69 +326,6 @@ private fun ProposalIntroPane(
         ) {
             Text("Reise beginnen", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
         }
-    }
-}
-
-@Composable
-private fun ProposalEitherOrPane(
-    prompt: String,
-    first: String,
-    second: String,
-    selected: String?,
-    onPick: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("✦  ENTWEDER ODER", color = HarmonyPinkSoft, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = prompt,
-            color = Color.White,
-            fontSize = 27.sp,
-            lineHeight = 33.sp,
-            fontWeight = FontWeight.Black,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(28.dp))
-        ProposalChoiceCard(first, selected == first, { onPick(first) }, Modifier.fillMaxWidth())
-        Spacer(Modifier.height(14.dp))
-        ProposalChoiceCard(second, selected == second, { onPick(second) }, Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-private fun ProposalChoiceCard(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(24.dp)
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        if (selected) HarmonyPink.copy(alpha = 0.55f) else HarmonyPurple.copy(alpha = 0.34f),
-                        HarmonySurface2
-                    )
-                )
-            )
-            .border(
-                if (selected) 2.dp else 1.dp,
-                if (selected) HarmonyPinkSoft else Color.White.copy(alpha = 0.15f),
-                shape
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
     }
 }
 
