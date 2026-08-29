@@ -68,14 +68,18 @@ object DevExportLogic {
         return result
     }
 
-    /** Paar/Seite liegen im Pfad, der Original-Dateiname selbst bleibt unverändert. */
+    /**
+     * Alle Bilder liegen direkt im gemeinsamen images-Ordner.
+     * Spiel, Paar und A/B-Seite stecken im Dateinamen, damit die Zuordnung eindeutig bleibt
+     * und der gesamte Bilderordner auf einmal in Google AI Studio übernommen werden kann.
+     */
     fun zipPaths(assets: List<ExportAssetAssignment>): Map<ExportAssetAssignment, String> {
         val result = LinkedHashMap<ExportAssetAssignment, String>()
         assets.forEach { asset ->
             val pack = safeSegment(asset.packId.ifBlank { "spiel" })
             val pair = "pair-${(asset.pairIndex + 1).toString().padStart(3, '0')}"
             val side = if (asset.side == 0) "a" else "b"
-            result[asset] = "images/$pack/$pair/$side/${safeBaseName(asset.originalFileName)}"
+            result[asset] = "images/${pack}__${pair}__${side}__${safeBaseName(asset.originalFileName)}"
         }
         return result
     }
