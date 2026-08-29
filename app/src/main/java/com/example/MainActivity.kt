@@ -337,7 +337,7 @@ fun HarmonyApp(
                 ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen && !isKidGeneratorOpen) {
                     HarmonyTopBar(
                         userName = uiState.profile.userName,
                         partnerName = uiState.profile.partnerName,
@@ -350,7 +350,7 @@ fun HarmonyApp(
                 }
             },
             bottomBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen && !isKidGeneratorOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
                         6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
