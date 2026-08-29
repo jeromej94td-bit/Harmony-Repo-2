@@ -17,6 +17,16 @@ object QuestionResponseCuration {
             QuestionResponseKind.PHOTO_ONLY,
         key("gespraechsanreger", "Wie würdest du unsere Beziehung in 3 Worten beschreiben?") to
             QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("gespraechsanreger", "Was möchtest du, dass dein Partner öfter tut?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("gespraechsanreger", "Welcher gemeinsame Moment bringt dich immer zum Lächeln?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("gespraechsanreger", "Gibt es ein Thema, über das wir zu wenig reden?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("schnapp", "Was war dein schönster Moment mit mir bisher?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+        key("tagesfragen", "Wie kann dein Partner ein noch besserer Partner für dich sein?") to
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
         key("tiefe", "Was bedeutet Vertrauen für dich konkret?") to
             QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
         key("tiefe", "Gibt es etwas, das du mir schon immer sagen wolltest, aber dich nie getraut hast?") to
