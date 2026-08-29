@@ -7,7 +7,7 @@
 **Current substage:** 02.1 — Experience data model and deterministic proposal flow definition  
 **Current stage progress:** 0/12 complete (0%)  
 **Current status:** 🧪 VERIFY<br>
-**Latest fully verified work package:** ✅ 24.1 — Control Center Foundation  
+**Latest fully verified work package:** ✅ 24.1 — Control Center Foundation<br>
 **GitHub PR:** #25  
 **Merge commit:** `c0479277ab8b53c888a4c5bf2fb35d827230c6cc`  
 **Next work package:** 24.2 — Stage 02.1 Experience data model / proposal flow
