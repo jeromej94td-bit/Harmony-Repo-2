@@ -9,6 +9,7 @@ class WhoWouldLayoutPolicyTest {
     @Test
     fun `short phone reduces portrait chrome before cards can clip`() {
         val metrics = WhoWouldLayoutPolicy.metrics(
+            screenWidthDp = 360,
             screenHeightDp = 520,
             fontScale = 1f
         )
@@ -24,6 +25,7 @@ class WhoWouldLayoutPolicyTest {
     @Test
     fun `large font scale switches Paarlabor to compact metrics`() {
         val metrics = WhoWouldLayoutPolicy.metrics(
+            screenWidthDp = 412,
             screenHeightDp = 760,
             fontScale = 1.35f
         )
@@ -36,6 +38,7 @@ class WhoWouldLayoutPolicyTest {
     @Test
     fun `normal phone preserves current Paarlabor proportions`() {
         val metrics = WhoWouldLayoutPolicy.metrics(
+            screenWidthDp = 412,
             screenHeightDp = 760,
             fontScale = 1f
         )
@@ -45,5 +48,19 @@ class WhoWouldLayoutPolicyTest {
         assertEquals(22, metrics.nameSizeSp)
         assertEquals(94, metrics.bottomRowHeightDp)
         assertEquals(12, metrics.rowGapDp)
+    }
+
+    @Test
+    fun `tall but narrow phone avoids the oversized normal portrait preset`() {
+        val metrics = WhoWouldLayoutPolicy.metrics(
+            screenWidthDp = 340,
+            screenHeightDp = 760,
+            fontScale = 1f
+        )
+
+        assertEquals(76, metrics.avatarSizeDp)
+        assertEquals(10, metrics.cardPaddingDp)
+        assertEquals(8, metrics.rowGapDp)
+        assertTrue(metrics.avatarSizeDp + metrics.cardPaddingDp * 2 <= 110)
     }
 }
