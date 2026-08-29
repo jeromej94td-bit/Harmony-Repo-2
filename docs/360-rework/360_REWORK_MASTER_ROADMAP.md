@@ -8,8 +8,8 @@
 **Stage 02 package coverage:** 12/12 = 100%  
 **Stage 02 status:** 🧪 IMPLEMENTATION/CONTRACT COMPLETE; GREEN ANDROID BUILD PENDING INFRASTRUCTURE  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #81:** 1/7  
-**Next core substage after PR #81:** 03.2 — Reusable `EitherOr` step  
+**Stage-03 progress after PR #84:** 2/7  
+**Next core substage after PR #84:** 03.3 — Reusable `ImageDuel` step  
 **Stage-05 progress:** 1/5 = 20%
 
 > Stage 02 has all twelve feature/contract slices on `main`. PR #79 closes 02.12 with available static/UI/end-to-end contracts but explicitly does not claim a green Android/Gradle build because Actions still fail before step 1. A later successful Android build is an infrastructure verification check, not a new feature slice.
@@ -20,7 +20,7 @@
 |---|---|---|---|---:|
 | 01/08 | prerequisite | Ring Image Quality Rework | ✅ DONE | 1/1 = 100% |
 | 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 CONTRACT-COMPLETE / BUILD CAVEAT | 12/12 slices = 100% |
-| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 1/7 after PR #81 |
+| 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 2/7 after PR #84 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
 | 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 1/5 = 20% |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
@@ -69,11 +69,11 @@ Feature implementation and available contract coverage are complete. A genuine A
 
 **Original plan reference:** Point 2  
 **Status:** 🟣 ACTIVE  
-**Progress after PR #81:** 1/7
+**Progress after PR #84:** 2/7
 
 - [x] **03.1 General mixed-step experience definition/state model** — 26.1 / PR #81. Adds generic step kinds, immutable validated experience definitions, generic position/navigation/progress, safe invalid-position handling, content-owned item-count resolution, and a proposal compatibility adapter. Proposal remains nine steps / 35 positions with locked ratio parity.
-- [ ] **03.2 Reusable `EitherOr` step** — 🔵 NEXT.
-- [ ] 03.3 Reusable `ImageDuel` step
+- [x] **03.2 Reusable `EitherOr` step** — 26.2 / PR #84. Adds generic validated `EitherOrRound` + immutable `EitherOrStepContent`, maps the shipped Proposal Mood/Details content through `ProposalEitherOrAdapter`, and preserves 5 + 6 rounds, all shipped fields, the 35-position journey and existing progress ratios.
+- [ ] **03.3 Reusable `ImageDuel` step** — 🔵 NEXT.
 - [ ] 03.4 Reusable `Ranking` step
 - [ ] 03.5 Reusable `PartnerPrediction` step
 - [ ] 03.6 Reusable `Scenario` + `OpenPrompt` steps
@@ -83,9 +83,13 @@ Feature implementation and available contract coverage are complete. A genuine A
 
 26.1 follows test-first sequencing. Local Kotlin RED compilation confirmed the generic API and proposal adapter were absent before implementation; subsequent isolated Kotlin harnesses pass definition/validation/navigation/progress and proposal parity at exactly 35 positions. The full Android/Gradle suite is not claimed green while GitHub Actions remain blocked before executable step 1.
 
+### 03.2 verification note
+
+26.2 follows RED → GREEN sequencing. The pre-implementation compile probe failed on the missing generic Either-Or types/adapter. The post-implementation focused Kotlin harness passes generic validation/immutability, exact Proposal field parity, 5 + 6 Either-Or item counts, 35 total Proposal positions and the existing step-start progress ratios. No full Android/Gradle green claim is made.
+
 ### NEXT EXACT ACTION
 
-Implement **03.2 — Reusable `EitherOr` step** as a narrow package on top of the 03.1 core. Do not pull ImageDuel, Ranking, Prediction or a full generic renderer into that slice.
+Implement **03.3 — Reusable `ImageDuel` step** as a narrow package. Reuse the 03.1 generic engine and the same compatibility strategy used by 03.2; cover both Proposal location and ring duels without pulling Ranking, Prediction or a full generic renderer into the slice.
 
 Definition of Done: the proposal implementation becomes the reference for reusable mixed-step experiences without copying one-off runners; legacy content remains usable during migration.
 
