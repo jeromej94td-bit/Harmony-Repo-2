@@ -128,4 +128,27 @@ class QuestionMechanicsAuditTest {
 
         assertTrue(findings.any { it.kind == QuestionAuditKind.UNSTABLE_INDEX_SPECIAL_CASE })
     }
+
+    @Test
+    fun `migrated stable role question is no longer reported as an index special case`() {
+        val source = QuestionPack(
+            id = "h500_414_rollenverteilung_ranking",
+            title = "Rollenverteilung",
+            tags = listOf("mechanik_ranking"),
+            cat = "h360_ranking",
+            topic = "beziehung",
+            type = "quiz",
+            questions = listOf(
+                Question("Was ist wichtig?", listOf("A", "B", "C", "D")),
+                Question(
+                    "Wer übernimmt welche Rolle bei gemeinsamen Plänen? Rank: Visionär/Ideen, Detailplaner, Ausführer, Qualitätsprüfer",
+                    listOf("Visionär/Ideen", "Detailplaner", "Ausführer", "Qualitätsprüfer")
+                )
+            )
+        )
+
+        val findings = QuestionMechanicsAudit.scan(listOf(source))
+
+        assertTrue(findings.none { it.kind == QuestionAuditKind.UNSTABLE_INDEX_SPECIAL_CASE })
+    }
 }
