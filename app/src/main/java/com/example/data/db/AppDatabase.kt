@@ -53,6 +53,9 @@ interface AnswerDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAnswer(answer: AnswerEntity)
+
+    @Query("DELETE FROM answers WHERE packId = :packId")
+    suspend fun deleteAnswersForPack(packId: String)
 }
 
 @Dao

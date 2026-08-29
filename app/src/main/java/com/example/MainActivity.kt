@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +40,14 @@ import com.example.data.DeveloperDataManager
 import com.example.data.DevExporter
 import com.example.data.OkHttpLinkPreviewResolver
 import com.example.data.db.HarmonyDatabase
+import com.example.data.model.HarmonyPacksData
 import com.example.data.model.MemoryEntryKind
 import com.example.data.model.ProposalExperienceEntryPolicy
 import com.example.data.repository.RoomMemoryRepository
 import com.example.ui.AppLanguage
 import com.example.ui.HarmonyViewModel
 import com.example.ui.LocalAppLanguage
+import com.example.ui.skipCurrentQuestion
 import com.example.ui.memory.MemoryEditorMode
 import com.example.ui.memory.MemoryTab
 import com.example.ui.memory.MemoryViewModel
@@ -67,17 +70,21 @@ import com.example.ui.screens.MomentsScreen
 import com.example.ui.screens.MemoryEditorSheet
 import com.example.ui.screens.MemoryScreen
 import com.example.ui.screens.PackListScreen
+import com.example.ui.screens.PackResultsScreen
 import com.example.ui.screens.PANDA_EITHER_OR_PACK_ID
 import com.example.ui.screens.PandaEitherOrScreen
 import com.example.ui.screens.ProfileSheet
 import com.example.ui.screens.ProposalExperienceScreen
 import com.example.ui.screens.QuizRunnerScreen
+import com.example.ui.screens.RunnerSkipButton
+import com.example.ui.screens.hasCompletePackResults
 import com.example.ui.screens.liveChangeLongPressObserver
 import com.example.ui.theme.HarmonyTheme
 import com.example.widget.MemoryWidgetDatabaseObserver
 import com.example.widget.MemoryWidgetOpenRequest
 import com.example.widget.PicShareWidgetProvider
 import com.example.widget.parseMemoryWidgetOpenRequest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -151,8 +158,12 @@ fun HarmonyApp(
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val isImeVisible = WindowInsets.isImeVisible
+    val runnerScope = rememberCoroutineScope()
+    val appDb = remember(context.applicationContext) {
+        HarmonyDatabase.getInstance(context.applicationContext)
+    }
     val memoryRepository = remember(context.applicationContext) {
-        RoomMemoryRepository(HarmonyDatabase.getInstance(context.applicationContext))
+        RoomMemoryRepository(appDb)
     }
     val memoryFactory = remember(memoryRepository) {
         MemoryViewModelFactory(
@@ -172,6 +183,7 @@ fun HarmonyApp(
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
     var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
     var liveChangeCount by remember { mutableStateOf(0) }
+    var resultsPackId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(memoryWidgetOpenRequest) {
         val request = memoryWidgetOpenRequest ?: return@LaunchedEffect
@@ -199,7 +211,8 @@ fun HarmonyApp(
         onMemoryWidgetRequestConsumed()
     }
 
-    fun openPack(packId: String) {
+    fun openPackForPlay(packId: String, freshRun: Boolean = false) {
+        resultsPackId = null
         when {
             packId == PANDA_EITHER_OR_PACK_ID -> {
                 isPandaEitherOrOpen = true
@@ -208,22 +221,55 @@ fun HarmonyApp(
             ProposalExperienceEntryPolicy.handlesPack(packId) -> {
                 isProposalExperienceOpen = true
             }
+            freshRun -> {
+                val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
+                    ?.let { com.example.data.model.LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(it) }
+                    ?: return
+                runnerScope.launch {
+                    appDb.answerDao().deleteAnswersForPack(packId)
+                    appDb.brainRoomDao().clearFinishedPack(packId)
+                    viewModel.startPackForTest(pack, currentIndex = 0)
+                }
+            }
             else -> viewModel.startPack(packId)
         }
     }
 
+    fun openPack(packId: String) {
+        if (packId == PANDA_EITHER_OR_PACK_ID || ProposalExperienceEntryPolicy.handlesPack(packId)) {
+            openPackForPlay(packId)
+            return
+        }
+        val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId } ?: return
+        if (hasCompletePackResults(pack, uiState.answers)) {
+            resultsPackId = packId
+            return
+        }
+        runnerScope.launch {
+            if (appDb.brainRoomDao().hasFinishedPack(packId)) {
+                resultsPackId = packId
+            } else {
+                openPackForPlay(packId)
+            }
+        }
+    }
+
     val isQuizActive = uiState.activeRun != null
+    val isResultsOpen = resultsPackId != null
     val isMemoryOverlayActive = memoryState.editorMode != null ||
         memoryState.pendingDeleteEntryIds.isNotEmpty() || memoryState.selectionMode
     val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
-    val canHandleBack = isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isEureMischungOpen || isKidGeneratorOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
+    val canHandleBack = isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isEureMischungOpen || isKidGeneratorOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
             isLiveChangeEditorOpen -> {
                 isLiveChangeEditorOpen = false
+            }
+            isResultsOpen -> {
+                resultsPackId = null
             }
             isIntrospectionOpen -> {
                 // IntrospectionExperienceScreen handles back so it can show its own leave dialog.
@@ -290,7 +336,7 @@ fun HarmonyApp(
                 ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
-                if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
                     HarmonyTopBar(
                         userName = uiState.profile.userName,
                         partnerName = uiState.profile.partnerName,
@@ -303,7 +349,7 @@ fun HarmonyApp(
                 }
             },
             bottomBar = {
-                if (!isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
                         6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
@@ -457,7 +503,7 @@ fun HarmonyApp(
                     5 -> DevStudioScreen(
                         answers = uiState.answers,
                         profile = uiState.profile,
-                        onStartPack = { packId -> openPack(packId) },
+                        onStartPack = { packId -> openPackForPlay(packId) },
                         onShowToast = { msg -> viewModel.showToast(msg) }
                     )
 
@@ -522,7 +568,14 @@ fun HarmonyApp(
                         isExitConfirmOpen = uiState.isExitConfirmOpen,
                         isOwnAnswerDialogOpen = uiState.isOwnAnswerDialogOpen,
                         appLanguage = uiState.appLanguage,
-                        onPickAnswer = { optText -> viewModel.pickAnswer(optText) },
+                        onPickAnswer = { optText ->
+                            val skipLabel = com.example.util.LanguageManager.tr("Überspringen", uiState.appLanguage)
+                            if (optText == skipLabel) {
+                                viewModel.skipCurrentQuestion()
+                            } else {
+                                viewModel.pickAnswer(optText)
+                            }
+                        },
                         onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
                         onNextStep = { viewModel.nextStep() },
                         onAskExit = {
@@ -534,10 +587,32 @@ fun HarmonyApp(
                         },
                         onCloseExitConfirm = { viewModel.closeExitConfirm() },
                         onCloseRunner = { viewModel.closeRunner() },
-                        onOpenOwnAnswerDialog = { idx, mode -> viewModel.openOwnAnswerDialog(idx, mode) },
+                        onOpenOwnAnswerDialog = { idx, mode ->
+                            if (activeRun.pack.cat == "nie" && mode == null) {
+                                viewModel.skipCurrentQuestion()
+                            } else {
+                                viewModel.openOwnAnswerDialog(idx, mode)
+                            }
+                        },
                         onCloseOwnAnswerDialog = { viewModel.closeOwnAnswerDialog() },
                         onSaveOwnAnswer = { ansText -> viewModel.saveOwnAnswer(ansText) }
                     )
+
+                    if (
+                        !activeRun.isFinished &&
+                        activeRun.pack.type != "disc" &&
+                        activeRun.pack.cat != "nie" &&
+                        !uiState.isExitConfirmOpen &&
+                        !uiState.isOwnAnswerDialogOpen
+                    ) {
+                        RunnerSkipButton(
+                            appLanguage = uiState.appLanguage,
+                            onSkip = { viewModel.skipCurrentQuestion() },
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 16.dp, bottom = 14.dp)
+                        )
+                    }
 
                     if (
                         activeRun.pack.type == "tot" &&
@@ -556,6 +631,22 @@ fun HarmonyApp(
                                 .align(Alignment.TopEnd)
                                 .statusBarsPadding()
                                 .padding(top = 19.dp, end = 18.dp)
+                        )
+                    }
+                }
+
+                resultsPackId?.let { packId ->
+                    HarmonyPacksData.PACKS.firstOrNull { it.id == packId }?.let { resultPack ->
+                        PackResultsScreen(
+                            pack = resultPack,
+                            answers = uiState.answers.filter { it.packId == packId },
+                            profile = uiState.profile,
+                            appLanguage = uiState.appLanguage,
+                            onReplay = {
+                                resultsPackId = null
+                                openPackForPlay(packId, freshRun = true)
+                            },
+                            onClose = { resultsPackId = null }
                         )
                     }
                 }
@@ -704,7 +795,8 @@ fun HarmonyApp(
                                 onClick = { isPandaExitConfirmOpen = false }
                             ) {
                                 androidx.compose.material3.Text(
-                                    com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage)
+                                    com.example.util.LanguageManager.tr("Weiterspielen", uiState.appLanguage),
+                                    color = androidx.compose.ui.graphics.Color.Unspecified
                                 )
                             }
                         }

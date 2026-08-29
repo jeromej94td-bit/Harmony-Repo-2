@@ -82,6 +82,12 @@ interface BrainRoomDao {
     @Query("SELECT * FROM brain_interactions WHERE category = :category ORDER BY createdAt DESC")
     suspend fun getInteractionsByCategory(category: String): List<BrainInteractionEntity>
 
+    @Query("SELECT EXISTS(SELECT 1 FROM brain_interactions WHERE contentId = :packId AND action = 'FINISHED_PACK')")
+    suspend fun hasFinishedPack(packId: String): Boolean
+
+    @Query("DELETE FROM brain_interactions WHERE contentId = :packId AND action = 'FINISHED_PACK'")
+    suspend fun clearFinishedPack(packId: String)
+
     // --- MEMORY FACTS ---
     @Query("SELECT * FROM brain_memory_facts ORDER BY importance DESC, confidence DESC")
     suspend fun getAllMemoryFacts(): List<BrainMemoryFactEntity>
