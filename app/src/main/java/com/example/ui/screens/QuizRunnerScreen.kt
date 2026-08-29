@@ -84,6 +84,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.data.LinkEngine
 import com.example.data.model.ProfileEntity
+import com.example.data.model.QuestionInteractionPolicy
 import com.example.data.model.QuestionPack
 import com.example.ui.ActivePackRun
 import com.example.ui.contentText
@@ -802,7 +803,6 @@ fun QuizRunnerScreen(
                             }
                         }
                     } else if (pack.type == "tot") {
-                        // This or That Mode
                         val pair = pack.pairs.getOrNull(activeRun.currentIndex) ?: ("" to "")
                         val selectedAns = activeRun.currentAnswers[activeRun.currentIndex]
                         val caption = LinkEngine.captionFor(pack.id, activeRun.currentIndex)
@@ -833,9 +833,7 @@ fun QuizRunnerScreen(
                                 secondText = pair.second,
                                 packPairs = pack.pairs,
                                 selectedAns = selectedAns,
-                                onPick = { chosen ->
-                                    onPickTot(chosen)
-                                },
+                                onPick = { chosen -> onPickTot(chosen) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -857,7 +855,6 @@ fun QuizRunnerScreen(
                             )
                         }
                     } else if (pack.type == "disc") {
-                        // Discussion Mode
                         val scrollState = rememberScrollState()
                         Column(
                             modifier = Modifier
@@ -978,7 +975,6 @@ fun QuizRunnerScreen(
                             }
                         }
                     } else {
-                        // Standard Quiz Mode
                         val q = pack.questions.getOrNull(activeRun.currentIndex)
                         val selectedAns = activeRun.currentAnswers[activeRun.currentIndex]
                         val scrollState = rememberScrollState()
@@ -1067,12 +1063,25 @@ fun QuizRunnerScreen(
                                 val processedOptions = rawOptions.map {
                                     it.replace("{user}", profile.userName).replace("{partner}", profile.partnerName)
                                 }
-                                val isNie = pack.cat == "nie"
-                                val fallbackText = if (isNie) tr("Überspringen", "Skip") else tr("Schreibe deine eigene Antwort", "Write your own answer")
-                                val options = if (isPizzaBurgerTensionQuestion) {
+                                val interactionSpec = q?.let {
+                                    QuestionInteractionPolicy.resolveSpec(pack, activeRun.currentIndex, it)
+                                }
+                                val customTextLabel = tr("Schreibe deine eigene Antwort", "Write your own answer")
+                                val skipLabel = tr("Überspringen", "Skip")
+                                val baseOptions = if (isPizzaBurgerTensionQuestion) {
                                     processedOptions.take(2)
                                 } else {
-                                    processedOptions + fallbackText
+                                    processedOptions
+                                }
+                                val options = if (isPizzaBurgerTensionQuestion || interactionSpec == null) {
+                                    baseOptions
+                                } else {
+                                    QuizAnswerOptionsPolicy.build(
+                                        options = baseOptions,
+                                        spec = interactionSpec,
+                                        customTextLabel = customTextLabel,
+                                        skipLabel = skipLabel
+                                    )
                                 }
 
                                 var visibleMoralOptions by remember(questionAnimationKey) {
@@ -1093,9 +1102,11 @@ fun QuizRunnerScreen(
                                 }
 
                                 options.forEachIndexed { optIdx, optText ->
-                                    val isOwn = !isPizzaBurgerTensionQuestion && optIdx == options.size - 1
+                                    val isOwn = !isPizzaBurgerTensionQuestion &&
+                                        interactionSpec?.allowCustomText == true &&
+                                        optText == customTextLabel
                                     val isSelected = if (isOwn) {
-                                        selectedAns != null && selectedAns !in (q?.options ?: emptyList())
+                                        selectedAns != null && selectedAns !in baseOptions && selectedAns != skipLabel
                                     } else {
                                         selectedAns == optText
                                     }
@@ -1130,9 +1141,7 @@ fun QuizRunnerScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(bottom = 11.dp)
-                                        ) { glitchAmount ->
-                                            optionButton(glitchAmount)
-                                        }
+                                        ) { glitchAmount -> optionButton(glitchAmount) }
                                     } else if (isMoralGreyZone) {
                                         AnimatedVisibility(
                                             visible = optIdx < visibleMoralOptions,
@@ -1181,7 +1190,6 @@ fun QuizRunnerScreen(
                     }
                 }
 
-                // Runner Footer
                 if (activeRun.isFinished || pack.type == "disc") {
                     Row(
                         modifier = Modifier
@@ -1220,7 +1228,6 @@ fun QuizRunnerScreen(
 
             }
 
-            // Exit Confirm Dialog
             if (isExitConfirmOpen) {
                 Dialog(onDismissRequest = onCloseExitConfirm) {
                     Box(
@@ -1271,7 +1278,6 @@ fun QuizRunnerScreen(
                 }
             }
 
-            // Own Answer Dialog
             if (isOwnAnswerDialogOpen) {
                 var textInput by remember { mutableStateOf("") }
                 Dialog(onDismissRequest = onCloseOwnAnswerDialog) {
@@ -1565,8 +1571,6 @@ fun TotCardPairView(
             bottomFlip.snapTo(0f)
             skipNextTotEntrance = false
 
-            // Continue the final shuffle momentum on the same rotationY axis only.
-            // No extra Z tilt or positional wobble: just a small, damped rotational settle.
             coroutineScope {
                 launch { topFlip.animateTo(2.0f, tween(120, easing = FastOutSlowInEasing)) }
                 launch { bottomFlip.animateTo(-2.0f, tween(120, easing = FastOutSlowInEasing)) }
@@ -1620,13 +1624,9 @@ fun TotCardPairView(
                     launch { bottomFlip.animateTo(0f, tween(115, easing = FastOutSlowInEasing)) }
                 }
             }
-            // The shuffle already ends on the incoming pair. Keep it in place.
-            // Do not converge the cards or replay the wind entrance after the index update.
             skipNextTotEntrance = true
             onPick(option)
             isAnimating = false
-            // tot_settle_wobble: the incoming pair is already clickable while its tiny
-            // inertial settle runs in the keyed LaunchedEffect above.
         }
     }
 
@@ -1638,7 +1638,6 @@ fun TotCardPairView(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Top Card (tilted -3.2f)
             TotStyledCard(
                 text = contentText(firstText),
                 assetKey = topShuffleKey,
@@ -1655,7 +1654,6 @@ fun TotCardPairView(
                     }
             )
 
-            // Bottom Card (tilted +3.2f)
             TotStyledCard(
                 text = contentText(secondText),
                 assetKey = bottomShuffleKey,
@@ -1673,7 +1671,6 @@ fun TotCardPairView(
             )
         }
 
-        // Central "oder" badge
         Box(
             modifier = Modifier
                 .size(50.dp)
@@ -1750,7 +1747,6 @@ fun TotStyledCard(
                 )
         )
 
-        // Destination Tag Pill
         if (com.example.data.DevAssetStore.isUserFacingLabel(text)) {
             Box(
                 modifier = Modifier
