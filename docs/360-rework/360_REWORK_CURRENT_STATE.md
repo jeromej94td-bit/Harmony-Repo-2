@@ -7,8 +7,8 @@
 **Stage-02 package coverage:** 12/12 = 100%  
 **Latest Stage-02 package:** 24.17 / PR #79, merge `571ec3b4b29f3bb8982837a8bd1d12914b1f1fca`  
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
-**Stage-03 progress after PR #85:** 2/7  
-**Current Stage-03 substage after PR #85:** 03.3 — Reusable `ImageDuel` step  
+**Stage-03 progress after PR #87:** 3/7  
+**Current Stage-03 substage after PR #87:** 03.4 — Reusable `Ranking` step  
 **Stage-05 progress:** 1/5 = 20%  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Next Stage-05 substage:** 05.2 — Food / travel / leisure / culture
@@ -60,7 +60,6 @@ PR #81 introduced:
 **Status:** ✅ DONE  
 **Package:** 26.2 / PR #85  
 **Merge:** `4ef6d583144df4f59c59daef301ffe2596b89b7b`  
-**Stage-03 progress:** **2/7**
 
 PR #85 introduced:
 
@@ -71,11 +70,28 @@ PR #85 introduced:
 - proposal integration by replacing the old private Either-Or pane with the generic board;
 - model and Compose contracts while preserving the existing 11 proposal Either-Or rounds, text, order and direct advance behavior.
 
-TDD evidence for 26.2: the generic model contract was committed before production code; a focused Kotlin RED compile failed on the absent generic type, followed by a passing isolated Kotlin model/adapter harness. The existing `ProposalExperienceScreenUiTest` remains the integration contract that clicks all 11 Either-Or rounds and reaches the first location duel. No green full Android/Robolectric run is claimed while repository runner/credit execution remains unavailable.
+### 03.3 Reusable ImageDuel step
+
+**Status:** ✅ DONE  
+**Package:** 26.3 / PR #87  
+**Merge:** `704fa2a14732ed8141abb7d98da2018d27853aeb`  
+**Stage-03 progress:** **3/7**
+
+PR #87 introduced:
+
+- reusable `ExperienceImageDuelOption` and `ExperienceImageDuelRound` with fail-fast validation;
+- narrow proposal adapters for both location duels and ring duels;
+- stateless `ExperienceImageDuelBoard` plus `AnimatedExperienceImageDuelBoard`;
+- the shipped proposal-location choreography moved into the generic board: cards first, question after 620 ms, selection lock, then 420 ms hold + 760 ms 3D transition;
+- `ProposalLocationDuelBoard` retained as a compatibility wrapper with the existing `proposal_location_*` tags and callbacks;
+- proposal ring rounds now use the same generic board while preserving existing drawable keys and saved asset-key answers;
+- the old private proposal ring-card renderer was removed.
+
+TDD/verification evidence for 26.3: generic model contracts landed before production code; focused Kotlin RED compilation failed on the absent generic image-duel types, followed by a passing isolated Kotlin model/adapter harness. Existing proposal-location tests continue to specify legacy tags, timing, selection-lock and the three-round sequence. A new Robolectric Compose contract covers generic rendering, stable tags and the pick callback. GitHub reported the final PR conflict-free and 0 commits behind `main`; no green full Android/Gradle/Robolectric run is claimed because repository CI has no runnable status checks/credits.
 
 ### NEXT EXACT ACTION — core
 
-Begin **03.3 — Reusable `ImageDuel` step** as its own narrow 26.x package. Reuse the existing proposal location/ring duel behavior, but do not pull Ranking, PartnerPrediction, Scenario, OpenPrompt or Reveal into 03.3.
+Begin **03.4 — Reusable `Ranking` step** as its own narrow 26.x package. Reuse the existing drag/drop ranking behavior and answer codec, preserve the proposal priority-ranking semantics, and do not pull PartnerPrediction, Scenario, OpenPrompt or Reveal into 03.4.
 
 ## Parallel Stage 05 — Questions Quality Rework
 
@@ -115,7 +131,7 @@ Stage 06 remains 0/5 complete. Existing targeted cleanup packages are partial re
 
 ## Verification caveat
 
-Repository-wide GitHub Actions continue to terminate before executable workflow step 1 in affected runs, so no green full Android/Gradle result is claimed from those failures. Focused local/static/contract evidence is recorded per narrow package and completed implementation is not left unmerged solely because CI credits/runners are unavailable.
+Repository-wide GitHub Actions continue to terminate before executable workflow step 1 or expose no runnable status checks in affected runs, so no green full Android/Gradle result is claimed from those failures. Focused local/static/contract evidence is recorded per narrow package and completed implementation is not left unmerged solely because CI credits/runners are unavailable.
 
 ## DO NOT REPEAT
 
