@@ -141,8 +141,7 @@ object QuestionMechanicsAudit {
                 val indexTag = pack.tags.any {
                     it == "interaction_person_assignment_$index" || it == "interaction_rank_order_$index"
                 }
-                val hardCodedLegacyIndex = pack.id == "h500_414_rollenverteilung_ranking" && index == 1
-                if (indexTag || hardCodedLegacyIndex) {
+                if (indexTag) {
                     addFinding(
                         QuestionAuditKind.UNSTABLE_INDEX_SPECIAL_CASE,
                         "Diese Mechanik hängt noch an einer veränderlichen Fragenposition und sollte beim nächsten Touch auf einen stabilen Schlüssel migriert werden."
