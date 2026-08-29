@@ -11,6 +11,8 @@ internal object QuizAnswerOptionsPolicy {
         customTextLabel: String,
         skipLabel: String
     ): List<String> {
+        if (spec.fullscreenMechanic != null) return emptyList()
+
         val cleaned = options.filter { it.isNotBlank() }
         return when {
             spec.allowSkip -> appendOnce(cleaned, skipLabel)
