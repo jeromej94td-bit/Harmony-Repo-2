@@ -38,7 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.PredictionAnswerCodec
 import com.example.data.model.ProfileEntity
 import com.example.data.model.ProposalEitherOrRounds
 import com.example.data.model.ProposalExperienceDefinitions
@@ -47,6 +46,8 @@ import com.example.data.model.ProposalFlowStepKind
 import com.example.data.model.ProposalLocationDuels
 import com.example.data.model.ProposalOpenPrompts
 import com.example.data.model.ProposalPartnerPrediction
+import com.example.data.model.ExperiencePartnerPredictionSelection
+import com.example.data.model.toExperiencePartnerPredictionRound
 import com.example.data.model.ProposalPriorityRanking
 import com.example.data.model.ProposalReveal
 import com.example.data.model.ProposalRevealInput
@@ -77,7 +78,7 @@ internal fun ProposalExperienceScreen(
     var locationSelections by remember { mutableStateOf(emptyMap<String, String>()) }
     var ringSelections by remember { mutableStateOf(emptyMap<String, String>()) }
     var rankedPriorityIds by remember { mutableStateOf(emptyList<String>()) }
-    var predictionAnswers by remember { mutableStateOf(emptyMap<String, String>()) }
+    var predictionAnswers by remember { mutableStateOf(emptyMap<String, ExperiencePartnerPredictionSelection>()) }
     var scenarioSelections by remember { mutableStateOf(emptyMap<String, String>()) }
     var personalWishAnswers by remember { mutableStateOf(emptyMap<String, String>()) }
 
@@ -212,13 +213,12 @@ internal fun ProposalExperienceScreen(
 
                     ProposalFlowStepKind.PARTNER_PREDICTION -> {
                         val round = ProposalPartnerPrediction.rounds[position.itemIndex]
-                        PartnerPredictionBoard(
-                            question = round.prompt,
-                            options = round.options,
-                            selectedAnswer = predictionAnswers[round.id],
+                        ExperiencePartnerPredictionBoard(
+                            round = round.toExperiencePartnerPredictionRound(),
+                            selectedSelection = predictionAnswers[round.id],
                             profile = profile,
-                            onPick = { encoded ->
-                                predictionAnswers = predictionAnswers + (round.id to encoded)
+                            onPick = { selection ->
+                                predictionAnswers = predictionAnswers + (round.id to selection)
                                 advance()
                             },
                             modifier = Modifier.fillMaxSize()
@@ -254,9 +254,7 @@ internal fun ProposalExperienceScreen(
                     }
 
                     ProposalFlowStepKind.REVEAL -> {
-                        val predictionMatches = predictionAnswers.values
-                            .mapNotNull(PredictionAnswerCodec::decode)
-                            .count { it.isHit }
+                        val predictionMatches = predictionAnswers.values.count(ExperiencePartnerPredictionSelection::isHit)
                         val reveal = ProposalReveal.build(
                             ProposalRevealInput(
                                 eitherOrSelections = eitherOrSelections,
