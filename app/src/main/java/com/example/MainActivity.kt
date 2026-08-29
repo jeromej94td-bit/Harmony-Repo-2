@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,6 +84,7 @@ import com.example.widget.MemoryWidgetDatabaseObserver
 import com.example.widget.MemoryWidgetOpenRequest
 import com.example.widget.PicShareWidgetProvider
 import com.example.widget.parseMemoryWidgetOpenRequest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -156,8 +158,12 @@ fun HarmonyApp(
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val isImeVisible = WindowInsets.isImeVisible
+    val runnerScope = rememberCoroutineScope()
+    val appDb = remember(context.applicationContext) {
+        HarmonyDatabase.getInstance(context.applicationContext)
+    }
     val memoryRepository = remember(context.applicationContext) {
-        RoomMemoryRepository(HarmonyDatabase.getInstance(context.applicationContext))
+        RoomMemoryRepository(appDb)
     }
     val memoryFactory = remember(memoryRepository) {
         MemoryViewModelFactory(
@@ -216,21 +222,36 @@ fun HarmonyApp(
                 isProposalExperienceOpen = true
             }
             freshRun -> {
-                HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
+                val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
                     ?.let { com.example.data.model.LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(it) }
-                    ?.let { pack -> viewModel.startPackForTest(pack, currentIndex = 0) }
+                    ?: return
+                runnerScope.launch {
+                    appDb.answerDao().deleteAnswersForPack(packId)
+                    appDb.brainRoomDao().clearFinishedPack(packId)
+                    viewModel.startPackForTest(pack, currentIndex = 0)
+                }
             }
             else -> viewModel.startPack(packId)
         }
     }
 
     fun openPack(packId: String) {
-        val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
-        if (pack != null && hasCompletePackResults(pack, uiState.answers)) {
+        if (packId == PANDA_EITHER_OR_PACK_ID || ProposalExperienceEntryPolicy.handlesPack(packId)) {
+            openPackForPlay(packId)
+            return
+        }
+        val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId } ?: return
+        if (hasCompletePackResults(pack, uiState.answers)) {
             resultsPackId = packId
             return
         }
-        openPackForPlay(packId)
+        runnerScope.launch {
+            if (appDb.brainRoomDao().hasFinishedPack(packId)) {
+                resultsPackId = packId
+            } else {
+                openPackForPlay(packId)
+            }
+        }
     }
 
     val isQuizActive = uiState.activeRun != null
@@ -557,7 +578,13 @@ fun HarmonyApp(
                         },
                         onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
                         onNextStep = { viewModel.nextStep() },
-                        onAskExit = { viewModel.askExitRun() },
+                        onAskExit = {
+                            if (activeRun.isFinished) {
+                                viewModel.askExitRun()
+                            } else {
+                                viewModel.previousStep()
+                            }
+                        },
                         onCloseExitConfirm = { viewModel.closeExitConfirm() },
                         onCloseRunner = { viewModel.closeRunner() },
                         onOpenOwnAnswerDialog = { idx, mode ->
