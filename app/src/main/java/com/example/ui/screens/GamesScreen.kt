@@ -29,12 +29,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Apps
@@ -116,8 +114,6 @@ fun GamesScreen(
     onStartGeneratedGame: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
-
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showUnansweredQuestions by remember { mutableStateOf(false) }
@@ -130,8 +126,6 @@ fun GamesScreen(
             keyboardController?.show()
         }
     }
-
-
 
     // Filter search results over title, category, topic, tags, questions, and option choices
     val trimmedQuery = searchQuery.trim().lowercase()
@@ -172,225 +166,226 @@ fun GamesScreen(
         }
     } else null
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(bottom = 90.dp)
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 90.dp)
     ) {
-        // Top Header with Lupe Button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 8.dp),
-        ) {
-            Text(
-                text = LanguageManager.tr("Fragen & Spiele", appLanguage),
-                fontSize = 21.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = HarmonyText,
-                letterSpacing = 0.3.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
-            IconButton(
-                onClick = {
-                    isSearchActive = !isSearchActive
-                    if (!isSearchActive) {
-                        searchQuery = ""
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(HarmonyPink.copy(alpha = if (isSearchActive) 0.28f else 0.13f), Color.Transparent)
-                        )
-                    )
-                    .border(1.dp, HarmonyPink.copy(alpha = if (isSearchActive) 0.72f else 0.30f), CircleShape)
-                    .testTag("search_icon_button")
-            ) {
-                Icon(
-                    imageVector = if (isSearchActive && searchQuery.isEmpty()) Icons.Default.Close else Icons.Default.Search,
-                    contentDescription = if (isSearchActive) LanguageManager.tr("Suche schließen", appLanguage) else LanguageManager.tr("Suche öffnen", appLanguage),
-                    tint = if (isSearchActive) HarmonyPink else HarmonyText
-                )
-            }
-        }
-
-        // Search Input Field with automatic keyboard focus
-        AnimatedVisibility(
-            visible = isSearchActive || searchQuery.isNotEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Row(
+        item(key = "games_header") {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 18.dp, vertical = 8.dp),
             ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = {
-                        Text(
-                            text = LanguageManager.tr("Titel, Kategorie, Thema, Tags, Fragen...", appLanguage),
-                            color = HarmonyMuted,
-                            fontSize = 13.5.sp
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = HarmonyPink,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(
-                                onClick = { searchQuery = "" },
-                                modifier = Modifier.testTag("clear_search_text_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Suchfeld löschen",
-                                    tint = HarmonyMuted,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        } else {
-                            IconButton(
-                                onClick = {
-                                    isSearchActive = false
-                                    searchQuery = ""
-                                },
-                                modifier = Modifier.testTag("close_search_button")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Suche schließen",
-                                    tint = HarmonyMuted,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                Text(
+                    text = LanguageManager.tr("Fragen & Spiele", appLanguage),
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = HarmonyText,
+                    letterSpacing = 0.3.sp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+
+                IconButton(
+                    onClick = {
+                        isSearchActive = !isSearchActive
+                        if (!isSearchActive) {
+                            searchQuery = ""
                         }
                     },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = HarmonySurface2.copy(alpha = 0.76f),
-                        unfocusedContainerColor = HarmonySurface2.copy(alpha = 0.66f),
-                        disabledContainerColor = HarmonySurface2.copy(alpha = 0.66f),
-                        focusedBorderColor = HarmonyPink,
-                        unfocusedBorderColor = HarmonyLine,
-                        focusedTextColor = HarmonyText,
-                        unfocusedTextColor = HarmonyText
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Search
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSearch = { keyboardController?.hide() }
-                    ),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .testTag("search_input_field")
-                )
+                        .align(Alignment.CenterEnd)
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(HarmonyPink.copy(alpha = if (isSearchActive) 0.28f else 0.13f), Color.Transparent)
+                            )
+                        )
+                        .border(1.dp, HarmonyPink.copy(alpha = if (isSearchActive) 0.72f else 0.30f), CircleShape)
+                        .testTag("search_icon_button")
+                ) {
+                    Icon(
+                        imageVector = if (isSearchActive && searchQuery.isEmpty()) Icons.Default.Close else Icons.Default.Search,
+                        contentDescription = if (isSearchActive) LanguageManager.tr("Suche schließen", appLanguage) else LanguageManager.tr("Suche öffnen", appLanguage),
+                        tint = if (isSearchActive) HarmonyPink else HarmonyText
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        item(key = "games_search") {
+            AnimatedVisibility(
+                visible = isSearchActive || searchQuery.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 18.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = {
+                            Text(
+                                text = LanguageManager.tr("Titel, Kategorie, Thema, Tags, Fragen...", appLanguage),
+                                color = HarmonyMuted,
+                                fontSize = 13.5.sp
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                tint = HarmonyPink,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(
+                                    onClick = { searchQuery = "" },
+                                    modifier = Modifier.testTag("clear_search_text_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Suchfeld löschen",
+                                        tint = HarmonyMuted,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            } else {
+                                IconButton(
+                                    onClick = {
+                                        isSearchActive = false
+                                        searchQuery = ""
+                                    },
+                                    modifier = Modifier.testTag("close_search_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Suche schließen",
+                                        tint = HarmonyMuted,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = HarmonySurface2.copy(alpha = 0.76f),
+                            unfocusedContainerColor = HarmonySurface2.copy(alpha = 0.66f),
+                            disabledContainerColor = HarmonySurface2.copy(alpha = 0.66f),
+                            focusedBorderColor = HarmonyPink,
+                            unfocusedBorderColor = HarmonyLine,
+                            focusedTextColor = HarmonyText,
+                            unfocusedTextColor = HarmonyText
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Search
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSearch = { keyboardController?.hide() }
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
+                            .testTag("search_input_field")
+                    )
+                }
+            }
+        }
 
-        // Filter Chips
-        FilterChipsRow(
-            selectedFilter = packFilter,
-            onFilterSelected = { filter ->
-                onSetFilter(filter)
-                if (filter == "open") showUnansweredQuestions = true
-            },
-            appLanguage = appLanguage,
-            modifier = Modifier.padding(horizontal = 18.dp)
-        )
-
-        Spacer(modifier = Modifier.height(18.dp))
+        item(key = "games_filters") {
+            Spacer(modifier = Modifier.height(6.dp))
+            FilterChipsRow(
+                selectedFilter = packFilter,
+                onFilterSelected = { filter ->
+                    onSetFilter(filter)
+                    if (filter == "open") showUnansweredQuestions = true
+                },
+                appLanguage = appLanguage,
+                modifier = Modifier.padding(horizontal = 18.dp)
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+        }
 
         if (searchResults != null) {
-            // Search Mode Results View
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = LanguageManager.tr("Suchergebnisse", appLanguage),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = HarmonyText
-                )
-                Text(
-                    text = "${searchResults.size} " + LanguageManager.tr("Treffer", appLanguage),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = HarmonyMuted
-                )
+            item(key = "search_results_header") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 18.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = LanguageManager.tr("Suchergebnisse", appLanguage),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = HarmonyText
+                    )
+                    Text(
+                        text = "${searchResults.size} " + LanguageManager.tr("Treffer", appLanguage),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = HarmonyMuted
+                    )
+                }
             }
 
             if (searchResults.isEmpty()) {
-                // Keine Treffer Meldung
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 40.dp, horizontal = 24.dp)
-                        .testTag("no_search_results_view"),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🔍",
-                        fontSize = 42.sp
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = LanguageManager.tr("Keine Treffer gefunden", appLanguage),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = HarmonyText,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = LanguageManager.tr("Für diese Suche wurden keine passenden Fragen oder Spiele gefunden.", appLanguage),
-                        fontSize = 13.5.sp,
-                        color = HarmonyMuted,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 19.sp
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Box(
+                item(key = "search_results_empty") {
+                    Column(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Brush.horizontalGradient(listOf(HarmonyPink, HarmonyPurple)))
-                            .clickable { searchQuery = "" }
-                            .padding(horizontal = 20.dp, vertical = 11.dp)
-                            .testTag("clear_search_button")
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp, horizontal = 24.dp)
+                            .testTag("no_search_results_view"),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = LanguageManager.tr("Suche zurücksetzen", appLanguage),
-                            color = Color.White,
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.Bold
+                            text = "🔍",
+                            fontSize = 42.sp
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = LanguageManager.tr("Keine Treffer gefunden", appLanguage),
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = HarmonyText,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = LanguageManager.tr("Für diese Suche wurden keine passenden Fragen oder Spiele gefunden.", appLanguage),
+                            fontSize = 13.5.sp,
+                            color = HarmonyMuted,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 19.sp
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(Brush.horizontalGradient(listOf(HarmonyPink, HarmonyPurple)))
+                                .clickable { searchQuery = "" }
+                                .padding(horizontal = 20.dp, vertical = 11.dp)
+                                .testTag("clear_search_button")
+                        ) {
+                            Text(
+                                text = LanguageManager.tr("Suche zurücksetzen", appLanguage),
+                                color = Color.White,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             } else {
-                searchResults.forEach { pack ->
+                items(items = searchResults, key = { it.id }) { pack ->
                     val translatedPack = LanguageManager.translatePack(pack, appLanguage)
                     PaddingPackCard(
                         appLanguage = appLanguage,
@@ -402,109 +397,115 @@ fun GamesScreen(
                 }
             }
         } else {
-            // Normal View
-            // Categories Header
-            AuroraGlassSectionTitle(
-                LanguageManager.tr("Kategorien", appLanguage),
-                Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
-            )
-
-            // Horizontal Category Rail
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 18.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(HarmonyPacksData.CATEGORIES) { category ->
-                    val translatedCategory = LanguageManager.translateCategory(category, appLanguage)
-                    val displayCategory = if (category.id == "unterbewusstsein" && appLanguage == "de") {
-                        translatedCategory.copy(name = "Tauche ins Selbstbewusstsein ein")
-                    } else {
-                        translatedCategory
-                    }
-                    CategoryRailCard(
-                        category = displayCategory,
-                        onClick = { onCategoryClick(category.id) }
-                    )
-                }
+            item(key = "categories_header") {
+                AuroraGlassSectionTitle(
+                    LanguageManager.tr("Kategorien", appLanguage),
+                    Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-
-            // Generated Games Section
-            if (generatedGames.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 18.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("🧠", fontSize = 18.sp)
-                        Spacer(modifier = Modifier.width(7.dp))
-                        Text(
-                            text = LanguageManager.tr("Persönliche Spiele von Harmony", appLanguage),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = HarmonyText
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFE056FD).copy(alpha = 0.2f))
-                            .border(1.dp, Color(0xFFE056FD).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "${generatedGames.size} Neu",
-                            color = Color(0xFFE056FD),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
+            item(key = "categories_rail") {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 18.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(generatedGames, key = { it.id }) { gameEntity ->
-                        val payload = remember(gameEntity.payloadJson) {
-                            runCatching {
-                                Json { ignoreUnknownKeys = true }.decodeFromString(
-                                    GeneratedGamePayload.serializer(),
-                                    gameEntity.payloadJson
-                                )
-                            }.getOrNull()
+                    items(HarmonyPacksData.CATEGORIES, key = { it.id }) { category ->
+                        val translatedCategory = LanguageManager.translateCategory(category, appLanguage)
+                        val displayCategory = if (category.id == "unterbewusstsein" && appLanguage == "de") {
+                            translatedCategory.copy(name = "Tauche ins Selbstbewusstsein ein")
+                        } else {
+                            translatedCategory
                         }
-                        val emoji = payload?.emoji ?: "✨"
-                        val title = payload?.title ?: gameEntity.title ?: "Neues Spiel"
-                        val questionCount = payload?.questions?.size ?: 7
-                        val isOpened = gameEntity.playedCount > 0 || gameEntity.firstShownAt != null
-
-                        GeneratedGameCard(
-                            title = title,
-                            emoji = emoji,
-                            questionCount = questionCount,
-                            isOpened = isOpened,
-                            appLanguage = appLanguage,
-                            onClick = { onStartGeneratedGame(gameEntity.id) }
+                        CategoryRailCard(
+                            category = displayCategory,
+                            onClick = { onCategoryClick(category.id) }
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            item(key = "after_categories_spacer") {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
-            // Topics Progress Header
-            AuroraGlassSectionTitle(LanguageManager.tr("Themen", appLanguage), Modifier.padding(horizontal = 18.dp, vertical = 4.dp))
+            if (generatedGames.isNotEmpty()) {
+                item(key = "generated_games_section") {
+                    Column {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 18.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("🧠", fontSize = 18.sp)
+                                Spacer(modifier = Modifier.width(7.dp))
+                                Text(
+                                    text = LanguageManager.tr("Persönliche Spiele von Harmony", appLanguage),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = HarmonyText
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFFE056FD).copy(alpha = 0.2f))
+                                    .border(1.dp, Color(0xFFE056FD).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "${generatedGames.size} Neu",
+                                    color = Color(0xFFE056FD),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
 
-            // Topics List with progress bars
-            HarmonyPacksData.TOPICS.forEach { topic ->
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 18.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(generatedGames, key = { it.id }) { gameEntity ->
+                                val payload = remember(gameEntity.payloadJson) {
+                                    runCatching {
+                                        Json { ignoreUnknownKeys = true }.decodeFromString(
+                                            GeneratedGamePayload.serializer(),
+                                            gameEntity.payloadJson
+                                        )
+                                    }.getOrNull()
+                                }
+                                val emoji = payload?.emoji ?: "✨"
+                                val title = payload?.title ?: gameEntity.title ?: "Neues Spiel"
+                                val questionCount = payload?.questions?.size ?: 7
+                                val isOpened = gameEntity.playedCount > 0 || gameEntity.firstShownAt != null
+
+                                GeneratedGameCard(
+                                    title = title,
+                                    emoji = emoji,
+                                    questionCount = questionCount,
+                                    isOpened = isOpened,
+                                    appLanguage = appLanguage,
+                                    onClick = { onStartGeneratedGame(gameEntity.id) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            item(key = "topics_header") {
+                Spacer(modifier = Modifier.height(20.dp))
+                AuroraGlassSectionTitle(
+                    LanguageManager.tr("Themen", appLanguage),
+                    Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
+                )
+            }
+
+            items(items = HarmonyPacksData.TOPICS, key = { it.id }) { topic ->
                 val packsForTopic = HarmonyPacksData.PACKS.filter { it.topic == topic.id }
                 val donePacksCount = packsForTopic.count { pack ->
                     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
