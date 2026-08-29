@@ -4,32 +4,26 @@ package com.example.data
 object Harmony360FutureSectionCuration {
     internal enum class CurationDecision { KEEP, REWRITE, MERGE, ARCHIVE }
 
-    private val scale = listOf("1 – gar nicht", "2", "3", "4", "5 – extrem")
-    private val who = listOf("{user}", "{partner}", "Beide", "Niemand")
-
     private fun q(text: String, vararg options: String): GenQuestion =
         GenQuestion(q = text, options = options.toList())
 
-    private fun scaleQ(text: String): GenQuestion = GenQuestion(q = text, options = scale)
-    private fun whoQ(text: String): GenQuestion = GenQuestion(q = text, options = who)
-
     internal val decisions: Map<String, CurationDecision> = linkedMapOf(
         "h500_051_unser_naechstes_jahr_entweder_oder" to CurationDecision.REWRITE,
-        "h500_052_in_fuenf_jahren_wer_eher" to CurationDecision.REWRITE,
-        "h500_053_traumwohnung_skala" to CurationDecision.REWRITE,
+        "h500_052_in_fuenf_jahren_wer_eher" to CurationDecision.ARCHIVE,
+        "h500_053_traumwohnung_skala" to CurationDecision.ARCHIVE,
         "h500_054_traumhaus_ranking" to CurationDecision.REWRITE,
-        "h500_055_stadt_oder_land_prognose" to CurationDecision.REWRITE,
+        "h500_055_stadt_oder_land_prognose" to CurationDecision.ARCHIVE,
         "h500_056_auswandern_szenario" to CurationDecision.REWRITE,
-        "h500_057_karriereplaene_geheime_wahl" to CurationDecision.REWRITE,
+        "h500_057_karriereplaene_geheime_wahl" to CurationDecision.ARCHIVE,
         "h500_058_finanzielle_ziele_memory" to CurationDecision.REWRITE,
         "h500_060_hochzeit_offene_runde" to CurationDecision.REWRITE,
         "h500_061_familienplanung_entweder_oder" to CurationDecision.REWRITE,
-        "h500_062_lebensstil_wer_eher" to CurationDecision.REWRITE,
+        "h500_062_lebensstil_wer_eher" to CurationDecision.ARCHIVE,
         "h500_064_abenteuerliste_ranking" to CurationDecision.REWRITE,
-        "h500_065_bucket_list_prognose" to CurationDecision.REWRITE,
+        "h500_065_bucket_list_prognose" to CurationDecision.ARCHIVE,
         "h500_066_wohnort_szenario" to CurationDecision.REWRITE,
-        "h500_067_prioritaeten_geheime_wahl" to CurationDecision.REWRITE,
-        "h500_069_selbststaendigkeit_prioritaet" to CurationDecision.REWRITE,
+        "h500_067_prioritaeten_geheime_wahl" to CurationDecision.ARCHIVE,
+        "h500_069_selbststaendigkeit_prioritaet" to CurationDecision.ARCHIVE,
         "h500_070_sicherheit_oder_freiheit_offene_runde" to CurationDecision.REWRITE,
         "h500_075_das_leben_mit_60_prognose" to CurationDecision.REWRITE
     )
@@ -43,22 +37,6 @@ object Harmony360FutureSectionCuration {
             q("Wohin sollte zusätzliches Geld eher fließen?", "Gemeinsame Erlebnisse", "Rücklagen und Sicherheit"),
             q("Wenn sich plötzlich eine große Chance ergibt?", "Mutig zugreifen", "Erst gemeinsam gründlich prüfen")
         ),
-        "h500_052_in_fuenf_jahren_wer_eher" to listOf(
-            whoQ("Wer hat eher schon ein ziemlich klares Bild davon, wie euer Leben in fünf Jahren aussehen könnte?"),
-            whoQ("Wer denkt bei Zukunftsplänen eher zuerst an finanzielle Machbarkeit?"),
-            whoQ("Wer würde für eine große Chance eher Job oder Wohnort verändern?"),
-            whoQ("Wer setzt sich eher konkrete Meilensteine für die nächsten Jahre?"),
-            whoQ("Wer merkt eher, wenn ein Zukunftsplan zwar schön klingt, aber im Alltag nicht funktionieren würde?"),
-            whoQ("Wer könnte den anderen in fünf Jahren mit einem Lebensweg überraschen, den heute keiner erwartet?")
-        ),
-        "h500_053_traumwohnung_skala" to listOf(
-            scaleQ("Wie wichtig ist dir in einer Traumwohnung ein eigenes Arbeits- oder Rückzugszimmer?"),
-            scaleQ("Wie wichtig wäre dir Balkon, Terrasse oder ein anderer privater Außenbereich?"),
-            scaleQ("Wie wichtig sind dir kurze Wege zu Arbeit, Einkauf und Freizeit?"),
-            scaleQ("Wie stark brauchst du zuhause Ruhe vor Straßenlärm und Nachbarn?"),
-            scaleQ("Wie wichtig sind dir genug Stauraum und ein wirklich praktischer Grundriss?"),
-            scaleQ("Wie wichtig ist dir, eine Wohnung langfristig nach euren eigenen Vorstellungen gestalten zu können?")
-        ),
         "h500_054_traumhaus_ranking" to listOf(
             q("Welche Eigenschaften wären dir bei einem Traumhaus am wichtigsten? Ordne.", "Garten", "Große Küche", "Zusätzliches Zimmer", "Energieeffizienz"),
             q("Was entscheidet beim Standort am stärksten? Ordne.", "Kurzer Arbeitsweg", "Nähe zur Natur", "Gute Infrastruktur", "Nähe zu Familie und Freunden"),
@@ -67,14 +45,6 @@ object Harmony360FutureSectionCuration {
             q("Wo würdest du am ehesten Kompromisse machen? Ordne.", "Größe", "Lage", "Zustand", "Ausstattung"),
             q("Was wäre langfristig am wertvollsten? Ordne.", "Barrierearm nutzbar", "Homeoffice-tauglich", "Platz für Gäste", "Niedriger Energieverbrauch")
         ),
-        "h500_055_stadt_oder_land_prognose" to listOf(
-            q("Was wäre deinem Partner beim Wohnort vermutlich am wichtigsten?", "Kurze Wege", "Ruhe", "Mehr Wohnfläche", "Kultur und Ausgehen"),
-            q("Wie viel Pendelzeit würde dein Partner wahrscheinlich für den passenden Wohnort akzeptieren?", "Fast keine", "Bis 30 Minuten", "Bis etwa eine Stunde", "Wenn der Ort passt auch mehr"),
-            q("Was würde dein Partner eher vermissen?", "Restaurants und Kultur", "Natur direkt vor der Tür", "Viele Menschen um sich", "Mehr Platz zuhause"),
-            q("Welche Mobilität wäre deinem Partner am wichtigsten?", "Guter ÖPNV", "Auto problemlos nutzen", "Viel mit dem Fahrrad", "Viel zu Fuß erledigen"),
-            q("Welches Umfeld würde deinem Partner vermutlich besser gefallen?", "Lebendiges Viertel", "Ruhiger Stadtrand", "Kleine Gemeinde", "Sehr ländlich"),
-            q("Welchen Kompromiss würde dein Partner eher eingehen?", "Weniger Platz für bessere Lage", "Längere Wege für mehr Platz", "Höhere Kosten für Infrastruktur", "Weniger Angebote für mehr Ruhe")
-        ),
         "h500_056_auswandern_szenario" to listOf(
             q("Einer von euch bekommt ein starkes Jobangebot im Ausland. Was ist der erste sinnvolle Schritt?", "Bedingungen gemeinsam prüfen", "Land für einige Tage testen", "Finanzen durchrechnen", "Erst über persönliche Grenzen sprechen"),
             q("Nur einer spricht die Landessprache gut. Wie geht ihr damit um?", "Gemeinsam vorab lernen", "Vor Ort intensiv lernen", "Englisch als Übergang nutzen", "Umzug erst bei solider Sprachbasis"),
@@ -82,14 +52,6 @@ object Harmony360FutureSectionCuration {
             q("Die Lebenshaltungskosten sind deutlich höher als erwartet. Was macht ihr?", "Budget neu rechnen", "Andere Stadt prüfen", "Umzug verschieben", "Weniger Wohnkomfort akzeptieren"),
             q("Ihr seid nach drei Monaten uneinig, ob ihr bleiben wollt. Was wäre fair?", "Festes Prüfdatum vereinbaren", "Noch drei Monate testen", "Rückkehr konkret planen", "Alternatives Land prüfen"),
             q("Aufenthaltsrecht und Bürokratie werden komplizierter als gedacht. Was tut ihr?", "Professionelle Beratung holen", "Aufgaben klar aufteilen", "Zeitplan verlängern", "Plan B für den Wohnort vorbereiten")
-        ),
-        "h500_057_karriereplaene_geheime_wahl" to listOf(
-            q("Was reizt dich an deiner beruflichen Zukunft heimlich am meisten?", "Mehr Verantwortung", "Mehr Freiheit", "Mehr Einkommen", "Mehr Sinn"),
-            q("Welche Veränderung würdest du am ehesten wagen, wenn niemand Erwartungen an dich hätte?", "Branche wechseln", "Führungsrolle übernehmen", "Weniger arbeiten", "Etwas Eigenes aufbauen"),
-            q("Was wäre dir bei einem Traumjob wichtiger?", "Flexibler Ort", "Flexible Zeit", "Starkes Team", "Spannende Aufgabe"),
-            q("Welchen Preis würdest du für Karriere am wenigsten zahlen wollen?", "Zu wenig gemeinsame Zeit", "Dauerhafter Stress", "Umzug gegen den eigenen Wunsch", "Kaum persönliche Freiheit"),
-            q("Was würdest du dir beruflich eher zutrauen, als du meistens sagst?", "Großes Projekt leiten", "Neu anfangen", "Öffentlich Verantwortung tragen", "Selbstständig arbeiten"),
-            q("Welche Unterstützung vom Partner wäre bei einem großen Karriereschritt am wertvollsten?", "Ehrliches Feedback", "Rückhalt bei Risiko", "Praktische Entlastung", "Raum zum Entscheiden")
         ),
         "h500_058_finanzielle_ziele_memory" to listOf(
             GenQuestion("Wofür hast du zum ersten Mal bewusst länger Geld zurückgelegt?"),
@@ -115,14 +77,6 @@ object Harmony360FutureSectionCuration {
             q("Wie sollten Karriere und Familienplanung eher zusammenspielen?", "Früh aufeinander abstimmen", "Erst anpassen, wenn es konkret wird"),
             q("Wenn ihr beim Thema noch nicht gleich denkt?", "Zeitnah Klarheit suchen", "Ohne Druck im Gespräch bleiben")
         ),
-        "h500_062_lebensstil_wer_eher" to listOf(
-            whoQ("Wer braucht im Alltag eher feste Routinen, damit das gemeinsame Leben gut läuft?"),
-            whoQ("Wer würde eher spontan den bisherigen Lebensstil komplett umkrempeln?"),
-            whoQ("Wer achtet eher darauf, dass zuhause nicht immer mehr Dinge und Verpflichtungen entstehen?"),
-            whoQ("Wer braucht eher regelmäßig Zeit nur für sich, auch wenn ihr viel gemeinsam macht?"),
-            whoQ("Wer würde eher für mehr Lebensqualität bewusst auf Einkommen oder Status verzichten?"),
-            whoQ("Wer merkt eher zuerst, wenn euer aktueller Lebensstil nicht mehr zu euren Bedürfnissen passt?")
-        ),
         "h500_064_abenteuerliste_ranking" to listOf(
             q("Welche Art Zukunftsabenteuer reizt dich am meisten? Ordne.", "Große Reise", "Neue Fähigkeit lernen", "Gemeinsames Herzensprojekt", "Körperliche Herausforderung"),
             q("Was macht einen Punkt auf eurer Abenteuerliste wirklich wichtig? Ordne.", "Emotionale Bedeutung", "Einmaligkeit", "Gemeinsamer Wunsch", "Realistische Machbarkeit"),
@@ -131,14 +85,6 @@ object Harmony360FutureSectionCuration {
             q("Was dürfte eine Abenteuerliste am wenigsten werden? Ordne vom größten Störfaktor.", "Pflichtprogramm", "Zu teuer", "Nur einseitige Wünsche", "Endlos aufgeschoben"),
             q("Was sollte nach fünf Jahren am stärksten sichtbar sein? Ordne.", "Mutiger geworden", "Mehr gemeinsam erlebt", "Etwas aufgebaut", "Neue Seiten aneinander entdeckt")
         ),
-        "h500_065_bucket_list_prognose" to listOf(
-            q("Welchen Bucket-List-Punkt würde dein Partner vermutlich zuerst wählen?", "Große Reise", "Traumkonzert oder Event", "Neue Fähigkeit lernen", "Eigenes Herzensprojekt"),
-            q("Was wäre deinem Partner bei einem großen Wunsch wahrscheinlich wichtiger?", "Außergewöhnlich", "Gemeinsam", "Gut planbar", "Persönlich bedeutsam"),
-            q("Welche Herausforderung würde dein Partner eher annehmen?", "Körperliche Challenge", "Kreatives Projekt", "Neue Sprache", "Längere Reise"),
-            q("Was würde deinen Partner bei einer Bucket List am ehesten nerven?", "Zu viel Planung", "Zu hohe Kosten", "Druck etwas abhaken zu müssen", "Wünsche ohne echten Bezug"),
-            q("Wie würde dein Partner einen lange aufgeschobenen Wunsch eher angehen?", "Termin festlegen", "Geld dafür zurücklegen", "Kleinere Version starten", "Auf die richtige Gelegenheit warten"),
-            q("Was würde deinen Partner nach einem erfüllten Wunsch wahrscheinlich am meisten freuen?", "Gemeinsame Erinnerung", "Eigene Grenze überwunden", "Lange Vorfreude eingelöst", "Etwas Neues über sich gelernt")
-        ),
         "h500_066_wohnort_szenario" to listOf(
             q("Einer bekommt einen Traumjob in einer anderen Stadt, der andere möchte bleiben. Wie startet ihr die Entscheidung?", "Beide Konsequenzen sammeln", "Probezeit mit Pendeln", "Umzug ernsthaft durchrechnen", "Alternative Jobs prüfen"),
             q("Eure Miete steigt stark. Was wäre der sinnvollste nächste Schritt?", "Neu verhandeln oder prüfen", "Andere Wohnung suchen", "Stadtteil wechseln", "Budget an anderer Stelle anpassen"),
@@ -146,22 +92,6 @@ object Harmony360FutureSectionCuration {
             q("Ein Familienmitglied braucht künftig regelmäßig Unterstützung. Wie beeinflusst das euren Wohnort?", "Nähe stärker gewichten", "Fahrtzeiten realistisch prüfen", "Aufgaben mit Familie teilen", "Wohnort trotzdem unabhängig wählen"),
             q("Nach Monaten findet ihr keine Wohnung, die alle Wünsche erfüllt. Was gebt ihr zuerst frei?", "Größe", "Lage", "Ausstattung", "Einzugszeitpunkt"),
             q("Ihr seid unsicher, ob ein neuer Ort wirklich passt. Was wäre ein guter Test?", "Mehrere Wochen dort leben", "Alltagswege ausprobieren", "Mit Menschen vor Ort sprechen", "Kosten und Pendeln simulieren")
-        ),
-        "h500_067_prioritaeten_geheime_wahl" to listOf(
-            q("Was hätte in deinen nächsten Jahren heimlich gern mehr Platz?", "Zeit zu zweit", "Eigene Entwicklung", "Finanzielle Sicherheit", "Neue Erlebnisse"),
-            q("Was würdest du ungern dauerhaft für gemeinsame Ziele opfern?", "Eigene Freundschaften", "Berufliche Chancen", "Freie Zeit", "Finanzielle Unabhängigkeit"),
-            q("Wofür würdest du dagegen bewusst mehr investieren?", "Gemeinsames Zuhause", "Reisen und Erlebnisse", "Weiterbildung", "Rücklagen"),
-            q("Welche Priorität sagst du vielleicht seltener laut als du sie tatsächlich fühlst?", "Ruhe im Alltag", "Abwechslung", "Planbarkeit", "Persönlicher Freiraum"),
-            q("Was dürfte in einem vollen Jahr am wenigsten untergehen?", "Gesundheit", "Beziehung", "Eigene Ziele", "Familie und Freunde"),
-            q("Bei welcher Sache wäre es für dich am schwersten, jahrelang auf 'später' zu vertrösten?", "Reise", "Wohnwunsch", "Beruflicher Schritt", "Mehr freie Zeit")
-        ),
-        "h500_069_selbststaendigkeit_prioritaet" to listOf(
-            q("Welche Form von Selbstständigkeit ist dir im gemeinsamen Leben am wichtigsten?", "Eigene Entscheidungen", "Eigene Zeit", "Eigene Kontakte", "Eigener finanzieller Spielraum"),
-            q("Was sollte trotz enger Beziehung immer möglich bleiben?", "Allein etwas unternehmen", "Eigene Interessen verfolgen", "Eigene Meinung behalten", "Eigene Freundschaften pflegen"),
-            q("Wo ist Abstimmung für dich am wichtigsten?", "Große Ausgaben", "Wohnort", "Zeitplanung", "Langfristige Verpflichtungen"),
-            q("Woran merkst du gesunde Eigenständigkeit am ehesten?", "Man kann Nein sagen", "Man kann allein entscheiden", "Man vermisst sich auch mal", "Man unterstützt eigene Ziele"),
-            q("Was wäre für dich am ehesten zu viel Abhängigkeit?", "Jede Freizeit gemeinsam", "Finanzen völlig unklar vermischen", "Kontakte vernachlässigen", "Entscheidungen nur noch gemeinsam treffen"),
-            q("Was hilft, Freiheit und Verbindlichkeit gleichzeitig zu behalten?", "Klare Absprachen", "Vertrauen", "Eigene Verantwortungsbereiche", "Regelmäßig neu justieren")
         ),
         "h500_070_sicherheit_oder_freiheit_offene_runde" to listOf(
             GenQuestion("Was bedeutet Sicherheit für dich ganz konkret: Geld, Zuhause, Verlässlichkeit, Routine oder etwas anderes?"),
