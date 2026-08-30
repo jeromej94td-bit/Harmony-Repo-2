@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -179,7 +180,7 @@ fun HarmonyApp(
     var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
     var isEureMischungOpen by remember { mutableStateOf(false) }
     var isKidGeneratorOpen by remember { mutableStateOf(false) }
-    var isProposalExperienceOpen by remember { mutableStateOf(false) }
+    var isProposalExperienceOpen by rememberSaveable { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
     var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
@@ -314,11 +315,11 @@ fun HarmonyApp(
             memoryState.selectionMode -> {
                 memoryViewModel.clearSelection()
             }
-            uiState.selectedTab == 6 -> { // PackListScreen
-                viewModel.selectTab(1) // Back to GamesScreen
+            uiState.selectedTab == 6 -> {
+                viewModel.selectTab(1)
             }
             uiState.selectedTab != 0 -> {
-                viewModel.selectTab(0) // Back to HomeScreen
+                viewModel.selectTab(0)
             }
         }
     }
@@ -352,7 +353,7 @@ fun HarmonyApp(
             bottomBar = {
                 if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen && !isKidGeneratorOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
-                        6 -> 1 // When inside PackListScreen, highlight Spiele tab
+                        6 -> 1
                         else -> uiState.selectedTab
                     }
                     HarmonyBottomNav(
@@ -368,7 +369,6 @@ fun HarmonyApp(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                // Main Content depending on selected Tab
                 when (uiState.selectedTab) {
                     0 -> HomeScreen(
                         profile = uiState.profile,
@@ -535,13 +535,11 @@ fun HarmonyApp(
                     )
                 }
 
-                // Toast Notification Overlay
                 HarmonyToast(
                     message = uiState.toastMessage,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
 
-                // Profile Sheet
                 if (uiState.isProfileSheetOpen) {
                     val currentLanguage = AppLanguage.fromCode(uiState.appLanguage)
                     ProfileSheet(
@@ -561,7 +559,6 @@ fun HarmonyApp(
                     )
                 }
 
-                // Full-Screen Quiz Runner Overlay
                 uiState.activeRun?.let { activeRun ->
                     QuizRunnerScreen(
                         activeRun = activeRun,
