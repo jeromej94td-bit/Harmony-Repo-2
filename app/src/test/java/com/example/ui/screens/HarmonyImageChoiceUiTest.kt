@@ -67,6 +67,43 @@ class HarmonyImageChoiceUiTest {
     }
 
     @Test
+    fun `happy couple grid exposes four numbered cards and stores the tapped answer`() {
+        var pickedAnswer by mutableStateOf<String?>(null)
+
+        composeRule.mainClock.autoAdvance = false
+        composeRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                AmbientBackground {
+                    HarmonyImageChoiceQuestion(
+                        kind = HarmonyImageChoiceKind.HAPPY_COUPLE,
+                        question = "Welches Paar ist GLÜCKLICH?",
+                        options = listOf("1", "2", "3", "4"),
+                        selectedAnswer = pickedAnswer,
+                        onPick = { pickedAnswer = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        composeRule.mainClock.advanceTimeBy(2_800L)
+        composeRule.onNodeWithTag("harmony_happy_couple_question").assertExists()
+        (0..3).forEach { index ->
+            composeRule.onNodeWithTag("happy_couple_option_$index").assertExists()
+            composeRule.onNodeWithTag("happy_couple_number_${index + 1}").assertExists()
+        }
+        composeRule.onNodeWithTag("happy_couple_option_3").performClick()
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.waitForIdle()
+
+        assertEquals("4", pickedAnswer)
+        composeRule.onNodeWithTag("happy_couple_option_3_selected").assertExists()
+        composeRule.onNodeWithTag("harmony_happy_couple_question").captureRoboImage(
+            filePath = "build/harmony-image-choice-preview/happy-couple-question.png"
+        )
+    }
+
+    @Test
     fun `egg question renders all twelve source images`() {
         captureQuestion(
             packId = "essenreden",
