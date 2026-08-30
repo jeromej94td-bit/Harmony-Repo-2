@@ -46,7 +46,7 @@ class SkipExistingAnswerRegressionTest {
         activeRunFlow.value = ActivePackRun(
             pack = pack,
             currentIndex = 0,
-            currentAnswers = mapOf(0 to "A"),
+            currentAnswers = mutableMapOf(0 to "A"),
             isFinished = false
         )
 
@@ -58,16 +58,16 @@ class SkipExistingAnswerRegressionTest {
 
     @Test
     fun `skip path removes only current durable answer before recording skip`() {
-        val daoSource = source("app/src/main/java/com/example/data/db/AppDatabase.kt")
-        val repositorySource = source("app/src/main/java/com/example/data/repository/HarmonyRepository.kt")
-        val viewModelSource = source("app/src/main/java/com/example/ui/HarmonyViewModel.kt")
+        val persistenceSource = source("app/src/main/java/com/example/data/repository/AnswerSkipPersistence.kt")
         val skipSource = source("app/src/main/java/com/example/ui/HarmonyViewModelSkip.kt")
 
-        assertTrue(daoSource.contains("DELETE FROM answers WHERE packId = :packId AND questionIndex = :questionIndex"))
-        assertTrue(repositorySource.contains("suspend fun skipAnswer(packId: String, questionIndex: Int)"))
-        assertTrue(repositorySource.contains("db.answerDao().deleteAnswer(packId, questionIndex)"))
-        assertTrue(viewModelSource.contains("internal fun discardCurrentAnswerAndRecordSkip(questionIndex: Int)"))
-        assertTrue(skipSource.contains("discardCurrentAnswerAndRecordSkip(questionIndex)"))
+        assertTrue(persistenceSource.contains("suspend fun HarmonyDatabase.deleteAnswerForSkip"))
+        assertTrue(persistenceSource.contains("DELETE FROM answers WHERE packId = ? AND questionIndex = ?"))
+        assertTrue(persistenceSource.contains("runInTransaction"))
+        assertTrue(skipSource.contains("run.currentAnswers as? MutableMap<Int, String>"))
+        assertTrue(skipSource.contains("remove(questionIndex)"))
+        assertTrue(skipSource.contains("deleteAnswerForSkip(packId, questionIndex)"))
+        assertTrue(skipSource.contains("recordBrainSkip(packId, questionIndex)"))
     }
 
     private fun source(path: String): String {
