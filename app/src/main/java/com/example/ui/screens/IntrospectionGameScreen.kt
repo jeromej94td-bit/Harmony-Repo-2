@@ -419,6 +419,7 @@ fun IntrospectionExperienceScreen(
                         appLang = appLang,
                         isAnswerPlaying = isAnswerPlaying,
                         activeStage = activeAnswerStage,
+                        onBackRequest = { goBackOneQuestion() },
                         onPlayAnswer = { file, stage ->
                             if (isAnswerPlaying && activeAnswerStage == stage) {
                                 mediaController.stopAnswerAudio()
@@ -1132,6 +1133,7 @@ private fun ResultsScreen(
     appLang: AppLanguage,
     isAnswerPlaying: Boolean,
     activeStage: IntrospectionStage?,
+    onBackRequest: () -> Unit,
     onPlayAnswer: (File, IntrospectionStage) -> Unit,
     onRestart: () -> Unit,
     onFinish: () -> Unit
@@ -1143,6 +1145,27 @@ private fun ResultsScreen(
             .padding(horizontal = 22.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            IconButton(
+                onClick = onBackRequest,
+                modifier = Modifier.testTag("results_back_button")
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = IntrospectionStrings.tr(
+                        IntrospectionStringKey.BACK_BUTTON_CD,
+                        appLang
+                    ),
+                    tint = IntrospectionColors.PrimaryText
+                )
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+
         Text(
             text = IntrospectionConstants.WIZARD_EMOJI,
             fontSize = 40.sp
