@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -91,6 +93,23 @@ internal fun HarmonyHappyCoupleQuestion(
             .testTag("harmony_happy_couple_question"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(HarmonyPurple.copy(alpha = 0.46f))
+                .border(1.dp, HarmonyPink.copy(alpha = 0.50f), CircleShape)
+                .padding(horizontal = 18.dp, vertical = 7.dp)
+                .testTag("happy_couple_question_pill"),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "✦ ${tr("Frage 1 von 11", "Question 1 of 11")}",
+                color = HarmonyText,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = displayQuestion,
             color = HarmonyText,
@@ -207,6 +226,32 @@ private fun HarmonyHappyCoupleCard(
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp)
+                .size(46.dp)
+                .clip(CircleShape)
+                .background(
+                    if (selected) HarmonyPink.copy(alpha = 0.94f)
+                    else HarmonyBg.copy(alpha = 0.88f)
+                )
+                .border(
+                    width = if (selected) 2.dp else 1.4.dp,
+                    color = if (selected) Color.White else HarmonyPink.copy(alpha = 0.90f),
+                    shape = CircleShape
+                )
+                .testTag("happy_couple_number_$option"),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = option,
+                color = Color.White,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
 
         if (selected) {
             Box(
