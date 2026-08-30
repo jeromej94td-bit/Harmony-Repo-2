@@ -185,7 +185,7 @@ fun HarmonyApp(
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
     var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
     var liveChangeCount by remember { mutableStateOf(0) }
-    var resultsPackId by remember { mutableStateOf<String?>(null) }
+    var resultsPackId by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(memoryWidgetOpenRequest) {
         val request = memoryWidgetOpenRequest ?: return@LaunchedEffect
