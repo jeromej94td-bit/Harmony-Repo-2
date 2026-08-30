@@ -33,10 +33,7 @@ internal enum class HarmonyImageChoiceKind {
 
 internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
 
-private val HAPPY_COUPLE_PROMPTS = setOf(
-    LoveBalanceQuestionPolicy.QUESTION_TEXT,
-    "Was fällt dir in unserer Beziehung leichter?"
-)
+private val HAPPY_COUPLE_PROMPTS = setOf(LoveBalanceQuestionPolicy.QUESTION_TEXT)
 private const val EGG_PROMPT = "Wie möchtest du dein Ei am liebsten?"
 private const val STEAK_PROMPT = "Wie willst du dein Steak?"
 private const val TRAVEL_PROMPT = "Wie sieht deine Traumreise aus?"
