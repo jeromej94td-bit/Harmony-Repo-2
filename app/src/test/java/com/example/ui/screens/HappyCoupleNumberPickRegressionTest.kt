@@ -14,6 +14,7 @@ import com.example.data.model.Question
 import com.example.ui.components.AmbientBackground
 import com.example.ui.theme.HarmonyTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,6 +86,18 @@ class HappyCoupleNumberPickRegressionTest {
         assertEquals(
             HarmonyImageChoiceKind.HAPPY_COUPLE,
             harmonyImageChoiceKind(dynamicLikePack, 0)
+        )
+    }
+
+    @Test
+    fun `later love balance questions never reuse happy couple image renderer`() {
+        val pack = HarmonyPacksData.DEFAULT_PACKS.first {
+            it.id == LoveBalanceQuestionPolicy.PACK_ID
+        }
+
+        assertNotEquals(
+            HarmonyImageChoiceKind.HAPPY_COUPLE,
+            harmonyImageChoiceKind(pack, 1)
         )
     }
 }
