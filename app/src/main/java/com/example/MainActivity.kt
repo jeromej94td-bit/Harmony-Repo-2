@@ -180,7 +180,7 @@ fun HarmonyApp(
     var isPandaEitherOrOpen by rememberSaveable { mutableStateOf(false) }
     var isPandaExitConfirmOpen by rememberSaveable { mutableStateOf(false) }
     var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
-    var isEureMischungOpen by remember { mutableStateOf(false) }
+    var isEureMischungOpen by rememberSaveable { mutableStateOf(false) }
     var isKidGeneratorOpen by remember { mutableStateOf(false) }
     var isProposalExperienceOpen by rememberSaveable { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
