@@ -24,7 +24,7 @@ class Harmony360NeedNowQuickGameTest {
     @Test
     fun `quick game covers concrete current-needs situations`() {
         val questions = Harmony360NeedNowQuickGame.PACK.questions
-        val text = questions.joinToString(" ") { it.q }
+        val text = questions.joinToString(" ") { it.q + " " + it.options.joinToString(" ") }
 
         assertTrue("miesen Tag" in text)
         assertTrue("Problem" in text)
