@@ -980,7 +980,9 @@ fun QuizRunnerScreen(
                         val scrollState = rememberScrollState()
                         val isIntimacyPack = pack.id == "naehe" && pack.topic == "sex"
                         val questionAnimationKey = "${pack.id}_${activeRun.currentIndex}_question"
-                        val imageChoiceKind = harmonyImageChoiceKind(pack.id, activeRun.currentIndex)
+                        // Route from the pack that is actually running. Re-resolving only by id can
+                        // select stale or not-yet-synchronised content and fall back to generic options.
+                        val imageChoiceKind = harmonyImageChoiceKind(pack, activeRun.currentIndex)
                         val interactionSpec = q?.let {
                             QuestionInteractionPolicy.resolveSpec(pack, activeRun.currentIndex, it)
                         }
