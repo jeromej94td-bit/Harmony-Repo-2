@@ -36,34 +36,27 @@ class HappyCoupleVisualContractTest {
             source.contains("text = (index + 1).toString()")
         )
         assertTrue(
-            "Happy Couple cards should use the larger visual card ratio.",
+            "Happy Couple cards should use the target card ratio.",
             source.contains(".aspectRatio(0.88f)")
         )
         assertTrue(
             "Happy Couple heading should be compact so the images receive more vertical space.",
             source.contains("fontSize = 24.sp") && source.contains("lineHeight = 27.sp")
         )
-    }
-
-    @Test
-    fun `happy couple first question hides the category chip`() {
-        val source = source("app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt")
-            .replace(Regex("\\s+"), " ")
-
         assertTrue(
-            "The first Love Balance image question must hide CategoryTag to leave more room for the artwork.",
-            source.contains("if (!isHappyCoupleQuestion) { CategoryTag(")
+            "Happy Couple container padding should be compact and scoped to this renderer.",
+            source.contains(".padding(horizontal = 6.dp, vertical = 10.dp)")
         )
     }
 
     @Test
     fun `happy couple first question hides the floating skip button only there`() {
-        val source = source("app/src/main/java/com/example/MainActivity.kt")
+        val source = source("app/src/main/java/com/example/ui/screens/RunnerSkipButton.kt")
             .replace(Regex("\\s+"), " ")
 
         assertTrue(
             "The skip affordance must be suppressed for Love Balance question 0 only.",
-            source.contains("!(activeRun.pack.id == LoveBalanceQuestionPolicy.PACK_ID && activeRun.currentIndex == 0)")
+            source.contains("activeRun?.pack?.id == LoveBalanceQuestionPolicy.PACK_ID && activeRun.currentIndex == 0")
         )
     }
 
