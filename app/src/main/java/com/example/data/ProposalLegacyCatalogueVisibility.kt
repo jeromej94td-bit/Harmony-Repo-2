@@ -1,6 +1,8 @@
 package com.example.data
 
+import com.example.data.model.HarmonyPacksData
 import com.example.data.model.ProposalLegacyContentInventory
+import com.example.data.model.QuestionPack
 
 /**
  * Stage 04.3 controls presentation only.
@@ -33,3 +35,9 @@ object ProposalLegacyCatalogueVisibility {
         }
     }
 }
+
+/**
+ * User-facing catalogue view. `HarmonyPacksData.PACKS` deliberately stays complete.
+ */
+val HarmonyPacksData.CATALOG_PACKS: List<QuestionPack>
+    get() = PACKS.filter { pack -> ProposalLegacyCatalogueVisibility.isVisible(pack.id) }
