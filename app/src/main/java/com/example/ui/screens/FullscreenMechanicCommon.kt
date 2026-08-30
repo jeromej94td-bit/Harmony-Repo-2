@@ -95,14 +95,8 @@ internal fun FullscreenMechanicShell(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp
     val compact = screenHeight < 700
-    val reservedChrome = when {
-        screenHeight < 600 -> 96
-        compact -> 118
-        else -> 150
-    }
-    // Never force a stage taller than the usable phone viewport. The old 560dp
-    // minimum made compact phones scroll even when a question only had four answers.
-    val stageHeight = (screenHeight - reservedChrome).coerceIn(360, 720).dp
+    // Keep the stage inside the usable viewport even on landscape/short displays.
+    val stageHeight = FullscreenMechanicStageHeightPolicy.stageHeightDp(screenHeight).dp
     val shape = RoundedCornerShape(if (compact) 26.dp else 30.dp)
     val horizontalPadding = if (compact) 14.dp else 18.dp
     val verticalPadding = if (compact) 12.dp else 18.dp
