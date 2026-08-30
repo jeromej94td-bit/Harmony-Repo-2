@@ -58,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,12 +117,13 @@ fun IntrospectionExperienceScreen(
     val mediaController = remember { IntrospectionMediaController(context, coroutineScope) }
 
     var progress by remember { mutableStateOf(store.load()) }
-    var screenState by remember { mutableStateOf(ScreenState.ENTRY) }
-    var showIntroVideo by remember { mutableStateOf(false) }
+    var screenStateName by rememberSaveable { mutableStateOf(ScreenState.ENTRY.name) }
+    val screenState = ScreenState.valueOf(screenStateName)
+    var showIntroVideo by rememberSaveable { mutableStateOf(false) }
 
-    var showContinueDialog by remember { mutableStateOf(false) }
-    var showLeaveDialog by remember { mutableStateOf(false) }
-    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
+    var showContinueDialog by rememberSaveable { mutableStateOf(false) }
+    var showLeaveDialog by rememberSaveable { mutableStateOf(false) }
+    var showPermissionSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     // Media states
     val isNarratorPlaying by mediaController.isNarratorPlaying.collectAsState()
@@ -133,10 +135,12 @@ fun IntrospectionExperienceScreen(
     val mediaErrorMessage by mediaController.errorMessage.collectAsState()
 
     // Question input local states
-    var inputMode by remember { mutableStateOf("text") } // "text" or "voice"
-    var currentTextAnswer by remember { mutableStateOf("") }
-    var currentRecordedFile by remember { mutableStateOf<File?>(null) }
-    var permissionDeniedMessage by remember { mutableStateOf<String?>(null) }
+    var inputMode by rememberSaveable { mutableStateOf("text") } // "text" or "voice"
+    var currentTextAnswer by rememberSaveable { mutableStateOf("") }
+    var currentRecordedFilePath by rememberSaveable { mutableStateOf<String?>(null) }
+    var draftStageName by rememberSaveable { mutableStateOf<String?>(null) }
+    var permissionDeniedMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    val currentRecordedFile = currentRecordedFilePath?.let { File(it) }
 
     val combinedErrorMessage = permissionDeniedMessage ?: mediaErrorMessage
 
@@ -155,9 +159,10 @@ fun IntrospectionExperienceScreen(
         if (isGranted) {
             permissionDeniedMessage = null
             val targetFile = store.recordingFile(progress.stage)
-            currentRecordedFile = targetFile
+            draftStageName = progress.stage.name
+            currentRecordedFilePath = targetFile.absolutePath
             mediaController.startRecording(targetFile) { completedFile ->
-                currentRecordedFile = completedFile
+                currentRecordedFilePath = completedFile.absolutePath
             }
         } else {
             permissionDeniedMessage = IntrospectionStrings.tr(
@@ -181,24 +186,31 @@ fun IntrospectionExperienceScreen(
         if (showIntroVideo) {
             mediaController.stopNarrator()
         } else if (screenState == ScreenState.QUESTION && progress.stage.isQuestion) {
-            // Preload existing text/audio for stage if any
-            when (val existing = progress.answers[progress.stage]) {
-                is IntrospectionAnswer.Text -> {
-                    currentTextAnswer = existing.value
-                    inputMode = "text"
-                }
-                is IntrospectionAnswer.Audio -> {
-                    val file = File(existing.filePath)
-                    if (file.exists() && file.isFile) {
-                        currentRecordedFile = file
-                        inputMode = "voice"
+            // Preserve an unsent draft restored by rememberSaveable. Only preload the
+            // durable answer when entering a stage without a local draft for that stage.
+            val hasDraftForCurrentStage = draftStageName == progress.stage.name
+            if (!hasDraftForCurrentStage) {
+                when (val existing = progress.answers[progress.stage]) {
+                    is IntrospectionAnswer.Text -> {
+                        currentTextAnswer = existing.value
+                        currentRecordedFilePath = null
+                        inputMode = "text"
+                    }
+                    is IntrospectionAnswer.Audio -> {
+                        val file = File(existing.filePath)
+                        if (file.exists() && file.isFile) {
+                            currentTextAnswer = ""
+                            currentRecordedFilePath = file.absolutePath
+                            inputMode = "voice"
+                        }
+                    }
+                    null -> {
+                        currentTextAnswer = ""
+                        currentRecordedFilePath = null
+                        inputMode = "text"
                     }
                 }
-                null -> {
-                    currentTextAnswer = ""
-                    currentRecordedFile = null
-                    inputMode = "text"
-                }
+                draftStageName = progress.stage.name
             }
             mediaController.playNarratorForStage(progress.stage)
         } else if (screenState == ScreenState.REVELATION) {
@@ -207,7 +219,7 @@ fun IntrospectionExperienceScreen(
                 val completedProgress = progress.finishRevelation()
                 progress = completedProgress
                 store.save(completedProgress)
-                screenState = ScreenState.RESULTS
+                screenStateName = ScreenState.RESULTS.name
             }
         }
     }
@@ -215,19 +227,20 @@ fun IntrospectionExperienceScreen(
     fun beginNewRun() {
         progress = store.clear()
         currentTextAnswer = ""
-        currentRecordedFile = null
+        currentRecordedFilePath = null
+        draftStageName = null
         inputMode = "text"
         mediaController.stopNarrator()
         mediaController.stopAnswerAudio()
         mediaController.pauseBackgroundMusic()
         showIntroVideo = true
-        screenState = ScreenState.QUESTION
+        screenStateName = ScreenState.QUESTION.name
     }
 
     fun continueExistingRun() {
-        screenState = if (progress.completed) ScreenState.RESULTS
-        else if (progress.stage == IntrospectionStage.REVELATION) ScreenState.REVELATION
-        else ScreenState.QUESTION
+        screenStateName = if (progress.completed) ScreenState.RESULTS.name
+        else if (progress.stage == IntrospectionStage.REVELATION) ScreenState.REVELATION.name
+        else ScreenState.QUESTION.name
         mediaController.stopNarrator()
         mediaController.stopAnswerAudio()
         mediaController.pauseBackgroundMusic()
@@ -254,9 +267,13 @@ fun IntrospectionExperienceScreen(
             completed = false,
             updatedAt = System.currentTimeMillis()
         )
+        currentTextAnswer = ""
+        currentRecordedFilePath = null
+        draftStageName = null
+        inputMode = "text"
         progress = previousProgress
         store.save(previousProgress)
-        screenState = ScreenState.QUESTION
+        screenStateName = ScreenState.QUESTION.name
     }
 
     fun submitCurrentAnswer() {
@@ -280,11 +297,12 @@ fun IntrospectionExperienceScreen(
         store.save(nextProgress)
 
         currentTextAnswer = ""
-        currentRecordedFile = null
+        currentRecordedFilePath = null
+        draftStageName = null
         inputMode = "text"
 
         if (nextProgress.stage == IntrospectionStage.REVELATION) {
-            screenState = ScreenState.REVELATION
+            screenStateName = ScreenState.REVELATION.name
         }
     }
 
@@ -334,10 +352,12 @@ fun IntrospectionExperienceScreen(
                         errorMessage = combinedErrorMessage,
                         onInputModeChange = {
                             inputMode = it
+                            draftStageName = progress.stage.name
                             mediaController.clearErrorMessage()
                         },
                         onTextChange = {
                             currentTextAnswer = it
+                            draftStageName = progress.stage.name
                             if (mediaErrorMessage != null) mediaController.clearErrorMessage()
                         },
                         onReplayNarrator = {
@@ -355,9 +375,10 @@ fun IntrospectionExperienceScreen(
                             ) {
                                 permissionDeniedMessage = null
                                 val targetFile = store.recordingFile(progress.stage)
-                                currentRecordedFile = targetFile
+                                draftStageName = progress.stage.name
+                                currentRecordedFilePath = targetFile.absolutePath
                                 mediaController.startRecording(targetFile) { file ->
-                                    currentRecordedFile = file
+                                    currentRecordedFilePath = file.absolutePath
                                 }
                             } else {
                                 permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -368,7 +389,8 @@ fun IntrospectionExperienceScreen(
                         },
                         onDiscardRecord = {
                             mediaController.discardRecording(currentRecordedFile)
-                            currentRecordedFile = null
+                            currentRecordedFilePath = null
+                            draftStageName = progress.stage.name
                         },
                         onPlayPauseAudio = {
                             currentRecordedFile?.let { file ->
