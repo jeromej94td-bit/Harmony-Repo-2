@@ -34,28 +34,31 @@ class Harmony360SectionTopicSortingTest {
     }
 
     @Test
-    fun `everyday home topics leave Beziehung when another visible topic fits better`() {
+    fun `alltag und zuhause is routed from its real section ids`() {
         val sorted = Harmony360SectionTopicSorting.apply(
             GeneratedHarmonyAdrenaline360Section06AlltagZuhause.PACKS
         ).associateBy { it.id }
 
         listOf(
-            "h500_126_morgenroutine_entweder_oder",
-            "h500_127_haushalt_wer_eher",
-            "h500_128_ordnung_und_sauberkeit_skala",
-            "h500_129_aufgabenverteilung_ranking",
-            "h500_132_wohnstil_memory",
-            "h500_134_einkaufen_wer_eher",
-            "h500_135_wochenplanung_ranking",
-            "h500_136_zeitmanagement_prognose"
+            "h500_126_morgenroutine_szenario",
+            "h500_127_abendroutine_geheime_wahl",
+            "h500_128_haushalt_memory",
+            "h500_129_ordnung_prioritaet",
+            "h500_132_einkaufen_wer_eher",
+            "h500_134_schlafen_ranking",
+            "h500_135_homeoffice_prognose",
+            "h500_136_dekoration_szenario",
+            "h500_138_haustiere_memory",
+            "h500_139_besuch_bekommen_prioritaet",
+            "h500_143_gemeinsame_to_do_liste_skala",
+            "h500_144_technik_zuhause_ranking",
+            "h500_148_wohnzimmer_memory",
+            "h500_149_balkon_prioritaet"
         ).forEach { id -> assertEquals("kennen", sorted.getValue(id).topic) }
         assertEquals("essen", sorted.getValue("h500_133_kochen_im_alltag_skala").topic)
-        assertEquals("familie", sorted.getValue("h500_138_putzen_entweder_oder").topic)
-        listOf(
-            "h500_141_wochenende_entweder_oder",
-            "h500_142_ausschlafen_wer_eher",
-            "h500_144_feierabend_ranking"
-        ).forEach { id -> assertEquals("hobbys", sorted.getValue(id).topic) }
+        assertEquals("hobbys", sorted.getValue("h500_141_sonntage_entweder_oder").topic)
+        assertEquals("hobbys", sorted.getValue("h500_142_feierabend_wer_eher").topic)
+        assertEquals("beziehung", sorted.getValue("h500_150_unser_gemuetlichster_abend_offene_runde").topic)
     }
 
     @Test
@@ -76,7 +79,7 @@ class Harmony360SectionTopicSortingTest {
         listOf(
             "h500_254_kompromisse_ranking",
             "h500_257_geheimnisse_geheime_wahl",
-            "h500_260_ehrlichkeit_entweder_oder"
+            "h500_260_ehrlichkeit_offene_runde"
         ).forEach { id -> assertEquals("moral", sorted.getValue(id).topic) }
 
         listOf(
