@@ -45,7 +45,7 @@ class Harmony360Stage054HealthFitnessCurationTest {
     }
 
     @Test
-    fun `health curation keeps canonical ids and exactly six concrete questions per survivor`() {
+    fun `health curation keeps canonical ids and exactly six concrete questions per survivor before scenario finalization`() {
         val curated = Harmony360HealthFitnessSectionCuration.apply(raw)
         assertEquals(canonicalIds, curated.map { it.id })
         assertTrue(curated.none { it.id in archivedIds })
@@ -90,13 +90,16 @@ class Harmony360Stage054HealthFitnessCurationTest {
     }
 
     @Test
-    fun `runtime registry exposes only canonical health packs with final topic routing`() {
+    fun `runtime registry exposes canonical health packs with final topic and scenario routing`() {
         val runtime = GeneratedHarmonyAdrenaline360.PACKS.filter {
             "h360_section_11_gesundheit_fitness" in it.tags
         }
         assertEquals(canonicalIds, runtime.map { it.id })
         assertTrue(runtime.none { it.id in archivedIds })
-        assertTrue(runtime.all { it.questions.size == 6 })
+        runtime.forEach { pack ->
+            val isScenario = pack.cat == "h360_szenario" || "mechanik_szenario" in pack.tags
+            assertEquals(if (isScenario) 8 else 6, pack.questions.size)
+        }
 
         assertEquals("essen", runtime.single { it.id == "h500_231_ernaehrung_entweder_oder" }.topic)
         assertEquals("hobbys", runtime.single { it.id == "h500_236_sportliche_ziele_szenario" }.topic)
