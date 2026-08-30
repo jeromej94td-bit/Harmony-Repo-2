@@ -2,11 +2,11 @@
 
 **Purpose:** append-only package ledger for the parallel Stage-05 content-quality track.  
 **Stage:** 05 — Harmony-360 Questions Quality Rework  
-**Current verified substage after 25.26:** 05.5 complete  
+**Current verified substage after 25.28:** 05.5 complete with post-audit Teamwork/Mutprobe correction  
 **Stage-05 progress:** **5/5 = 100%**  
 **Next:** none — reopen only for a demonstrated content regression
 
-This file supplements `360_REWORK_WORKLOG.md` with the dedicated 25.x package history.
+This file supplements `360_REWORK_WORKLOG.md` with the dedicated 25.x package history. Historical package entries remain intact; later corrective packages explicitly supersede earlier counts where noted.
 
 ## 25.0 — Stage 05.1 approved design and plan
 - PR #59; branch `360-rework/25-0-stage-05-1-spec-plan`; merge `648a1898bb1bbb602d8013cb7d9f287509846318`.
@@ -166,25 +166,45 @@ All four target sections now use explicit stable-ID curation with concrete subje
 - 18 raw packs reduced to 10 distinct rewritten games; 8 redundant/generic packs archived.
 - Humor, irony, teasing and dark-humor prompts include explicit respect/boundary logic; Peinliche Momente remains an eight-decision scenario.
 
-## 25.25 / 05.5c — Teamwork & Challenge
+## 25.25 / 05.5c — Teamwork & Challenge — historical initial pass
 - PR #166; merge `721f33a9e11a010d674b5e39c67710ca64c4ca9b`.
-- 18 raw packs reduced to 14 distinct rewritten games; 4 overlaps archived.
-- English ranking residue, literal User/Partner leftovers and the named reality-TV reference were removed; Escape Room and Notfallplan contain eight explicit decisions.
+- Historical state at merge time: 18 raw packs, 14 rewritten games and 4 archives.
+- English ranking residue, literal User/Partner leftovers and the named reality-TV reference were removed; Escape Room and Notfallplan contained eight explicit decisions.
+- **This 14/4 decision ledger was later superseded by 25.28 after the approved re-home-before-archive correction.**
 
-## 25.26 / 05.5d — Final Stage 05.5 audit
+## 25.26 / 05.5d — Original final Stage 05.5 audit — superseded counts
 - PR #169; merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`.
-- Final 05.5 inventory: 108 raw packs, 53 visible survivors, 55 archives.
-- Gate protects archive visibility, visible taxonomy, known generator residue, exact scenario lengths and ordinary four-option sets copied across three or more packs.
-- Negative fixture injects the same four options into three final packs and requires a reuse violation.
-- On merge: Stage 05.5 complete; Stage 05 = **5/5 = 100%**.
+- Historical audit baseline counted 108 raw packs, 53 visible survivors and 55 archives.
+- Gate protected archive visibility, visible taxonomy, known generator residue, exact scenario lengths and ordinary four-option sets copied across three or more packs.
+- Negative fixture injected the same four options into three final packs and required a reuse violation.
+- Stage 05.5 and Stage 05 remained complete; **only the detailed Teamwork/05.5 accounting was later corrected by 25.28.**
 
-## 25.27 — Final Stage-05 tracker sync
-- Documentation-only package after the actual 25.26 merge.
-- Synchronizes `360_REWORK_CURRENT_STATE.md`, this append-only worklog and `360_REWORK_STAGE05_FINAL.md` to the merged 5/5 state.
-- Does not alter runtime content or count toward another core stage.
+## 25.27 — Final Stage-05 tracker sync — historical pre-correction docs
+- Documentation-only package after the 25.26 merge.
+- Synchronized `360_REWORK_CURRENT_STATE.md`, this append-only worklog and `360_REWORK_STAGE05_FINAL.md` to the then-current 5/5 state.
+- Its 53/55 and 14-Teamwork figures are historical and superseded by 25.28/25.29.
+
+## 25.28 — Teamwork/Mutprobe redistribution correction — authoritative
+- PR #178; merge `5e309627ec495bae4031173938b6ef8fea45bc8b`.
+- Corrected Section 20 to the explicitly approved ledger: **12 REWRITE / 5 ARCHIVE / 1 MERGE**.
+- Visible Teamwork packs: 411 Zusammenhalt, 412 Krisenmodus, 413 Teamgeist, 414 Rollenverteilung, 416 Escape Room, 417 Geheimes Paar-Ziel, 418 Größter Triumph, 419 Paar-Challenge, 421 Wettbewerb, 425 Gemeinsamer Sieg, 426 Notfallplan, 430 Team Zukunft.
+- Genuine Teamwork archives: 415 Blindes Vertrauen, 420 Unschlagbar als Team, 423 Durchhaltevermögen, 424 Unsere Stärken, 427 Mutiger Traum.
+- `h500_422_mutprobe_wer_eher` is **MERGE**, not ARCHIVE: its useful ideas are redistributed into existing Reise-, Essen-, Moral-, Kennenlernen- and Teamwork-Packs before the mixed source is removed from runtime.
+- Destination mapping: Bungee/Fallschirm + kaltes Wasser → `h500_085_abenteuerurlaub_prognose`; falsches Essen → `h500_119_restaurantwahl_prioritaet`; unbekannte Reisegerichte → `h500_103_streetfood_skala`; Ungerechtigkeit → `h500_340_gerechtigkeit_offene_runde`; spontane Rede + Alltagsmut → `h500_272_charaktereigenschaften_wer_eher`; Komfortzone ohne Druck → `h500_413_teamgeist_skala`.
+- `Harmony360Stage055FinalAudit` now distinguishes **51 visible / 56 genuine archives / 1 merged source** across the same 108 raw Stage-05.5 packs.
+- Focused TDD evidence: old 14-rewrite state failed the correction contract; final focused Kotlin harness reported `STAGE055_MUTPROBE_CORRECTION_PASS`.
+- `.agents/skills/repo-sorting/SKILL.md` now permanently codifies **re-home before archive**, Source→Destination mapping and `MERGE` semantics for mixed useful packs.
+- Repository Actions still failed before executable test steps (`steps=null`), so no full Gradle/JUnit green is claimed.
+
+## 25.29 — Post-correction tracker reconciliation
+- Documentation-only package created after 25.28.
+- Keeps 25.25–25.27 as historical evidence rather than rewriting history.
+- Makes the authoritative final 05.5 accounting explicit in Current State, Stage-05 Final and this worklog: **108 raw / 51 visible / 56 archived / 1 merged source**.
 
 ## Stage 05 completion summary
 
-Stage 05 is complete at **5/5 = 100%**. Raw generated sections remain available for traceability, while stable-ID curation removes confirmed filler and replaces generic noun-substitution content with subject-specific questions. Final regression gates protect archive decisions, the existing visible topic taxonomy, eight-step fullscreen scenarios, known generator wording/answer quartets and cross-pack option-copy regressions.
+Stage 05 remains complete at **5/5 = 100%**. The corrected final 05.5 accounting is **108 raw / 51 visible / 56 genuine archives / 1 merged source**. Raw generated sections remain available for traceability, while stable-ID curation removes confirmed filler and replaces generic noun-substitution content with subject-specific questions.
+
+The permanent sorting rule is now explicit: useful content is **re-homed or merged before archive**. A mixed source pack is not discarded merely because its questions span different real topics; useful questions are moved into existing destination packs and the source is recorded as `MERGE` when appropriate.
 
 Do not reopen Stage 05 for new feature work. Reopen only when a concrete content regression is demonstrated. Remaining 360 Rework work belongs to other core stages, reusable experience-engine work or infrastructure verification.
