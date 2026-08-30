@@ -9,11 +9,11 @@ Dieser Branch dient als Sammelstelle für Features, Ideen und Zwischenstände, d
 - Wenn bereits Code auf einem separaten Arbeitsbranch existiert, Branch und Commit hier referenzieren, damit nichts verloren geht.
 - Bei Wiederaufnahme zuerst gegen den dann aktuellen `main` neu aufsetzen bzw. rebasen und anschließend normal über einen eigenen PR prüfen.
 
-## 1. Baby-/Kid-Generator / „Eure Mischung“
+## 1. Baby-/Kid-Generator
 
 **Status:** PAUSED
 
-**Entscheidung:** Der Baby-/Kid-Generator wird vorerst nicht weiterentwickelt und nicht in den produktiven Harmony-Stand gemergt.
+**Entscheidung:** Der ältere Baby-/Kid-Generator-Zwischenstand wird vorerst nicht weiterentwickelt.
 
 **Vorhandener Zwischenstand:**
 - Arbeitsbranch: `fix/generated-moment-image-persistence`
@@ -25,12 +25,35 @@ Dieser Branch dient als Sammelstelle für Features, Ideen und Zwischenstände, d
 - MainActivity-Verdrahtung für Bildpfad und Emoji noch nicht vollständig abgeschlossen
 - Zwischenstand liegt hinter dem aktuellen `main` und darf nicht direkt gemergt werden
 
+## 2. „Eure Mischung“
+
+**Status:** PAUSED / AUS PRODUKTIVEM APP-PFAD ENTFERNT
+
+**Entscheidung:** „Eure Mischung“ wird aus der aktiven App genommen, der letzte vollständige Stand aber separat konserviert.
+
+**Vollständiges Archiv:** `unfinished/eure-mischung/`
+
+**Archivierte Quelle:**
+- Arbeitsbranch: `fix/eure-mischung-state-restoration`
+- Head: `309804ee7f718b3f524a72206c0edbd938dc2458`
+- PR #195: State-/Rotationsfix, bewusst nicht in `main` gemergt
+
+**Im Archiv enthalten:**
+- vollständiger `EureMischungScreen`
+- letzter `EureMischungSessionState`
+- State-Restoration-Regressionstest
+- Snapshot der zu diesem Stand verwendeten `GeminiImageService`
+- Wiederaufnahme-Dokumentation
+
+**Wichtig:** Die produktive `GeminiImageService` wird nicht zusammen mit „Eure Mischung“ gelöscht, weil der separate KidGenerator diese gemeinsame technische Abhängigkeit weiterhin verwendet.
+
 **Wiederaufnahme:**
 1. aktuellen `main` prüfen
 2. neuen Arbeitsbranch aus aktuellem `main` erstellen
-3. nur die noch sinnvollen Teile aus dem alten Zwischenstand übernehmen
-4. Generator-Flow vollständig testen
-5. erst danach neuen PR erstellen
+3. Dateien selektiv aus `unfinished/eure-mischung/` übernehmen
+4. Home-/MainActivity-Einstieg neu gegen den aktuellen Stand verdrahten
+5. Generator- und State-Restoration-Flow vollständig testen
+6. erst danach einen neuen Freigabe-PR erstellen
 
 ---
 
