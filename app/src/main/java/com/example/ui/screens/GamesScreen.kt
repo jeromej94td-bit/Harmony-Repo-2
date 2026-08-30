@@ -74,6 +74,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.CATALOG_PACKS
 import com.example.data.brain.db.BrainGeneratedContentEntity
 import com.example.data.brain.model.GeneratedGamePayload
 import com.example.data.model.AnswerEntity
@@ -131,7 +132,7 @@ fun GamesScreen(
     // Filter search results over title, category, topic, tags, questions, and option choices
     val trimmedQuery = searchQuery.trim().lowercase()
     val searchResults = if (trimmedQuery.isNotEmpty()) {
-        HarmonyPacksData.PACKS.filter { pack ->
+        HarmonyPacksData.CATALOG_PACKS.filter { pack ->
             val matchesTitle = pack.title.lowercase().contains(trimmedQuery)
 
             val catObj = HarmonyPacksData.CATEGORIES.find { it.id == pack.cat }
@@ -507,7 +508,7 @@ fun GamesScreen(
             }
 
             items(items = HarmonyPacksData.TOPICS, key = { it.id }) { topic ->
-                val packsForTopic = HarmonyPacksData.PACKS.filter { it.topic == topic.id }
+                val packsForTopic = HarmonyPacksData.CATALOG_PACKS.filter { it.topic == topic.id }
                 val donePacksCount = packsForTopic.count { pack ->
                     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
                     val ansCount = answerCounts[pack.id] ?: 0
@@ -615,7 +616,7 @@ private fun UnansweredQuestionsDialog(
 ) {
     val unanswered = remember(answers, appLanguage) {
         val answeredKeys = answers.mapTo(hashSetOf()) { it.packId to it.questionIndex }
-        HarmonyPacksData.PACKS.flatMap { rawPack ->
+        HarmonyPacksData.CATALOG_PACKS.flatMap { rawPack ->
             val pack = LanguageManager.translatePack(rawPack, appLanguage)
             val category = HarmonyPacksData.CATEGORIES
                 .firstOrNull { it.id == rawPack.cat }
