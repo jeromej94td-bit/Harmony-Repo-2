@@ -18,16 +18,16 @@ object Harmony360TeamworkSectionCuration {
         "h500_412_krisenmodus_wer_eher" to CurationDecision.REWRITE,
         "h500_413_teamgeist_skala" to CurationDecision.REWRITE,
         "h500_414_rollenverteilung_ranking" to CurationDecision.REWRITE,
-        "h500_415_blindes_vertrauen_prognose" to CurationDecision.REWRITE,
+        "h500_415_blindes_vertrauen_prognose" to CurationDecision.ARCHIVE,
         "h500_416_escape_room_szenario" to CurationDecision.REWRITE,
-        "h500_417_geheimes_ziel_geheime_wahl" to CurationDecision.ARCHIVE,
+        "h500_417_geheimes_ziel_geheime_wahl" to CurationDecision.REWRITE,
         "h500_418_groesster_triumph_memory" to CurationDecision.REWRITE,
-        "h500_419_paarchallenge_prioritaet" to CurationDecision.ARCHIVE,
-        "h500_420_unschlagbar_offene_runde" to CurationDecision.REWRITE,
+        "h500_419_paarchallenge_prioritaet" to CurationDecision.REWRITE,
+        "h500_420_unschlagbar_offene_runde" to CurationDecision.ARCHIVE,
         "h500_421_wettbewerb_entweder_oder" to CurationDecision.REWRITE,
-        "h500_422_mutprobe_wer_eher" to CurationDecision.REWRITE,
+        "h500_422_mutprobe_wer_eher" to CurationDecision.MERGE,
         "h500_423_durchhaltevermoegen_skala" to CurationDecision.ARCHIVE,
-        "h500_424_staerken_ranking" to CurationDecision.REWRITE,
+        "h500_424_staerken_ranking" to CurationDecision.ARCHIVE,
         "h500_425_gemeinsamer_sieg_prognose" to CurationDecision.REWRITE,
         "h500_426_notfallplan_szenario" to CurationDecision.REWRITE,
         "h500_427_mutiger_traum_geheime_wahl" to CurationDecision.ARCHIVE,
@@ -57,7 +57,7 @@ object Harmony360TeamworkSectionCuration {
             q("Wie leicht kannst du deinem Partner bei einer gemeinsamen Aufgabe Verantwortung überlassen?", "1 – sehr schwer", "2", "3", "4", "5 – sehr leicht"),
             q("Wie gut könnt ihr unterschiedliche Arbeitsweisen nutzen, statt euch daran zu reiben?", "1 – kaum", "2", "3", "4", "5 – sehr gut"),
             q("Wie fair fühlt sich eure Aufgabenteilung in stressigen Phasen an?", "1 – unfair", "2", "3", "4", "5 – sehr fair"),
-            q("Wie gut findet ihr nach einem Rückschlag wieder in einen gemeinsamen Modus?", "1 – schwer", "2", "3", "4", "5 – sehr gut")
+            q("Wie gut ermutigt ihr euch, eine selbstgewählte Komfortzone zu verlassen, ohne Druck aufzubauen?", "1 – gar nicht", "2", "3", "4", "5 – sehr gut")
         ),
         "h500_414_rollenverteilung_ranking" to listOf(
             q("Welche Rolle ist bei gemeinsamen Projekten für euch am wichtigsten? Ordne.", "Ideen entwickeln", "Plan strukturieren", "Umsetzung vorantreiben", "Ergebnis prüfen"),
@@ -66,14 +66,6 @@ object Harmony360TeamworkSectionCuration {
             q("Was verhindert am ehesten Streit über Zuständigkeiten? Ordne.", "Vorher absprechen", "Zwischendurch nachjustieren", "Hilfe aktiv anbieten", "Probleme früh ansprechen"),
             q("Was sollte passieren, wenn einer dauerhaft mehr übernimmt? Ordne.", "Belastung sichtbar machen", "Aufgaben neu verteilen", "Standards vereinfachen", "Nach Unterstützung suchen"),
             q("Was macht Rollen als Paar langfristig gesund? Ordne.", "Keine Rolle ist festgeschrieben", "Beide werden gesehen", "Verantwortung bleibt gemeinsam", "Jeder darf Nein sagen")
-        ),
-        "h500_415_blindes_vertrauen_prognose" to listOf(
-            q("Was würde dein Partner dir vermutlich am ehesten komplett überlassen?", "Eine Tagesplanung", "Eine wichtige Reservierung", "Die Navigation auf einer Reise", "Eine gemeinsame Überraschung"),
-            q("Wann würde dein Partner bei einer Entscheidung eher sagen: Ich vertraue dir?", "Wenn du mehr Erfahrung hast", "Wenn die Folgen überschaubar sind", "Wenn ihr vorher Grenzen geklärt habt", "Wenn er deine Absicht versteht"),
-            q("Was braucht dein Partner vermutlich, um Kontrolle leichter abzugeben?", "Klare Absprachen", "Transparenz", "Eine Rückfragemöglichkeit", "Gute Erfahrungen aus der Vergangenheit"),
-            q("Woran würde dein Partner Vertrauen am stärksten erkennen?", "Du hältst Zusagen ein", "Du sagst Fehler ehrlich", "Du respektierst Grenzen", "Du bist auch unter Druck verlässlich"),
-            q("Was würde dein Partner bei einer riskanteren gemeinsamen Entscheidung eher bevorzugen?", "Gemeinsam entscheiden", "Einer führt, der andere prüft", "Erst Informationen sammeln", "Kleine Testentscheidung zuerst"),
-            q("Welche Form von Vertrauen wäre deinem Partner vermutlich wichtiger als 'blindes' Vertrauen?", "Nachfragen dürfen", "Ehrlich widersprechen dürfen", "Sich aufeinander verlassen können", "Fehler ohne Angst ansprechen können")
         ),
         "h500_416_escape_room_szenario" to listOf(
             q("Ihr betretet einen Escape Room und der Raum ist voller Hinweise. Wie startet ihr?", "Raum systematisch aufteilen", "Gemeinsam zuerst alles ansehen", "Gefundene Hinweise laut sammeln", "Direkt das auffälligste Rätsel lösen"),
@@ -85,6 +77,14 @@ object Harmony360TeamworkSectionCuration {
             q("Ihr löst das letzte Rätsel in letzter Minute. Was war wahrscheinlich eure größte Stärke?", "Gute Kommunikation", "Arbeitsteilung", "Hartnäckigkeit", "Unterschiedliche Denkweisen"),
             q("Nach dem Spiel wollt ihr besser werden. Was besprecht ihr zuerst?", "Wo ihr Zeit verloren habt", "Welche Rollen gut funktioniert haben", "Wann ihr zu wenig zugehört habt", "Was besonders Spaß gemacht hat")
         ),
+        "h500_417_geheimes_ziel_geheime_wahl" to listOf(
+            q("Welches gemeinsame Ziel würdest du heimlich am liebsten als Nächstes anstoßen?", "Eine besondere Reise", "Ein gemeinsames Projekt", "Eine neue Fähigkeit lernen", "Unseren Alltag spürbar verbessern"),
+            q("Welche gemeinsame Fähigkeit würdest du mit deinem Partner gern entwickeln?", "Besser planen", "Gelassener improvisieren", "Konsequenter Ziele verfolgen", "Noch klarer kommunizieren"),
+            q("Wo wünschst du dir insgeheim mehr echtes Teamwork?", "Bei Alltagsorganisation", "Bei großen Entscheidungen", "Bei persönlichen Zielen", "Bei gemeinsamer Freizeit"),
+            q("Welches Projekt würde euch als Team wahrscheinlich besonders wachsen lassen?", "Etwas gemeinsam bauen oder gestalten", "Eine längere Reise planen", "Ein neues Hobby meistern", "Für ein gemeinsames Ziel sparen"),
+            q("Was würdest du gern einmal gemeinsam schaffen, nur um später stolz darauf zurückzuschauen?", "Eine schwierige Challenge", "Ein Herzensprojekt", "Eine große Veränderung", "Eine gemeinsame Tradition aufbauen"),
+            q("Was sollte bei einem gemeinsamen Ziel immer erhalten bleiben?", "Freiwilligkeit", "Eigene Wünsche", "Humor", "Faire Verantwortung")
+        ),
         "h500_418_groesster_triumph_memory" to listOf(
             open("Welche schwierige Situation habt ihr gemeinsam besser gemeistert, als du vorher erwartet hattest?"),
             open("Auf welches gemeinsame Projekt oder Ziel bist du als Paar besonders stolz?"),
@@ -93,13 +93,13 @@ object Harmony360TeamworkSectionCuration {
             open("Wann habt ihr euch nach einer gemeinsamen Anstrengung richtig als Team gefühlt?"),
             open("Welchen nächsten gemeinsamen Erfolg würdest du besonders gern mit deinem Partner feiern?")
         ),
-        "h500_420_unschlagbar_offene_runde" to listOf(
-            open("In welchen Situationen ergänzt ihr euch als Team besonders gut?"),
-            open("Welche Stärke deines Partners gleicht eine deiner Schwächen im Alltag am besten aus?"),
-            open("Wo funktioniert euer Teamwork noch nicht so gut, wie es eigentlich könnte?"),
-            open("Wie möchtest du angesprochen werden, wenn du in einem gemeinsamen Projekt gerade nicht genug beiträgst?"),
-            open("Welche Entscheidung habt ihr als Team besser getroffen, weil ihr unterschiedlich gedacht habt?"),
-            open("Welche eine Team-Regel würde euch in stressigen Zeiten am meisten helfen?")
+        "h500_419_paarchallenge_prioritaet" to listOf(
+            q("Welche Paar-Challenge hätte für euch gerade den größten echten Nutzen?", "Mehr ungestörte Zeit", "Ein gemeinsames Projekt", "Mehr Bewegung zusammen", "Etwas Neues lernen"),
+            q("Was macht eine gemeinsame Challenge für dich fair?", "Beide wollen sie wirklich", "Ziel passt zu beiden", "Pausen sind erlaubt", "Niemand kontrolliert den anderen"),
+            q("Was sollte passieren, wenn einer an einem Tag keine Energie dafür hat?", "Pausieren ohne schlechtes Gewissen", "Challenge kleiner machen", "Nur der andere macht weiter", "Gemeinsam neu entscheiden"),
+            q("Was motiviert dich bei einer gemeinsamen Challenge am meisten?", "Fortschritt sehen", "Gemeinsam lachen", "Ein konkretes Ziel", "Der feste Termin miteinander"),
+            q("Wann sollte eine Challenge beendet oder verändert werden?", "Wenn sie nur noch Druck macht", "Wenn das Ziel nicht mehr passt", "Wenn einer klar aussteigen will", "Wenn eine bessere Idee entsteht"),
+            q("Was wäre nach einer gelungenen Challenge die beste Belohnung?", "Gemeinsam etwas unternehmen", "Den Erfolg bewusst feiern", "Direkt etwas Neues ausprobieren", "Einfach stolz darauf sein")
         ),
         "h500_421_wettbewerb_entweder_oder" to listOf(
             q("Bei Spielen gegeneinander: Was macht dir mehr Spaß?", "Locker spielen", "Mit gesundem Ehrgeiz spielen"),
@@ -108,22 +108,6 @@ object Harmony360TeamworkSectionCuration {
             q("Was ist beim Wettbewerb wichtiger?", "Fair bleiben", "Alles geben"),
             q("Wenn einer deutlich besser ist?", "Vorsprung ohne Schonung ausspielen", "Spiel so wählen, dass es spannend bleibt"),
             q("Was darf ein Wettbewerb zwischen euch niemals kaputtmachen?", "Gute Stimmung", "Respekt füreinander")
-        ),
-        "h500_422_mutprobe_wer_eher" to listOf(
-            whoQ("Wer würde eher freiwillig eine Aktivität mit ordentlich Adrenalin ausprobieren?"),
-            whoQ("Wer spricht eher eine fremde Person an, wenn etwas unfair läuft?"),
-            whoQ("Wer traut sich eher, vor vielen Menschen spontan etwas zu sagen?"),
-            whoQ("Wer probiert eher etwas völlig Unbekanntes, obwohl es Überwindung kostet?"),
-            whoQ("Wer motiviert den anderen eher, eine selbstgewählte Komfortzone zu verlassen?"),
-            whoQ("Wer sagt eher Nein zu einer Mutprobe, wenn sie sich einfach nicht richtig anfühlt?")
-        ),
-        "h500_424_staerken_ranking" to listOf(
-            q("Welche Stärke trägt euer Team am meisten? Ordne.", "Verlässlichkeit", "Kommunikation", "Humor", "Flexibilität"),
-            q("Was hilft euch bei schwierigen Entscheidungen am meisten? Ordne.", "Ruhe bewahren", "Offen widersprechen", "Informationen sammeln", "Gemeinsames Ziel erinnern"),
-            q("Welche Stärke zeigt sich im Alltag am deutlichsten? Ordne.", "Organisation", "Fürsorge", "Improvisation", "Geduld"),
-            q("Was macht euch bei Veränderungen besonders stark? Ordne.", "Anpassungsfähigkeit", "Mut", "Planung", "Gegenseitiger Rückhalt"),
-            q("Welche Stärke deines Partners ist für euer Team besonders wertvoll? Ordne.", "Weitsicht", "Pragmatismus", "Empathie", "Durchhaltevermögen"),
-            q("Welche Stärke möchtet ihr als Paar noch bewusster entwickeln? Ordne.", "Grenzen setzen", "Aufgaben teilen", "Konflikte lösen", "Gemeinsam Neues wagen")
         ),
         "h500_425_gemeinsamer_sieg_prognose" to listOf(
             q("Wenn ihr bei einer Fernseh-Quizshow mitmacht: Wie weit kommt ihr vermutlich?", "Bis ganz nach vorne", "Sehr weit", "Solides Mittelfeld", "Hauptsache gemeinsam Spaß"),
@@ -157,9 +141,9 @@ object Harmony360TeamworkSectionCuration {
         if (SECTION !in pack.tags) return@mapNotNull pack
 
         when (decisions[pack.id]) {
-            CurationDecision.ARCHIVE -> null
+            CurationDecision.ARCHIVE, CurationDecision.MERGE -> null
             CurationDecision.REWRITE -> pack.copy(questions = overrides.getValue(pack.id))
-            CurationDecision.KEEP, CurationDecision.MERGE -> pack
+            CurationDecision.KEEP -> pack
             null -> null
         }
     }

@@ -15,11 +15,12 @@ class Harmony360Stage055FinalAuditTest {
     }
 
     @Test
-    fun `Stage 05_5 covers 108 raw packs and exactly 53 curated survivors`() {
+    fun `Stage 05_5 covers 108 raw packs with 51 visible 56 archived and one merged source`() {
         assertEquals(108, raw.size)
         assertEquals(108, raw.map { it.id }.toSet().size)
-        assertEquals(53, Harmony360Stage055FinalAudit.targetPacks(GeneratedHarmonyAdrenaline360.PACKS).size)
-        assertEquals(55, Harmony360Stage055FinalAudit.expectedArchivedIds.size)
+        assertEquals(51, Harmony360Stage055FinalAudit.targetPacks(GeneratedHarmonyAdrenaline360.PACKS).size)
+        assertEquals(56, Harmony360Stage055FinalAudit.expectedArchivedIds.size)
+        assertEquals(setOf("h500_422_mutprobe_wer_eher"), Harmony360Stage055FinalAudit.expectedMergedIds)
     }
 
     @Test
@@ -35,8 +36,14 @@ class Harmony360Stage055FinalAuditTest {
         assertEquals(10, Harmony360HumorSectionCuration.decisions.values.count {
             it == Harmony360HumorSectionCuration.CurationDecision.REWRITE
         })
-        assertEquals(14, Harmony360TeamworkSectionCuration.decisions.values.count {
+        assertEquals(12, Harmony360TeamworkSectionCuration.decisions.values.count {
             it == Harmony360TeamworkSectionCuration.CurationDecision.REWRITE
+        })
+        assertEquals(5, Harmony360TeamworkSectionCuration.decisions.values.count {
+            it == Harmony360TeamworkSectionCuration.CurationDecision.ARCHIVE
+        })
+        assertEquals(1, Harmony360TeamworkSectionCuration.decisions.values.count {
+            it == Harmony360TeamworkSectionCuration.CurationDecision.MERGE
         })
     }
 
