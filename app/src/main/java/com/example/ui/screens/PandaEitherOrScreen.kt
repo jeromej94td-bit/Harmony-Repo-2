@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -157,12 +158,19 @@ fun PandaEitherOrScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { goBackOneQuestion() }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = LanguageManager.tr("Eine Frage zurück", appLanguage),
-                        tint = HarmonyText
-                    )
+                if (orderPosition > 0) {
+                    IconButton(
+                        onClick = { goBackOneQuestion() },
+                        modifier = Modifier.testTag("panda_previous_button")
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = LanguageManager.tr("Eine Frage zurück", appLanguage),
+                            tint = HarmonyText
+                        )
+                    }
+                } else {
+                    Spacer(Modifier.size(48.dp).testTag("panda_back_placeholder"))
                 }
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("🐼 ${LanguageManager.tr("Entweder oder", appLanguage)}", color = HarmonyText, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
