@@ -8,6 +8,15 @@ import org.junit.Test
 class ProposalStateRestorationContractTest {
 
     @Test
+    fun `proposal overlay remains open across activity recreation`() {
+        val source = source("app/src/main/java/com/example/MainActivity.kt")
+
+        assertTrue(source.contains("import androidx.compose.runtime.saveable.rememberSaveable"))
+        assertTrue(source.contains("var isProposalExperienceOpen by rememberSaveable { mutableStateOf(false) }"))
+        assertFalse(source.contains("var isProposalExperienceOpen by remember { mutableStateOf(false) }"))
+    }
+
+    @Test
     fun `proposal session state survives activity recreation`() {
         val source = source("app/src/main/java/com/example/ui/screens/ProposalExperienceScreen.kt")
 
