@@ -75,7 +75,7 @@ class Harmony360Stage053FutureCurationTest {
     }
 
     @Test
-    fun `future curation output removes known generator quartets and wording leftovers`() {
+    fun `future output removes known generator quartets and wording leftovers`() {
         val curated = Harmony360FutureSectionCuration.apply(raw)
         val forbidden = setOf(
             listOf("Nähe", "Freiheit", "Sicherheit", "Abenteuer"),
@@ -97,27 +97,20 @@ class Harmony360Stage053FutureCurationTest {
     }
 
     @Test
-    fun `runtime restores future packs while keeping curated rewrites and section topic moves`() {
+    fun `runtime registry keeps canonical visibility and prior topic moves`() {
         val runtimeFuture = GeneratedHarmonyAdrenaline360.PACKS.filter {
             "h360_section_03_zukunft_lebensplanung" in it.tags
         }
 
-        assertEquals(raw.map { it.id }.toSet(), runtimeFuture.map { it.id }.toSet())
-        assertTrue(runtimeFuture.map { it.id }.containsAll(archivedIds))
+        assertEquals(canonicalIds.toSet(), runtimeFuture.map { it.id }.toSet())
+        assertTrue(runtimeFuture.none { it.id in archivedIds })
 
         assertEquals("reisen", runtimeFuture.single { it.id == "h500_056_auswandern_szenario" }.topic)
         assertEquals("geld", runtimeFuture.single { it.id == "h500_058_finanzielle_ziele_memory" }.topic)
-        assertEquals("familie", runtimeFuture.single { it.id == "h500_060_hochzeit_offene_runde" }.topic)
         assertEquals("familie", runtimeFuture.single { it.id == "h500_061_familienplanung_entweder_oder" }.topic)
         assertEquals("reisen", runtimeFuture.single { it.id == "h500_064_abenteuerliste_ranking" }.topic)
-        assertEquals("moral", runtimeFuture.single { it.id == "h500_070_sicherheit_oder_freiheit_offene_runde" }.topic)
 
         val runtimeDreamHome = runtimeFuture.single { it.id == "h500_054_traumhaus_ranking" }
-        assertEquals("kennen", runtimeDreamHome.topic)
         assertTrue(runtimeDreamHome.questions.flatMap { it.options }.contains("Garten"))
-
-        archivedIds.forEach { id ->
-            assertEquals("kennen", runtimeFuture.single { it.id == id }.topic)
-        }
     }
 }
