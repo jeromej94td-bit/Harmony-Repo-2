@@ -48,6 +48,8 @@ import com.example.data.repository.RoomMemoryRepository
 import com.example.ui.AppLanguage
 import com.example.ui.HarmonyViewModel
 import com.example.ui.LocalAppLanguage
+import com.example.ui.nextStep
+import com.example.ui.pickAnswer
 import com.example.ui.skipCurrentQuestion
 import com.example.ui.memory.MemoryEditorMode
 import com.example.ui.memory.MemoryTab
@@ -573,19 +575,23 @@ fun HarmonyApp(
                         onPickAnswer = { optText ->
                             val skipLabel = com.example.util.LanguageManager.tr("Überspringen", uiState.appLanguage)
                             if (optText == skipLabel) {
-                                viewModel.skipCurrentQuestion()
+                                viewModel.skipCurrentQuestion(expectedIndex = activeRun.currentIndex)
                             } else {
-                                viewModel.pickAnswer(optText)
+                                viewModel.pickAnswer(optText, expectedIndex = activeRun.currentIndex)
                             }
                         },
-                        onPickTot = { optionText -> viewModel.pickAnswer(optionText) },
-                        onNextStep = { viewModel.nextStep() },
+                        onPickTot = { optionText ->
+                            viewModel.pickAnswer(optionText, expectedIndex = activeRun.currentIndex)
+                        },
+                        onNextStep = {
+                            viewModel.nextStep(expectedIndex = activeRun.currentIndex)
+                        },
                         onAskExit = { viewModel.previousStep() },
                         onCloseExitConfirm = { viewModel.closeExitConfirm() },
                         onCloseRunner = { viewModel.closeRunner() },
                         onOpenOwnAnswerDialog = { idx, mode ->
                             if (activeRun.pack.cat == "nie" && mode == null) {
-                                viewModel.skipCurrentQuestion()
+                                viewModel.skipCurrentQuestion(expectedIndex = activeRun.currentIndex)
                             } else {
                                 viewModel.openOwnAnswerDialog(idx, mode)
                             }
@@ -603,7 +609,9 @@ fun HarmonyApp(
                     ) {
                         RunnerSkipButton(
                             appLanguage = uiState.appLanguage,
-                            onSkip = { viewModel.skipCurrentQuestion() },
+                            onSkip = {
+                                viewModel.skipCurrentQuestion(expectedIndex = activeRun.currentIndex)
+                            },
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(end = 16.dp, bottom = 14.dp)
