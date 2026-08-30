@@ -1,6 +1,5 @@
 package com.example.data
 
-import com.example.data.model.HarmonyPacksData
 import com.example.data.model.InteractionPromptPolicy
 import com.example.data.model.LoveBalanceQuestionPolicy
 
@@ -50,39 +49,8 @@ object GeneratedContentRegistry {
                 }
             )
         }
-
-        return TopLevelTopicPlacementPolicy.apply(result)
+        return result
     }
-
-    /**
-     * Four legacy wedding packs live in Models.kt rather than generated content. Installing
-     * curated dynamic copies lets the normal runtime merge replace only their topic metadata,
-     * while title, mechanic, questions and choices stay byte-for-byte equivalent in meaning.
-     */
-    private fun defaultTopicOverrides(): List<GenPack> =
-        HarmonyPacksData.DEFAULT_PACKS
-            .filter { TopLevelTopicPlacementPolicy.isDefaultPackOverride(it.id) }
-            .map { pack ->
-                TopLevelTopicPlacementPolicy.apply(
-                    GenPack(
-                        id = pack.id,
-                        title = pack.title,
-                        cat = pack.cat,
-                        topic = pack.topic,
-                        type = pack.type,
-                        tags = pack.tags,
-                        pairs = pack.pairs,
-                        questions = pack.questions.map { question ->
-                            GenQuestion(
-                                q = question.q,
-                                options = question.options,
-                                defaultMine = question.defaultMine
-                            )
-                        },
-                        emoji = pack.emoji
-                    )
-                )
-            }
 
     /**
      * Old Dev-Studio exports can still contain stale copies of generated packs. CUSTOM
@@ -95,22 +63,24 @@ object GeneratedContentRegistry {
         for (index in customPacks.indices) {
             val pack = customPacks[index]
 
-            TopLevelTopicPlacementPolicy.topicFor(pack.id)?.let { topic ->
-                if (pack.topic != topic) {
-                    customPacks[index] = pack.copy(topic = topic)
-                }
+            // Familienplanung is a Familie topic. Older Dev-Studio exports still stored
+            // this pack under Beziehung and would otherwise win over the curated topic.
+            if (
+                pack.id == "h500_061_familienplanung_entweder_oder" &&
+                pack.topic != "familie"
+            ) {
+                customPacks[index] = pack.copy(topic = "familie")
             }
 
-            val normalizedPack = customPacks[index]
             if (
-                normalizedPack.id == LoveBalanceQuestionPolicy.PACK_ID &&
-                normalizedPack.type == "quiz" &&
+                pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
+                pack.type == "quiz" &&
                 (
-                    normalizedPack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
-                        normalizedPack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
+                    pack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
+                        pack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
                     )
             ) {
-                customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(normalizedPack)
+                customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(pack)
             }
         }
     }
@@ -124,9 +94,6 @@ object GeneratedContentRegistry {
         // Curated reworks come last so their stable pack IDs intentionally override
         // older generated/default variants at runtime without touching Models.kt.
         GeneratedHarmonySexIntimacyRework.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
-        // Models.kt wedding packs are injected last as dynamic copies so their corrected
-        // Familie placement wins over the legacy static topic without editing their content.
-        defaultTopicOverrides().forEach { pack -> byId[pack.id] = pack }
         byId.values.toList()
     }
 
