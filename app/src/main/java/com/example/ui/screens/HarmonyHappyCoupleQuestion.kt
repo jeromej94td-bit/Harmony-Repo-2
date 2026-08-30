@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -208,6 +210,20 @@ private fun HarmonyHappyCoupleCard(
             modifier = Modifier.fillMaxSize()
         )
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            HarmonyBg.copy(alpha = 0.16f)
+                        )
+                    )
+                )
+        )
+
         if (selected) {
             Box(
                 modifier = Modifier
@@ -220,6 +236,36 @@ private fun HarmonyHappyCoupleCard(
                             )
                         )
                     )
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(HarmonyBg.copy(alpha = 0.92f))
+                .border(
+                    width = if (selected) 2.5.dp else 1.8.dp,
+                    brush = Brush.linearGradient(
+                        if (selected) {
+                            listOf(Color.White, HarmonyPink, HarmonyPurpleLight, HarmonyPink)
+                        } else {
+                            listOf(HarmonyPink, HarmonyPurpleLight)
+                        }
+                    ),
+                    shape = CircleShape
+                )
+                .testTag("happy_couple_number_${index + 1}"),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = option,
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
         }
     }
