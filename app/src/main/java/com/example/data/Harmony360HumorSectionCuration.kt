@@ -57,7 +57,9 @@ object Harmony360HumorSectionCuration {
             q("Dein Partner stolpert öffentlich und alle schauen. Was tust du zuerst?", "Prüfen, ob alles okay ist", "Diskret helfen", "Nur lachen, wenn er selbst lacht", "Die Aufmerksamkeit weglenken"),
             q("Ein gemeinsamer Witz kommt bei einer anderen Person schlecht an. Was macht ihr?", "Direkt entschuldigen", "Kurz erklären, aber nicht rechtfertigen", "Thema beenden", "Später gemeinsam besprechen, was zu weit ging"),
             q("Einer von euch wird auf einer Feier unangenehm aufgezogen. Was sollte der andere tun?", "Klar Partei ergreifen", "Mit einem Themenwechsel helfen", "Nachfragen, ob Hilfe gewünscht ist", "Gemeinsam die Situation verlassen"),
-            q("Nach einem peinlichen Moment ist einer noch lange beschämt. Was hilft am meisten?", "Nicht weiter darauf herumreiten", "Normalität herstellen", "Liebevoll relativieren", "Zuhören, wenn er darüber reden will")
+            q("Nach einem peinlichen Moment ist einer noch lange beschämt. Was hilft am meisten?", "Nicht weiter darauf herumreiten", "Normalität herstellen", "Liebevoll relativieren", "Zuhören, wenn er darüber reden will"),
+            q("Jemand filmt einen peinlichen Moment und möchte ihn in die Gruppe schicken. Was sollte passieren?", "Vorher klar um Erlaubnis fragen", "Nicht teilen, wenn einer unsicher ist", "Aufnahme direkt löschen", "Nur gemeinsam entscheiden"),
+            q("Ihr seid später allein und müsst beide über den peinlichen Moment lachen. Was macht ihn zu einer guten Erinnerung?", "Beide können wirklich mitlachen", "Niemand wurde bloßgestellt", "Die Grenze wurde respektiert", "Ihr könnt liebevoll darüber reden")
         ),
         "h500_377_insider_witze_geheime_wahl" to listOf(
             q("Welche Art Insider zwischen euch macht dir heimlich am meisten Spaß?", "Ein völlig sinnloses Codewort", "Eine gemeinsame Imitation", "Ein Satz aus einer alten Situation", "Ein Blick, den nur ihr versteht"),
