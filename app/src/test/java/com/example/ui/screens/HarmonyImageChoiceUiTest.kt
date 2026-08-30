@@ -67,6 +67,48 @@ class HarmonyImageChoiceUiTest {
     }
 
     @Test
+    fun `happy couple exposes four numbered clickable picks and stores every tapped number`() {
+        val question = HarmonyPacksData.DEFAULT_PACKS
+            .first { it.id == "liebegleichgewicht" }
+            .questions.first()
+        var pickedAnswer by mutableStateOf<String?>(null)
+
+        composeRule.mainClock.autoAdvance = false
+        composeRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                AmbientBackground {
+                    HarmonyImageChoiceQuestion(
+                        kind = HarmonyImageChoiceKind.HAPPY_COUPLE,
+                        question = question.q,
+                        options = question.options,
+                        selectedAnswer = pickedAnswer,
+                        onPick = { pickedAnswer = it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        composeRule.mainClock.advanceTimeBy(3_000L)
+        (1..4).forEach { number ->
+            composeRule.onNodeWithTag("happy_couple_number_$number").assertExists()
+        }
+
+        (0..3).forEach { index ->
+            composeRule.onNodeWithTag("happy_couple_option_$index").performClick()
+            composeRule.mainClock.advanceTimeByFrame()
+            composeRule.waitForIdle()
+
+            assertEquals((index + 1).toString(), pickedAnswer)
+            composeRule.onNodeWithTag("happy_couple_option_${index}_selected").assertExists()
+        }
+
+        composeRule.onNodeWithTag("harmony_happy_couple_question").captureRoboImage(
+            filePath = "build/harmony-image-choice-preview/happy-couple-question.png"
+        )
+    }
+
+    @Test
     fun `egg question renders all twelve source images`() {
         captureQuestion(
             packId = "essenreden",
