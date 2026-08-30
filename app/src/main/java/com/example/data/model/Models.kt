@@ -1039,6 +1039,6 @@ object HarmonyPacksData {
                     result.add(dp)
                 }
             }
-            return result
+            return result.map { com.example.data.Harmony360SectionTopicSorting.apply(it) }
         }
 }

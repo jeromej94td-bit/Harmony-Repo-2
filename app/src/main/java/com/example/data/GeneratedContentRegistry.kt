@@ -26,7 +26,9 @@ object GeneratedContentRegistry {
     }
 
     private fun runtimePack(pack: GenPack): GenPack {
-        var result = GeneratedContentRepairPolicy.repair(pack)
+        var result = Harmony360SectionTopicSorting.apply(
+            GeneratedContentRepairPolicy.repair(pack)
+        )
 
         // Deep Talk owns a dedicated full-screen, two-person reveal flow. The legacy
         // "disc" runner renders every question in one long discussion list and would
@@ -61,28 +63,21 @@ object GeneratedContentRegistry {
     private fun normalizeLoadedCustomPacks() {
         val customPacks = DeveloperDataManager._customPacks
         for (index in customPacks.indices) {
-            val pack = customPacks[index]
-
-            // Keep the pre-RS-001 Familienplanung fix: older Dev-Studio exports can
-            // still store this one pack under Beziehung and otherwise override the
-            // curated Familie placement.
-            if (
-                pack.id == "h500_061_familienplanung_entweder_oder" &&
-                pack.topic != "familie"
-            ) {
-                customPacks[index] = pack.copy(topic = "familie")
+            val retopiced = Harmony360SectionTopicSorting.apply(customPacks[index])
+            if (retopiced != customPacks[index]) {
+                customPacks[index] = retopiced
             }
 
-            val normalizedPack = customPacks[index]
+            val pack = customPacks[index]
             if (
-                normalizedPack.id == LoveBalanceQuestionPolicy.PACK_ID &&
-                normalizedPack.type == "quiz" &&
+                pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
+                pack.type == "quiz" &&
                 (
-                    normalizedPack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
-                        normalizedPack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
+                    pack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
+                        pack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
                     )
             ) {
-                customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(normalizedPack)
+                customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(pack)
             }
         }
     }

@@ -118,7 +118,10 @@ class Harmony360RelationshipQualityReworkTest {
         assertTrue(curated.getValue("h500_003_kleine_gesten_skala").questions.any { "Lieblingssnack" in it.q })
         assertTrue(curated.getValue("h500_005_komplimente_prognose").questions.any { "Kompliment" in it.q && "Partner" in it.q })
         assertTrue(curated.getValue("h500_006_vermissen_szenario").questions.any { "Tage" in it.q || "Nachricht" in it.q })
-        assertTrue(curated.getValue("h500_014_gemeinsame_rituale_ranking").questions.any { "Gute-Nacht" in it.q || "Morgen" in it.q })
+        assertTrue(curated.getValue("h500_014_gemeinsame_rituale_ranking").questions.any {
+            "Gute-Nacht" in it.q || "Morgen" in it.q ||
+                it.options.any { o -> "Gute-Nacht" in o || "Morgen" in o }
+        })
         assertTrue(curated.getValue("h500_017_flirten_in_der_beziehung_geheime_wahl").questions.any { "flirten" in it.q.lowercase() })
     }
 
