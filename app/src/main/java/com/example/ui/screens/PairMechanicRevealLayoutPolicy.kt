@@ -19,14 +19,16 @@ internal data class PairMechanicRevealMetrics(
 )
 
 /**
- * Shrinks the fixed reveal surfaces of the pair mechanics only when the fullscreen stage is
- * tight. Normal phones keep the original 155/160/150/175dp proportions and text sizes.
+ * Sizes fixed reveal surfaces from the height that the fullscreen mechanic can actually use,
+ * not from the physical screen height. The mechanic shell reserves app/experience chrome before
+ * rendering its stage, so a tall phone can still have a sub-700dp reveal area.
  */
 internal object PairMechanicRevealLayoutPolicy {
     fun metrics(screenHeightDp: Int, fontScale: Float): PairMechanicRevealMetrics {
         val safeFontScale = fontScale.coerceAtLeast(1f)
-        val veryCompact = screenHeightDp < 600 || safeFontScale >= 1.30f
-        val compact = screenHeightDp < 700 || safeFontScale >= 1.15f
+        val stageHeightDp = FullscreenMechanicStageHeightPolicy.stageHeightDp(screenHeightDp)
+        val veryCompact = stageHeightDp < 600 || safeFontScale >= 1.30f
+        val compact = stageHeightDp < 700 || safeFontScale >= 1.15f
 
         return when {
             veryCompact -> PairMechanicRevealMetrics(

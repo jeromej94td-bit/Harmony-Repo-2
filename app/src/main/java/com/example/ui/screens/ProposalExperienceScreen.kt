@@ -100,6 +100,7 @@ internal fun ProposalExperienceScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .background(Color.Black)
             .background(
                 Brush.radialGradient(
                     colors = listOf(
