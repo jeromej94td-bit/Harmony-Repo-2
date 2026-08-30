@@ -196,7 +196,7 @@ internal fun ProposalExperienceScreen(
                         } else {
                             val round = ProposalRingImageDuels.rounds[position.itemIndex]
                             val context = LocalContext.current
-                            ExperienceImageDuelBoard(
+                            ExperienceProductImageDuelBoard(
                                 round = round.toExperienceImageDuelRound(),
                                 selectedOptionId = ringSelections[round.id],
                                 imageResolver = { imageKey ->
@@ -207,7 +207,6 @@ internal fun ProposalExperienceScreen(
                                     advance()
                                 },
                                 kicker = "💎  RING-DUELL",
-                                instruction = "",
                                 testTagPrefix = "proposal_ring",
                                 rootTestTag = "proposal_ring_duel",
                                 modifier = Modifier.fillMaxSize()

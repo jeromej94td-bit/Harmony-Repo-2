@@ -364,10 +364,9 @@ object DeveloperDataManager {
         val finalPacks = mergedPacks + materializedPacks
 
         HarmonyPacksData.setDynamicCategories(mergedCats)
-        // Models.kt fügt dynamische, neue Packs aktuell jeweils vorne ein.
-        // Deshalb geben wir die gewünschte Reihenfolge rückwärts hinein, damit
-        // die tatsächlich sichtbare Reihenfolge exakt dem Dev Studio entspricht.
-        HarmonyPacksData.setDynamicPacks(finalPacks.asReversed())
+        // HarmonyPacksData ersetzt bekannte IDs an Ort und Stelle und hängt neue
+        // dynamische Packs in exakt der gelieferten Reihenfolge an.
+        HarmonyPacksData.setDynamicPacks(finalPacks)
 
         TotImageProvider.clearGeneratedImages()
         generatedImages.forEach { (name, path) -> TotImageProvider.setGeneratedImage(name, path) }

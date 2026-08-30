@@ -2,9 +2,9 @@
 
 **Purpose:** append-only package ledger for the parallel Stage-05 content-quality track.  
 **Stage:** 05 — Harmony-360 Questions Quality Rework  
-**Current verified substage after 25.13:** 05.2 complete — 6/6 = 100%  
-**Stage-05 progress after 25.13:** 2/5 = 40%  
-**Next:** 05.3 — Future / money / work / family
+**Current verified substage after 25.26:** 05.5 complete  
+**Stage-05 progress:** **5/5 = 100%**  
+**Next:** none — reopen only for a demonstrated content regression
 
 This file supplements `360_REWORK_WORKLOG.md` with the dedicated 25.x package history.
 
@@ -104,4 +104,87 @@ The four approved target areas are represented by explicit deterministic curatio
 
 All four target sections now use explicit stable-ID curation with concrete subject-specific questions. The raw generated sources remain intact for traceability, while the final runtime output is protected by a cross-section regression gate against the exact copy-paste failure modes that motivated this rework.
 
-Next Stage-05 work: **05.3 — Future / money / work / family** under the next narrow 25.x range. Do not reopen 05.1 or 05.2 unless a regression is demonstrated.
+## 25.14 / 05.3a — Zukunft & Lebensplanung
+- PR #138; merge `8003f5957f4332b4edbc284259602e8857f711d7`.
+- 18 raw Section-03 packs: 10 explicit rewrites, 8 previously identified overlaps remain archived.
+- Six concrete future/life-planning questions per visible pack; stable IDs/order preserved.
+
+## 25.15 / 05.3b — Freunde & Familie
+- PR #145; merge `a03eccf8f4320708b606b4306089e641848f0770`.
+- 18/18 packs explicitly rewritten with concrete social/family situations.
+- Child- and parent-related prompts stay conditional instead of assuming a specific family situation.
+
+## 25.16 / 05.3c — Geld & Finanzen
+- PR #150; merge `c6a2b150899f9dc0422851dc39f2c9f8517bd0d8`.
+- 18/18 packs rewritten around shared accounts, spending, saving, risk tolerance, debt conversations, inheritance and retirement planning.
+- No stock/ETF purchase instruction or guaranteed-return language.
+
+## 25.17 / 05.3d — Arbeit & Karriere
+- PR #151; merge `f7048c1ff7b18d0b7056b3c5d8651a958eda268f`.
+- 13 canonical Work/Career packs rewritten; five already identified filler packs remain archived.
+- Existing topic routing remains intact, including relationship-specific work packs and retirement routing.
+
+## 25.18 / 05.3e — Final 05.3 cross-section audit
+- PR #152; merge `8c465cd8cfe2b6105a3a42a8e8309bf6cb4ef814`.
+- Final 05.3 target: 72 raw packs, 59 runtime survivors, 13 archives.
+- Non-mutating gate protects known quartets, English leftovers, repeated ordinary four-option sets and key topic moves.
+- On merge: Stage 05.3 complete; Stage 05 = 3/5 = 60%.
+
+## 25.19 / 05.4a — Gesundheit & Fitness
+- PR #153; merge `172bb3277862ccb04078cda88943d17e2f355d91`.
+- 18 raw packs: 8 canonical survivors rewritten, 10 generic/overlapping packs remain archived.
+- Content stays preference-, support- and everyday-life-oriented rather than diagnostic or treatment-directive.
+
+## Scenario contract repair between 25.19 and 25.20
+- PR #156; merge `712f68301d01f93b4a8c41247aed9197f01faee1`.
+- Moved `Harmony360ScenarioJourneyCuration` after all content rewrites and added subject-specific late-scenario additions.
+- Final fullscreen scenario packs are protected at exactly eight decisions; no generic fallback template was introduced.
+
+## 25.20 / 05.4b — Psychologie & Gefühle
+- PR #157; merge `006213069a23ffb40f78b21c23f90048d4206dbf`.
+- 18 raw packs: 9 canonical survivors rewritten, 9 generic/overlapping packs archived.
+- Questions remain descriptive and relationship-oriented instead of assigning diagnoses or fixed labels.
+
+## 25.21 / 05.4c — Intimacy reconciliation
+- PR #158; merge `a7997d5e6c1f7f76eb33523efa973a3c3785333f`.
+- Regression contract protects stable runtime IDs `naehe` and `intimleben`, topic `sex`, and the existing curated 12 + 18 questions.
+- Registry ordering confirms the curated stable-ID overrides win over older variants.
+
+## 25.22 / 05.4d — Final 05.4 cross-section audit
+- PR #159; merge `56cc09f116d898c1ad0dceb28e6a37f67fbe45f2`.
+- Protects 36 raw Health/Psych packs, 17 survivors, 19 archives plus both intimacy overrides.
+- Protects known generator residue and the eight-step scenario contract.
+- On merge: Stage 05.4 complete; Stage 05 = 4/5 = 80%.
+
+## 25.23 / 05.5a — Values / Faith / Society / Fantasy regression audit
+- Four already-curated sections: 72 raw packs, 29 intentional survivors, 43 archives.
+- Same final audit/test blobs landed on `main` in parallel; redundant PR #162 was closed rather than duplicating the change.
+- Protects survivor inventory, visible topic taxonomy, generator residue and scenario length.
+
+## 25.24 / 05.5b — Humor & Lachen
+- PR #164; merge `ac501f022c46211541e6d61a4a75be1d231e313b`.
+- 18 raw packs reduced to 10 distinct rewritten games; 8 redundant/generic packs archived.
+- Humor, irony, teasing and dark-humor prompts include explicit respect/boundary logic; Peinliche Momente remains an eight-decision scenario.
+
+## 25.25 / 05.5c — Teamwork & Challenge
+- PR #166; merge `721f33a9e11a010d674b5e39c67710ca64c4ca9b`.
+- 18 raw packs reduced to 14 distinct rewritten games; 4 overlaps archived.
+- English ranking residue, literal User/Partner leftovers and the named reality-TV reference were removed; Escape Room and Notfallplan contain eight explicit decisions.
+
+## 25.26 / 05.5d — Final Stage 05.5 audit
+- PR #169; merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`.
+- Final 05.5 inventory: 108 raw packs, 53 visible survivors, 55 archives.
+- Gate protects archive visibility, visible taxonomy, known generator residue, exact scenario lengths and ordinary four-option sets copied across three or more packs.
+- Negative fixture injects the same four options into three final packs and requires a reuse violation.
+- On merge: Stage 05.5 complete; Stage 05 = **5/5 = 100%**.
+
+## 25.27 — Final Stage-05 tracker sync
+- Documentation-only package after the actual 25.26 merge.
+- Synchronizes `360_REWORK_CURRENT_STATE.md`, this append-only worklog and `360_REWORK_STAGE05_FINAL.md` to the merged 5/5 state.
+- Does not alter runtime content or count toward another core stage.
+
+## Stage 05 completion summary
+
+Stage 05 is complete at **5/5 = 100%**. Raw generated sections remain available for traceability, while stable-ID curation removes confirmed filler and replaces generic noun-substitution content with subject-specific questions. Final regression gates protect archive decisions, the existing visible topic taxonomy, eight-step fullscreen scenarios, known generator wording/answer quartets and cross-pack option-copy regressions.
+
+Do not reopen Stage 05 for new feature work. Reopen only when a concrete content regression is demonstrated. Remaining 360 Rework work belongs to other core stages, reusable experience-engine work or infrastructure verification.
