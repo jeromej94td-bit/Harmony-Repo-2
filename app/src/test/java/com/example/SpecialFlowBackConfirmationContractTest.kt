@@ -25,6 +25,20 @@ class SpecialFlowBackConfirmationContractTest {
     }
 
     @Test
+    fun `proposal visible back moves one step while system back stays global`() {
+        val source = source("app/src/main/java/com/example/ui/screens/ProposalExperienceScreen.kt")
+        val normalized = source.replace(Regex("\\s+"), " ")
+
+        assertTrue(source.contains("val previousPosition = ProposalExperienceRunnerPolicy.previous(position)"))
+        assertTrue(normalized.contains("onClick = { moveTo(previousPosition) }, modifier = Modifier.testTag(\"proposal_previous_button\")"))
+
+        // Android/system back must bubble to MainActivity, where the existing special-flow
+        // leave confirmation is owned. Only the visible in-app button may move backwards.
+        assertFalse(source.contains("import androidx.activity.compose.BackHandler"))
+        assertFalse(source.contains("BackHandler("))
+    }
+
+    @Test
     fun `special flow leave dialog keeps flow open until explicit confirmation`() {
         val source = source("app/src/main/java/com/example/MainActivity.kt")
         val normalized = source.replace(Regex("\\s+"), " ")
