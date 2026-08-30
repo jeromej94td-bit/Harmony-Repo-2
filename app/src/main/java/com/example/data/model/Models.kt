@@ -264,7 +264,7 @@ object HarmonyPacksData {
             title = "Der perfekte Heiratsantrag",
             tags = listOf("hochzeit", "unterhaltung"),
             cat = "tief",
-            topic = "beziehung",
+            topic = "familie",
             type = "quiz",
             questions = listOf(
                 Question("Welche Umgebung würdest du dir für einen Antrag wünschen?", listOf("Zu Hause, gemütlich und privat", "Draußen mit der Natur als Kulisse", "Schickes Restaurant oder Hotel")),
@@ -468,7 +468,7 @@ object HarmonyPacksData {
             title = "Verlobungsringe",
             tags = listOf("hochzeit", "dasoderdas"),
             cat = "tot",
-            topic = "beziehung",
+            topic = "familie",
             type = "tot",
             pairs = listOf(
                 "Klassisch Solitär" to "Vintage verspielt",
@@ -491,7 +491,7 @@ object HarmonyPacksData {
             title = "Hochzeitssträuße",
             tags = listOf("hochzeit", "dasoderdas"),
             cat = "tot",
-            topic = "beziehung",
+            topic = "familie",
             type = "tot",
             pairs = listOf(
                 "Weiße Rosen" to "Pfingstrosen",
@@ -506,7 +506,7 @@ object HarmonyPacksData {
             title = "Traumhochzeit",
             tags = listOf("hochzeit", "dasoderdas"),
             cat = "tot",
-            topic = "beziehung",
+            topic = "familie",
             type = "tot",
             pairs = listOf(
                 "Große Feier" to "Kleine Runde",

@@ -26,7 +26,8 @@ class Harmony360Stage055FinalAuditTest {
     @Test
     fun `final Stage 05_5 audit is clean`() {
         val violations = Harmony360Stage055FinalAudit.audit(raw, GeneratedHarmonyAdrenaline360.PACKS)
-        assertTrue(violations.joinToString("\n"), violations.isEmpty())
+        println("VIOLATIONS:\n" + violations.joinToString("\n"))
+        assertEquals(emptyList<String>(), violations)
     }
 
     @Test

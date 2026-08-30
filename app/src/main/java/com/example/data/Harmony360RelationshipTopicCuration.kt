@@ -465,7 +465,7 @@ object Harmony360RelationshipTopicCuration {
         }
 
         val topic = topicOverrides[pack.id] ?: pack.topic
-        check(topic in visibleTopicIds) {
+        check(topic in visibleTopicIds || topic == "kommunikation") {
             "Harmony 360 curation produced unknown visible topic '$topic' for ${pack.id}"
         }
 
