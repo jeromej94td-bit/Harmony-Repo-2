@@ -84,6 +84,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.data.LinkEngine
 import com.example.data.model.ProfileEntity
+import com.example.data.model.LoveBalanceQuestionPolicy
 import com.example.data.model.QuestionInteractionPolicy
 import com.example.data.model.QuestionPack
 import com.example.ui.ActivePackRun
@@ -980,9 +981,17 @@ fun QuizRunnerScreen(
                         val scrollState = rememberScrollState()
                         val isIntimacyPack = pack.id == "naehe" && pack.topic == "sex"
                         val questionAnimationKey = "${pack.id}_${activeRun.currentIndex}_question"
-                        // Route from the pack that is actually running. Re-resolving only by id can
-                        // select stale or not-yet-synchronised content and fall back to generic options.
-                        val imageChoiceKind = harmonyImageChoiceKind(pack, activeRun.currentIndex)
+                        // Dev-Studio packs may retain a different generated ID, but this exact
+                        // question must always render its four visual choices.
+                        val isHappyCoupleQuestion = q?.q
+                            ?.replace(Regex("\\s+"), " ")
+                            ?.trim()
+                            ?.equals(LoveBalanceQuestionPolicy.QUESTION_TEXT, ignoreCase = true) == true
+                        val imageChoiceKind = if (isHappyCoupleQuestion) {
+                            HarmonyImageChoiceKind.HAPPY_COUPLE
+                        } else {
+                            harmonyImageChoiceKind(pack, activeRun.currentIndex)
+                        }
                         val interactionSpec = q?.let {
                             QuestionInteractionPolicy.resolveSpec(pack, activeRun.currentIndex, it)
                         }
