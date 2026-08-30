@@ -12,13 +12,14 @@ Repo-specific workflows must be kept as separate skills so new rules can be adde
 ## Available Repo Skills
 
 - `repo-sorting` — use for verschieben, sortieren, umsortieren, einsortieren, Kategorie ändern, or moving games/questions/packs between visible Harmony areas.
+- `video-repo-skill` — **Video Repo Skill**; use for adding, replacing, wiring, debugging, or changing Harmony intro videos, fullscreen videos, video assets, or video-triggered experience flows.
 
 ## Rule for future additions
 
 When a new reusable repository workflow is introduced:
 
 1. create it as its own skill under `.agents/skills/<repo-skill-name>/SKILL.md`;
-2. use a clear `repo-...` name;
+2. use a clear repo-specific name;
 3. add it to this index;
 4. reference it from `AGENTS.md` when the trigger should be mandatory.
 
