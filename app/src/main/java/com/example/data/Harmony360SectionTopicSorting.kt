@@ -49,6 +49,7 @@ object Harmony360SectionTopicSorting {
 
         // 10 · Arbeit & Karriere
         "h500_216_work_life_balance_szenario" to "kennen",
+        "h500_220_job_und_beziehung_offene_runde" to "beziehung",
         "h500_225_ruhestand_prognose" to "geld",
         "h500_226_kuendigung_szenario" to "kennen",
 
@@ -72,10 +73,15 @@ object Harmony360SectionTopicSorting {
 
         // 15 · Glaube & Religion
         "h500_318_religioese_erziehung_memory" to "familie",
+        "h500_330_gemeinsamer_glaube_offene_runde" to "beziehung",
 
-        // 17 · Psychologie & Gefühle
+        // 16 · Politik & Gesellschaft
+        "h500_350_gemeinsames_weltbild_offene_runde" to "beziehung",
+
+        // 17 · Psychologie & Gefühle. Eifersucht stays a direct relationship topic.
         "h500_352_einfuehlungsvermoegen_wer_eher" to "kennen",
         "h500_353_verletzlichkeit_skala" to "kennen",
+        "h500_355_eifersucht_prognose" to "beziehung",
         "h500_357_wuensche_und_beduerfnisse_geheime_wahl" to "kennen",
         "h500_358_kindheitstraumata_memory" to "kennen",
         "h500_361_selbstwertgefuehl_entweder_oder" to "kennen",
@@ -87,8 +93,10 @@ object Harmony360SectionTopicSorting {
         "h500_394_lottogewinn_ranking" to "geld",
         "h500_396_einsame_insel_szenario" to "reisen",
         "h500_398_kindheitstraum_memory" to "kennen",
+        "h500_402_telepathie_wer_eher" to "beziehung",
         "h500_403_zukunftsvision_skala" to "kennen",
-        "h500_407_geheime_fantasie_geheime_wahl" to "kennen"
+        "h500_407_geheime_fantasie_geheime_wahl" to "kennen",
+        "h500_410_unsere_traumwelt_offene_runde" to "beziehung"
     )
 
     fun apply(packs: List<GenPack>): List<GenPack> = packs.map(::apply)
