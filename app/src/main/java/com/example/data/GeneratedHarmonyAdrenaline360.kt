@@ -38,37 +38,30 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
 
-        // This is the last point where explicit deletion layers are allowed to remove packs.
-        // Everything after this point may rewrite/retopic content, but must not make questions vanish.
-        val baseline = NormensLoeschungen.apply(
-            Harmony360RelationshipStage051Pipeline.apply(
-                raw
-                    .map(GeneratedHarmony360ScenarioCleanup::apply)
-                    .map(GeneratedHarmony360TextCleanup::apply)
-                    .map(Harmony360ContentRework::apply)
-            )
-        )
-
-        val curated = Harmony360FutureSectionCuration.apply(
-            Harmony360CultureMediaSectionCuration.apply(
-                Harmony360LeisureSectionCuration.apply(
-                    Harmony360FoodSectionCuration.apply(
-                        Harmony360FoodTravelLeisureCultureQualityRework.apply(
-                            Harmony360ScenarioJourneyCuration.apply(
-                                Harmony360RelationshipTopicCuration.apply(
-                                    Harmony360TopicNormalizationCuration.apply(baseline)
+        Harmony360SectionTopicSorting.apply(
+            Harmony360FutureSectionCuration.apply(
+                Harmony360CultureMediaSectionCuration.apply(
+                    Harmony360LeisureSectionCuration.apply(
+                        Harmony360FoodSectionCuration.apply(
+                            Harmony360FoodTravelLeisureCultureQualityRework.apply(
+                                Harmony360ScenarioJourneyCuration.apply(
+                                    Harmony360RelationshipTopicCuration.apply(
+                                        Harmony360TopicNormalizationCuration.apply(
+                                            NormensLoeschungen.apply(
+                                                Harmony360RelationshipStage051Pipeline.apply(
+                                                    raw
+                                                        .map(GeneratedHarmony360ScenarioCleanup::apply)
+                                                        .map(GeneratedHarmony360TextCleanup::apply)
+                                                        .map(Harmony360ContentRework::apply)
+                                                )
+                                            )
+                                        )
+                                    )
                                 )
                             )
                         )
                     )
                 )
-            )
-        )
-
-        Harmony360SectionTopicSorting.apply(
-            Harmony360CurationPackPreservation.apply(
-                baseline = baseline,
-                curated = curated
             )
         )
     }
