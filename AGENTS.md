@@ -4,7 +4,7 @@
 
 When a user asks to **verschieben**, **sortieren**, **umsortieren**, **einsortieren**, move a game/question/pack to another category, or reorganize visible Harmony areas, you MUST read and follow:
 
-`.agents/skills/harmony-real-topic-sorting/SKILL.md`
+`.agents/skills/repo-skills/SKILL.md`
 
 Do this before proposing destinations and before editing code.
 
