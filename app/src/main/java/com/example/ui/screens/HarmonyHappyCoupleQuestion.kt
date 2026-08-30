@@ -208,7 +208,16 @@ private fun HarmonyHappyCoupleCard(
             painter = painterResource(imageRes),
             contentDescription = tr("Paar $option", "Couple $option"),
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    // The source artwork contains legacy number badges at the bottom.
+                    // Zoom and bias the artwork downward so those badges are fully clipped,
+                    // while giving the couples more visual presence inside each card.
+                    scaleX = 1.30f
+                    scaleY = 1.30f
+                    translationY = 18f * density
+                }
         )
 
         Box(
