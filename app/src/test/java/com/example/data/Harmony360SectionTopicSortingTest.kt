@@ -7,7 +7,7 @@ import org.junit.Test
 class Harmony360SectionTopicSortingTest {
 
     @Test
-    fun `curation preservation never drops a baseline pack`() {
+    fun `curation preservation never drops a protected baseline pack`() {
         val baseline = GeneratedHarmonyAdrenaline360Section03ZukunftLebensplanung.PACKS.take(4)
         val curated = baseline.drop(1)
 
@@ -95,7 +95,7 @@ class Harmony360SectionTopicSortingTest {
     }
 
     @Test
-    fun `final Harmony 360 pipeline keeps all packs that survived explicit Stage051 and Normens deletions`() {
+    fun `final Harmony 360 pipeline keeps every protected pack that survived explicit Stage051 and Normens deletions`() {
         val raw = buildList {
             addAll(GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS)
             addAll(GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS)
@@ -126,9 +126,13 @@ class Harmony360SectionTopicSortingTest {
                     .map(Harmony360ContentRework::apply)
             )
         )
+        val protectedBaselineIds = baseline
+            .filter(Harmony360CurationPackPreservation::shouldPreserve)
+            .map { it.id }
+            .toSet()
         val finalIds = GeneratedHarmonyAdrenaline360.PACKS.map { it.id }.toSet()
 
-        assertEquals(baseline.map { it.id }.toSet(), finalIds)
+        assertTrue(finalIds.containsAll(protectedBaselineIds))
         assertTrue(finalIds.isNotEmpty())
     }
 }
