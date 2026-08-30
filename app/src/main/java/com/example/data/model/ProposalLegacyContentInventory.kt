@@ -8,6 +8,7 @@ enum class ProposalLegacyContentArea {
 
 enum class ProposalLegacyContentSource {
     DEFAULT,
+    DEFAULT_WITH_GENERATED_OVERRIDE,
     GENERATED_360
 }
 
@@ -51,10 +52,10 @@ object ProposalLegacyContentInventory {
             packId = "ringe",
             title = "Verlobungsringe",
             area = ProposalLegacyContentArea.RINGS,
-            source = ProposalLegacyContentSource.DEFAULT,
+            source = ProposalLegacyContentSource.DEFAULT_WITH_GENERATED_OVERRIDE,
             stage02Decision = ProposalLegacyReuseDecision.ALREADY_REUSED,
             nextStep = "Stage 04.2: verify all worthwhile ring labels/assets are represented; Stage 04.3/04.4 can then remove and archive the duplicate standalone pack.",
-            rationale = "Stage 02.4 already reuses the ten strongest ring concepts in the Proposal Experience ring duels."
+            rationale = "The ring pack exists in Models.kt and is also supplied by GeneratedHarmonyContent with the same stable ID; Stage 02.4 already reuses its ten strongest ring concepts in the Proposal Experience ring duels."
         ),
         ProposalLegacyContentInventoryItem(
             packId = "straeusse",
