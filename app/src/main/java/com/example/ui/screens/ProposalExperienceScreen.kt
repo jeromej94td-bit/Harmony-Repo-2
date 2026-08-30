@@ -25,7 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +47,7 @@ import com.example.data.model.ProposalLocationDuels
 import com.example.data.model.ProposalOpenPrompts
 import com.example.data.model.ProposalPartnerPrediction
 import com.example.data.model.ExperiencePartnerPredictionSelection
+import com.example.data.model.ExperiencePartnerPredictionSelectionCodec
 import com.example.data.model.toExperiencePartnerPredictionRound
 import com.example.data.model.ProposalPriorityRanking
 import com.example.data.model.ProposalReveal
@@ -72,23 +73,31 @@ internal fun ProposalExperienceScreen(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var started by remember { mutableStateOf(false) }
-    var position by remember { mutableStateOf(ProposalRunnerPosition(0, 0)) }
-    var eitherOrSelections by remember { mutableStateOf(emptyMap<String, String>()) }
-    var locationSelections by remember { mutableStateOf(emptyMap<String, String>()) }
-    var ringSelections by remember { mutableStateOf(emptyMap<String, String>()) }
-    var rankedPriorityIds by remember { mutableStateOf(emptyList<String>()) }
-    var predictionAnswers by remember { mutableStateOf(emptyMap<String, ExperiencePartnerPredictionSelection>()) }
-    var scenarioSelections by remember { mutableStateOf(emptyMap<String, String>()) }
-    var personalWishAnswers by remember { mutableStateOf(emptyMap<String, String>()) }
+    var started by rememberSaveable { mutableStateOf(false) }
+    var positionStepIndex by rememberSaveable { mutableStateOf(0) }
+    var positionItemIndex by rememberSaveable { mutableStateOf(0) }
+    var eitherOrSelections by rememberSaveable { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var locationSelections by rememberSaveable { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var ringSelections by rememberSaveable { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var rankedPriorityIds by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
+    var predictionAnswersEncoded by rememberSaveable { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var scenarioSelections by rememberSaveable { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var personalWishAnswers by rememberSaveable { mutableStateOf<Map<String, String>>(emptyMap()) }
+
+    val position = ProposalRunnerPosition(positionStepIndex, positionItemIndex)
+
+    fun moveTo(nextPosition: ProposalRunnerPosition) {
+        positionStepIndex = nextPosition.stepIndex
+        positionItemIndex = nextPosition.itemIndex
+    }
 
     fun advance() {
-        ProposalExperienceRunnerPolicy.next(position)?.let { position = it }
+        ProposalExperienceRunnerPolicy.next(position)?.let(::moveTo)
     }
 
     val previousPosition = ProposalExperienceRunnerPolicy.previous(position)
     BackHandler(enabled = started && previousPosition != null) {
-        previousPosition?.let { position = it }
+        previousPosition?.let(::moveTo)
     }
 
     val step = ProposalExperienceRunnerPolicy.steps.getOrNull(position.stepIndex)
@@ -144,7 +153,7 @@ internal fun ProposalExperienceScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (previousPosition != null) {
                         TextButton(
-                            onClick = { position = previousPosition },
+                            onClick = { moveTo(previousPosition) },
                             modifier = Modifier.testTag("proposal_previous_button")
                         ) {
                             Text("Zurück", color = HarmonyPinkSoft)
@@ -219,7 +228,7 @@ internal fun ProposalExperienceScreen(
                             selectedItemIds = rankedPriorityIds,
                             profile = profile,
                             onPick = { orderedIds ->
-                                rankedPriorityIds = orderedIds
+                                rankedPriorityIds = orderedIds.toList()
                                 advance()
                             },
                             modifier = Modifier.fillMaxSize()
@@ -230,10 +239,12 @@ internal fun ProposalExperienceScreen(
                         val round = ProposalPartnerPrediction.rounds[position.itemIndex]
                         ExperiencePartnerPredictionBoard(
                             round = round.toExperiencePartnerPredictionRound(),
-                            selectedSelection = predictionAnswers[round.id],
+                            selectedSelection = predictionAnswersEncoded[round.id]?.let(ExperiencePartnerPredictionSelectionCodec::decode),
                             profile = profile,
                             onPick = { selection ->
-                                predictionAnswers = predictionAnswers + (round.id to selection)
+                                predictionAnswersEncoded = predictionAnswersEncoded + (
+                                    round.id to ExperiencePartnerPredictionSelectionCodec.encode(selection)
+                                )
                                 advance()
                             },
                             modifier = Modifier.fillMaxSize()
@@ -269,7 +280,9 @@ internal fun ProposalExperienceScreen(
                     }
 
                     ProposalFlowStepKind.REVEAL -> {
-                        val predictionMatches = predictionAnswers.values.count(ExperiencePartnerPredictionSelection::isHit)
+                        val predictionMatches = predictionAnswersEncoded.values
+                            .mapNotNull(ExperiencePartnerPredictionSelectionCodec::decode)
+                            .count(ExperiencePartnerPredictionSelection::isHit)
                         val reveal = ProposalReveal.build(
                             ProposalRevealInput(
                                 eitherOrSelections = eitherOrSelections,
@@ -345,7 +358,7 @@ private fun ProposalOpenPromptPane(
     onContinue: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var text by remember(prompt) { mutableStateOf(initialValue) }
+    var text by rememberSaveable(prompt) { mutableStateOf(initialValue) }
     Column(
         modifier = modifier.padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
