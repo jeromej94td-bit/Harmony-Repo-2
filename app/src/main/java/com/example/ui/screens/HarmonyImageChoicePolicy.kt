@@ -34,10 +34,6 @@ internal enum class HarmonyImageChoiceKind {
 
 internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
 
-private val HAPPY_COUPLE_PROMPTS = setOf(
-    LoveBalanceQuestionPolicy.QUESTION_TEXT,
-    "Was fällt dir in unserer Beziehung leichter?"
-)
 private const val EGG_PROMPT = "Wie möchtest du dein Ei am liebsten?"
 private const val STEAK_PROMPT = "Wie willst du dein Steak?"
 private const val TRAVEL_PROMPT = "Wie sieht deine Traumreise aus?"
@@ -130,7 +126,6 @@ internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): Har
 private fun stableVisualQuestionKind(packId: String, rawQuestion: String?): HarmonyImageChoiceKind? {
     val prompt = rawQuestion?.trim() ?: return null
     return when {
-        packId == "liebegleichgewicht" && prompt in HAPPY_COUPLE_PROMPTS -> HarmonyImageChoiceKind.HAPPY_COUPLE
         packId == "essenreden" && prompt == EGG_PROMPT -> HarmonyImageChoiceKind.EGG
         packId == "essenreden" && prompt == STEAK_PROMPT -> HarmonyImageChoiceKind.STEAK
         packId == "reisevor" && prompt == TRAVEL_PROMPT -> HarmonyImageChoiceKind.TRAVEL
