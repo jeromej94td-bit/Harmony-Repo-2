@@ -2,7 +2,6 @@ package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -52,13 +49,13 @@ import com.example.data.model.toExperiencePartnerPredictionRound
 import com.example.data.model.ProposalPriorityRanking
 import com.example.data.model.ProposalReveal
 import com.example.data.model.ProposalRevealInput
-import com.example.data.model.ProposalRevealResult
 import com.example.data.model.ProposalRingImageDuels
 import com.example.data.model.ProposalRunnerPosition
 import com.example.data.model.ProposalScenarios
 import com.example.data.model.toExperienceEitherOrRound
 import com.example.data.model.toExperienceImageDuelRound
 import com.example.data.model.toExperienceRankingRound
+import com.example.data.model.toExperienceRevealResult
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
@@ -295,9 +292,10 @@ internal fun ProposalExperienceScreen(
                                 personalWishAnswers = personalWishAnswers
                             )
                         )
-                        ProposalRevealPane(
-                            reveal = reveal,
+                        ExperienceRevealBoard(
+                            reveal = reveal.toExperienceRevealResult(),
                             onClose = onClose,
+                            closeButtonTestTag = "proposal_finish",
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -397,73 +395,6 @@ private fun ProposalOpenPromptPane(
             colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
         ) {
             Text("Weiter", fontWeight = FontWeight.ExtraBold)
-        }
-    }
-}
-
-@Composable
-private fun ProposalRevealPane(
-    reveal: ProposalRevealResult,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(bottom = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("✨", fontSize = 58.sp)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            reveal.title,
-            color = Color.White,
-            fontSize = 30.sp,
-            lineHeight = 36.sp,
-            fontWeight = FontWeight.Black,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(10.dp))
-        Text(
-            reveal.subtitle,
-            color = HarmonyMuted,
-            fontSize = 16.sp,
-            lineHeight = 22.sp,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(20.dp))
-        reveal.sections.forEach { section ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(HarmonyPurple.copy(alpha = 0.22f))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(22.dp))
-                    .padding(16.dp)
-            ) {
-                Text(section.title, color = HarmonyPinkSoft, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(7.dp))
-                section.values.forEach { value ->
-                    Text("• $value", color = HarmonyText, fontSize = 15.sp, lineHeight = 21.sp)
-                }
-            }
-        }
-        Spacer(Modifier.height(14.dp))
-        Text(
-            reveal.closing,
-            color = Color.White,
-            fontSize = 18.sp,
-            lineHeight = 25.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 10.dp)
-        )
-        Spacer(Modifier.height(22.dp))
-        Button(
-            onClick = onClose,
-            modifier = Modifier.fillMaxWidth().height(58.dp).testTag("proposal_finish"),
-            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
-        ) {
-            Text("Zurück zu Harmony", fontWeight = FontWeight.ExtraBold)
         }
     }
 }
