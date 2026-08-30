@@ -9,10 +9,13 @@
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
 **Stage-03 progress after PR #126:** 6/7  
 **Current Stage-03 substage after PR #126:** 03.7 — Reusable `Reveal`/result flow  
-**Stage-05 progress:** 2/5 = 40%  
+**Stage-05 progress:** **5/5 = 100%**  
 **Stage 05.1:** ✅ 7/7 = 100%  
 **Stage 05.2:** ✅ 6/6 = 100%  
-**Next Stage-05 substage:** 05.3 — Future / money / work / family
+**Stage 05.3:** ✅ complete  
+**Stage 05.4:** ✅ complete  
+**Stage 05.5:** ✅ complete — final audit PR #169, merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`  
+**Next Stage-05 action:** none; reopen only for a demonstrated regression
 
 ## Source-of-truth rule
 
@@ -129,52 +132,62 @@ Begin **03.7 — Reusable `Reveal`/result flow plus legacy compatibility during 
 
 ## Parallel Stage 05 — Questions Quality Rework
 
-### 05.1 Relationship / communication / everyday-life
+**Status:** ✅ COMPLETE  
+**Overall progress:** **5/5 = 100%**  
+**Final audit:** 25.26 / PR #169 / merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`  
+**Detailed final record:** `docs/360-rework/360_REWORK_STAGE05_FINAL.md`
 
-**Status:** ✅ DONE  
-**Progress:** **7/7 = 100%**
+### 05.1 — Relationship / communication / everyday-life
 
-Scope: Sections 01, 02, 06 and 12.
-
-- 72 raw packs.
-- 72/72 explicit Keep/Rewrite/Archive decisions.
-- Curated section counts: 16 / 17 / 16 / 17 = 66.
-- Six redundant/filler packs archived from the curated target output.
-- One additional Quick Game `h360_need_now_quick`, exactly 10 situations × 2 choices.
-- Final scoped target: 67 unique packs with canonical packs retained.
-- `NormensLoeschungen` currently targets only `h500_430_team_zukunft_offene_runde`, outside 05.1.
+**Status:** ✅ DONE — 7/7  
+Sections 01, 02, 06 and 12 were explicitly curated by stable ID, six confirmed filler/duplicate packs were archived, canonical relationship packs were retained, and `h360_need_now_quick` added 10 concrete two-choice situations.
 
 Package trail: 25.0 PR #59, 25.1 PR #60, 25.2 PR #62, 25.3 PR #64, 25.4 PR #69, 25.5 PR #70, 25.6 PR #71, 25.7 PR #76.
 
-### 05.2 Food / travel / leisure / culture
+### 05.2 — Food / travel / leisure / culture
 
-**Status:** ✅ DONE  
-**Progress:** **6/6 = 100%**  
-**Stage-05 overall after 25.13:** **2/5 = 40%**
-
-Scope: Sections 04, 05, 07 and 14.
-
-- 72 raw target packs: 18 each in travel, food, leisure and culture/media.
-- 72 stable runtime packs retained; every target pack has an explicit `REWRITE` decision.
-- Six concrete, subject-specific questions per pack replace the generator filler.
-- Final cross-section gate rejects the known generic answer quartets, including `Sicherheit / Freiheit / Abenteuer / Komfort` and `Kopf / Herz / Bauch / Erfahrung`.
-- The gate also rejects known English generator fragments, source typos and identical ordinary four-option sets reused across three or more different packs.
-- The intentional mechanic set `{user} / {partner} / Beide / Niemand` remains allowed.
-- Generated raw section files remain intact; curation stays isolated by stable pack ID.
+**Status:** ✅ DONE — 6/6  
+Sections 04, 05, 07 and 14 were converted from generator filler to concrete travel, food, hobby and media questions. The cross-section gate rejects known generic quartets, English generator fragments, source typos and repeated ordinary four-option sets.
 
 Package trail: 25.8 PR #97, 25.9 PR #108, 25.10 PR #114, 25.11 PR #117, 25.12 PR #132, 25.13 PR #136.
 
-The detailed 25.x ledger is `docs/360-rework/360_REWORK_STAGE05_WORKLOG.md`.
+### 05.3 — Future / family / money / work
+
+**Status:** ✅ DONE  
+The final 05.3 contract covers 72 raw packs, 59 visible survivors and 13 archives. Child/parent prompts are conditional, finance content avoids investment instructions, and existing topic-routing moves are regression-protected.
+
+Key finish packages: 25.15 Friends & Family / PR #145, 25.16 Money & Finance / PR #150, 25.17 Work & Career / PR #151, 25.18 cross-section audit / PR #152.
+
+### 05.4 — Health / psychology / intimacy
+
+**Status:** ✅ DONE  
+Health & Fitness and Psychology & Feelings were curated down to 17 survivors from 36 raw packs with 19 archives. The existing `naehe` and `intimleben` runtime overrides were reconciled and regression-protected at 12 and 18 curated questions. The central scenario finalizer was moved after content rewrites so scenario packs cannot shrink below eight decisions.
+
+Key finish packages: 25.19 Health / PR #153, scenario-contract fix PR #156, 25.20 Psychology / PR #157, 25.21 intimacy reconciliation / PR #158, 25.22 cross-section audit / PR #159.
+
+### 05.5 — Values / faith / society / humor / fantasy / teamwork
+
+**Status:** ✅ DONE  
+Six 18-pack raw sections = 108 raw packs. Final runtime target: 53 curated survivor packs / 55 archives.
+
+- Persönlichkeit & Werte — 8 survivors
+- Glaube & Religion — 4 survivors
+- Politik & Gesellschaft — 4 survivors
+- Humor & Lachen — 10 survivors
+- Fantasie / Was wäre wenn — 13 survivors
+- Teamwork & Challenge — 14 survivors
+
+25.23 protects the already-curated Values/Faith/Society/Fantasy survivor set. 25.24 / PR #164 curates Humor. 25.25 / PR #166 curates Teamwork. 25.26 / PR #169 provides the final non-mutating quality gate. The final audit protects archive visibility, visible topic taxonomy, eight-step scenarios, known generator residue and ordinary four-option sets copied across three or more different packs while allowing the intentional `{user}/{partner}/Beide/Niemand` mechanic set.
 
 ### NEXT EXACT ACTION — Stage 05
 
-Start **05.3 — Future / money / work / family** under the next narrow 25.x range. Do not reopen 05.1 or 05.2 unless a regression is proven.
+None. Stage 05 is closed at **5/5 = 100%**. Reopen only for a demonstrated content regression; new feature or runner work belongs to another stage.
 
 ## Newer parallel main changes preserved
 
-The separately merged **Sex & Intimität** rework at `c15a18488f2eb269aa03a3620c1c569f316d6be2` remains preserved and is not retroactively counted as completion of 05.4.
+The separately developed **Sex & Intimität** rework remains preserved and was explicitly reconciled into Stage 05.4 without rewriting its stable-ID runtime overrides.
 
-Open parallel Question Rework work remains outside 360-Rework progress until merged and explicitly reconciled.
+Parallel UI/navigation/answer-persistence work remains outside Stage-05 content progress and is preserved by narrow Stage-05 branches.
 
 ## Stage 06
 
@@ -191,5 +204,5 @@ Repository-wide GitHub Actions continue to terminate before executable workflow 
 - Do not overwrite newer main changes while reconciling tracker work.
 - Do not count unrelated content reworks toward Stage-03 engine progress.
 - Do not reopen Stage 02 feature implementation unless a regression is demonstrated.
-- Do not reopen completed Stage 05.1/05.2 unless a regression is demonstrated.
+- Do not reopen completed Stage 05 unless a concrete regression is demonstrated.
 - Do not claim a green Android build until one actually executes.
