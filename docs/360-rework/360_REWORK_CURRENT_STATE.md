@@ -14,7 +14,7 @@
 **Stage 05.2:** ✅ 6/6 = 100%  
 **Stage 05.3:** ✅ complete  
 **Stage 05.4:** ✅ complete  
-**Stage 05.5:** ✅ complete — final audit PR #169, merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`  
+**Stage 05.5:** ✅ complete — audit baseline PR #169; authoritative post-audit correction PR #178, merge `5e309627ec495bae4031173938b6ef8fea45bc8b`  
 **Next Stage-05 action:** none; reopen only for a demonstrated regression
 
 ## Source-of-truth rule
@@ -134,7 +134,8 @@ Begin **03.7 — Reusable `Reveal`/result flow plus legacy compatibility during 
 
 **Status:** ✅ COMPLETE  
 **Overall progress:** **5/5 = 100%**  
-**Final audit:** 25.26 / PR #169 / merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`  
+**Audit baseline:** 25.26 / PR #169 / merge `aab3acb80b245e2d4520a63ee36f91461a421dcf`  
+**Authoritative 05.5 correction:** 25.28 / PR #178 / merge `5e309627ec495bae4031173938b6ef8fea45bc8b`  
 **Detailed final record:** `docs/360-rework/360_REWORK_STAGE05_FINAL.md`
 
 ### 05.1 — Relationship / communication / everyday-life
@@ -168,16 +169,18 @@ Key finish packages: 25.19 Health / PR #153, scenario-contract fix PR #156, 25.2
 ### 05.5 — Values / faith / society / humor / fantasy / teamwork
 
 **Status:** ✅ DONE  
-Six 18-pack raw sections = 108 raw packs. Final runtime target: 53 curated survivor packs / 55 archives.
+Six 18-pack raw sections = 108 raw packs. **Authoritative corrected accounting after 25.28: 51 visible curated packs / 56 genuine archives / 1 merged source.**
 
-- Persönlichkeit & Werte — 8 survivors
-- Glaube & Religion — 4 survivors
-- Politik & Gesellschaft — 4 survivors
-- Humor & Lachen — 10 survivors
-- Fantasie / Was wäre wenn — 13 survivors
-- Teamwork & Challenge — 14 survivors
+- Persönlichkeit & Werte — 8 visible survivors
+- Glaube & Religion — 4 visible survivors
+- Politik & Gesellschaft — 4 visible survivors
+- Humor & Lachen — 10 visible survivors
+- Fantasie / Was wäre wenn — 13 visible survivors
+- Teamwork & Challenge — **12 visible survivors + 1 merged source**
 
-25.23 protects the already-curated Values/Faith/Society/Fantasy survivor set. 25.24 / PR #164 curates Humor. 25.25 / PR #166 curates Teamwork. 25.26 / PR #169 provides the final non-mutating quality gate. The final audit protects archive visibility, visible topic taxonomy, eight-step scenarios, known generator residue and ordinary four-option sets copied across three or more different packs while allowing the intentional `{user}/{partner}/Beide/Niemand` mechanic set.
+25.23 protects the already-curated Values/Faith/Society/Fantasy survivor set. 25.24 / PR #164 curates Humor. 25.25 / PR #166 was the initial Teamwork pass. 25.26 / PR #169 created the original final audit. **25.28 / PR #178 supersedes the detailed Teamwork/05.5 counts with the approved 12 REWRITE / 5 ARCHIVE / 1 MERGE model.** `h500_422_mutprobe_wer_eher` is the merged source: its useful travel, food, moral, personality and Teamwork ideas are redistributed into existing destination packs before the mixed source disappears from runtime. The final audit now distinguishes archive IDs from merged-source IDs and protects both against accidental runtime resurrection.
+
+The repository sorting skill permanently requires **re-home before archive** for mixed but useful content. A source removed only after its usable ideas were redistributed must be recorded as `MERGE`, not `ARCHIVE`.
 
 ### NEXT EXACT ACTION — Stage 05
 
@@ -205,4 +208,5 @@ Repository-wide GitHub Actions continue to terminate before executable workflow 
 - Do not count unrelated content reworks toward Stage-03 engine progress.
 - Do not reopen Stage 02 feature implementation unless a regression is demonstrated.
 - Do not reopen completed Stage 05 unless a concrete regression is demonstrated.
+- **Do not archive mixed useful content before checking whether it belongs in existing real destination packs; re-home/merge first.**
 - Do not claim a green Android build until one actually executes.
