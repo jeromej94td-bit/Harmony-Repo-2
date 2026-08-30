@@ -7,13 +7,13 @@ import org.junit.Test
 class ProposalExperienceOverlayIsolationContractTest {
 
     @Test
-    fun `proposal experience suppresses the legacy quiz runner behind it`() {
-        val source = source("app/src/main/java/com/example/MainActivity.kt")
+    fun `proposal experience paints an opaque base before translucent aurora layers`() {
+        val source = source("app/src/main/java/com/example/ui/screens/ProposalExperienceScreen.kt")
 
         assertTrue(
-            "QuizRunnerScreen must not stay rendered behind ProposalExperienceScreen",
+            "Proposal overlay needs an opaque base so a stale QuizRunner cannot ghost through it",
             source.contains(
-                "if (!isProposalExperienceOpen) {\n                    uiState.activeRun?.let { activeRun ->\n                        QuizRunnerScreen("
+                ".fillMaxSize()\n            .background(Color.Black)\n            .background(\n                Brush.radialGradient("
             )
         )
     }
