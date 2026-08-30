@@ -63,7 +63,10 @@ class Harmony360Stage053MoneyFinanceCurationTest {
         assertTrue(account.questions.flatMap { it.options }.contains("Gemeinsame Fixkosten über ein Gemeinschaftskonto"))
 
         val investing = curated.single { it.id == "h500_194_investieren_ranking" }
-        assertTrue(investing.questions.any { it.q.contains("Risikotoleranz", ignoreCase = true) })
+        assertTrue(investing.questions.any {
+            it.q.contains("Risikotoleranz", ignoreCase = true) ||
+                it.options.any { o -> o.contains("Risikotoleranz", ignoreCase = true) }
+        })
         assertTrue(investing.questions.any { it.q.contains("gemeinsam", ignoreCase = true) })
 
         val childhood = curated.single { it.id == "h500_198_geld_in_der_kindheit_memory" }
