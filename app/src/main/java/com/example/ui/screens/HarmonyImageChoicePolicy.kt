@@ -46,6 +46,8 @@ internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeas
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
     val pack = HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
+        ?: HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
+        ?: GeneratedContentRegistry.PACKS.firstOrNull { it.id == packId }
 
     if (pack != null) return harmonyImageChoiceKind(pack, questionIndex)
 
