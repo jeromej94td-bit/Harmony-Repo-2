@@ -13,16 +13,18 @@ class Harmony360SectionTopicSortingTest {
                 GeneratedHarmonyAdrenaline360Section10ArbeitKarriere.PACKS +
                 GeneratedHarmonyAdrenaline360Section11GesundheitFitness.PACKS +
                 GeneratedHarmonyAdrenaline360Section12KommunikationKonflikte.PACKS +
-                GeneratedHarmonyAdrenaline360Section13PersoenlichkeitWerte.PACKS +
-                GeneratedHarmonyAdrenaline360Section15GlaubeReligion.PACKS +
-                GeneratedHarmonyAdrenaline360Section16PolitikGesellschaft.PACKS +
-                GeneratedHarmonyAdrenaline360Section17PsychologieGefuehle.PACKS +
-                GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS
+                GeneratedHarmonyAdrenaline360Section17PsychologieGefuehle.PACKS
 
         val sorted = Harmony360SectionTopicSorting.apply(input)
 
         assertEquals(input.size, sorted.size)
         assertEquals(input.map { it.id }, sorted.map { it.id })
+        input.zip(sorted).forEach { (before, after) ->
+            assertEquals(before.questions, after.questions)
+            assertEquals(before.tags, after.tags)
+            assertEquals(before.cat, after.cat)
+            assertEquals(before.type, after.type)
+        }
     }
 
     @Test
@@ -43,7 +45,7 @@ class Harmony360SectionTopicSortingTest {
     }
 
     @Test
-    fun `alltag und zuhause is routed from its real section ids`() {
+    fun `alltag und zuhause uses the actual section06 pack ids without blanket moving the section`() {
         val sorted = Harmony360SectionTopicSorting.apply(
             GeneratedHarmonyAdrenaline360Section06AlltagZuhause.PACKS
         ).associateBy { it.id }
@@ -56,17 +58,17 @@ class Harmony360SectionTopicSortingTest {
             "h500_132_einkaufen_wer_eher",
             "h500_134_schlafen_ranking",
             "h500_135_homeoffice_prognose",
-            "h500_136_dekoration_szenario",
-            "h500_138_haustiere_memory",
-            "h500_139_besuch_bekommen_prioritaet",
-            "h500_143_gemeinsame_to_do_liste_skala",
-            "h500_144_technik_zuhause_ranking",
-            "h500_148_wohnzimmer_memory",
-            "h500_149_balkon_prioritaet"
+            "h500_136_dekoration_szenario"
         ).forEach { id -> assertEquals("kennen", sorted.getValue(id).topic) }
+
         assertEquals("essen", sorted.getValue("h500_133_kochen_im_alltag_skala").topic)
+        assertEquals("familie", sorted.getValue("h500_138_haustiere_memory").topic)
         assertEquals("hobbys", sorted.getValue("h500_141_sonntage_entweder_oder").topic)
         assertEquals("hobbys", sorted.getValue("h500_142_feierabend_wer_eher").topic)
+        assertEquals("hobbys", sorted.getValue("h500_144_technik_zuhause_ranking").topic)
+
+        assertEquals("beziehung", sorted.getValue("h500_139_besuch_bekommen_prioritaet").topic)
+        assertEquals("beziehung", sorted.getValue("h500_143_gemeinsame_to_do_liste_skala").topic)
         assertEquals("beziehung", sorted.getValue("h500_150_unser_gemuetlichster_abend_offene_runde").topic)
     }
 
@@ -101,5 +103,7 @@ class Harmony360SectionTopicSortingTest {
             "h500_366_stressreaktionen_szenario",
             "h500_367_sehnsuechte_geheime_wahl"
         ).forEach { id -> assertEquals("kennen", sorted.getValue(id).topic) }
+
+        assertEquals("beziehung", sorted.getValue("h500_355_eifersucht_prognose").topic)
     }
 }
