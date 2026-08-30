@@ -107,13 +107,16 @@ class Harmony360Stage053MoneyFinanceCurationTest {
     }
 
     @Test
-    fun `runtime registry uses money finance curation without changing section size`() {
+    fun `runtime registry uses money finance curation and preserves scenario journey contract`() {
         val runtime = GeneratedHarmonyAdrenaline360.PACKS.filter {
             "h360_section_09_geld_finanzen" in it.tags
         }
 
         assertEquals(expectedIds, runtime.map { it.id })
-        assertTrue(runtime.all { it.questions.size == 6 })
+        runtime.forEach { pack ->
+            val isScenario = pack.cat == "h360_szenario" || "mechanik_szenario" in pack.tags
+            assertEquals(if (isScenario) 8 else 6, pack.questions.size)
+        }
         assertTrue(runtime.single { it.id == "h500_203_notgroschen_skala" }
             .questions.any { it.q.contains("Notgroschen", ignoreCase = true) })
     }
