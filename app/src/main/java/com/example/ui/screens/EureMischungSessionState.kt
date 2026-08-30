@@ -12,14 +12,14 @@ import com.example.util.GeneratedImageResult
 import java.io.File
 import java.io.Serializable
 
-private data class EureMischungSavedResult(
+internal data class EureMischungSavedResult(
     val localFilePath: String,
     val aiDescription: String,
     val promptSummary: String,
     val timestamp: Long
 ) : Serializable
 
-private data class EureMischungPersistedState(
+internal data class EureMischungPersistedState(
     val parent1CustomUriString: String?,
     val parent2CustomUriString: String?,
     val selectedScenarioName: String,
