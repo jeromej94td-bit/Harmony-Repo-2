@@ -67,10 +67,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -127,38 +127,42 @@ fun EureMischungScreen(
     val coroutineScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberScrollState()
+    val sessionState = rememberSaveable(saver = EureMischungSessionState.Saver) {
+        EureMischungSessionState()
+    }
 
     // Photo Sources (Defaults to profile avatars, or custom picked Uris)
-    var parent1CustomUri by remember { mutableStateOf<Uri?>(null) }
-    var parent2CustomUri by remember { mutableStateOf<Uri?>(null) }
+    var parent1CustomUriString by sessionState.parent1CustomUriStringState
+    var parent2CustomUriString by sessionState.parent2CustomUriStringState
 
-    val parent1Source = parent1CustomUri?.toString() ?: profile.userAvatarPath
-    val parent2Source = parent2CustomUri?.toString() ?: profile.partnerAvatarPath
+    val parent1Source = parent1CustomUriString ?: profile.userAvatarPath
+    val parent2Source = parent2CustomUriString ?: profile.partnerAvatarPath
 
     // Config options
-    var selectedScenario by remember { mutableStateOf(BlendScenario.BABY) }
-    var selectedStyle by remember { mutableStateOf(BlendStyle.ANIME) }
-    var selectedGender by remember { mutableStateOf(BlendGender.SURPRISE) }
-    var customNotes by remember { mutableStateOf("") }
+    var selectedScenario by sessionState.selectedScenarioState
+    var selectedStyle by sessionState.selectedStyleState
+    var selectedGender by sessionState.selectedGenderState
+    var customNotes by sessionState.customNotesState
 
-    // Generation State
+    // Generation State. In-flight work is intentionally composition-scoped: after recreation the
+    // saved form/result returns idle instead of getting stuck in an orphaned loading state.
     var isGenerating by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var technicalErrorDetails by remember { mutableStateOf<String?>(null) }
-    var isTechDetailsExpanded by remember { mutableStateOf(false) }
-    var currentResult by remember { mutableStateOf<GeneratedImageResult?>(null) }
-    var isFullscreenImageOpen by remember { mutableStateOf(false) }
-    var isMomentSaved by remember { mutableStateOf(false) }
+    var errorMessage by sessionState.errorMessageState
+    var technicalErrorDetails by sessionState.technicalErrorDetailsState
+    var isTechDetailsExpanded by sessionState.isTechDetailsExpandedState
+    var currentResult by sessionState.currentResultState
+    var isFullscreenImageOpen by sessionState.isFullscreenImageOpenState
+    var isMomentSaved by sessionState.isMomentSavedState
 
-    // Session History
-    val historyList = remember { mutableStateListOf<GeneratedImageResult>() }
+    // Session History is restored from the already persisted local image files.
+    val historyList = sessionState.historyList
 
     // Launchers for Gallery selection
     val pickParent1Launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) parent1CustomUri = uri
+        if (uri != null) parent1CustomUriString = uri.toString()
     }
     val pickParent2Launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) parent2CustomUri = uri
+        if (uri != null) parent2CustomUriString = uri.toString()
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -636,6 +640,7 @@ fun EureMischungScreen(
                             isGenerating = false
                             result.onSuccess { gen ->
                                 currentResult = gen
+                                historyList.removeAll { it.localFilePath == gen.localFilePath }
                                 historyList.add(0, gen)
                                 Toast.makeText(context, "Eure Mischung wurde erschaffen! ✨", Toast.LENGTH_SHORT).show()
                             }.onFailure { err ->
@@ -751,8 +756,8 @@ fun EureMischungScreen(
                                 .size(88.dp)
                                 .clip(RoundedCornerShape(14.dp))
                                 .border(
-                                    if (hist == currentResult) 2.dp else 1.dp,
-                                    if (hist == currentResult) HarmonyPink else HarmonyLine,
+                                    if (hist.localFilePath == currentResult?.localFilePath) 2.dp else 1.dp,
+                                    if (hist.localFilePath == currentResult?.localFilePath) HarmonyPink else HarmonyLine,
                                     RoundedCornerShape(14.dp)
                                 )
                                 .clickable {
