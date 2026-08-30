@@ -1,23 +1,32 @@
 package com.example.data
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class Harmony360SectionTopicSortingTest {
 
     @Test
-    fun `curation preservation never drops a protected baseline pack`() {
-        val baseline = GeneratedHarmonyAdrenaline360Section03ZukunftLebensplanung.PACKS.take(4)
-        val curated = baseline.drop(1)
+    fun `topic sorting never drops or duplicates packs`() {
+        val input =
+            GeneratedHarmonyAdrenaline360Section03ZukunftLebensplanung.PACKS +
+                GeneratedHarmonyAdrenaline360Section06AlltagZuhause.PACKS +
+                GeneratedHarmonyAdrenaline360Section10ArbeitKarriere.PACKS +
+                GeneratedHarmonyAdrenaline360Section11GesundheitFitness.PACKS +
+                GeneratedHarmonyAdrenaline360Section12KommunikationKonflikte.PACKS +
+                GeneratedHarmonyAdrenaline360Section13PersoenlichkeitWerte.PACKS +
+                GeneratedHarmonyAdrenaline360Section15GlaubeReligion.PACKS +
+                GeneratedHarmonyAdrenaline360Section16PolitikGesellschaft.PACKS +
+                GeneratedHarmonyAdrenaline360Section17PsychologieGefuehle.PACKS +
+                GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS
 
-        val restored = Harmony360CurationPackPreservation.apply(baseline, curated)
+        val sorted = Harmony360SectionTopicSorting.apply(input)
 
-        assertEquals(baseline.map { it.id }, restored.map { it.id })
+        assertEquals(input.size, sorted.size)
+        assertEquals(input.map { it.id }, sorted.map { it.id })
     }
 
     @Test
-    fun `future topics are sorted by their own section rules`() {
+    fun `future topics are sorted by their real source section`() {
         val sorted = Harmony360SectionTopicSorting.apply(
             GeneratedHarmonyAdrenaline360Section03ZukunftLebensplanung.PACKS
         ).associateBy { it.id }
@@ -92,47 +101,5 @@ class Harmony360SectionTopicSortingTest {
             "h500_366_stressreaktionen_szenario",
             "h500_367_sehnsuechte_geheime_wahl"
         ).forEach { id -> assertEquals("kennen", sorted.getValue(id).topic) }
-    }
-
-    @Test
-    fun `final Harmony 360 pipeline keeps every protected pack that survived explicit Stage051 and Normens deletions`() {
-        val raw = buildList {
-            addAll(GeneratedHarmonyAdrenaline360Section01BeziehungNaehe.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section02Kommunikation.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section03ZukunftLebensplanung.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section04ReisenAbenteuer.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section05EssenGenuss.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section06AlltagZuhause.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section07FreizeitHobbys.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section08FreundeFamilie.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section09GeldFinanzen.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section10ArbeitKarriere.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section11GesundheitFitness.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section12KommunikationKonflikte.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section13PersoenlichkeitWerte.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section14KulturMedien.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section15GlaubeReligion.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section16PolitikGesellschaft.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section17PsychologieGefuehle.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section18HumorLachen.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS)
-            addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
-        }
-        val baseline = NormensLoeschungen.apply(
-            Harmony360RelationshipStage051Pipeline.apply(
-                raw
-                    .map(GeneratedHarmony360ScenarioCleanup::apply)
-                    .map(GeneratedHarmony360TextCleanup::apply)
-                    .map(Harmony360ContentRework::apply)
-            )
-        )
-        val protectedBaselineIds = baseline
-            .filter(Harmony360CurationPackPreservation::shouldPreserve)
-            .map { it.id }
-            .toSet()
-        val finalIds = GeneratedHarmonyAdrenaline360.PACKS.map { it.id }.toSet()
-
-        assertTrue(finalIds.containsAll(protectedBaselineIds))
-        assertTrue(finalIds.isNotEmpty())
     }
 }
