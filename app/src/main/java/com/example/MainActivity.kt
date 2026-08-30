@@ -315,11 +315,11 @@ fun HarmonyApp(
             memoryState.selectionMode -> {
                 memoryViewModel.clearSelection()
             }
-            uiState.selectedTab == 6 -> {
-                viewModel.selectTab(1)
+            uiState.selectedTab == 6 -> { // PackListScreen
+                viewModel.selectTab(1) // Back to GamesScreen
             }
             uiState.selectedTab != 0 -> {
-                viewModel.selectTab(0)
+                viewModel.selectTab(0) // Back to HomeScreen
             }
         }
     }
@@ -353,7 +353,7 @@ fun HarmonyApp(
             bottomBar = {
                 if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen && !isKidGeneratorOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
-                        6 -> 1
+                        6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
                     }
                     HarmonyBottomNav(
@@ -369,6 +369,7 @@ fun HarmonyApp(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
+                // Main Content depending on selected Tab
                 when (uiState.selectedTab) {
                     0 -> HomeScreen(
                         profile = uiState.profile,
@@ -535,11 +536,13 @@ fun HarmonyApp(
                     )
                 }
 
+                // Toast Notification Overlay
                 HarmonyToast(
                     message = uiState.toastMessage,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
 
+                // Profile Sheet
                 if (uiState.isProfileSheetOpen) {
                     val currentLanguage = AppLanguage.fromCode(uiState.appLanguage)
                     ProfileSheet(
@@ -559,6 +562,7 @@ fun HarmonyApp(
                     )
                 }
 
+                // Full-Screen Quiz Runner Overlay
                 uiState.activeRun?.let { activeRun ->
                     QuizRunnerScreen(
                         activeRun = activeRun,
