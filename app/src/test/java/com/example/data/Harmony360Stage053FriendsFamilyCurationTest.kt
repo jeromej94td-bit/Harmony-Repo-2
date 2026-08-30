@@ -111,13 +111,16 @@ class Harmony360Stage053FriendsFamilyCurationTest {
     }
 
     @Test
-    fun `runtime registry uses friends and family curation without changing section size`() {
+    fun `runtime registry uses friends and family curation and preserves scenario journey contract`() {
         val runtime = GeneratedHarmonyAdrenaline360.PACKS.filter {
             "h360_section_08_freunde_familie" in it.tags
         }
 
         assertEquals(expectedIds, runtime.map { it.id })
-        assertTrue(runtime.all { it.questions.size == 6 })
+        runtime.forEach { pack ->
+            val isScenario = pack.cat == "h360_szenario" || "mechanik_szenario" in pack.tags
+            assertEquals(if (isScenario) 8 else 6, pack.questions.size)
+        }
         assertTrue(runtime.single { it.id == "h500_174_familientreffen_ranking" }
             .questions.flatMap { it.options }.contains("Zeit für echte Gespräche"))
     }
