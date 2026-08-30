@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,9 +92,6 @@ internal fun ProposalExperienceScreen(
     }
 
     val previousPosition = ProposalExperienceRunnerPolicy.previous(position)
-    BackHandler(enabled = started && previousPosition != null) {
-        previousPosition?.let(::moveTo)
-    }
 
     val step = ProposalExperienceRunnerPolicy.steps.getOrNull(position.stepIndex)
         ?: ProposalExperienceDefinitions.perfectProposal.steps.last()
