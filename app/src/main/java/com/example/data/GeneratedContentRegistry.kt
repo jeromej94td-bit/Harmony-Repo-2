@@ -26,7 +26,9 @@ object GeneratedContentRegistry {
     }
 
     private fun runtimePack(pack: GenPack): GenPack {
-        var result = GeneratedContentRepairPolicy.repair(pack)
+        var result = Harmony360SectionTopicSorting.apply(
+            GeneratedContentRepairPolicy.repair(pack)
+        )
 
         // Deep Talk owns a dedicated full-screen, two-person reveal flow. The legacy
         // "disc" runner renders every question in one long discussion list and would
@@ -61,17 +63,12 @@ object GeneratedContentRegistry {
     private fun normalizeLoadedCustomPacks() {
         val customPacks = DeveloperDataManager._customPacks
         for (index in customPacks.indices) {
-            val pack = customPacks[index]
-
-            // Familienplanung is a Familie topic. Older Dev-Studio exports still stored
-            // this pack under Beziehung and would otherwise win over the curated topic.
-            if (
-                pack.id == "h500_061_familienplanung_entweder_oder" &&
-                pack.topic != "familie"
-            ) {
-                customPacks[index] = pack.copy(topic = "familie")
+            val retopiced = Harmony360SectionTopicSorting.apply(customPacks[index])
+            if (retopiced != customPacks[index]) {
+                customPacks[index] = retopiced
             }
 
+            val pack = customPacks[index]
             if (
                 pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
                 pack.type == "quiz" &&

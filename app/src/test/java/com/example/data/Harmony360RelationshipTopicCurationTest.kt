@@ -21,14 +21,21 @@ class Harmony360RelationshipTopicCurationTest {
         assertEquals("kennen", requirePack("h500_211_arbeitszeiten_entweder_oder").topic)
         assertEquals("essen", requirePack("h500_231_ernaehrung_entweder_oder").topic)
         assertEquals("hobbys", requirePack("h500_236_sportliche_ziele_szenario").topic)
+        assertEquals("kennen", requirePack("h500_216_work_life_balance_szenario").topic)
+        assertEquals("geld", requirePack("h500_225_ruhestand_prognose").topic)
+        assertEquals("kennen", requirePack("h500_238_krank_sein_memory").topic)
+        assertEquals("kennen", requirePack("h500_250_gemeinsame_gesundheit_offene_runde").topic)
+        assertEquals("moral", requirePack("h500_254_kompromisse_ranking").topic)
+        assertEquals("moral", requirePack("h500_257_geheimnisse_geheime_wahl").topic)
+        assertEquals("moral", requirePack("h500_260_ehrlichkeit_offene_runde").topic)
     }
 
     @Test
     fun communicationAndStrongPairContentStayInRelationship() {
         assertEquals("beziehung", requirePack("h500_026_zuhoeren_szenario").topic)
         assertEquals("beziehung", requirePack("h500_251_streitkultur_entweder_oder").topic)
-        assertEquals("beziehung", requirePack("h500_216_work_life_balance_szenario").topic)
-        assertEquals("beziehung", requirePack("h500_238_krank_sein_memory").topic)
+        assertEquals("beziehung", requirePack("h500_220_job_und_beziehung_offene_runde").topic)
+        assertEquals("beziehung", requirePack("h500_355_eifersucht_prognose").topic)
         assertEquals("beziehung", requirePack("h500_402_telepathie_wer_eher").topic)
         assertEquals("beziehung", requirePack("h500_410_unsere_traumwelt_offene_runde").topic)
         assertEquals("beziehung", requirePack("h500_411_zusammenhalt_entweder_oder").topic)
