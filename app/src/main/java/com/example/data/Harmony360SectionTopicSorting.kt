@@ -1,5 +1,7 @@
 package com.example.data
 
+import com.example.data.model.QuestionPack
+
 /**
  * Non-destructive top-level topic routing, grouped by the real Harmony source sections.
  * This is intentionally a pure retagging pass: stable ids, questions, mechanics and order stay intact.
@@ -96,6 +98,11 @@ object Harmony360SectionTopicSorting {
     fun apply(packs: List<GenPack>): List<GenPack> = packs.map(::apply)
 
     fun apply(pack: GenPack): GenPack {
+        val topic = topicByPackId[pack.id] ?: return pack
+        return if (topic == pack.topic) pack else pack.copy(topic = topic)
+    }
+
+    fun apply(pack: QuestionPack): QuestionPack {
         val topic = topicByPackId[pack.id] ?: return pack
         return if (topic == pack.topic) pack else pack.copy(topic = topic)
     }
