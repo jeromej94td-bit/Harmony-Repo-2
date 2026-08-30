@@ -8,7 +8,7 @@ import org.junit.Test
 class SpecialFlowBackConfirmationContractTest {
 
     @Test
-    fun `system back requests confirmation instead of closing special flows`() {
+    fun `system back requests confirmation instead of closing release special flows`() {
         val source = source("app/src/main/java/com/example/MainActivity.kt")
         val backHandler = source.substringAfter("BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen)")
             .substringBefore("AmbientBackground {")
@@ -17,21 +17,21 @@ class SpecialFlowBackConfirmationContractTest {
         assertTrue(source.contains("var isSpecialFlowExitConfirmOpen by remember"))
         assertTrue(backHandler.contains("isProposalExperienceOpen -> { isSpecialFlowExitConfirmOpen = true }"))
         assertTrue(backHandler.contains("isEureMischungOpen -> { isSpecialFlowExitConfirmOpen = true }"))
-        assertTrue(backHandler.contains("isKidGeneratorOpen -> { isSpecialFlowExitConfirmOpen = true }"))
 
         assertFalse(backHandler.contains("isProposalExperienceOpen -> { isProposalExperienceOpen = false }"))
         assertFalse(backHandler.contains("isEureMischungOpen -> { isEureMischungOpen = false }"))
-        assertFalse(backHandler.contains("isKidGeneratorOpen -> { isKidGeneratorOpen = false }"))
+        assertFalse(source.contains("isKidGeneratorOpen"))
+        assertFalse(source.contains("KidGeneratorScreen"))
     }
 
     @Test
-    fun `special flow leave dialog keeps flow open until explicit confirmation`() {
+    fun `special flow leave dialog keeps release flow open until explicit confirmation`() {
         val source = source("app/src/main/java/com/example/MainActivity.kt")
         val normalized = source.replace(Regex("\\s+"), " ")
 
         assertTrue(normalized.contains("if (isSpecialFlowExitConfirmOpen) { androidx.compose.material3.AlertDialog("))
         assertTrue(normalized.contains("onDismissRequest = { isSpecialFlowExitConfirmOpen = false }"))
-        assertTrue(normalized.contains("isSpecialFlowExitConfirmOpen = false when { isProposalExperienceOpen -> isProposalExperienceOpen = false isEureMischungOpen -> isEureMischungOpen = false isKidGeneratorOpen -> isKidGeneratorOpen = false }"))
+        assertTrue(normalized.contains("isSpecialFlowExitConfirmOpen = false when { isProposalExperienceOpen -> isProposalExperienceOpen = false isEureMischungOpen -> isEureMischungOpen = false }"))
     }
 
     private fun source(path: String): String {

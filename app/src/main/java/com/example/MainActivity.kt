@@ -60,7 +60,6 @@ import com.example.ui.components.HarmonyTopBar
 import com.example.ui.screens.ChatScreen
 import com.example.ui.screens.DevStudioScreen
 import com.example.ui.screens.EureMischungScreen
-import com.example.ui.screens.KidGeneratorScreen
 import com.example.ui.screens.GamesScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.IntrospectionExperienceScreen
@@ -179,7 +178,6 @@ fun HarmonyApp(
     var isPandaExitConfirmOpen by rememberSaveable { mutableStateOf(false) }
     var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
     var isEureMischungOpen by remember { mutableStateOf(false) }
-    var isKidGeneratorOpen by remember { mutableStateOf(false) }
     var isProposalExperienceOpen by rememberSaveable { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
@@ -263,7 +261,7 @@ fun HarmonyApp(
     val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
-    val canHandleBack = isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isEureMischungOpen || isKidGeneratorOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
+    val canHandleBack = isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isEureMischungOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
@@ -283,9 +281,6 @@ fun HarmonyApp(
                 isSpecialFlowExitConfirmOpen = true
             }
             isEureMischungOpen -> {
-                isSpecialFlowExitConfirmOpen = true
-            }
-            isKidGeneratorOpen -> {
                 isSpecialFlowExitConfirmOpen = true
             }
             isQuizActive -> {
@@ -338,7 +333,7 @@ fun HarmonyApp(
                 ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen && !isKidGeneratorOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
                     HarmonyTopBar(
                         userName = uiState.profile.userName,
                         partnerName = uiState.profile.partnerName,
@@ -351,7 +346,7 @@ fun HarmonyApp(
                 }
             },
             bottomBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen && !isKidGeneratorOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen && !isEureMischungOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
                         6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
@@ -406,7 +401,7 @@ fun HarmonyApp(
                             if (catId == "unterbewusstsein") {
                                 isIntrospectionOpen = true
                             } else if (catId == "mischung") {
-                                isKidGeneratorOpen = true
+                                isEureMischungOpen = true
                             } else {
                                 viewModel.openCategory(catId)
                             }
@@ -746,18 +741,6 @@ fun HarmonyApp(
                     )
                 }
 
-                if (isKidGeneratorOpen) {
-                    KidGeneratorScreen(
-                        profile = uiState.profile,
-                        appLanguage = uiState.appLanguage,
-                        onClose = { isKidGeneratorOpen = false },
-                        onAddMoment = { title, content, emoji ->
-                            viewModel.addMoment(title, content)
-                            viewModel.showToast("Zu euren Momenten hinzugefügt! ✨")
-                        }
-                    )
-                }
-
                 if (isPandaExitConfirmOpen) {
                     androidx.compose.material3.AlertDialog(
                         onDismissRequest = { isPandaExitConfirmOpen = false },
@@ -822,7 +805,6 @@ fun HarmonyApp(
                                     when {
                                         isProposalExperienceOpen -> isProposalExperienceOpen = false
                                         isEureMischungOpen -> isEureMischungOpen = false
-                                        isKidGeneratorOpen -> isKidGeneratorOpen = false
                                     }
                                 }
                             ) {
