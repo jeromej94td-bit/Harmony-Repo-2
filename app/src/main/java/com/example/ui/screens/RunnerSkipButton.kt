@@ -17,6 +17,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.model.LoveBalanceQuestionPolicy
+import com.example.ui.HarmonyViewModel
 import com.example.ui.theme.HarmonyPinkSoft
 import com.example.util.LanguageManager
 
@@ -26,6 +30,16 @@ fun RunnerSkipButton(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val activeRun = viewModel<HarmonyViewModel>()
+        .uiState
+        .collectAsStateWithLifecycle()
+        .value
+        .activeRun
+
+    if (activeRun?.pack?.id == LoveBalanceQuestionPolicy.PACK_ID && activeRun.currentIndex == 0) {
+        return
+    }
+
     Row(
         modifier = modifier
             .navigationBarsPadding()
