@@ -1,6 +1,8 @@
 package com.example.ui.screens
 
 import com.example.data.model.HarmonyPacksData
+import com.example.data.model.LoveBalanceQuestionPolicy
+import com.example.data.model.Question
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -83,6 +85,26 @@ class HarmonyImageChoiceQuestionTest {
         assertNull(harmonyImageChoiceKind("essenreden", 2))
         assertNull(harmonyImageChoiceKind("reisevor", 3))
         assertNull(harmonyImageChoiceKind("other", 4))
+    }
+
+    @Test
+    fun `love balance first slot keeps happy couple renderer for dynamic pack content`() {
+        val embeddedPack = HarmonyPacksData.DEFAULT_PACKS.first {
+            it.id == LoveBalanceQuestionPolicy.PACK_ID
+        }
+        val dynamicLikePack = embeddedPack.copy(
+            questions = listOf(
+                Question(
+                    q = "Remote content may change this prompt",
+                    options = listOf("A", "B", "C", "D")
+                )
+            )
+        )
+
+        assertEquals(
+            HarmonyImageChoiceKind.HAPPY_COUPLE,
+            harmonyImageChoiceKind(dynamicLikePack, 0)
+        )
     }
 
     @Test
