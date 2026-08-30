@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,12 +23,18 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.HarmonyPinkSoft
 import com.example.util.LanguageManager
 
+internal object RunnerSkipVisibilityState {
+    var suppressed by mutableStateOf(false)
+}
+
 @Composable
 fun RunnerSkipButton(
     appLanguage: String,
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (RunnerSkipVisibilityState.suppressed) return
+
     Row(
         modifier = modifier
             .navigationBarsPadding()
