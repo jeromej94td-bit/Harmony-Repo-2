@@ -62,6 +62,10 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
 }
 
 internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): HarmonyImageChoiceKind? {
+    if (pack.id == LoveBalanceQuestionPolicy.PACK_ID && questionIndex == 0) {
+        return HarmonyImageChoiceKind.HAPPY_COUPLE
+    }
+
     val rawQuestion = pack.questions.getOrNull(questionIndex)?.q
 
     if (PhotoQuestionPolicy.modeFor(pack.id, questionIndex, rawQuestion) != null) {

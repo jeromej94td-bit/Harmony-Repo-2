@@ -9,6 +9,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.data.model.HarmonyPacksData
+import com.example.data.model.LoveBalanceQuestionPolicy
+import com.example.data.model.Question
 import com.example.ui.components.AmbientBackground
 import com.example.ui.theme.HarmonyTheme
 import org.junit.Assert.assertEquals
@@ -64,5 +66,25 @@ class HappyCoupleNumberPickRegressionTest {
             assertEquals((index + 1).toString(), pickedAnswer)
             composeRule.onNodeWithTag("happy_couple_option_${index}_selected").assertExists()
         }
+    }
+
+    @Test
+    fun `love balance first slot keeps happy couple renderer when dynamic prompt changes`() {
+        val embeddedPack = HarmonyPacksData.DEFAULT_PACKS.first {
+            it.id == LoveBalanceQuestionPolicy.PACK_ID
+        }
+        val dynamicLikePack = embeddedPack.copy(
+            questions = listOf(
+                Question(
+                    q = "Remote content may change this prompt",
+                    options = listOf("A", "B", "C", "D")
+                )
+            )
+        )
+
+        assertEquals(
+            HarmonyImageChoiceKind.HAPPY_COUPLE,
+            harmonyImageChoiceKind(dynamicLikePack, 0)
+        )
     }
 }
