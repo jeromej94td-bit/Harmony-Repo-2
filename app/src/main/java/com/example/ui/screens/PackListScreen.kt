@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.CATALOG_PACKS
 import com.example.data.model.AnswerEntity
 import com.example.data.model.HarmonyPacksData
 import com.example.util.LanguageManager
@@ -48,7 +49,7 @@ fun PackListScreen(
         else -> LanguageManager.tr("Alle Pakete", appLanguage)
     }
 
-    var list = HarmonyPacksData.PACKS.filter { pack ->
+    var list = HarmonyPacksData.CATALOG_PACKS.filter { pack ->
         when {
             selectedTopicId != null -> pack.topic == selectedTopicId
             selectedCategoryId != null -> pack.cat == selectedCategoryId
