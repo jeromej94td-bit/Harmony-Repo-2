@@ -61,16 +61,18 @@ class StableSpecialQuestionRoutingTest {
     }
 
     @Test
-    fun `happy couple mechanic follows its actual prompt after reorder`() {
+    fun `happy couple mechanic only follows its exact visual prompt after reorder`() {
         val source = pack(
             "liebegleichgewicht",
             listOf(
                 Question("Andere Frage", listOf("A", "B")),
+                Question("Welches Paar ist GLÜCKLICH?", listOf("1", "2", "3", "4")),
                 Question("Was fällt dir in unserer Beziehung leichter?", listOf("Geben", "Nehmen"))
             )
         )
 
         assertEquals(HarmonyImageChoiceKind.HAPPY_COUPLE, harmonyImageChoiceKind(source, 1))
         assertNull(harmonyImageChoiceKind(source, 0))
+        assertNull(harmonyImageChoiceKind(source, 2))
     }
 }
