@@ -39,9 +39,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,20 +83,38 @@ fun PandaEitherOrScreen(
     val context = LocalContext.current
     val rawPack = remember { HarmonyPacksData.PACKS.first { it.id == PANDA_EITHER_OR_PACK_ID } }
     val displayPack = remember(appLanguage) { LanguageManager.translatePack(rawPack, appLanguage) }
-    val completedBeforeStart = remember {
-        answers.asSequence()
-            .filter { it.packId == PANDA_EITHER_OR_PACK_ID }
-            .filter { EitherOrAnswerCodec.decode(it.answerText) != null }
-            .map { it.questionIndex }
-            .toSet()
-    }
-    val questionOrder = remember { rawPack.pairs.indices.filterNot { it in completedBeforeStart }.shuffled() }
 
-    var orderPosition by remember { mutableIntStateOf(0) }
-    var step by remember { mutableStateOf(CoupleGameStep.USER_CHOICE) }
-    var userChoice by remember { mutableStateOf<String?>(null) }
-    var partnerChoice by remember { mutableStateOf<String?>(null) }
-    var reactionKey by remember { mutableIntStateOf(0) }
+    // Freeze the session baseline and shuffled order as strings so Activity recreation
+    // cannot reshuffle the active game or double-count answers saved during this session.
+    val completedBeforeStartEncoded by rememberSaveable {
+        mutableStateOf(
+            answers.asSequence()
+                .filter { it.packId == PANDA_EITHER_OR_PACK_ID }
+                .filter { EitherOrAnswerCodec.decode(it.answerText) != null }
+                .map { it.questionIndex }
+                .sorted()
+                .joinToString(",")
+        )
+    }
+    val completedBeforeStart = remember(completedBeforeStartEncoded) {
+        decodeIndexList(completedBeforeStartEncoded).toSet()
+    }
+    val questionOrderEncoded by rememberSaveable {
+        mutableStateOf(
+            rawPack.pairs.indices
+                .filterNot { it in completedBeforeStart }
+                .shuffled()
+                .joinToString(",")
+        )
+    }
+    val questionOrder = remember(questionOrderEncoded) { decodeIndexList(questionOrderEncoded) }
+
+    var orderPosition by rememberSaveable { mutableStateOf(0) }
+    var stepName by rememberSaveable { mutableStateOf(CoupleGameStep.USER_CHOICE.name) }
+    val step = CoupleGameStep.valueOf(stepName)
+    var userChoice by rememberSaveable { mutableStateOf<String?>(null) }
+    var partnerChoice by rememberSaveable { mutableStateOf<String?>(null) }
+    var reactionKey by rememberSaveable { mutableStateOf(0) }
 
     val questionIndex = questionOrder.getOrNull(orderPosition)
     val rawPair = questionIndex?.let(rawPack.pairs::get)
@@ -121,7 +139,7 @@ fun PandaEitherOrScreen(
         orderPosition -= 1
         userChoice = null
         partnerChoice = null
-        step = CoupleGameStep.USER_CHOICE
+        stepName = CoupleGameStep.USER_CHOICE.name
     }
 
     LaunchedEffect(reactionKey) {
@@ -182,10 +200,13 @@ fun PandaEitherOrScreen(
                                 "current" to (completedBeforeStart.size + orderPosition + 1).toString(),
                                 "total" to rawPack.pairs.size.toString()
                             )
-                        ) { userChoice = it; step = CoupleGameStep.HANDOVER }
+                        ) {
+                            userChoice = it
+                            stepName = CoupleGameStep.HANDOVER.name
+                        }
 
                         CoupleGameStep.HANDOVER -> HandoverPanel(profile.partnerName, appLanguage) {
-                            step = CoupleGameStep.PARTNER_CHOICE
+                            stepName = CoupleGameStep.PARTNER_CHOICE.name
                         }
 
                         CoupleGameStep.PARTNER_CHOICE -> CoupleChoicePanel(
@@ -195,7 +216,7 @@ fun PandaEitherOrScreen(
                             partnerChoice = it
                             onSaveAnswer(questionIndex, userChoice.orEmpty(), it)
                             reactionKey += 1
-                            step = CoupleGameStep.REVEAL
+                            stepName = CoupleGameStep.REVEAL.name
                         }
 
                         CoupleGameStep.REVEAL -> RevealPanel(
@@ -205,7 +226,7 @@ fun PandaEitherOrScreen(
                             orderPosition += 1
                             userChoice = null
                             partnerChoice = null
-                            step = CoupleGameStep.USER_CHOICE
+                            stepName = CoupleGameStep.USER_CHOICE.name
                         }
                     }
                 }
@@ -324,6 +345,11 @@ private fun CompletedEitherOrCard(completed: Int, appLanguage: String, onExit: (
             Text(LanguageManager.tr("Zurück zu den Spielen", appLanguage), fontWeight = FontWeight.Bold)
         }
     }
+}
+
+private fun decodeIndexList(encoded: String): List<Int> {
+    if (encoded.isBlank()) return emptyList()
+    return encoded.split(',').mapNotNull { it.toIntOrNull() }
 }
 
 private fun vibrateHighFive(context: Context) {

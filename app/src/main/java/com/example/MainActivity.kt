@@ -175,8 +175,8 @@ fun HarmonyApp(
     val memoryViewModel: MemoryViewModel = composeViewModel(factory = memoryFactory)
     val memoryState by memoryViewModel.uiState.collectAsStateWithLifecycle()
     var isIntrospectionOpen by rememberSaveable { mutableStateOf(false) }
-    var isPandaEitherOrOpen by remember { mutableStateOf(false) }
-    var isPandaExitConfirmOpen by remember { mutableStateOf(false) }
+    var isPandaEitherOrOpen by rememberSaveable { mutableStateOf(false) }
+    var isPandaExitConfirmOpen by rememberSaveable { mutableStateOf(false) }
     var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
     var isEureMischungOpen by remember { mutableStateOf(false) }
     var isKidGeneratorOpen by remember { mutableStateOf(false) }
