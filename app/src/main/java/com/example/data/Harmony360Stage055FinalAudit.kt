@@ -16,13 +16,18 @@ object Harmony360Stage055FinalAudit {
         "reisen", "familie", "hobbys", "filme_serien", "essen"
     )
 
+    val expectedMergedIds: Set<String> = Harmony360TeamworkSectionCuration.decisions
+        .filterValues { it == Harmony360TeamworkSectionCuration.CurationDecision.MERGE }
+        .keys
+
     val expectedVisibleIds: Set<String> = linkedSetOf<String>().apply {
         addAll(Harmony360Stage055ExistingCurationAudit.expectedVisibleIds)
         addAll(Harmony360HumorSectionCuration.decisions.filterValues {
             it != Harmony360HumorSectionCuration.CurationDecision.ARCHIVE
         }.keys)
         addAll(Harmony360TeamworkSectionCuration.decisions.filterValues {
-            it != Harmony360TeamworkSectionCuration.CurationDecision.ARCHIVE
+            it == Harmony360TeamworkSectionCuration.CurationDecision.REWRITE ||
+                it == Harmony360TeamworkSectionCuration.CurationDecision.KEEP
         }.keys)
     }
 
@@ -37,7 +42,9 @@ object Harmony360Stage055FinalAudit {
         }
     }
 
-    val expectedArchivedIds: Set<String> by lazy { allRawIds - expectedVisibleIds }
+    val expectedArchivedIds: Set<String> by lazy {
+        allRawIds - expectedVisibleIds - expectedMergedIds
+    }
 
     private val intentionalMechanicSets = setOf(
         normalizedOptions(listOf("{user}", "{partner}", "Beide", "Niemand"))
@@ -78,8 +85,9 @@ object Harmony360Stage055FinalAudit {
 
         if (raw.size != 108) violations += "expected 108 raw packs but found ${raw.size}"
         if (raw.map { it.id }.toSet().size != raw.size) violations += "raw Stage 05.5 ids are not unique"
-        if (expectedVisibleIds.size != 53) violations += "expected 53 visible ids but ledger has ${expectedVisibleIds.size}"
-        if (expectedArchivedIds.size != 55) violations += "expected 55 archived ids but ledger has ${expectedArchivedIds.size}"
+        if (expectedVisibleIds.size != 51) violations += "expected 51 visible ids but ledger has ${expectedVisibleIds.size}"
+        if (expectedArchivedIds.size != 56) violations += "expected 56 archived ids but ledger has ${expectedArchivedIds.size}"
+        if (expectedMergedIds.size != 1) violations += "expected one merged source id but ledger has ${expectedMergedIds.size}"
 
         val rawIds = raw.map { it.id }.toSet()
         if (rawIds != allRawIds) violations += "raw Stage 05.5 inventory differs from canonical section inventory"
@@ -88,9 +96,11 @@ object Harmony360Stage055FinalAudit {
         val missing = expectedVisibleIds - runtimeIds
         val unexpected = runtimeIds - expectedVisibleIds
         if (missing.isNotEmpty()) violations += "missing curated ids: ${missing.sorted()}"
-        if (unexpected.isNotEmpty()) violations += "archived/unexpected ids visible again: ${unexpected.sorted()}"
+        if (unexpected.isNotEmpty()) violations += "archived/merged/unexpected ids visible again: ${unexpected.sorted()}"
         val resurrected = runtimeIds intersect expectedArchivedIds
         if (resurrected.isNotEmpty()) violations += "archived ids resurrected: ${resurrected.sorted()}"
+        val mergedStillVisible = runtimeIds intersect expectedMergedIds
+        if (mergedStillVisible.isNotEmpty()) violations += "merged source ids still visible: ${mergedStillVisible.sorted()}"
 
         violations += Harmony360Stage055ExistingCurationAudit.audit(rawPacks, runtimePacks)
             .map { "existing-sections: $it" }
