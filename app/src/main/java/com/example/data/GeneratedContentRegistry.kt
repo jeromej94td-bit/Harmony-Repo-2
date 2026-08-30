@@ -73,8 +73,8 @@ object GeneratedContentRegistry {
                 pack.id == LoveBalanceQuestionPolicy.PACK_ID &&
                 pack.type == "quiz" &&
                 (
-                    pack.questions.firstOrNull()?.q != LoveBalanceQuestionPolicy.QUESTION_TEXT ||
-                        pack.questions.count { it.q == LoveBalanceQuestionPolicy.QUESTION_TEXT } != 1
+                    !LoveBalanceQuestionPolicy.isHappyCoupleQuestionText(pack.questions.firstOrNull()?.q) ||
+                        pack.questions.count { LoveBalanceQuestionPolicy.isHappyCoupleQuestionText(it.q) } != 1
                     )
             ) {
                 customPacks[index] = LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(pack)

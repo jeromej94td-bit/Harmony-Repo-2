@@ -983,10 +983,7 @@ fun QuizRunnerScreen(
                         val questionAnimationKey = "${pack.id}_${activeRun.currentIndex}_question"
                         // Dev-Studio packs may retain a different generated ID, but this exact
                         // question must always render its four visual choices.
-                        val isHappyCoupleQuestion = q?.q
-                            ?.replace(Regex("\\s+"), " ")
-                            ?.trim()
-                            ?.equals(LoveBalanceQuestionPolicy.QUESTION_TEXT, ignoreCase = true) == true
+                        val isHappyCoupleQuestion = pack.id == LoveBalanceQuestionPolicy.PACK_ID && activeRun.currentIndex == 0
                         val imageChoiceKind = if (isHappyCoupleQuestion) {
                             HarmonyImageChoiceKind.HAPPY_COUPLE
                         } else {

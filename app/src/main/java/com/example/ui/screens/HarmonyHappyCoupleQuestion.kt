@@ -68,11 +68,8 @@ internal fun HarmonyHappyCoupleQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val answerOptions = options.takeIf {
-        it.size >= 4 && it.take(4) == happyCoupleFallbackOptions
-    }?.take(4) ?: happyCoupleFallbackOptions
-    val displayQuestion = question.takeIf { it == LoveBalanceQuestionPolicy.QUESTION_TEXT }
-        ?: LoveBalanceQuestionPolicy.QUESTION_TEXT
+    val answerOptions = if (options.size >= 4) options.take(4) else happyCoupleFallbackOptions
+    val displayQuestion = question.takeIf { it.isNotBlank() } ?: LoveBalanceQuestionPolicy.QUESTION_TEXT
     val containerShape = RoundedCornerShape(28.dp)
 
     Column(
@@ -261,7 +258,7 @@ private fun HarmonyHappyCoupleCard(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = option,
+                text = (index + 1).toString(),
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,

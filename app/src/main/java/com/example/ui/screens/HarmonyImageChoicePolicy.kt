@@ -6,6 +6,7 @@ import com.example.data.model.FullscreenGameMechanicKind
 import com.example.data.model.FullscreenGameMechanicPolicy
 import com.example.data.model.HarmonyPacksData
 import com.example.data.model.LoveBalanceQuestionPolicy
+import com.example.data.model.Question
 import com.example.data.model.QuestionPack
 import com.example.data.model.SexIntimacyRevealPolicy
 
@@ -45,11 +46,27 @@ private const val PROPOSAL_LOCATION_PROMPT = "Welche Umgebung w√ºrdest du dir f√
 internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
-    val pack = HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
+    val qPack = HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
         ?: HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
-        ?: GeneratedContentRegistry.PACKS.firstOrNull { it.id == packId }
+    if (qPack != null) {
+        return harmonyImageChoiceKind(qPack, questionIndex)
+    }
 
-    if (pack != null) return harmonyImageChoiceKind(pack, questionIndex)
+    val genPack = GeneratedContentRegistry.PACKS.firstOrNull { it.id == packId }
+    if (genPack != null) {
+        val mappedPack = QuestionPack(
+            id = genPack.id,
+            title = genPack.title,
+            tags = genPack.tags,
+            cat = genPack.cat,
+            topic = genPack.topic,
+            type = genPack.type,
+            questions = genPack.questions.map { Question(q = it.q, options = it.options) },
+            pairs = genPack.pairs,
+            emoji = genPack.emoji
+        )
+        return harmonyImageChoiceKind(mappedPack, questionIndex)
+    }
 
     // Compatibility fallback for callers that only know an id/index for a pack not loaded yet.
     if (PhotoQuestionPolicy.modeFor(packId, questionIndex) != null) {
@@ -62,11 +79,12 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
 }
 
 internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): HarmonyImageChoiceKind? {
+    val q = pack.questions.getOrNull(questionIndex)
     if (pack.id == LoveBalanceQuestionPolicy.PACK_ID && questionIndex == 0) {
         return HarmonyImageChoiceKind.HAPPY_COUPLE
     }
 
-    val rawQuestion = pack.questions.getOrNull(questionIndex)?.q
+    val rawQuestion = q?.q
 
     if (PhotoQuestionPolicy.modeFor(pack.id, questionIndex, rawQuestion) != null) {
         return HarmonyImageChoiceKind.MEMORY_MATCH
