@@ -2,7 +2,7 @@ package com.example.data
 
 /** Small aggregator; content is split into 20 section objects to avoid JVM <clinit> size limits. */
 object GeneratedHarmonyAdrenaline360 {
-    const val VERSION: Long = 1787868780003L
+    const val VERSION: Long = 1788052300000L
 
     val CATEGORIES: List<GenCategory> = listOf(
         GenCategory(id="h360_skala", name="Skalen-Match", emoji="🎚️", color=0xFF9DB2FF),
@@ -37,28 +37,38 @@ object GeneratedHarmonyAdrenaline360 {
             addAll(GeneratedHarmonyAdrenaline360Section19FantasieWasWaereWenn.PACKS)
             addAll(GeneratedHarmonyAdrenaline360Section20TeamworkChallenge.PACKS)
         }
-        Harmony360FutureSectionCuration.apply(
+
+        // This is the last point where explicit deletion layers are allowed to remove packs.
+        // Everything after this point may rewrite/retopic content, but must not make questions vanish.
+        val baseline = NormensLoeschungen.apply(
+            Harmony360RelationshipStage051Pipeline.apply(
+                raw
+                    .map(GeneratedHarmony360ScenarioCleanup::apply)
+                    .map(GeneratedHarmony360TextCleanup::apply)
+                    .map(Harmony360ContentRework::apply)
+            )
+        )
+
+        val curated = Harmony360FutureSectionCuration.apply(
             Harmony360CultureMediaSectionCuration.apply(
                 Harmony360LeisureSectionCuration.apply(
                     Harmony360FoodSectionCuration.apply(
                         Harmony360FoodTravelLeisureCultureQualityRework.apply(
                             Harmony360ScenarioJourneyCuration.apply(
                                 Harmony360RelationshipTopicCuration.apply(
-                                    Harmony360TopicNormalizationCuration.apply(
-                                        NormensLoeschungen.apply(
-                                            Harmony360RelationshipStage051Pipeline.apply(
-                                                raw
-                                                    .map(GeneratedHarmony360ScenarioCleanup::apply)
-                                                    .map(GeneratedHarmony360TextCleanup::apply)
-                                                    .map(Harmony360ContentRework::apply)
-                                            )
-                                        )
-                                    )
+                                    Harmony360TopicNormalizationCuration.apply(baseline)
                                 )
                             )
                         )
                     )
                 )
+            )
+        )
+
+        Harmony360SectionTopicSorting.apply(
+            Harmony360CurationPackPreservation.apply(
+                baseline = baseline,
+                curated = curated
             )
         )
     }
