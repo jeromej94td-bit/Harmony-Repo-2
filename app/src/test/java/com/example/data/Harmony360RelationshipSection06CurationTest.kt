@@ -53,7 +53,7 @@ class Harmony360RelationshipSection06CurationTest {
     fun `stage 05 1 pipeline applies section 06 after existing relationship curation`() {
         val raw = GeneratedHarmonyAdrenaline360Section06AlltagZuhause.PACKS
         val curated = Harmony360RelationshipStage051Pipeline.apply(raw)
-        assertEquals(16, curated.size)
+        assertEquals(17, curated.size)
         assertFalse(curated.any { it.id == "h500_148_wohnzimmer_memory" })
     }
 }
