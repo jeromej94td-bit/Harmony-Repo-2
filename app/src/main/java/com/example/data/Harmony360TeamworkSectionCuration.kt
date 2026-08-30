@@ -78,7 +78,7 @@ object Harmony360TeamworkSectionCuration {
             q("Nach dem Spiel wollt ihr besser werden. Was besprecht ihr zuerst?", "Wo ihr Zeit verloren habt", "Welche Rollen gut funktioniert haben", "Wann ihr zu wenig zugehört habt", "Was besonders Spaß gemacht hat")
         ),
         "h500_417_geheimes_ziel_geheime_wahl" to listOf(
-            q("Welches gemeinsame Ziel würdest du heimlich am liebsten als Nächstes anstoßen?", "Eine besondere Reise", "Ein gemeinsames Projekt", "Eine neue Fähigkeit lernen", "Unseren Alltag spürbar verbessern"),
+            q("Welches gemeinsames Ziel würdest du heimlich am liebsten als Nächstes anstoßen?", "Eine besondere Reise", "Ein gemeinsames Projekt", "Eine neue Fähigkeit lernen", "Unseren Alltag spürbar verbessern"),
             q("Welche gemeinsame Fähigkeit würdest du mit deinem Partner gern entwickeln?", "Besser planen", "Gelassener improvisieren", "Konsequenter Ziele verfolgen", "Noch klarer kommunizieren"),
             q("Wo wünschst du dir insgeheim mehr echtes Teamwork?", "Bei Alltagsorganisation", "Bei großen Entscheidungen", "Bei persönlichen Zielen", "Bei gemeinsamer Freizeit"),
             q("Welches Projekt würde euch als Team wahrscheinlich besonders wachsen lassen?", "Etwas gemeinsam bauen oder gestalten", "Eine längere Reise planen", "Ein neues Hobby meistern", "Für ein gemeinsames Ziel sparen"),

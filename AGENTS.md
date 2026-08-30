@@ -25,3 +25,9 @@ When a user asks to add, replace, integrate, wire, debug, or change an **intro v
 Do this before choosing asset paths, playback code, build tasks, or trigger/state logic.
 
 The current repository implementation is the source of truth. Reuse the newest working Harmony video path where appropriate; do not invent folders, duplicate the player stack, copy another video's integrity constants, or rely on conversation memory instead of inspecting the current branch.
+
+## Custom UI / Image Choice Routing (Happy Couple, etc.)
+When updating questions, translating packs, or importing data via GitHub, you MUST preserve the exact logic for visual questions (like "Happy Couple" / "Liebe im Gleichgewicht").
+- **NEVER** use hardcoded question texts (e.g., `HAPPY_COUPLE_PROMPTS`) or text-matching to route UI components in `HarmonyImageChoicePolicy` or `QuizRunnerScreen`.
+- **ALWAYS** route visual cards strictly based on `pack.id` and the explicit question index (e.g., `pack.id == LoveBalanceQuestionPolicy.PACK_ID && questionIndex == 0`).
+- If you modify the `liebegleichgewicht` pack or similar visual packs, ensure the index-based routing remains intact so visual components (images) do not accidentally bleed into other standard text questions.

@@ -204,7 +204,9 @@ private fun HarmonyHappyCoupleCard(
             painter = painterResource(imageRes),
             contentDescription = tr("Paar $option", "Couple $option"),
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("happy_couple_number_${index + 1}")
         )
 
         Box(
@@ -233,36 +235,6 @@ private fun HarmonyHappyCoupleCard(
                             )
                         )
                     )
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 8.dp)
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(HarmonyBg.copy(alpha = 0.92f))
-                .border(
-                    width = if (selected) 2.5.dp else 1.8.dp,
-                    brush = Brush.linearGradient(
-                        if (selected) {
-                            listOf(Color.White, HarmonyPink, HarmonyPurpleLight, HarmonyPink)
-                        } else {
-                            listOf(HarmonyPink, HarmonyPurpleLight)
-                        }
-                    ),
-                    shape = CircleShape
-                )
-                .testTag("happy_couple_number_${index + 1}"),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = (index + 1).toString(),
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
             )
         }
     }

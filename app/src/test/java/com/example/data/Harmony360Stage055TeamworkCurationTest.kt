@@ -31,7 +31,7 @@ class Harmony360Stage055TeamworkCurationTest {
         "h500_427_mutiger_traum_geheime_wahl"
     )
 
-    private const val mergedMutprobeId = "h500_422_mutprobe_wer_eher"
+    private val mergedMutprobeId = "h500_422_mutprobe_wer_eher"
 
     @Test
     fun `all 18 teamwork packs have 12 rewrites 5 archives and one explicit merge`() {
