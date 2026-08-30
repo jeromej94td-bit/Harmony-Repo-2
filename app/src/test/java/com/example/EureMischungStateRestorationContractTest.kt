@@ -16,33 +16,31 @@ class EureMischungStateRestorationContractTest {
     }
 
     @Test
-    fun `eure mischung form selections and draft survive recreation`() {
+    fun `eure mischung screen delegates user visible session state to saveable holder`() {
         val source = source("app/src/main/java/com/example/ui/screens/EureMischungScreen.kt")
 
-        assertTrue(source.contains("var parent1CustomUriString by rememberSaveable"))
-        assertTrue(source.contains("var parent2CustomUriString by rememberSaveable"))
-        assertTrue(source.contains("var selectedScenarioName by rememberSaveable"))
-        assertTrue(source.contains("var selectedStyleName by rememberSaveable"))
-        assertTrue(source.contains("var selectedGenderName by rememberSaveable"))
-        assertTrue(source.contains("var customNotes by rememberSaveable"))
-        assertTrue(source.contains("var errorMessage by rememberSaveable"))
-        assertTrue(source.contains("var technicalErrorDetails by rememberSaveable"))
-        assertTrue(source.contains("var isTechDetailsExpanded by rememberSaveable"))
+        assertTrue(source.contains("rememberSaveable(saver = EureMischungSessionState.Saver)"))
+        assertTrue(source.contains("var parent1CustomUriString by sessionState.parent1CustomUriStringState"))
+        assertTrue(source.contains("var parent2CustomUriString by sessionState.parent2CustomUriStringState"))
+        assertTrue(source.contains("var selectedScenario by sessionState.selectedScenarioState"))
+        assertTrue(source.contains("var selectedStyle by sessionState.selectedStyleState"))
+        assertTrue(source.contains("var selectedGender by sessionState.selectedGenderState"))
+        assertTrue(source.contains("var customNotes by sessionState.customNotesState"))
+        assertTrue(source.contains("var errorMessage by sessionState.errorMessageState"))
+        assertTrue(source.contains("var technicalErrorDetails by sessionState.technicalErrorDetailsState"))
+        assertTrue(source.contains("val historyList = sessionState.historyList"))
     }
 
     @Test
-    fun `generated result and session history can be reconstructed from saved file metadata`() {
-        val source = source("app/src/main/java/com/example/ui/screens/EureMischungScreen.kt")
+    fun `generated result metadata is saved and bitmap is reconstructed from local file`() {
+        val source = source("app/src/main/java/com/example/ui/screens/EureMischungSessionState.kt")
 
-        assertTrue(source.contains("var currentResultPath by rememberSaveable"))
-        assertTrue(source.contains("var historyPaths by rememberSaveable"))
-        assertTrue(source.contains("var resultDescriptions by rememberSaveable"))
-        assertTrue(source.contains("var resultSummaries by rememberSaveable"))
-        assertTrue(source.contains("var resultTimestamps by rememberSaveable"))
-        assertTrue(source.contains("restoreGeneratedImageResult("))
-        assertTrue(source.contains("BitmapFactory.decodeFile"))
-        assertTrue(source.contains("var isFullscreenImageOpen by rememberSaveable"))
-        assertTrue(source.contains("var isMomentSaved by rememberSaveable"))
+        assertTrue(source.contains("currentResult = state.currentResultState.value?.toSavedResult()"))
+        assertTrue(source.contains("history = ArrayList(state.historyList.map(GeneratedImageResult::toSavedResult))"))
+        assertTrue(source.contains("BitmapFactory.decodeFile(localFilePath)"))
+        assertTrue(source.contains("val currentResultState: MutableState<GeneratedImageResult?>"))
+        assertTrue(source.contains("val isFullscreenImageOpenState: MutableState<Boolean>"))
+        assertTrue(source.contains("val isMomentSavedState: MutableState<Boolean>"))
     }
 
     @Test
@@ -50,7 +48,7 @@ class EureMischungStateRestorationContractTest {
         val source = source("app/src/main/java/com/example/ui/screens/EureMischungScreen.kt")
 
         assertTrue(source.contains("var isGenerating by remember { mutableStateOf(false) }"))
-        assertFalse(source.contains("var isGenerating by rememberSaveable"))
+        assertFalse(source.contains("isGeneratingState"))
     }
 
     private fun source(path: String): String {
