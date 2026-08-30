@@ -10,7 +10,7 @@
 **Current functional core stage:** Stage 03/08 — Reusable Harmony Experience Engine  
 **Stage-03 progress after PR #126:** 6/7  
 **Next core substage after PR #126:** 03.7 — Reusable `Reveal`/result flow  
-**Stage-05 progress:** 2/5 = 40%
+**Stage-05 progress:** **5/5 = 100%**
 
 > Stage 02 has all twelve feature/contract slices on `main`. PR #79 closes 02.12 with available static/UI/end-to-end contracts but explicitly does not claim a green Android/Gradle build because Actions still fail before step 1. A later successful Android build is an infrastructure verification check, not a new feature slice.
 
@@ -22,7 +22,7 @@
 | 02/08 | Point 1 | 💍 Unser perfekter Antrag | 🧪 CONTRACT-COMPLETE / BUILD CAVEAT | 12/12 slices = 100% |
 | 03/08 | Point 2 | Reusable Harmony Experience Engine | 🟣 ACTIVE | 6/7 after PR #126 |
 | 04/08 | Point 3 | Existing Proposal/Ring Content Consolidation | ⬜ PLANNED | 0/5 |
-| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | 🟡 PARALLEL ACTIVE | 2/5 = 40% |
+| 05/08 | Point 4 | Harmony-360 Questions Quality Rework | ✅ DONE | 5/5 = 100% |
 | 06/08 | Point 5 | Broken, Duplicate & Low-Quality Content Cleanup | 🟡 PARTIAL PARALLEL REPAIRS | 0/5 |
 | 07/08 | Point 6 | Additional Flagship Harmony Experiences | ⬜ PLANNED | 0/12 |
 | 08/08 | Point 7 | Automated Content Quality Gate | ⬜ PLANNED | 0/6 |
@@ -109,19 +109,21 @@ Definition of Done: the proposal implementation becomes the reference for reusab
 ## Stage 05/08 — Harmony-360 Questions Quality Rework
 
 **Original plan reference:** Point 4  
-**Status:** 🟡 PARALLEL ACTIVE  
-**Progress:** 2/5 = 40%  
-**Next:** 05.3 — Future / money / work / family
+**Status:** ✅ DONE  
+**Progress:** **5/5 = 100%**  
+**Authoritative 05.5 correction:** 25.28 / PR #178 / merge `5e309627ec495bae4031173938b6ef8fea45bc8b`
 
 - [x] **05.1 Relationship / communication / everyday-life** — 7/7 = 100%. Sections 01/02/06/12: 72/72 explicit decisions; six archived fillers; curated counts 16/17/16/17; plus Quick Game `Was brauchst du gerade?` with 10×2 choices. Final audit PR #76.
 - [x] **05.2 Food / travel / leisure / culture** — 6/6 = 100%. Sections 04/05/07/14: 72 stable packs, 18/18 explicit rewrites in each section, six concrete questions per pack, and a final cross-section regression gate for generic quartets, English generator residue, known typos and repeated unrelated 4-option sets. Package trail: PR #97, #108, #114, #117, #132, final audit PR #136.
-- [ ] **05.3 Future / money / work / family**
-- [ ] **05.4 Psychology / feelings / health / intimacy**
-- [ ] **05.5 Values / belief / society / humor / fantasy / teamwork**
+- [x] **05.3 Future / money / work / family** — Sections 03/08/09/10 audited at 72 raw, 59 visible, 13 archives. Package trail through final audit PR #152.
+- [x] **05.4 Psychology / feelings / health / intimacy** — Health/Psychology audited at 36 raw, 17 visible, 19 archives; stable intimacy overrides reconciled. Final audit PR #159.
+- [x] **05.5 Values / belief / society / humor / fantasy / teamwork** — six 18-pack sections = 108 raw. Corrected final accounting after 25.28: **51 visible / 56 genuine archives / 1 merged source**. Teamwork is 12 REWRITE / 5 ARCHIVE / 1 MERGE; `h500_422_mutprobe_wer_eher` is redistributed into real Reise-, Essen-, Moral-, Kennenlernen- and Teamwork destination packs before the source is merged out.
 
-The separately merged Sex & Intimität rework is preserved but is not retroactively counted as completion of 05.4; Stage-05 progress changes only through explicit audited 25.x slices.
+The separately merged Sex & Intimität rework is preserved and was explicitly reconciled as part of 05.4 without changing the stable runtime override IDs.
 
-Definition of Done: audited areas are no longer dominated by noun-substitution templates or repeated generic answer quartets; retained questions are concrete, relationship-relevant and worth keeping.
+Definition of Done: audited areas are no longer dominated by noun-substitution templates or repeated generic answer quartets; retained questions are concrete, relationship-relevant and worth keeping. Sorting/cleanup follows the repository rule **re-home useful content before archive**.
+
+Stage 05 stays closed unless a concrete regression is demonstrated.
 
 ---
 
@@ -186,3 +188,4 @@ After every meaningful completed package:
 5. Record branch, real PR, merge SHA when available, verification evidence and caveats.
 6. Never silently rewrite scope or count unrelated parallel work.
 7. Reconcile narrow tracker packages with the newest `main` before merge.
+8. For sorting/cleanup, re-home useful content into verified existing destinations before archive; classify a redistributed mixed source as `MERGE` rather than `ARCHIVE`.
