@@ -52,9 +52,16 @@ class ProposalLegacyContentInventoryTest {
 
         assertEquals(ProposalLegacyContentArea.PROPOSAL, byId.getValue("antrag").area)
         assertEquals(ProposalLegacyContentArea.RINGS, byId.getValue("ringe").area)
+        assertEquals(
+            ProposalLegacyContentSource.DEFAULT_WITH_GENERATED_OVERRIDE,
+            byId.getValue("ringe").source
+        )
         assertEquals(ProposalLegacyContentArea.WEDDING, byId.getValue("straeusse").area)
         assertEquals(ProposalLegacyContentArea.WEDDING, byId.getValue("traumhochzeit").area)
-        assertEquals(ProposalLegacyContentSource.GENERATED_360, byId.getValue("h500_060_hochzeit_offene_runde").source)
+        assertEquals(
+            ProposalLegacyContentSource.GENERATED_360,
+            byId.getValue("h500_060_hochzeit_offene_runde").source
+        )
     }
 
     @Test
