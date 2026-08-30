@@ -45,11 +45,14 @@ class Harmony360Stage055HumorCurationTest {
     }
 
     @Test
-    fun `humor curation keeps only distinct packs with six concrete core questions`() {
+    fun `humor curation keeps only distinct packs with complete concrete question sets`() {
         val curated = Harmony360HumorSectionCuration.apply(raw)
         assertEquals(canonicalIds, curated.map { it.id })
         assertTrue(curated.none { it.id in archivedIds })
-        assertTrue(curated.all { it.questions.size == 6 })
+        curated.forEach { pack ->
+            val isScenario = pack.cat == "h360_szenario" || "mechanik_szenario" in pack.tags
+            assertEquals(if (isScenario) 8 else 6, pack.questions.size)
+        }
 
         assertTrue(curated.single { it.id == "h500_371_humor_entweder_oder" }
             .questions.flatMap { it.options }.contains("Trocken & subtil"))
