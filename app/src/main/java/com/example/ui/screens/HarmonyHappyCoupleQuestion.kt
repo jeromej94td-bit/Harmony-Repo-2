@@ -28,8 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -51,8 +53,11 @@ import com.example.ui.theme.HarmonyText
 import com.example.ui.tr
 import kotlinx.coroutines.delay
 
+// happy_couple_01.webp contains visible corruption in the live build. Reuse the intact
+// matching composition for slot 1 and render it blue so the intended first card stays
+// immediately recognizable instead of showing broken pixels.
 private val happyCoupleImages = listOf(
-    R.drawable.happy_couple_01,
+    R.drawable.happy_couple_02,
     R.drawable.happy_couple_02,
     R.drawable.happy_couple_03,
     R.drawable.happy_couple_04
@@ -150,6 +155,11 @@ private fun HarmonyHappyCoupleCard(
     val reveal = remember(animationKey) { Animatable(0f) }
     val density = LocalDensity.current.density
     val shape = RoundedCornerShape(24.dp)
+    val imageColorFilter = if (index == 0) {
+        ColorFilter.tint(Color(0xFF286EBA), BlendMode.Color)
+    } else {
+        null
+    }
 
     LaunchedEffect(animationKey) {
         reveal.snapTo(0f)
@@ -202,8 +212,9 @@ private fun HarmonyHappyCoupleCard(
     ) {
         Image(
             painter = painterResource(imageRes),
-            contentDescription = tr("Paar $option", "Couple $option"),
+            contentDescription = tr("Paar ${index + 1}", "Couple ${index + 1}"),
             contentScale = ContentScale.Crop,
+            colorFilter = imageColorFilter,
             modifier = Modifier.fillMaxSize()
         )
 
