@@ -157,6 +157,15 @@ fun HarmonyApp(
     memoryWidgetOpenRequest: MemoryWidgetOpenRequest? = null,
     onMemoryWidgetRequestConsumed: () -> Unit = {}
 ) {
+    var isAuthenticated by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+
+    if (!isAuthenticated) {
+        com.example.ui.screens.AuthScreen(
+            onAuthSuccess = { isAuthenticated = true }
+        )
+        return
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -560,7 +569,8 @@ fun HarmonyApp(
                         onCloseEditProfile = { viewModel.closeEditProfile() },
                         onSaveEditProfile = { u, p, s -> viewModel.saveEditProfile(u, p, s) },
                         onUpdateAvatar = { uri, isUser -> viewModel.updateProfileAvatar(uri, isUser) },
-                        onOpenDevStudio = { viewModel.selectTab(5) }
+                        onOpenDevStudio = { viewModel.selectTab(5) },
+                        onLogout = { isAuthenticated = false }
                     )
                 }
 
@@ -600,10 +610,12 @@ fun HarmonyApp(
                         onSaveOwnAnswer = { ansText -> viewModel.saveOwnAnswer(ansText) }
                     )
 
+                    val isHappyCoupleQuestion = activeRun.pack.id == com.example.data.model.LoveBalanceQuestionPolicy.PACK_ID && activeRun.currentIndex == 0
                     if (
                         !activeRun.isFinished &&
                         activeRun.pack.type != "disc" &&
                         activeRun.pack.cat != "nie" &&
+                        !isHappyCoupleQuestion &&
                         !uiState.isExitConfirmOpen &&
                         !uiState.isOwnAnswerDialogOpen
                     ) {

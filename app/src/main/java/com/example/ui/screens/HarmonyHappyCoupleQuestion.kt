@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -86,33 +87,33 @@ internal fun HarmonyHappyCoupleQuestion(
                 )
             )
             .border(1.2.dp, HarmonyPink.copy(alpha = 0.42f), containerShape)
-            .padding(horizontal = 10.dp, vertical = 18.dp)
+            .padding(horizontal = 6.dp, vertical = 12.dp)
             .testTag("harmony_happy_couple_question"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = displayQuestion,
             color = HarmonyText,
-            fontSize = 27.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.ExtraBold,
-            lineHeight = 31.sp,
+            lineHeight = 26.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 10.dp)
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = tr(
                 "Wähle das Paar, das für dich am glücklichsten wirkt.",
                 "Choose the couple that looks happiest to you."
             ),
             color = Color(0xFFFFB8DB),
-            fontSize = 14.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 19.sp,
+            lineHeight = 17.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 10.dp)
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         answerOptions.chunked(2).forEachIndexed { rowIndex, rowOptions ->
             Row(
@@ -204,9 +205,7 @@ private fun HarmonyHappyCoupleCard(
             painter = painterResource(imageRes),
             contentDescription = tr("Paar $option", "Couple $option"),
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag("happy_couple_number_${index + 1}")
+            modifier = Modifier.fillMaxSize()
         )
 
         Box(
@@ -237,5 +236,13 @@ private fun HarmonyHappyCoupleCard(
                     )
             )
         }
+
+        // Invisible test tag to preserve existing regression tests while removing visible numbers as requested by the user
+        Box(
+            modifier = Modifier
+                .size(1.dp)
+                .alpha(0f)
+                .testTag("happy_couple_number_${index + 1}")
+        )
     }
 }

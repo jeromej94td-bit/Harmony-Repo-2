@@ -407,7 +407,11 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
         val currentAnswers = uiState.value.answers.filter { it.packId == packId }
             .associate { it.questionIndex to it.answerText }
         val total = if (pack.type == "tot") pack.pairs.size else pack.questions.size
-        val resumeIndex = RunnerProgressPolicy.firstUnanswered(total, currentAnswers.keys) ?: 0
+        val resumeIndex = if (packId == com.example.data.model.LoveBalanceQuestionPolicy.PACK_ID) {
+            0
+        } else {
+            RunnerProgressPolicy.firstUnanswered(total, currentAnswers.keys) ?: 0
+        }
         _activeRun.value = ActivePackRun(
             pack = pack,
             currentIndex = resumeIndex,

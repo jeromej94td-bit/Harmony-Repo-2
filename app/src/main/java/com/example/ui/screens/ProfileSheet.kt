@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
 import android.net.Uri
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.functions.functions
+import kotlinx.coroutines.launch
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -89,12 +92,18 @@ fun ProfileSheet(
     onToggleDarkMode: ((Boolean) -> Unit)? = null,
     language: AppLanguage = AppLanguage.GERMAN,
     onLanguageChange: (AppLanguage) -> Unit = {},
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     var isLanguageExpanded by remember { mutableStateOf(false) }
+    var isDeleteDialogOpen by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
+
     val userAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { onUpdateAvatar(it, true) }
     }
@@ -275,6 +284,45 @@ fun ProfileSheet(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            HarmonyCard {
+                Column {
+                    Text(text = tr("Konto", "Account"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                runCatching {
+                                    com.example.data.SupabaseConfig.client.auth.signOut()
+                                }
+                                onDismiss()
+                                onLogout()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .testTag("logout_button"),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple)
+                    ) {
+                        Text(text = tr("Abmelden", "Log out"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
+                        onClick = { isDeleteDialogOpen = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .testTag("delete_account_button"),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f))
+                    ) {
+                        Text(text = tr("Konto löschen", "Delete account"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -295,6 +343,61 @@ fun ProfileSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
         }
+    }
+
+    if (isDeleteDialogOpen) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { if (!isDeleting) isDeleteDialogOpen = false },
+            title = { Text(tr("Konto wirklich löschen?", "Really delete account?")) },
+            text = {
+                Column {
+                    Text(tr("Dein Konto und deine persönlichen Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.", "Your account and personal data will be permanently deleted. This action cannot be undone."))
+                    if (deleteError != null) {
+                        Text(deleteError!!, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+                    }
+                    if (isDeleting) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.padding(top = 16.dp).align(Alignment.CenterHorizontally),
+                            color = Color.Red
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isDeleting = true
+                            deleteError = null
+                            val res = runCatching {
+                                com.example.data.SupabaseConfig.client.functions.invoke("delete-account")
+                                com.example.data.SupabaseConfig.client.auth.signOut()
+                            }
+                            isDeleting = false
+                            if (res.isSuccess) {
+                                isDeleteDialogOpen = false
+                                onDismiss()
+                                onLogout()
+                            } else {
+                                deleteError = res.exceptionOrNull()?.message ?: "Fehler beim Löschen des Kontos"
+                            }
+                        }
+                    },
+                    enabled = !isDeleting,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text(tr("Endgültig löschen", "Delete permanently"), color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { isDeleteDialogOpen = false },
+                    enabled = !isDeleting
+                ) {
+                    Text(tr("Abbrechen", "Cancel"), color = HarmonyText)
+                }
+            }
+        )
     }
 
     // Edit Profile Dialog
