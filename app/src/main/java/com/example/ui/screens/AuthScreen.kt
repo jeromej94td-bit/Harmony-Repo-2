@@ -64,6 +64,15 @@ fun AuthScreen(
     val context = LocalContext.current
     val credentialManager = remember { CredentialManager.create(context) }
 
+    LaunchedEffect(Unit) {
+        val existingSession = runCatching {
+            SupabaseConfig.client.auth.currentSessionOrNull()
+        }.getOrNull()
+        if (existingSession != null) {
+            onAuthSuccess()
+        }
+    }
+
     val darkCosmicBg = Brush.verticalGradient(
         colors = listOf(Color(0xFF0F041C), Color(0xFF000000))
     )
