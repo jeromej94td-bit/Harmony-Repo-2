@@ -13,12 +13,13 @@ permissions:
 jobs:
   focused-unit-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
@@ -32,3 +33,6 @@ jobs:
             --tests com.example.PartnerConnectionContractTest \
             --tests com.example.AccountLifecycleContractTest \
             --stacktrace
+      - name: Compile debug app
+        if: success()
+        run: gradle :app:compileDebugKotlin --stacktrace
