@@ -38,6 +38,16 @@ class AuthScreenVisualContractTest {
         assertFalse(auth.contains("GetGoogleIdOption.Builder("))
     }
 
+    @Test
+    fun `forgot password button sends a Supabase password reset email`() {
+        val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
+
+        assertTrue(auth.contains("auth.resetPasswordForEmail("))
+        assertTrue(auth.contains("Bitte gib eine gültige E-Mail-Adresse ein."))
+        assertTrue(auth.contains("Passwort-Reset-Link wurde gesendet"))
+        assertFalse(auth.contains("TODO: Forgot Password"))
+    }
+
     private fun source(path: String): String {
         val candidates = listOf(File(path.removePrefix("app/")), File(path))
         return candidates.firstOrNull(File::exists)?.readText()

@@ -444,7 +444,34 @@ fun AuthScreen(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .padding(top = 1.dp)
-                    .clickable { /* TODO: Forgot Password */ }
+                    .clickable(enabled = !isLoading) {
+                        scope.launch {
+                            val currentEmail = email.trim()
+                            if (currentEmail.isEmpty() ||
+                                !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
+                            ) {
+                                errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
+                                successMessage = null
+                                return@launch
+                            }
+
+                            isLoading = true
+                            errorMessage = null
+                            successMessage = null
+                            val res = kotlin.runCatching {
+                                SupabaseConfig.client.auth.resetPasswordForEmail(currentEmail)
+                            }
+                            isLoading = false
+
+                            if (res.isSuccess) {
+                                successMessage =
+                                    "Passwort-Reset-Link wurde gesendet. Bitte prüfe dein Postfach."
+                            } else {
+                                errorMessage = res.exceptionOrNull()?.message
+                                    ?: "Passwort-Reset konnte nicht gestartet werden."
+                            }
+                        }
+                    }
             )
         }
     }
