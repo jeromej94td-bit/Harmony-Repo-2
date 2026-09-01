@@ -17,6 +17,7 @@ class QuestionContentDefectAuditTest {
             type = "quiz",
             questions = listOf(
                 Question("", listOf("Ja", "Nein")),
+                Question("Fehlende Optionen?"),
                 Question("Leere Option?", listOf("Ja", "  ")),
                 Question("Doppelte Option?", listOf("Ja", " ja ")),
                 Question("Zu wenig Auswahl?", listOf("Nur eine"))
@@ -26,6 +27,7 @@ class QuestionContentDefectAuditTest {
         val issues = QuestionContentDefectAudit.audit(listOf(pack))
 
         assertTrue(issues.any { it.kind == QuestionContentDefectKind.BLANK_QUESTION })
+        assertTrue(issues.any { it.kind == QuestionContentDefectKind.MISSING_OPTIONS })
         assertTrue(issues.any { it.kind == QuestionContentDefectKind.BLANK_OPTION })
         assertTrue(issues.any { it.kind == QuestionContentDefectKind.DUPLICATE_OPTION })
         assertTrue(issues.any { it.kind == QuestionContentDefectKind.TOO_FEW_OPTIONS })
