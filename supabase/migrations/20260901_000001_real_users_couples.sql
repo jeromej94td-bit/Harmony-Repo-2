@@ -262,7 +262,7 @@ returns table (
   partner_avatar_url text
 )
 language plpgsql
-stable
+volatile
 security definer
 set search_path = public, auth
 as $$
@@ -272,6 +272,12 @@ declare
 begin
   if v_user_id is null then
     raise exception 'not_authenticated' using errcode = 'insufficient_privilege';
+  end if;
+
+  if exists (
+    select 1 from auth.users u where u.id = v_user_id and coalesce(u.is_anonymous, false)
+  ) then
+    raise exception 'anonymous_accounts_not_supported' using errcode = 'insufficient_privilege';
   end if;
 
   insert into public.harmony_profiles(user_id, display_name, avatar_url)
@@ -317,7 +323,7 @@ returns table (code text, expires_at timestamptz)
 language plpgsql
 volatile
 security definer
-set search_path = public
+set search_path = public, auth
 as $$
 declare
   v_user_id uuid := auth.uid();
@@ -330,6 +336,10 @@ declare
 begin
   if v_user_id is null then
     raise exception 'not_authenticated' using errcode = 'insufficient_privilege';
+  end if;
+
+  if exists (select 1 from auth.users u where u.id = v_user_id and coalesce(u.is_anonymous, false)) then
+    raise exception 'anonymous_accounts_not_supported' using errcode = 'insufficient_privilege';
   end if;
 
   if exists (select 1 from public.harmony_couple_members where user_id = v_user_id) then
@@ -368,17 +378,21 @@ returns uuid
 language plpgsql
 volatile
 security definer
-set search_path = public
+set search_path = public, auth
 as $$
 declare
   v_user_id uuid := auth.uid();
-  v_normalized text := upper(regexp_replace(coalesce(p_code, ''), '[^A-Z0-9]', '', 'g'));
+  v_normalized text := regexp_replace(upper(coalesce(p_code, '')), '[^A-Z0-9]', '', 'g');
   v_hash text;
   v_invite public.harmony_couple_invites%rowtype;
   v_couple_id uuid;
 begin
   if v_user_id is null then
     raise exception 'not_authenticated' using errcode = 'insufficient_privilege';
+  end if;
+
+  if exists (select 1 from auth.users u where u.id = v_user_id and coalesce(u.is_anonymous, false)) then
+    raise exception 'anonymous_accounts_not_supported' using errcode = 'insufficient_privilege';
   end if;
 
   if length(v_normalized) <> 6 then
