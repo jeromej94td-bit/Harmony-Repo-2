@@ -293,6 +293,18 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun ensureProductionData() {
+        viewModelScope.launch {
+            runCatching { repository.ensureInitialData() }
+        }
+    }
+
+    fun ensureDemoData() {
+        viewModelScope.launch {
+            runCatching { repository.ensureDemoData() }
+        }
+    }
+
     fun showToast(msg: String) {
         _toastMessage.value = msg
         viewModelScope.launch {

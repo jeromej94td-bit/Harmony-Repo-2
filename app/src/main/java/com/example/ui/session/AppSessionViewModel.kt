@@ -86,11 +86,15 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
                     email = null,
                     profile = UserProfile(
                         userId = DEMO_USER_ID,
-                        displayName = "Demo",
+                        displayName = "Jerome",
                         avatarUrl = null
                     ),
-                    coupleId = null,
-                    partner = null
+                    coupleId = DEMO_COUPLE_ID,
+                    partner = UserProfile(
+                        userId = DEMO_PARTNER_ID,
+                        displayName = "Alex",
+                        avatarUrl = null
+                    )
                 )
             }.onSuccess { demoSession ->
                 _uiState.value = AppSessionUiState(
@@ -213,5 +217,7 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
 
     private companion object {
         const val DEMO_USER_ID = "local-demo-session"
+        const val DEMO_PARTNER_ID = "local-demo-partner"
+        const val DEMO_COUPLE_ID = "local-demo-couple"
     }
 }

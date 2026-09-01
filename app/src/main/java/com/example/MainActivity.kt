@@ -210,6 +210,15 @@ fun HarmonyApp(
         userName = appSession.profile.displayName,
         partnerName = appSession.partner?.displayName ?: "Partner"
     )
+
+    LaunchedEffect(sessionState.phase, appSession.userId) {
+        when (sessionState.phase) {
+            com.example.ui.session.SessionPhase.DEMO -> viewModel.ensureDemoData()
+            com.example.ui.session.SessionPhase.READY -> viewModel.ensureProductionData()
+            else -> Unit
+        }
+    }
+
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val isImeVisible = WindowInsets.isImeVisible
