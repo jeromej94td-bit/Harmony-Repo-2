@@ -7,8 +7,24 @@ import org.junit.Test
 
 class AccountCacheBoundaryTest {
     @Test
-    fun `first authenticated owner is recorded without clearing cache`() = runTest {
+    fun `first authenticated owner purges unowned legacy cache before claiming it`() = runTest {
         var owner: String? = null
+        var clearCount = 0
+        val boundary = AccountCacheBoundary(
+            readOwner = { owner },
+            writeOwner = { owner = it },
+            clearLocalData = { clearCount++ }
+        )
+
+        boundary.ensureOwner("user-a")
+
+        assertEquals("user-a", owner)
+        assertEquals(1, clearCount)
+    }
+
+    @Test
+    fun `same authenticated owner keeps its local cache`() = runTest {
+        var owner: String? = "user-a"
         var clearCount = 0
         val boundary = AccountCacheBoundary(
             readOwner = { owner },
