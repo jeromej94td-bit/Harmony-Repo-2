@@ -24,9 +24,14 @@ data class GermanWordingDefect(
  * This intentionally does not try to score style or rewrite natural language. It only flags
  * regression signatures that are unambiguously broken: known typo fragments, unresolved template
  * tokens, placeholder/debug copy and accidentally repeated functional words.
+ *
+ * Harmony fullscreen mechanics intentionally keep the exact option tokens `{user}` and `{partner}`
+ * until presentation time. Those two standalone answer options are runtime data, not broken copy;
+ * embedded or unknown template tokens are still reported.
  */
 object GermanWordingDefectAudit {
     private val unresolvedTemplate = Regex("""\{[A-Za-z_][^}\n]{0,40}}""")
+    private val intentionalMechanicIdentityOptions = setOf("{user}", "{partner}")
     private val placeholderText = Regex(
         pattern = """\b(TODO|TBD|FIXME|LOREM\s+IPSUM|PLACEHOLDER)\b""",
         option = RegexOption.IGNORE_CASE
@@ -89,7 +94,10 @@ object GermanWordingDefectAudit {
             )
         }
 
-        if (unresolvedTemplate.containsMatchIn(text)) {
+        if (
+            unresolvedTemplate.containsMatchIn(text) &&
+            !isIntentionalMechanicIdentityOption(text, optionIndex)
+        ) {
             return defect(
                 packId = packId,
                 text = text,
@@ -124,6 +132,9 @@ object GermanWordingDefectAudit {
 
         return null
     }
+
+    private fun isIntentionalMechanicIdentityOption(text: String, optionIndex: Int?): Boolean =
+        optionIndex != null && text.trim().lowercase(Locale.ROOT) in intentionalMechanicIdentityOptions
 
     private fun defect(
         packId: String,
