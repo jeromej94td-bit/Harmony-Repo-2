@@ -8,29 +8,39 @@ import org.junit.Test
 class EureMischungRemovalContractTest {
 
     @Test
-    fun `eure mischung is absent from productive navigation`() {
+    fun `productive navigation contains neither eure mischung nor kid generator`() {
         val main = source("app/src/main/java/com/example/MainActivity.kt")
 
-        assertFalse(main.contains("import com.example.ui.screens.EureMischungScreen"))
+        assertFalse(main.contains("EureMischungScreen"))
         assertFalse(main.contains("isEureMischungOpen"))
-        assertFalse(main.contains("onOpenEureMischung"))
-        assertFalse(main.contains("EureMischungScreen("))
+        assertFalse(main.contains("KidGenerator"))
+        assertFalse(main.contains("isKidGeneratorOpen"))
+        assertFalse(main.contains("catId == \"mischung\""))
     }
 
     @Test
-    fun `home no longer exposes eure mischung entry`() {
-        val home = source("app/src/main/java/com/example/ui/screens/HomeScreen.kt")
-        assertFalse(home.contains("onOpenEureMischung"))
+    fun `catalog removes eure mischung and applies the removal policy`() {
+        val models = source("app/src/main/java/com/example/data/model/Models.kt")
+
+        assertFalse(models.contains("Eure Mischung"))
+        assertFalse(models.contains("Category(\"mischung\""))
+        assertTrue(models.contains("RemovedGameCatalogPolicy.allowsCategoryId"))
+        assertTrue(models.contains("RemovedGameCatalogPolicy.allowsPackCategoryId"))
     }
 
     @Test
-    fun `eure mischung source is removed while kid generator and shared image service remain`() {
-        assertFalse(sourceExists("app/src/main/java/com/example/ui/screens/EureMischungScreen.kt"))
+    fun `kid generator production sources are removed while shared image service remains`() {
+        val kidGeneratorSources = listOf(
+            "app/src/main/java/com/example/ui/screens/KidGeneratorScreen.kt",
+            "app/src/main/java/com/example/ui/viewmodel/KidGeneratorViewModel.kt",
+            "app/src/main/java/com/example/data/repository/KidGeneratorRepository.kt",
+            "app/src/main/java/com/example/data/SupabaseKidGeneratorGateway.kt",
+            "app/src/main/java/com/example/data/model/KidGeneratorModels.kt"
+        )
 
-        val main = source("app/src/main/java/com/example/MainActivity.kt")
-        assertTrue(main.contains("KidGeneratorScreen"))
-        assertTrue(main.contains("isKidGeneratorOpen"))
-        assertTrue(sourceExists("app/src/main/java/com/example/ui/screens/KidGeneratorScreen.kt"))
+        kidGeneratorSources.forEach { path ->
+            assertFalse("$path must be removed", sourceExists(path))
+        }
         assertTrue(sourceExists("app/src/main/java/com/example/util/GeminiImageService.kt"))
     }
 
