@@ -30,7 +30,8 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           for patch in "${patches[@]}"; do
-            git apply --index "$patch"
+            git apply --recount "$patch"
+            git add -A
             git rm "$patch"
           done
           git commit -m 'chore: apply queued real-user implementation patch'
