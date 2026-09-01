@@ -9,6 +9,7 @@ import com.example.data.session.AppSession
 import com.example.data.session.AppSessionRepository
 import com.example.data.session.PartnerInvite
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.functions.functions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -126,14 +127,25 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun onAccountDeleted() {
-        val userId = _uiState.value.session?.userId
+    fun deleteAccount() {
+        val current = _uiState.value
+        val userId = current.session?.userId ?: return
+        if (current.phase != SessionPhase.READY || current.actionInProgress) return
+
         viewModelScope.launch {
-            if (userId != null) {
-                runCatching { cacheBoundary.clearForReset(userId) }
+            _uiState.value = current.copy(actionInProgress = true, errorMessage = null)
+            runCatching {
+                SupabaseConfig.client.functions.invoke("delete-account")
+                cacheBoundary.clearForReset(userId)
+                runCatching { SupabaseConfig.client.auth.signOut() }
+            }.onSuccess {
+                _uiState.value = AppSessionUiState(phase = SessionPhase.SIGNED_OUT)
+            }.onFailure { error ->
+                _uiState.value = current.copy(
+                    actionInProgress = false,
+                    errorMessage = error.message ?: "Konto konnte nicht gelöscht werden"
+                )
             }
-            runCatching { SupabaseConfig.client.auth.signOut() }
-            _uiState.value = AppSessionUiState(phase = SessionPhase.SIGNED_OUT)
         }
     }
 
