@@ -1,0 +1,37 @@
+name: Real users branch patch runner
+
+on:
+  push:
+    branches:
+      - feat/real-users-couples-foundation
+    paths:
+      - 'automation-patches/*.patch'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply queued implementation patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          patches=(automation-patches/*.patch)
+          if [ ${#patches[@]} -eq 0 ]; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for patch in "${patches[@]}"; do
+            git apply --index "$patch"
+            git rm "$patch"
+          done
+          git commit -m 'chore: apply queued real-user implementation patch'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
