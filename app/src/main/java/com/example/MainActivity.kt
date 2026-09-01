@@ -94,7 +94,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.attachAutoGeneration(this)
         memoryWidgetOpenRequest = parseMemoryWidgetOpenRequest(intent)
         if (intent.getIntExtra("open_tab", -1) == 1) {
             viewModel.selectTab(1)

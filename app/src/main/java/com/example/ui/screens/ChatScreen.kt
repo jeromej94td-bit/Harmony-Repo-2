@@ -94,6 +94,7 @@ fun ChatScreen(
     partnerName: String,
     partnerAvatarPath: String?,
     appLanguage: String = "de",
+    brainEnabled: Boolean = false,
     onSendMessage: (String) -> Unit,
     onSendImage: (Uri) -> Unit,
     onReportUser: () -> Unit,
@@ -127,6 +128,7 @@ fun ChatScreen(
 
     Column(modifier = modifier.fillMaxSize().padding(bottom = 80.dp)) {
         // --- CHAT MODE TOGGLE ---
+        if (brainEnabled) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -177,6 +179,7 @@ fun ChatScreen(
                     )
                 }
             }
+        }
         }
 
         // --- HEADER BAR ---

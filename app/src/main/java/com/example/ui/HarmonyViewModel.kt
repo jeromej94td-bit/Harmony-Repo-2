@@ -50,6 +50,8 @@ import java.io.File
 import java.net.URLEncoder
 import java.util.UUID
 
+private const val HARMONY_BRAIN_ENABLED = false
+
 data class ActivePackRun(
     val pack: QuestionPack,
     val currentIndex: Int = 0,
@@ -228,6 +230,7 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
         }
 
         // --- HARMONY BRAIN ANALYZER ---
+        if (HARMONY_BRAIN_ENABLED) {
         _brainMessages.value = listOf(
             com.example.data.model.BrainMessage(
                 text = "Hallo! Ich bin euer Harmony Brain 🧠. Ich analysiere eure gemeinsamen Antworten und helfe euch dabei, noch tiefere Gemeinsamkeiten und neue Interessen zu entdecken.\n\nFragt mich gerne nach Date-Ideen, euren gemeinsamen Interessen oder wie ihr eure Unterschiede feiern könnt!",
@@ -256,6 +259,7 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
                     // No default static offline questions generated on startup
                 }
             }
+        }
         }
     }
 
@@ -300,6 +304,7 @@ class HarmonyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun attachAutoGeneration(lifecycleOwner: LifecycleOwner) {
+        if (!HARMONY_BRAIN_ENABLED) return
         if (foregroundGameGenerator != null) return
 
         val prefs = getApplication<Application>().getSharedPreferences("harmony_auto_generation", android.content.Context.MODE_PRIVATE)
