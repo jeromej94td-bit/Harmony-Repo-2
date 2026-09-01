@@ -29,6 +29,34 @@ class GermanContentLanguageAuditTest {
     }
 
     @Test
+    fun `audit flags clear English sentence options without treating short terms as errors`() {
+        val pack = QuestionPack(
+            id = "mixed-option-pack",
+            title = "Gemischte Antworten",
+            tags = emptyList(),
+            cat = "tief",
+            topic = "beziehung",
+            type = "quiz",
+            questions = listOf(
+                Question(
+                    "Was wäre dir lieber?",
+                    listOf(
+                        "I would rather stay home tonight",
+                        "We would plan it together",
+                        "Happy End",
+                        "Fine Dining"
+                    )
+                )
+            )
+        )
+
+        val issues = GermanContentLanguageAudit.audit(listOf(pack))
+
+        assertEquals(2, issues.size)
+        assertTrue(issues.all { it.kind == GermanContentLanguageIssueKind.ENGLISH_OPTION })
+    }
+
+    @Test
     fun `audit does not reject common loanwords brands or food terms`() {
         val pack = QuestionPack(
             id = "legitimate-terms",
