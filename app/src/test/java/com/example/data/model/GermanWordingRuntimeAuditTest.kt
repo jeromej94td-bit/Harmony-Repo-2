@@ -1,0 +1,52 @@
+package com.example.data.model
+
+import com.example.data.GeneratedContentRegistry
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class GermanWordingRuntimeAuditTest {
+
+    @Test
+    fun `repository runtime catalog has no Stage 06_3 wording defects`() {
+        val generatedPacks = GeneratedContentRegistry.PACKS.map { pack ->
+            QuestionPack(
+                id = pack.id,
+                title = pack.title,
+                tags = pack.tags,
+                cat = pack.cat,
+                topic = pack.topic,
+                type = pack.type,
+                questions = pack.questions.map { question ->
+                    Question(
+                        q = question.q,
+                        options = question.options,
+                        defaultMine = question.defaultMine
+                    )
+                },
+                pairs = pack.pairs,
+                emoji = pack.emoji
+            )
+        }
+
+        HarmonyPacksData.setDynamicPacks(generatedPacks)
+        try {
+            val issues = GermanWordingDefectAudit.audit(HarmonyPacksData.PACKS)
+            assertTrue(
+                issues.joinToString(
+                    prefix = "Stage 06.3 wording defects found:\n",
+                    separator = "\n"
+                ) { issue ->
+                    buildString {
+                        append(issue.packId)
+                        issue.questionIndex?.let { append("[").append(it).append("]") }
+                        issue.optionIndex?.let { append(" option ").append(it) }
+                        append(" ").append(issue.kind).append(": ").append(issue.text)
+                    }
+                },
+                issues.isEmpty()
+            )
+        } finally {
+            HarmonyPacksData.setDynamicPacks(emptyList())
+        }
+    }
+}
