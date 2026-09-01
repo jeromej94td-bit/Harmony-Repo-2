@@ -5,9 +5,12 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.functions.Functions
 
 object SupabaseConfig {
+    const val SUPABASE_URL = "https://rspgnonlpkxdudbjxnrl.supabase.co"
+    const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_qNtemRRaLIW0nbFb52uKLw_rWwlgUo1"
+
     val client = createSupabaseClient(
-        supabaseUrl = "https://rspgnonlpkxdudbjxnrl.supabase.co",
-        supabaseKey = "sb_publishable_qNtemRRaLIW0nbFb52uKLw_rWwlgUo1"
+        supabaseUrl = SUPABASE_URL,
+        supabaseKey = SUPABASE_PUBLISHABLE_KEY
     ) {
         install(Auth)
         install(Functions)
