@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -291,29 +293,71 @@ internal fun LargeOptionGrid(
 ) {
     val configuration = LocalConfiguration.current
     val gap = if (configuration.screenHeightDp < 700) 8.dp else 12.dp
+    val rowItems = items.chunked(2)
     val accents = listOf(HarmonyPink, HarmonyBlue, HarmonyTeal, HarmonyGold, HarmonyPurpleLight)
 
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(gap)
-    ) {
-        items.chunked(2).forEachIndexed { rowIndex, rowItems ->
-            Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(gap)
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val gridMetrics = LargeOptionGridLayoutPolicy.metrics(
+            availableHeightDp = maxHeight.value.toInt(),
+            rowCount = rowItems.size,
+            gapDp = gap.value.toInt(),
+            fontScale = configuration.fontScale
+        )
+
+        if (gridMetrics.useScroll) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .testTag("${tagPrefix}_scroll"),
+                verticalArrangement = Arrangement.spacedBy(gap)
             ) {
-                rowItems.forEachIndexed { columnIndex, item ->
-                    val index = rowIndex * 2 + columnIndex
-                    LargeOptionCard(
-                        item = item,
-                        selected = selectedRaw == item.raw,
-                        onClick = { onSelect(item) },
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                        testTag = "${tagPrefix}_$index",
-                        accent = accents[index % accents.size]
-                    )
+                rowItems.forEachIndexed { rowIndex, itemsInRow ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(gridMetrics.scrollRowHeightDp.dp),
+                        horizontalArrangement = Arrangement.spacedBy(gap)
+                    ) {
+                        itemsInRow.forEachIndexed { columnIndex, item ->
+                            val index = rowIndex * 2 + columnIndex
+                            LargeOptionCard(
+                                item = item,
+                                selected = selectedRaw == item.raw,
+                                onClick = { onSelect(item) },
+                                modifier = Modifier.weight(1f).fillMaxSize(),
+                                testTag = "${tagPrefix}_$index",
+                                accent = accents[index % accents.size]
+                            )
+                        }
+                        if (itemsInRow.size == 1) Spacer(Modifier.weight(1f))
+                    }
                 }
-                if (rowItems.size == 1) Spacer(Modifier.weight(1f))
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(gap)
+            ) {
+                rowItems.forEachIndexed { rowIndex, itemsInRow ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(gap)
+                    ) {
+                        itemsInRow.forEachIndexed { columnIndex, item ->
+                            val index = rowIndex * 2 + columnIndex
+                            LargeOptionCard(
+                                item = item,
+                                selected = selectedRaw == item.raw,
+                                onClick = { onSelect(item) },
+                                modifier = Modifier.weight(1f).fillMaxSize(),
+                                testTag = "${tagPrefix}_$index",
+                                accent = accents[index % accents.size]
+                            )
+                        }
+                        if (itemsInRow.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
