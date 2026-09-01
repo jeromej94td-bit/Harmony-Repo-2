@@ -32,6 +32,7 @@ jobs:
             --tests com.example.AccountCacheBoundaryTest \
             --tests com.example.PartnerConnectionContractTest \
             --tests com.example.AccountLifecycleContractTest \
+            --tests com.example.DemoSessionContractTest \
             --stacktrace
       - name: Compile debug app
         if: success()
