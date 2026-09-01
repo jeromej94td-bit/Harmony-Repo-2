@@ -1,0 +1,88 @@
+name: Apply Spieleland Quickstart
+
+on:
+  push:
+    branches:
+      - feat/spieleland-quickstart
+    paths:
+      - .github/workflows/temp-apply-games-quickstart.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/spieleland-quickstart
+
+      - name: Wire quickstart into GamesScreen
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("app/src/main/java/com/example/ui/screens/GamesScreen.kt")
+          source = path.read_text()
+
+          def replace_once(old: str, new: str) -> None:
+              global source
+              count = source.count(old)
+              if count != 1:
+                  raise SystemExit(f"Expected one anchor, found {count}: {old[:80]!r}")
+              source = source.replace(old, new, 1)
+
+          replace_once(
+              '    var showUnansweredQuestions by remember { mutableStateOf(false) }\n    val focusRequester = remember { FocusRequester() }',
+              '    var showUnansweredQuestions by remember { mutableStateOf(false) }\n'
+              '    var browseMode by remember { mutableStateOf(false) }\n'
+              '    val quickstartPool = remember(answers) {\n'
+              '        buildGamesQuickstartPool(HarmonyPacksData.CATALOG_PACKS, answers)\n'
+              '    }\n'
+              '    val focusRequester = remember { FocusRequester() }'
+          )
+
+          replace_once(
+              '        } else {\n            item(key = "categories_header") {',
+              '        } else {\n'
+              '            item(key = "play_mode_chooser") {\n'
+              '                GamesQuickstartSection(\n'
+              '                    pool = quickstartPool,\n'
+              '                    browseMode = browseMode,\n'
+              '                    appLanguage = appLanguage,\n'
+              '                    onBrowseModeChange = { browseMode = it },\n'
+              '                    onStartPack = onStartPack,\n'
+              '                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 4.dp)\n'
+              '                )\n'
+              '            }\n\n'
+              '            item(key = "after_play_mode_spacer") {\n'
+              '                Spacer(modifier = Modifier.height(18.dp))\n'
+              '            }\n\n'
+              '            if (browseMode) {\n'
+              '            item(key = "categories_header") {'
+          )
+
+          replace_once(
+              '\n            }\n        }\n    }\n\n    if (showUnansweredQuestions) {',
+              '\n            }\n            }\n        }\n    }\n\n    if (showUnansweredQuestions) {'
+          )
+
+          path.write_text(source)
+
+      - name: Run targeted unit tests
+        run: |
+          chmod +x ./gradlew
+          ./gradlew testDebugUnitTest \
+            --tests com.example.ui.GamesQuickstartSelectorTest \
+            --tests com.example.ui.AnswerProgressIndexTest \
+            --tests com.example.ui.GamesHomeVirtualizationContractTest
+
+      - name: Commit verified wiring and remove temporary workflow
+        run: |
+          git config user.name "harmony-quickstart-bot"
+          git config user.email "actions@users.noreply.github.com"
+          rm .github/workflows/temp-apply-games-quickstart.yml
+          git add app/src/main/java/com/example/ui/screens/GamesScreen.kt .github/workflows/temp-apply-games-quickstart.yml
+          git commit -m "feat: integrate Quickstart into Spieleland"
+          git push origin HEAD:feat/spieleland-quickstart
