@@ -34,6 +34,27 @@ class QuestionContentDefectAuditTest {
     }
 
     @Test
+    fun `audit flags one-option standard quiz as too few choices`() {
+        val pack = QuestionPack(
+            id = "standard-one-option",
+            title = "Standard",
+            tags = emptyList(),
+            cat = "quiz",
+            topic = "kennen",
+            type = "quiz",
+            questions = listOf(
+                Question("Welche Antwort passt?", listOf("Nur diese"))
+            )
+        )
+
+        val issues = QuestionContentDefectAudit.audit(listOf(pack))
+
+        assertTrue(
+            issues.any { it.kind == QuestionContentDefectKind.TOO_FEW_OPTIONS }
+        )
+    }
+
+    @Test
     fun `audit allows open text and open fullscreen mechanics without options`() {
         val freeTextPack = QuestionPack(
             id = "free-text",
