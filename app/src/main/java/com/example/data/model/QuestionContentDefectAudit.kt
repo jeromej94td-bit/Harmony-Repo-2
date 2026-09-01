@@ -25,6 +25,19 @@ data class QuestionContentDefect(
  * Open-text, photo-only, memory-match and deep-talk rounds may intentionally have no options.
  */
 object QuestionContentDefectAudit {
+    private val fixedChoiceCategories = setOf(
+        "nie",
+        "zust",
+        "wer",
+        "lieber",
+        "h360_ranking",
+        "h360_prognose",
+        "h360_geheim",
+        "h360_skala",
+        "h360_szenario",
+        "h360_prioritaet"
+    )
+
     fun audit(packs: List<QuestionPack>): List<QuestionContentDefect> = buildList {
         packs.forEach { pack ->
             pack.questions.forEachIndexed { questionIndex, question ->
@@ -104,16 +117,31 @@ object QuestionContentDefectAudit {
         questionIndex: Int,
         question: Question
     ): Boolean {
+        when (QuestionResponseCuration.resolve(pack.id, question.q)) {
+            QuestionResponseKind.OPEN_TEXT,
+            QuestionResponseKind.PHOTO_ONLY -> return false
+
+            QuestionResponseKind.FIXED_CHOICE,
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+            QuestionResponseKind.CHOICE_WITH_OPTIONAL_PHOTO -> return true
+
+            null -> Unit
+        }
+
         val spec = QuestionInteractionPolicy.resolveSpec(pack, questionIndex, question)
         return when (spec.fullscreenMechanic) {
             FullscreenGameMechanicKind.MEMORY_MATCH,
             FullscreenGameMechanicKind.DEEP_TALK -> false
 
-            null -> spec.responseKind in setOf(
-                QuestionResponseKind.FIXED_CHOICE,
-                QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
-                QuestionResponseKind.CHOICE_WITH_OPTIONAL_PHOTO
-            )
+            null -> if (question.options.isEmpty()) {
+                pack.cat in fixedChoiceCategories
+            } else {
+                spec.responseKind in setOf(
+                    QuestionResponseKind.FIXED_CHOICE,
+                    QuestionResponseKind.CHOICE_WITH_OPTIONAL_TEXT,
+                    QuestionResponseKind.CHOICE_WITH_OPTIONAL_PHOTO
+                )
+            }
 
             else -> true
         }
