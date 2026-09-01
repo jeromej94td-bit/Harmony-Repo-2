@@ -16,8 +16,13 @@ class AccountCacheBoundary(
 
         val previousOwner = readOwner()
         when {
-            previousOwner == null -> writeOwner(userId)
             previousOwner == userId -> Unit
+            previousOwner == null -> {
+                // Pre-account builds stored relationship/demo data without an owner.
+                // Purge that legacy cache before the first real or local-demo session claims it.
+                clearLocalData()
+                writeOwner(userId)
+            }
             else -> {
                 clearLocalData()
                 writeOwner(userId)
