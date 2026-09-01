@@ -1,0 +1,73 @@
+diff --git a/app/src/main/java/com/example/ui/screens/ProfileSheet.kt b/app/src/main/java/com/example/ui/screens/ProfileSheet.kt
+--- a/app/src/main/java/com/example/ui/screens/ProfileSheet.kt
++++ b/app/src/main/java/com/example/ui/screens/ProfileSheet.kt
+@@
+     modifier: Modifier = Modifier
+ ) {
+     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+     val scrollState = rememberScrollState()
+-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+ 
+     var isLanguageExpanded by remember { mutableStateOf(false) }
+-    var isDeleteDialogOpen by remember { mutableStateOf(false) }
+-    var isDeleting by remember { mutableStateOf(false) }
+-    var deleteError by remember { mutableStateOf<String?>(null) }
+ 
+     val userAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+@@
+-    if (isDeleteDialogOpen) {
+-        androidx.compose.material3.AlertDialog(
+-            onDismissRequest = { if (!isDeleting) isDeleteDialogOpen = false },
+-            title = { Text(tr("Konto wirklich löschen?", "Really delete account?")) },
+-            text = {
+-                Column {
+-                    Text(tr("Dein Konto und deine persönlichen Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.", "Your account and personal data will be permanently deleted. This action cannot be undone."))
+-                    if (deleteError != null) {
+-                        Text(deleteError!!, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+-                    }
+-                    if (isDeleting) {
+-                        androidx.compose.material3.CircularProgressIndicator(
+-                            modifier = Modifier.padding(top = 16.dp).align(Alignment.CenterHorizontally),
+-                            color = Color.Red
+-                        )
+-                    }
+-                }
+-            },
+-            confirmButton = {
+-                Button(
+-                    onClick = {
+-                        scope.launch {
+-                            isDeleting = true
+-                            deleteError = null
+-                            val res = runCatching {
+-                                com.example.data.SupabaseConfig.client.functions.invoke("delete-account")
+-                                com.example.data.SupabaseConfig.client.auth.signOut()
+-                            }
+-                            isDeleting = false
+-                            if (res.isSuccess) {
+-                                isDeleteDialogOpen = false
+-                                onDismiss()
+-                                onLogout()
+-                            } else {
+-                                deleteError = res.exceptionOrNull()?.message ?: "Fehler beim Löschen des Kontos"
+-                            }
+-                        }
+-                    },
+-                    enabled = !isDeleting,
+-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+-                ) {
+-                    Text(tr("Endgültig löschen", "Delete permanently"), color = Color.White)
+-                }
+-            },
+-            dismissButton = {
+-                TextButton(
+-                    onClick = { isDeleteDialogOpen = false },
+-                    enabled = !isDeleting
+-                ) {
+-                    Text(tr("Abbrechen", "Cancel"), color = HarmonyText)
+-                }
+-            }
+-        )
+-    }
+-
+     // Edit Profile Dialog
