@@ -262,9 +262,30 @@ diff --git a/app/src/main/java/com/example/ui/screens/ProfileSheet.kt b/app/src/
                      color = HarmonyMuted
                  )
 @@
+                     Spacer(modifier = Modifier.height(8.dp))
+                     ProfileRow(label = tr("Dein Name", "Your name"), value = profile.userName)
+                     ProfileRow(label = tr("Partnerin", "Partner"), value = profile.partnerName)
+                     ProfileRow(label = tr("Zusammen seit", "Together since"), value = formatTimestamp(profile.startDate))
+ 
 -                    Row(
 +                    if (com.example.BuildConfig.DEBUG) Row(
                          modifier = Modifier
+                             .fillMaxWidth()
+                             .padding(vertical = 10.dp),
+                         horizontalArrangement = Arrangement.SpaceBetween,
+                         verticalAlignment = Alignment.CenterVertically
+                     ) {
+                         Text(text = tr("Partner-Simulator", "Partner simulator"), fontSize = 13.5.sp, color = HarmonyText)
+                         Switch(
+                             checked = profile.simulatorEnabled,
+                             onCheckedChange = { onToggleSimulator() },
+                             colors = SwitchDefaults.colors(
+                                 checkedThumbColor = Color.White,
+                                 checkedTrackColor = HarmonyPink
+                             ),
+                             modifier = Modifier.testTag("simulator_toggle")
+                         )
+                     }
 @@
              HarmonyCard {
                  Column {
