@@ -30,6 +30,14 @@ class AuthScreenVisualContractTest {
         assertTrue(auth.contains("onAuthSuccess()"))
     }
 
+    @Test
+    fun `explicit Google button uses dedicated Google button credential flow`() {
+        val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
+
+        assertTrue(auth.contains("GetSignInWithGoogleOption.Builder("))
+        assertFalse(auth.contains("GetGoogleIdOption.Builder("))
+    }
+
     private fun source(path: String): String {
         val candidates = listOf(File(path.removePrefix("app/")), File(path))
         return candidates.firstOrNull(File::exists)?.readText()
