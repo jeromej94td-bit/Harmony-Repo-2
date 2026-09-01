@@ -92,6 +92,11 @@ fun ProfileSheet(
     onToggleDarkMode: ((Boolean) -> Unit)? = null,
     language: AppLanguage = AppLanguage.GERMAN,
     onLanguageChange: (AppLanguage) -> Unit = {},
+    isPaired: Boolean = false,
+    partnerDisplayName: String? = null,
+    onOpenPartnerConnection: () -> Unit = {},
+    onOpenHarmonyReset: () -> Unit = {},
+    onOpenDeleteAccount: () -> Unit = {},
     onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -154,7 +159,11 @@ fun ProfileSheet(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = tr("Invite-Code: HRM-8731 · alles freigeschaltet", "Invite code: HRM-8731 · everything unlocked"),
+                    text = if (isPaired) {
+                        "Verbunden mit ${partnerDisplayName ?: profile.partnerName}"
+                    } else {
+                        "Noch nicht verbunden · Harmony ist auch solo nutzbar"
+                    },
                     fontSize = 12.sp,
                     color = HarmonyMuted
                 )
@@ -177,7 +186,7 @@ fun ProfileSheet(
                     ProfileRow(label = tr("Partnerin", "Partner"), value = profile.partnerName)
                     ProfileRow(label = tr("Zusammen seit", "Together since"), value = formatTimestamp(profile.startDate))
 
-                    Row(
+                    if (com.example.BuildConfig.DEBUG) Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 10.dp),
@@ -292,14 +301,32 @@ fun ProfileSheet(
                     Text(text = tr("Konto", "Account"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
                     Spacer(modifier = Modifier.height(10.dp))
                     Button(
+                        onClick = onOpenPartnerConnection,
+                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("partner_connection_button"),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
+                    ) {
+                        Text(
+                            text = if (isPaired) "Verbindung ansehen" else "Partner verbinden",
+                            color = Color.White,
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
+                        onClick = onOpenHarmonyReset,
+                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("reset_harmony_button"),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.08f))
+                    ) {
+                        Text("Harmony zurücksetzen", color = HarmonyText, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
                         onClick = {
-                            scope.launch {
-                                runCatching {
-                                    com.example.data.SupabaseConfig.client.auth.signOut()
-                                }
-                                onDismiss()
-                                onLogout()
-                            }
+                            onDismiss()
+                            onLogout()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -312,7 +339,7 @@ fun ProfileSheet(
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Button(
-                        onClick = { isDeleteDialogOpen = true },
+                        onClick = onOpenDeleteAccount,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp)

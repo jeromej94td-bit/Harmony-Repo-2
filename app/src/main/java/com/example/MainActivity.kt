@@ -90,6 +90,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     private val viewModel: HarmonyViewModel by viewModels()
+    private val sessionViewModel: com.example.ui.session.AppSessionViewModel by viewModels()
     private var memoryWidgetOpenRequest by mutableStateOf<MemoryWidgetOpenRequest?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,6 +130,7 @@ class MainActivity : ComponentActivity() {
                 HarmonyTheme(darkTheme = uiState.isDarkMode) {
                     HarmonyApp(
                         viewModel = viewModel,
+                        sessionViewModel = sessionViewModel,
                         memoryWidgetOpenRequest = memoryWidgetOpenRequest,
                         onMemoryWidgetRequestConsumed = { memoryWidgetOpenRequest = null }
                     )
@@ -151,19 +153,60 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HarmonyApp(
     viewModel: HarmonyViewModel,
+    sessionViewModel: com.example.ui.session.AppSessionViewModel,
     memoryWidgetOpenRequest: MemoryWidgetOpenRequest? = null,
     onMemoryWidgetRequestConsumed: () -> Unit = {}
 ) {
-    var isAuthenticated by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
-
-    if (!isAuthenticated) {
-        com.example.ui.screens.AuthScreen(
-            onAuthSuccess = { isAuthenticated = true }
-        )
-        return
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    when (sessionState.phase) {
+        com.example.ui.session.SessionPhase.LOADING -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
+            return
+        }
+        com.example.ui.session.SessionPhase.SIGNED_OUT -> {
+            com.example.ui.screens.AuthScreen(
+                onAuthSuccess = { sessionViewModel.refresh() }
+            )
+            return
+        }
+        com.example.ui.session.SessionPhase.ERROR -> {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(28.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                androidx.compose.material3.Text(
+                    text = "Harmony konnte dein Konto gerade nicht laden.",
+                    color = androidx.compose.ui.graphics.Color.White,
+                    fontSize = 18.sp
+                )
+                androidx.compose.material3.Text(
+                    text = sessionState.errorMessage.orEmpty(),
+                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.68f),
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 18.dp)
+                )
+                androidx.compose.material3.Button(onClick = { sessionViewModel.refresh() }) {
+                    androidx.compose.material3.Text("Erneut versuchen")
+                }
+                androidx.compose.material3.TextButton(onClick = { sessionViewModel.logout() }) {
+                    androidx.compose.material3.Text("Abmelden")
+                }
+            }
+            return
+        }
+        com.example.ui.session.SessionPhase.READY -> Unit
     }
 
+    val appSession = sessionState.session ?: return
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val displayProfile = uiState.profile.copy(
+        userName = appSession.profile.displayName,
+        partnerName = appSession.partner?.displayName ?: "Partner"
+    )
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val isImeVisible = WindowInsets.isImeVisible
@@ -192,6 +235,8 @@ fun HarmonyApp(
     var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
     var liveChangeCount by remember { mutableStateOf(0) }
     var resultsPackId by rememberSaveable { mutableStateOf<String?>(null) }
+    var isPartnerConnectionOpen by rememberSaveable { mutableStateOf(false) }
+    var accountLifecycleModeName by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(memoryWidgetOpenRequest) {
         val request = memoryWidgetOpenRequest ?: return@LaunchedEffect
@@ -266,13 +311,22 @@ fun HarmonyApp(
     val isResultsOpen = resultsPackId != null
     val isMemoryOverlayActive = memoryState.editorMode != null ||
         memoryState.pendingDeleteEntryIds.isNotEmpty() || memoryState.selectionMode
-    val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive
+    val isAccountOverlayActive = isPartnerConnectionOpen || accountLifecycleModeName != null
+    val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive || isAccountOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
     val canHandleBack = isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
+            accountLifecycleModeName != null -> {
+                accountLifecycleModeName = null
+            }
+            isPartnerConnectionOpen -> {
+                isPartnerConnectionOpen = false
+                sessionViewModel.clearInvite()
+                sessionViewModel.clearError()
+            }
             isLiveChangeEditorOpen -> {
                 isLiveChangeEditorOpen = false
             }
@@ -340,10 +394,10 @@ fun HarmonyApp(
             topBar = {
                 if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
                     HarmonyTopBar(
-                        userName = uiState.profile.userName,
-                        partnerName = uiState.profile.partnerName,
-                        userAvatarPath = uiState.profile.userAvatarPath,
-                        partnerAvatarPath = uiState.profile.partnerAvatarPath,
+                        userName = displayProfile.userName,
+                        partnerName = displayProfile.partnerName,
+                        userAvatarPath = displayProfile.userAvatarPath,
+                        partnerAvatarPath = displayProfile.partnerAvatarPath,
                         onProfileClick = { viewModel.openProfileSheet() },
                         onRefresh = { viewModel.refreshData() },
                         showMemoryMark = uiState.selectedTab == 4
@@ -372,7 +426,7 @@ fun HarmonyApp(
                 // Main Content depending on selected Tab
                 when (uiState.selectedTab) {
                     0 -> HomeScreen(
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         answers = uiState.answers,
                         sharedPics = uiState.sharedPics,
                         stats = uiState.stats,
@@ -415,8 +469,8 @@ fun HarmonyApp(
 
                     2 -> ChatScreen(
                         messages = uiState.messages,
-                        partnerName = uiState.profile.partnerName,
-                        partnerAvatarPath = uiState.profile.partnerAvatarPath,
+                        partnerName = displayProfile.partnerName,
+                        partnerAvatarPath = displayProfile.partnerAvatarPath,
                         appLanguage = uiState.appLanguage,
                         onSendMessage = { text -> viewModel.sendChatMessage(text) },
                         onSendImage = { uri -> viewModel.sendChatImage(uri) },
@@ -435,7 +489,7 @@ fun HarmonyApp(
 
                     3 -> MomentsScreen(
                         moments = uiState.moments,
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         isAddMomentOpen = uiState.isAddMomentOpen,
                         appLanguage = uiState.appLanguage,
                         onOpenAddMoment = { viewModel.openAddMomentDialog() },
@@ -447,10 +501,10 @@ fun HarmonyApp(
                         MemoryScreen(
                             state = memoryState,
                             appLanguage = uiState.appLanguage,
-                            userName = uiState.profile.userName,
-                            partnerName = uiState.profile.partnerName,
-                            userAvatarPath = uiState.profile.userAvatarPath,
-                            partnerAvatarPath = uiState.profile.partnerAvatarPath,
+                            userName = displayProfile.userName,
+                            partnerName = displayProfile.partnerName,
+                            userAvatarPath = displayProfile.userAvatarPath,
+                            partnerAvatarPath = displayProfile.partnerAvatarPath,
                             onSelectTab = memoryViewModel::selectTab,
                             onQueryChange = memoryViewModel::setQuery,
                             onCategoryFilter = memoryViewModel::setCategoryFilter,
@@ -501,7 +555,7 @@ fun HarmonyApp(
 
                     5 -> DevStudioScreen(
                         answers = uiState.answers,
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         onStartPack = { packId -> openPackForPlay(packId) },
                         onShowToast = { msg -> viewModel.showToast(msg) }
                     )
@@ -543,8 +597,10 @@ fun HarmonyApp(
                 if (uiState.isProfileSheetOpen) {
                     val currentLanguage = AppLanguage.fromCode(uiState.appLanguage)
                     ProfileSheet(
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         isEditProfileOpen = uiState.isEditProfileOpen,
+                        isPaired = appSession.isPaired,
+                        partnerDisplayName = appSession.partner?.displayName,
                         isDarkMode = uiState.isDarkMode,
                         onToggleDarkMode = { enabled -> viewModel.toggleDarkMode(enabled) },
                         language = currentLanguage,
@@ -556,15 +612,73 @@ fun HarmonyApp(
                         onSaveEditProfile = { u, p, s -> viewModel.saveEditProfile(u, p, s) },
                         onUpdateAvatar = { uri, isUser -> viewModel.updateProfileAvatar(uri, isUser) },
                         onOpenDevStudio = { viewModel.selectTab(5) },
-                        onLogout = { isAuthenticated = false }
+                        onOpenPartnerConnection = {
+                            viewModel.closeProfileSheet()
+                            isPartnerConnectionOpen = true
+                        },
+                        onOpenHarmonyReset = {
+                            viewModel.closeProfileSheet()
+                            accountLifecycleModeName = com.example.ui.screens.AccountLifecycleMode.RESET_HARMONY.name
+                        },
+                        onOpenDeleteAccount = {
+                            viewModel.closeProfileSheet()
+                            accountLifecycleModeName = com.example.ui.screens.AccountLifecycleMode.DELETE_ACCOUNT.name
+                        },
+                        onLogout = { sessionViewModel.logout() }
                     )
+                }
+
+                if (isPartnerConnectionOpen) {
+                    com.example.ui.screens.PartnerConnectionSheet(
+                        session = appSession,
+                        activeInvite = sessionState.activeInvite,
+                        actionInProgress = sessionState.actionInProgress,
+                        errorMessage = sessionState.errorMessage,
+                        onDismiss = {
+                            isPartnerConnectionOpen = false
+                            sessionViewModel.clearInvite()
+                            sessionViewModel.clearError()
+                        },
+                        onCreateCode = { sessionViewModel.createPartnerInvite() },
+                        onJoinCode = { code -> sessionViewModel.joinPartnerInvite(code) },
+                        onClearInvite = { sessionViewModel.clearInvite() },
+                        onDisconnect = { sessionViewModel.leaveCurrentCouple() }
+                    )
+                }
+
+                accountLifecycleModeName?.let { modeName ->
+                    val lifecycleMode = runCatching {
+                        com.example.ui.screens.AccountLifecycleMode.valueOf(modeName)
+                    }.getOrNull()
+                    if (lifecycleMode != null) {
+                        com.example.ui.screens.AccountLifecycleScreen(
+                            mode = lifecycleMode,
+                            actionInProgress = sessionState.actionInProgress,
+                            errorMessage = sessionState.errorMessage,
+                            onBack = {
+                                accountLifecycleModeName = null
+                                sessionViewModel.clearError()
+                            },
+                            onConfirm = {
+                                when (lifecycleMode) {
+                                    com.example.ui.screens.AccountLifecycleMode.RESET_HARMONY -> {
+                                        sessionViewModel.resetHarmony()
+                                        accountLifecycleModeName = null
+                                    }
+                                    com.example.ui.screens.AccountLifecycleMode.DELETE_ACCOUNT -> {
+                                        sessionViewModel.deleteAccount()
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
 
                 // Full-Screen Quiz Runner Overlay
                 uiState.activeRun?.let { activeRun ->
                     QuizRunnerScreen(
                         activeRun = activeRun,
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         isExitConfirmOpen = uiState.isExitConfirmOpen,
                         isOwnAnswerDialogOpen = uiState.isOwnAnswerDialogOpen,
                         appLanguage = uiState.appLanguage,
@@ -642,7 +756,7 @@ fun HarmonyApp(
                         PackResultsScreen(
                             pack = resultPack,
                             answers = uiState.answers.filter { it.packId == packId },
-                            profile = uiState.profile,
+                            profile = displayProfile,
                             appLanguage = uiState.appLanguage,
                             onReplay = {
                                 resultsPackId = null
@@ -720,7 +834,7 @@ fun HarmonyApp(
 
                 if (isPandaEitherOrOpen) {
                     PandaEitherOrScreen(
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         answers = uiState.answers,
                         appLanguage = uiState.appLanguage,
                         onSaveAnswer = { questionIndex, userChoice, partnerChoice ->
@@ -735,7 +849,7 @@ fun HarmonyApp(
 
                 if (isProposalExperienceOpen) {
                     ProposalExperienceScreen(
-                        profile = uiState.profile,
+                        profile = displayProfile,
                         onClose = { isProposalExperienceOpen = false }
                     )
                 }
