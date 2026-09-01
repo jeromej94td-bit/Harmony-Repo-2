@@ -8,6 +8,7 @@ import com.example.data.session.AccountCacheBoundary
 import com.example.data.session.AppSession
 import com.example.data.session.AppSessionRepository
 import com.example.data.session.PartnerInvite
+import com.example.data.session.UserProfile
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ enum class SessionPhase {
     LOADING,
     SIGNED_OUT,
     READY,
+    DEMO,
     ERROR
 }
 
@@ -75,6 +77,35 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun enterDemo() {
+        viewModelScope.launch {
+            runCatching {
+                cacheBoundary.ensureOwner(DEMO_USER_ID)
+                AppSession(
+                    userId = DEMO_USER_ID,
+                    email = null,
+                    profile = UserProfile(
+                        userId = DEMO_USER_ID,
+                        displayName = "Demo",
+                        avatarUrl = null
+                    ),
+                    coupleId = null,
+                    partner = null
+                )
+            }.onSuccess { demoSession ->
+                _uiState.value = AppSessionUiState(
+                    phase = SessionPhase.DEMO,
+                    session = demoSession
+                )
+            }.onFailure { error ->
+                _uiState.value = AppSessionUiState(
+                    phase = SessionPhase.ERROR,
+                    errorMessage = error.message ?: "Demo-Modus konnte nicht gestartet werden"
+                )
+            }
+        }
+    }
+
     fun createPartnerInvite() {
         runReadyAction { current ->
             val invite = repository.createPartnerInvite()
@@ -114,12 +145,18 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun logout() {
+        val current = _uiState.value
+        if (current.phase == SessionPhase.DEMO) {
+            _uiState.value = AppSessionUiState(phase = SessionPhase.SIGNED_OUT)
+            return
+        }
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(actionInProgress = true, errorMessage = null)
+            _uiState.value = current.copy(actionInProgress = true, errorMessage = null)
             runCatching { SupabaseConfig.client.auth.signOut() }
                 .onSuccess { _uiState.value = AppSessionUiState(phase = SessionPhase.SIGNED_OUT) }
                 .onFailure { error ->
-                    _uiState.value = _uiState.value.copy(
+                    _uiState.value = current.copy(
                         actionInProgress = false,
                         errorMessage = error.message ?: "Abmelden fehlgeschlagen"
                     )
@@ -172,5 +209,9 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
                     )
                 }
         }
+    }
+
+    private companion object {
+        const val DEMO_USER_ID = "local-demo-session"
     }
 }
