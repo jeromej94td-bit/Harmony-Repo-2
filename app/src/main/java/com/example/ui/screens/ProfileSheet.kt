@@ -30,9 +30,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -98,6 +101,9 @@ fun ProfileSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val accountEmail = runCatching {
+        com.example.data.SupabaseConfig.client.auth.currentSessionOrNull()?.user?.email
+    }.getOrNull()?.takeIf { it.isNotBlank() }
 
     var isLanguageExpanded by remember { mutableStateOf(false) }
     var isDeleteDialogOpen by remember { mutableStateOf(false) }
@@ -291,6 +297,56 @@ fun ProfileSheet(
                 Column {
                     Text(text = tr("Konto", "Account"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
                     Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .background(
+                                    Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)),
+                                    CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(25.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (accountEmail != null) {
+                                    tr("Angemeldet als", "Signed in as")
+                                } else {
+                                    tr("Demo-Modus", "Demo mode")
+                                },
+                                fontSize = 11.5.sp,
+                                color = HarmonyMuted
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = accountEmail
+                                    ?: tr("Kein Benutzerkonto angemeldet", "No user account signed in"),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = HarmonyText,
+                                modifier = Modifier.testTag("account_email")
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = {
                             scope.launch {
