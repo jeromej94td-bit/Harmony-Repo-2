@@ -38,3 +38,4 @@ jobs:
           --tests com.example.data.model.GermanWordingDefectAuditTest
           --tests com.example.data.model.GermanWordingRuntimeAuditTest
           --stacktrace
+          --info
