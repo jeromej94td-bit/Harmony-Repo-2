@@ -95,21 +95,23 @@ internal fun FullscreenMechanicShell(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp
     val compact = screenHeight < 700
+    val chromeMetrics = FullscreenMechanicChromeLayoutPolicy.metrics(
+        screenHeightDp = screenHeight,
+        fontScale = configuration.fontScale
+    )
     // Keep the stage inside the usable viewport even on landscape/short displays.
     val stageHeight = FullscreenMechanicStageHeightPolicy.stageHeightDp(screenHeight).dp
     val shape = RoundedCornerShape(if (compact) 26.dp else 30.dp)
     val horizontalPadding = if (compact) 14.dp else 18.dp
-    val verticalPadding = if (compact) 12.dp else 18.dp
-    val questionSize = when {
-        compact && question.length > 95 -> 18.sp
-        compact && question.length > 70 -> 19.sp
-        compact && question.length > 48 -> 21.sp
-        compact -> 23.sp
-        question.length > 110 -> 22.sp
-        question.length > 80 -> 24.sp
-        else -> 27.sp
-    }
-    val questionLineHeight = (questionSize.value + if (compact) 4f else 6f).sp
+    val questionSizeSp = FullscreenMechanicChromeLayoutPolicy.questionSizeSp(
+        screenHeightDp = screenHeight,
+        questionLength = question.length,
+        fontScale = configuration.fontScale
+    )
+    val questionSize = questionSizeSp.sp
+    val questionLineHeight = FullscreenMechanicChromeLayoutPolicy
+        .questionLineHeightSp(screenHeight, questionSizeSp)
+        .sp
 
     Column(
         modifier = modifier
@@ -126,18 +128,21 @@ internal fun FullscreenMechanicShell(
                 )
             )
             .border(1.2.dp, HarmonyPink.copy(alpha = 0.54f), shape)
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+            .padding(
+                horizontal = horizontalPadding,
+                vertical = chromeMetrics.verticalPaddingDp.dp
+            )
             .testTag("fullscreen_mechanic_stage"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = kicker,
             color = HarmonyPinkSoft,
-            fontSize = if (compact) 11.sp else 13.sp,
+            fontSize = chromeMetrics.kickerSizeSp.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
+        Spacer(Modifier.height(chromeMetrics.headerGapDp.dp))
         Text(
             text = question,
             color = Color.White,
@@ -146,15 +151,17 @@ internal fun FullscreenMechanicShell(
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(if (compact) 4.dp else 8.dp))
-        Text(
-            text = instruction,
-            color = HarmonyMuted,
-            fontSize = if (compact) 12.sp else 14.sp,
-            lineHeight = if (compact) 16.sp else 19.sp,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(if (compact) 10.dp else 18.dp))
+        if (chromeMetrics.showInstruction) {
+            Spacer(Modifier.height(chromeMetrics.headerGapDp.dp))
+            Text(
+                text = instruction,
+                color = HarmonyMuted,
+                fontSize = chromeMetrics.instructionSizeSp.sp,
+                lineHeight = chromeMetrics.instructionLineHeightSp.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+        Spacer(Modifier.height(chromeMetrics.contentGapDp.dp))
         Box(modifier = Modifier.fillMaxSize()) { content() }
     }
 }
