@@ -426,6 +426,10 @@ internal fun ScenarioBoard(
         screenHeightDp = configuration.screenHeightDp,
         fontScale = configuration.fontScale
     )
+    val playMetrics = ScenarioPlayLayoutPolicy.metrics(
+        screenHeightDp = configuration.screenHeightDp,
+        fontScale = configuration.fontScale
+    )
 
     val sceneEmoji = when {
         journeyChoices.size >= 7 -> "🏝️"
@@ -546,36 +550,38 @@ internal fun ScenarioBoard(
             }
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(112.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(
-                                    HarmonyPurple.copy(alpha = 0.52f),
-                                    HarmonyPink.copy(alpha = 0.24f),
-                                    HarmonySurface2
+                if (playMetrics.showScene) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(playMetrics.sceneHeightDp.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        HarmonyPurple.copy(alpha = 0.52f),
+                                        HarmonyPink.copy(alpha = 0.24f),
+                                        HarmonySurface2
+                                    )
                                 )
                             )
-                        )
-                        .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(28.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(sceneEmoji, fontSize = 60.sp)
-                        if (journeyChoices.isNotEmpty()) {
-                            Text(
-                                text = tr("Kapitel ${journeyChoices.size + 1}", "Chapter ${journeyChoices.size + 1}"),
-                                color = Color.White.copy(alpha = 0.74f),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(28.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(sceneEmoji, fontSize = playMetrics.sceneEmojiSp.sp)
+                            if (playMetrics.showChapterLabel && journeyChoices.isNotEmpty()) {
+                                Text(
+                                    text = tr("Kapitel ${journeyChoices.size + 1}", "Chapter ${journeyChoices.size + 1}"),
+                                    color = Color.White.copy(alpha = 0.74f),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
+                    Spacer(Modifier.height(playMetrics.gapDp.dp))
                 }
-                Spacer(Modifier.height(12.dp))
                 LargeOptionGrid(
                     items = items,
                     selectedRaw = selected,
@@ -586,7 +592,7 @@ internal fun ScenarioBoard(
                     modifier = Modifier.weight(1f),
                     tagPrefix = "scenario_option"
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(playMetrics.gapDp.dp))
                 PrimaryMechanicButton(
                     text = if (projectedJourney.size >= 8) tr("Finale aufdecken", "Reveal finale") else tr("Entscheidung treffen", "Make decision"),
                     enabled = selected != null,

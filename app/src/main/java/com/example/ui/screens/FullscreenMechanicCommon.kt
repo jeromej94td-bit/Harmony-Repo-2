@@ -228,12 +228,11 @@ internal fun LargeOptionCard(
         )
 
         BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             val compactCard = maxHeight < 145.dp
+            val cardMetrics = LargeOptionCardLayoutPolicy.metrics(maxHeight.value.toInt())
             val labelSize = when {
                 compactCard && item.label.length > 78 -> 12.sp
                 compactCard && item.label.length > 55 -> 13.sp
@@ -245,7 +244,13 @@ internal fun LargeOptionCard(
             }
             val labelLineHeight = (labelSize.value + 4f).sp
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(
+                    horizontal = cardMetrics.horizontalPaddingDp.dp,
+                    vertical = cardMetrics.verticalPaddingDp.dp
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 if (!badge.isNullOrBlank()) {
                     Text(
                         text = badge,
