@@ -72,7 +72,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import com.example.data.SupabaseConfig
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
@@ -167,14 +167,12 @@ fun AuthScreen(
                         isLoading = true
                         errorMessage = null
                         val res = kotlin.runCatching {
-                            val googleIdOption = GetGoogleIdOption.Builder()
-                                .setFilterByAuthorizedAccounts(false)
-                                .setServerClientId(SupabaseConfig.GOOGLE_WEB_CLIENT_ID)
-                                .setAutoSelectEnabled(false)
-                                .build()
+                            val googleSignInOption = GetSignInWithGoogleOption.Builder(
+                                serverClientId = SupabaseConfig.GOOGLE_WEB_CLIENT_ID
+                            ).build()
 
                             val request = GetCredentialRequest.Builder()
-                                .addCredentialOption(googleIdOption)
+                                .addCredentialOption(googleSignInOption)
                                 .build()
 
                             val activity = context.findActivity()
