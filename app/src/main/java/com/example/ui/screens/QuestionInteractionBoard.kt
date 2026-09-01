@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -186,31 +188,46 @@ private fun PersonAssignmentBoard(
                         fontSize = layoutMetrics.headerSizeSp.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
-                    if (unassignedRoles.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = tr("Alles verteilt", "All assigned"),
-                                color = HarmonyPinkSoft,
-                                fontSize = if (layoutMetrics.hideAvatarWhenComplete) 13.sp else 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    } else {
-                        unassignedRoles.forEach { role ->
-                            key(role) {
-                                DraggableRoleChip(
-                                    role = role,
-                                    roleIndex = options.indexOf(role),
-                                    userBounds = { userBounds },
-                                    partnerBounds = { partnerBounds },
-                                    onHover = { hoveredSide = it },
-                                    onDrop = { side -> dropRole(role, side) },
-                                    layoutMetrics = layoutMetrics
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .testTag("assignment_unassigned_roles")
+                    ) {
+                        if (unassignedRoles.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = tr("Alles verteilt", "All assigned"),
+                                    color = HarmonyPinkSoft,
+                                    fontSize = if (layoutMetrics.hideAvatarWhenComplete) 13.sp else 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
                                 )
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(layoutMetrics.verticalSpacingDp.dp)
+                            ) {
+                                unassignedRoles.forEach { role ->
+                                    key(role) {
+                                        DraggableRoleChip(
+                                            role = role,
+                                            roleIndex = options.indexOf(role),
+                                            userBounds = { userBounds },
+                                            partnerBounds = { partnerBounds },
+                                            onHover = { hoveredSide = it },
+                                            onDrop = { side -> dropRole(role, side) },
+                                            layoutMetrics = layoutMetrics
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -338,18 +355,33 @@ private fun AssignmentTarget(
                 )
             }
         } else {
-            roles.forEach { role ->
-                key(role) {
-                    DraggableRoleChip(
-                        role = role,
-                        roleIndex = options.indexOf(role),
-                        userBounds = userBounds,
-                        partnerBounds = partnerBounds,
-                        onHover = onHover,
-                        onDrop = { target -> onDrop(role, target) },
-                        assigned = true,
-                        layoutMetrics = layoutMetrics
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .testTag("${targetTag}_roles")
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(layoutMetrics.verticalSpacingDp.dp)
+                ) {
+                    roles.forEach { role ->
+                        key(role) {
+                            DraggableRoleChip(
+                                role = role,
+                                roleIndex = options.indexOf(role),
+                                userBounds = userBounds,
+                                partnerBounds = partnerBounds,
+                                onHover = onHover,
+                                onDrop = { target -> onDrop(role, target) },
+                                assigned = true,
+                                layoutMetrics = layoutMetrics
+                            )
+                        }
+                    }
                 }
             }
         }
