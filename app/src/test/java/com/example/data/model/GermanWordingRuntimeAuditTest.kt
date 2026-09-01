@@ -31,6 +31,19 @@ class GermanWordingRuntimeAuditTest {
         HarmonyPacksData.setDynamicPacks(generatedPacks)
         try {
             val issues = GermanWordingDefectAudit.audit(HarmonyPacksData.PACKS)
+            if (issues.isNotEmpty()) {
+                println("Stage 06.3 wording defects found:")
+                issues.forEach { issue ->
+                    println(
+                        buildString {
+                            append(issue.packId)
+                            issue.questionIndex?.let { append("[").append(it).append("]") }
+                            issue.optionIndex?.let { append(" option ").append(it) }
+                            append(" ").append(issue.kind).append(": ").append(issue.text)
+                        }
+                    )
+                }
+            }
             assertTrue(
                 issues.joinToString(
                     prefix = "Stage 06.3 wording defects found:\n",
