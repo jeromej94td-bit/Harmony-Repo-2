@@ -543,8 +543,8 @@ private fun CosmicLoginBackdrop(modifier: Modifier = Modifier) {
             val angle = index * 0.82f + drift * 0.35f
             val radius = size.width * (0.16f + (index % 5) * 0.12f)
             val star = Offset(
-                center.x + cos(angle) * radius,
-                center.y + sin(angle) * radius * 0.42f
+                center.x + cos(angle.toDouble()).toFloat() * radius,
+                center.y + sin(angle.toDouble()).toFloat() * radius * 0.42f
             )
             val alpha = (0.18f + (index % 4) * 0.12f) * pulse
             drawCircle(
@@ -555,7 +555,7 @@ private fun CosmicLoginBackdrop(modifier: Modifier = Modifier) {
         }
 
         floatingHearts.forEach { heart ->
-            val wobble = sin((drift + heart.phase) * PI * 2).toFloat()
+            val wobble = sin(((drift + heart.phase) * 2f * PI).toDouble()).toFloat()
             drawHeart(
                 center = Offset(
                     size.width * heart.x + wobble * 13.dp.toPx(),
