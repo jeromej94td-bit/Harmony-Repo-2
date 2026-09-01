@@ -27,6 +27,15 @@ class GermanWordingDefectAuditTest {
     }
 
     @Test
+    fun `intentional mechanic identity option tokens remain allowed`() {
+        val issues = GermanWordingDefectAudit.audit(
+            listOf(pack(options = listOf("{user}", "{partner}", "Beide", "Niemand")))
+        )
+
+        assertTrue(issues.joinToString(), issues.isEmpty())
+    }
+
+    @Test
     fun `placeholder text in option is detected`() {
         val issues = GermanWordingDefectAudit.audit(
             listOf(pack(options = listOf("Gemeinsam reden", "TODO")))
