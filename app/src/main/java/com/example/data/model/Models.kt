@@ -101,7 +101,6 @@ data class QuestionPack(
 object HarmonyPacksData {
 
     private val DEFAULT_CATEGORIES = listOf(
-        Category("mischung", "Eure Mischung", "👶", 0xFFFF70A6),
         Category("unterbewusstsein", "Tauche ins Unterbewusstsein", "🧙‍♂️", 0xFF9D4EDD),
         Category("wer", "Wer würde eher?", "🤔", 0xFFFF2E63),
         Category("zeich", "Zeichnen", "🎨", 0xFF9E59BD),
@@ -138,7 +137,7 @@ object HarmonyPacksData {
                     result.add(dc)
                 }
             }
-            return result
+            return result.filter { RemovedGameCatalogPolicy.allowsCategoryId(it.id) }
         }
 
     val TOPICS = listOf(
@@ -1039,6 +1038,8 @@ object HarmonyPacksData {
                     result.add(dp)
                 }
             }
-            return result.map { com.example.data.Harmony360SectionTopicSorting.apply(it) }
+            return result
+                .filter { RemovedGameCatalogPolicy.allowsPackCategoryId(it.cat) }
+                .map { com.example.data.Harmony360SectionTopicSorting.apply(it) }
         }
 }
