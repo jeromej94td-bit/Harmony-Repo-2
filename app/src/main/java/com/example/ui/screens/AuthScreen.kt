@@ -366,36 +366,7 @@ fun AuthScreen(
 
             TextButton(
                 onClick = {
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        successMessage = null
-                        val demoEmail = "demo@harmony.app"
-                        val demoPassword = "DemoPassword123!"
-                        
-                        var res = kotlin.runCatching {
-                            SupabaseConfig.client.auth.signInWith(EmailProvider) {
-                                this.email = demoEmail
-                                this.password = demoPassword
-                            }
-                        }
-                        
-                        if (res.isFailure) {
-                            res = kotlin.runCatching {
-                                SupabaseConfig.client.auth.signUpWith(EmailProvider) {
-                                    this.email = demoEmail
-                                    this.password = demoPassword
-                                }
-                            }
-                        }
-                        
-                        isLoading = false
-                        if (res.isSuccess) {
-                            onAuthSuccess()
-                        } else {
-                            errorMessage = res.exceptionOrNull()?.message ?: "Demo-Login fehlgeschlagen"
-                        }
-                    }
+                    onAuthSuccess()
                 }
             ) {
                 Text("App im Demo-Modus testen", color = Color(0xFF99CCFF), fontSize = 14.sp)

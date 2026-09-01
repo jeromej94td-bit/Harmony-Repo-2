@@ -825,7 +825,7 @@ fun HarmonyApp(
                                         isProposalExperienceOpen -> isProposalExperienceOpen = false
                                         isKidGeneratorOpen -> isKidGeneratorOpen = false
                                     }
-                                )
+                                }
                             ) {
                                 androidx.compose.material3.Text(
                                     com.example.util.LanguageManager.tr("Verlassen", uiState.appLanguage)
