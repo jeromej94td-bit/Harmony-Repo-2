@@ -111,7 +111,8 @@ private data class HeartParticle(
 
 @Composable
 fun AuthScreen(
-    onAuthSuccess: () -> Unit
+    onAuthSuccess: () -> Unit,
+    onDemoRequested: () -> Unit = onAuthSuccess
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -429,7 +430,7 @@ fun AuthScreen(
 
             TextButton(
                 onClick = {
-                    onAuthSuccess()
+                    onDemoRequested()
                 }
             ) {
                 Text(

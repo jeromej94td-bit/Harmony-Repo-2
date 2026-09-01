@@ -167,7 +167,8 @@ fun HarmonyApp(
         }
         com.example.ui.session.SessionPhase.SIGNED_OUT -> {
             com.example.ui.screens.AuthScreen(
-                onAuthSuccess = { sessionViewModel.refresh() }
+                onAuthSuccess = { sessionViewModel.refresh() },
+                onDemoRequested = { sessionViewModel.enterDemo() }
             )
             return
         }
@@ -197,10 +198,12 @@ fun HarmonyApp(
             }
             return
         }
-        com.example.ui.session.SessionPhase.READY -> Unit
+        com.example.ui.session.SessionPhase.READY,
+        com.example.ui.session.SessionPhase.DEMO -> Unit
     }
 
     val appSession = sessionState.session ?: return
+    val isDemoMode = sessionState.phase == com.example.ui.session.SessionPhase.DEMO
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val displayProfile = uiState.profile.copy(
@@ -600,6 +603,7 @@ fun HarmonyApp(
                         profile = displayProfile,
                         isEditProfileOpen = uiState.isEditProfileOpen,
                         isPaired = appSession.isPaired,
+                        isDemoMode = isDemoMode,
                         partnerDisplayName = appSession.partner?.displayName,
                         isDarkMode = uiState.isDarkMode,
                         onToggleDarkMode = { enabled -> viewModel.toggleDarkMode(enabled) },

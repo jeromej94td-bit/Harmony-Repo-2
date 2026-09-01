@@ -93,6 +93,7 @@ fun ProfileSheet(
     language: AppLanguage = AppLanguage.GERMAN,
     onLanguageChange: (AppLanguage) -> Unit = {},
     isPaired: Boolean = false,
+    isDemoMode: Boolean = false,
     partnerDisplayName: String? = null,
     onOpenPartnerConnection: () -> Unit = {},
     onOpenHarmonyReset: () -> Unit = {},
@@ -159,10 +160,10 @@ fun ProfileSheet(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = if (isPaired) {
-                        "Verbunden mit ${partnerDisplayName ?: profile.partnerName}"
-                    } else {
-                        "Noch nicht verbunden · Harmony ist auch solo nutzbar"
+                    text = when {
+                        isDemoMode -> "Demo-Modus · keine Cloud-Kontodaten werden angelegt"
+                        isPaired -> "Verbunden mit ${partnerDisplayName ?: profile.partnerName}"
+                        else -> "Noch nicht verbunden · Harmony ist auch solo nutzbar"
                     },
                     fontSize = 12.sp,
                     color = HarmonyMuted
@@ -300,29 +301,31 @@ fun ProfileSheet(
                 Column {
                     Text(text = tr("Konto", "Account"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
                     Spacer(modifier = Modifier.height(10.dp))
-                    Button(
-                        onClick = onOpenPartnerConnection,
-                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("partner_connection_button"),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
-                    ) {
-                        Text(
-                            text = if (isPaired) "Verbindung ansehen" else "Partner verbinden",
-                            color = Color.White,
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    if (!isDemoMode) {
+                        Button(
+                            onClick = onOpenPartnerConnection,
+                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("partner_connection_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
+                        ) {
+                            Text(
+                                text = if (isPaired) "Verbindung ansehen" else "Partner verbinden",
+                                color = Color.White,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            onClick = onOpenHarmonyReset,
+                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("reset_harmony_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.08f))
+                        ) {
+                            Text("Harmony zurücksetzen", color = HarmonyText, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Button(
-                        onClick = onOpenHarmonyReset,
-                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("reset_harmony_button"),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.08f))
-                    ) {
-                        Text("Harmony zurücksetzen", color = HarmonyText, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
                     Button(
                         onClick = {
                             onDismiss()
@@ -335,19 +338,26 @@ fun ProfileSheet(
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple)
                     ) {
-                        Text(text = tr("Abmelden", "Log out"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = if (isDemoMode) "Demo beenden" else tr("Abmelden", "Log out"),
+                            color = Color.White,
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Button(
-                        onClick = onOpenDeleteAccount,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("delete_account_button"),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f))
-                    ) {
-                        Text(text = tr("Konto löschen", "Delete account"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                    if (!isDemoMode) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            onClick = onOpenDeleteAccount,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .testTag("delete_account_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f))
+                        ) {
+                            Text(text = tr("Konto löschen", "Delete account"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
