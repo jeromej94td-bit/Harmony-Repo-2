@@ -1,5 +1,4 @@
 diff --git a/app/src/main/java/com/example/MainActivity.kt b/app/src/main/java/com/example/MainActivity.kt
-index fc8d428..0000000 100644
 --- a/app/src/main/java/com/example/MainActivity.kt
 +++ b/app/src/main/java/com/example/MainActivity.kt
 @@ -99,7 +99,6 @@ class MainActivity : ComponentActivity() {
@@ -10,7 +9,6 @@ index fc8d428..0000000 100644
          if (intent.getIntExtra("open_tab", -1) == 1) {
              viewModel.selectTab(1)
 diff --git a/app/src/main/java/com/example/ui/HarmonyViewModel.kt b/app/src/main/java/com/example/ui/HarmonyViewModel.kt
-index 7f61aa7..0000000 100644
 --- a/app/src/main/java/com/example/ui/HarmonyViewModel.kt
 +++ b/app/src/main/java/com/example/ui/HarmonyViewModel.kt
 @@ -47,6 +47,8 @@ import java.io.File
@@ -47,7 +45,6 @@ index 7f61aa7..0000000 100644
  
          val prefs = getApplication<Application>().getSharedPreferences("harmony_auto_generation", android.content.Context.MODE_PRIVATE)
 diff --git a/app/src/main/java/com/example/ui/screens/HomeScreen.kt b/app/src/main/java/com/example/ui/screens/HomeScreen.kt
-index 4290e08..0000000 100644
 --- a/app/src/main/java/com/example/ui/screens/HomeScreen.kt
 +++ b/app/src/main/java/com/example/ui/screens/HomeScreen.kt
 @@ -105,6 +105,7 @@ fun HomeScreen(
@@ -75,7 +72,6 @@ index 4290e08..0000000 100644
      }
  
 diff --git a/app/src/main/java/com/example/ui/screens/GamesScreen.kt b/app/src/main/java/com/example/ui/screens/GamesScreen.kt
-index e8b41fc..0000000 100644
 --- a/app/src/main/java/com/example/ui/screens/GamesScreen.kt
 +++ b/app/src/main/java/com/example/ui/screens/GamesScreen.kt
 @@ -105,6 +105,7 @@ fun GamesScreen(
@@ -96,7 +92,6 @@ index e8b41fc..0000000 100644
                      Column {
                          Spacer(modifier = Modifier.height(20.dp))
 diff --git a/app/src/main/java/com/example/ui/screens/ChatScreen.kt b/app/src/main/java/com/example/ui/screens/ChatScreen.kt
-index ec14668..0000000 100644
 --- a/app/src/main/java/com/example/ui/screens/ChatScreen.kt
 +++ b/app/src/main/java/com/example/ui/screens/ChatScreen.kt
 @@ -96,6 +96,7 @@ fun ChatScreen(
