@@ -107,6 +107,7 @@ fun GamesScreen(
     answers: List<AnswerEntity>,
     packFilter: String,
     generatedGames: List<BrainGeneratedContentEntity> = emptyList(),
+    brainEnabled: Boolean = false,
     appLanguage: String = "de",
     onSetFilter: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
@@ -430,7 +431,7 @@ fun GamesScreen(
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
-            if (generatedGames.isNotEmpty()) {
+            if (brainEnabled && generatedGames.isNotEmpty()) {
                 item(key = "generated_games_section") {
                     Column {
                         Spacer(modifier = Modifier.height(20.dp))
