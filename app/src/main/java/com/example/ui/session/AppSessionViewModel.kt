@@ -1,6 +1,7 @@
 package com.example.ui.session
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.SupabaseConfig
@@ -8,6 +9,7 @@ import com.example.data.session.AccountCacheBoundary
 import com.example.data.session.AppSession
 import com.example.data.session.AppSessionRepository
 import com.example.data.session.PartnerInvite
+import com.example.data.session.ProfileAvatarRepository
 import com.example.data.session.UserProfile
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
@@ -34,6 +36,7 @@ data class AppSessionUiState(
 
 class AppSessionViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = AppSessionRepository()
+    private val avatarRepository = ProfileAvatarRepository(application.applicationContext)
     private val cacheBoundary = AccountCacheBoundary.forApplication(application)
 
     private val _uiState = MutableStateFlow(AppSessionUiState())
@@ -121,6 +124,14 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
 
         runReadyAction { current ->
             val session = repository.updateProfile(displayName)
+            current.copy(session = session)
+        }
+    }
+
+    fun updateProfileAvatar(uri: Uri) {
+        runReadyAction { current ->
+            val avatarRef = avatarRepository.uploadOwnAvatar(uri)
+            val session = repository.updateAvatar(avatarRef)
             current.copy(session = session)
         }
     }
