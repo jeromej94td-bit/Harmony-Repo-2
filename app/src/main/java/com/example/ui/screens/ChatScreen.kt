@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,12 +59,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.data.model.ChatMessageEntity
+import com.example.ui.components.AuthenticatedAvatarImage
 import com.example.ui.components.VoiceInputButton
 import com.example.ui.components.VoiceMessageBubble
 import com.example.ui.components.VoiceRecordingBar
 import com.example.ui.components.formatTimeOnly
+import com.example.ui.session.AppSessionViewModel
+import com.example.ui.session.SessionPhase
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
@@ -87,6 +93,46 @@ fun ChatScreen(
     onSendVoiceMessage: (String, Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
+    val sessionViewModel: AppSessionViewModel = viewModel()
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    val liveSession = sessionState.session
+    val isDemoMode = sessionState.phase == SessionPhase.DEMO
+    val livePartner = liveSession?.partner
+    var isPartnerConnectionOpen by rememberSaveable { mutableStateOf(false) }
+
+    if (!isDemoMode && livePartner == null) {
+        Box(modifier = modifier.fillMaxSize()) {
+            PartnerRequiredScreen(
+                title = LanguageManager.tr("Euer privater Chat", appLanguage),
+                description = LanguageManager.tr(
+                    "Verbinde zuerst deinen Partner. Danach erscheint hier euer gemeinsamer Chat ohne simulierte Partnerdaten.",
+                    appLanguage
+                ),
+                onConnectPartner = { isPartnerConnectionOpen = true }
+            )
+
+            if (isPartnerConnectionOpen && liveSession != null) {
+                PartnerConnectionSheet(
+                    session = liveSession,
+                    activeInvite = sessionState.activeInvite,
+                    actionInProgress = sessionState.actionInProgress,
+                    errorMessage = sessionState.errorMessage,
+                    onDismiss = {
+                        isPartnerConnectionOpen = false
+                        sessionViewModel.clearInvite()
+                        sessionViewModel.clearError()
+                    },
+                    onCreateCode = { sessionViewModel.createPartnerInvite() },
+                    onJoinCode = { code -> sessionViewModel.joinPartnerInvite(code) },
+                    onClearInvite = { sessionViewModel.clearInvite() },
+                    onDisconnect = { sessionViewModel.leaveCurrentCouple() }
+                )
+            }
+        }
+        return
+    }
+
+    val resolvedPartnerName = if (isDemoMode) partnerName else livePartner?.displayName.orEmpty()
     val context = LocalContext.current
     val recorderHelper = remember { AudioRecorderHelper(context) }
     var chatInputText by remember { mutableStateOf("") }
@@ -109,10 +155,19 @@ fun ChatScreen(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AvatarImage(path = partnerAvatarPath, fallback = partnerName.take(1), size = 42)
+            if (isDemoMode) {
+                AvatarImage(path = partnerAvatarPath, fallback = resolvedPartnerName.take(1), size = 42)
+            } else {
+                AuthenticatedAvatarImage(
+                    avatarRef = livePartner?.avatarUrl,
+                    displayName = livePartner?.displayName.orEmpty(),
+                    contentDescription = resolvedPartnerName,
+                    modifier = Modifier.size(42.dp)
+                )
+            }
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(partnerName, color = HarmonyText, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                Text(resolvedPartnerName, color = HarmonyText, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                 Text(
                     LanguageManager.tr("Privater Paar-Chat mit Sprachnachrichten", appLanguage),
                     color = HarmonyMuted,
@@ -213,7 +268,7 @@ fun ChatScreen(
                     onValueChange = { chatInputText = it },
                     placeholder = {
                         Text(
-                            "${LanguageManager.tr("Nachricht an", appLanguage)} $partnerName...",
+                            "${LanguageManager.tr("Nachricht an", appLanguage)} $resolvedPartnerName...",
                             color = HarmonyMuted
                         )
                     },
@@ -278,7 +333,7 @@ fun ChatScreen(
                     LanguageManager.tr(
                         "Möchtest du {partner} melden? Die Meldung wird erst nach deiner Bestätigung vorbereitet.",
                         appLanguage
-                    ).replace("{partner}", partnerName)
+                    ).replace("{partner}", resolvedPartnerName)
                 )
             },
             confirmButton = {
