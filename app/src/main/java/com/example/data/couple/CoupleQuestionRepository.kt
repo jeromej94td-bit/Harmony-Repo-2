@@ -3,6 +3,7 @@ package com.example.data.couple
 import com.example.data.SupabaseConfig
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -37,6 +38,36 @@ data class CoupleAnswerStatus(
     val readyToReveal: Boolean
 )
 
+class RapidAnswerSubmissionGuard(
+    private val windowMs: Long = 750L,
+    private val nowMs: () -> Long = { System.nanoTime() / 1_000_000L }
+) {
+    private data class Recent(
+        val timestampMs: Long,
+        val status: CoupleAnswerStatus
+    )
+
+    private val recentByQuestion = mutableMapOf<String, Recent>()
+
+    @Synchronized
+    fun recent(packId: String, questionIndex: Int): CoupleAnswerStatus? {
+        val key = key(packId, questionIndex)
+        val item = recentByQuestion[key] ?: return null
+        if (nowMs() - item.timestampMs >= windowMs) {
+            recentByQuestion.remove(key)
+            return null
+        }
+        return item.status
+    }
+
+    @Synchronized
+    fun record(packId: String, questionIndex: Int, status: CoupleAnswerStatus) {
+        recentByQuestion[key(packId, questionIndex)] = Recent(nowMs(), status)
+    }
+
+    private fun key(packId: String, questionIndex: Int): String = "$packId#$questionIndex"
+}
+
 data class CouplePackQuestionResult(
     val questionIndex: Int,
     val myAnswerText: String?,
@@ -63,9 +94,11 @@ class CoupleQuestionRepository(
     private val accessTokenProvider: suspend () -> String = {
         SupabaseConfig.client.auth.currentSessionOrNull()?.accessToken
             ?: throw CoupleQuestionException("not_authenticated")
-    }
+    },
+    private val submissionGuard: RapidAnswerSubmissionGuard = RapidAnswerSubmissionGuard()
 ) {
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
+    private val submitMutex = Mutex()
 
     suspend fun submitAnswer(
         packId: String,
@@ -76,22 +109,31 @@ class CoupleQuestionRepository(
             throw CoupleQuestionException("invalid_answer_payload")
         }
 
-        val response = postRpc(
-            functionName = "submit_question_answer",
-            body = JSONObject()
-                .put("p_pack_id", packId)
-                .put("p_question_index", questionIndex)
-                .put("p_answer_text", answerText.trim())
-        )
-        val rows = JSONArray(response)
-        if (rows.length() != 1) throw CoupleQuestionException("answer_status_missing")
-        val row = rows.getJSONObject(0)
-        return CoupleAnswerStatus(
-            roundId = row.getString("round_id"),
-            myAnswered = row.optBoolean("my_answered", false),
-            partnerAnswered = row.optBoolean("partner_answered", false),
-            readyToReveal = row.optBoolean("ready_to_reveal", false)
-        )
+        submitMutex.lock()
+        try {
+            submissionGuard.recent(packId, questionIndex)?.let { return it }
+
+            val response = postRpc(
+                functionName = "submit_question_answer",
+                body = JSONObject()
+                    .put("p_pack_id", packId)
+                    .put("p_question_index", questionIndex)
+                    .put("p_answer_text", answerText.trim())
+            )
+            val rows = JSONArray(response)
+            if (rows.length() != 1) throw CoupleQuestionException("answer_status_missing")
+            val row = rows.getJSONObject(0)
+            val status = CoupleAnswerStatus(
+                roundId = row.getString("round_id"),
+                myAnswered = row.optBoolean("my_answered", false),
+                partnerAnswered = row.optBoolean("partner_answered", false),
+                readyToReveal = row.optBoolean("ready_to_reveal", false)
+            )
+            submissionGuard.record(packId, questionIndex, status)
+            return status
+        } finally {
+            submitMutex.unlock()
+        }
     }
 
     suspend fun getPackResults(packId: String): List<CouplePackQuestionResult> {
