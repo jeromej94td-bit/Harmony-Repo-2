@@ -39,6 +39,19 @@ class AuthScreenVisualContractTest {
     }
 
     @Test
+    fun `Google button clears stale credential state and retries once after account reauth failure`() {
+        val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
+
+        assertTrue(auth.contains("ClearCredentialStateRequest"))
+        assertTrue(auth.contains("credentialManager.clearCredentialState"))
+        assertTrue(auth.contains("isGoogleAccountReauthFailure"))
+        assertTrue(auth.contains("retryAfterCredentialReset"))
+        assertTrue(auth.contains("retryAfterCredentialReset = false"))
+        assertTrue(auth.contains("Account reauth failed"))
+        assertTrue(auth.contains("[16]"))
+    }
+
+    @Test
     fun `forgot password button sends a Supabase password reset email`() {
         val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
 
