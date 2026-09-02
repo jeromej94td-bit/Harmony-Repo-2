@@ -32,9 +32,8 @@ class GoogleAuthRegressionContractTest {
     fun `missing native Google credentials fall back to browser oauth`() {
         val recovery = source("app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt")
 
-        assertTrue(recovery.contains("isNativeGoogleCredentialUnavailable"))
-        assertTrue(recovery.contains("No credentials available"))
-        assertTrue(recovery.contains("Native Google credential unavailable; using OAuth fallback"))
+        assertTrue(recovery.contains("catch (exception: Exception)"))
+        assertTrue(recovery.contains("Native Google credential failed (possibly SHA-1 mismatch or unavailable); using OAuth fallback"))
         assertTrue(recovery.contains("GoogleSignInOutcome.OAUTH_REDIRECT_STARTED"))
     }
 
