@@ -8,6 +8,7 @@ import com.example.data.model.BrainChatSuggestionItem
 import com.example.data.model.BrainMessage
 import com.example.data.model.ChatMessageEntity
 import com.example.ui.HarmonyViewModel
+import com.example.ui.session.isConnectedPartnerName
 
 /**
  * Source-compatibility bridge while the legacy MainActivity signature is being
@@ -35,7 +36,7 @@ fun ChatScreen(
     onSuggestionFeedback: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
-    if (partnerName == "Partner") {
+    if (!isConnectedPartnerName(partnerName)) {
         val harmonyViewModel: HarmonyViewModel = viewModel()
         PartnerRequiredScreen(
             title = "Chat wird zu zweit freigeschaltet",
