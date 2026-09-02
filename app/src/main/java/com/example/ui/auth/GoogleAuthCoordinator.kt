@@ -23,11 +23,12 @@ enum class GoogleSignInOutcome {
 /**
  * Canonical Google authentication entry point for Harmony.
  *
- * Do not replace this with a direct `signInWith(Google)` call in UI code.
- * Credential Manager is the primary path because it creates the Supabase
- * session immediately from Google's ID token. A stale Google credential state
- * ([16] Account reauth failed) is cleared and retried once; only after that do
- * we fall back to the browser OAuth flow.
+ * Credential Manager is the preferred path because it creates the Supabase
+ * session immediately from Google's ID token. Some Android / Google Play
+ * Services states can nevertheless report that no native credential is
+ * available even though Google OAuth itself is usable. In that case Harmony
+ * falls back to Supabase browser OAuth instead of leaving the Google button
+ * dead. A stale [16] re-auth state is cleared and retried once first.
  */
 suspend fun performHarmonyGoogleSignIn(context: Context): GoogleSignInOutcome {
     val activity = context.findActivity()
@@ -70,11 +71,9 @@ private suspend fun performResilientGoogleSignIn(
         }
         GoogleSignInOutcome.SESSION_CREATED
     } catch (exception: GetCredentialException) {
-        if (!isGoogleAccountReauthFailure(exception)) {
-            throw exception
-        }
+        val accountReauthFailure = isGoogleAccountReauthFailure(exception)
 
-        if (retryAfterCredentialReset) {
+        if (accountReauthFailure && retryAfterCredentialReset) {
             try {
                 credentialManager.clearCredentialState(ClearCredentialStateRequest())
             } catch (clearError: Exception) {
@@ -91,14 +90,31 @@ private suspend fun performResilientGoogleSignIn(
             )
         }
 
-        Log.w(
-            "HarmonyGoogleAuth",
-            "Google native sign-in still reports [16] Account reauth failed; using OAuth fallback",
-            exception
-        )
-        SupabaseConfig.client.auth.signInWith(Google)
-        GoogleSignInOutcome.OAUTH_REDIRECT_STARTED
+        if (accountReauthFailure) {
+            Log.w(
+                "HarmonyGoogleAuth",
+                "Google native sign-in still reports [16] Account reauth failed; using OAuth fallback",
+                exception
+            )
+            return startGoogleOAuthFallback()
+        }
+
+        if (isNativeGoogleCredentialUnavailable(exception)) {
+            Log.w(
+                "HarmonyGoogleAuth",
+                "Native Google credential unavailable; using OAuth fallback",
+                exception
+            )
+            return startGoogleOAuthFallback()
+        }
+
+        throw exception
     }
+}
+
+private suspend fun startGoogleOAuthFallback(): GoogleSignInOutcome {
+    SupabaseConfig.client.auth.signInWith(Google)
+    return GoogleSignInOutcome.OAUTH_REDIRECT_STARTED
 }
 
 private fun isGoogleAccountReauthFailure(error: Throwable): Boolean {
@@ -108,6 +124,18 @@ private fun isGoogleAccountReauthFailure(error: Throwable): Boolean {
 
     return details.contains("Account reauth failed", ignoreCase = true) ||
         details.contains("[16]", ignoreCase = true)
+}
+
+private fun isNativeGoogleCredentialUnavailable(error: Throwable): Boolean {
+    val errorChain = generateSequence(error) { it.cause }.toList()
+    val details = errorChain
+        .mapNotNull { it.message }
+        .joinToString(separator = " ")
+
+    return errorChain.any { it::class.java.simpleName == "NoCredentialException" } ||
+        details.contains("No credentials available", ignoreCase = true) ||
+        details.contains("No credential available", ignoreCase = true) ||
+        details.contains("NoCredentialException", ignoreCase = true)
 }
 
 private fun Context.findActivity(): Activity? = when (this) {
