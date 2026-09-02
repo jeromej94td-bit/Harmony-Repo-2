@@ -69,15 +69,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import com.example.data.SupabaseConfig
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email as EmailProvider
-import io.github.jan.supabase.auth.providers.builtin.IDToken
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.cos
@@ -166,39 +161,24 @@ fun AuthScreen(
                     scope.launch {
                         isLoading = true
                         errorMessage = null
+                        successMessage = null
                         val res = kotlin.runCatching {
-                            val googleSignInOption = GetSignInWithGoogleOption.Builder(
-                                serverClientId = SupabaseConfig.GOOGLE_WEB_CLIENT_ID
-                            ).build()
-
-                            val request = GetCredentialRequest.Builder()
-                                .addCredentialOption(googleSignInOption)
-                                .build()
-
                             val activity = context.findActivity()
                                 ?: throw Exception("Activity Context nicht gefunden")
-                            val result = credentialManager.getCredential(
-                                context = activity,
-                                request = request
+                            performResilientGoogleSignIn(
+                                activity = activity,
+                                credentialManager = credentialManager
                             )
-
-                            val credential = result.credential
-                            if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                val googleIdTokenCredential =
-                                    GoogleIdTokenCredential.createFrom(credential.data)
-                                val finalIdToken = googleIdTokenCredential.idToken
-
-                                SupabaseConfig.client.auth.signInWith(IDToken) {
-                                    idToken = finalIdToken
-                                    provider = Google
-                                }
-                            } else {
-                                throw Exception("Unerwarteter Anmeldetyp: ${credential.type}")
-                            }
                         }
                         isLoading = false
                         if (res.isSuccess) {
-                            onAuthSuccess()
+                            when (res.getOrThrow()) {
+                                GoogleSignInOutcome.SESSION_CREATED -> onAuthSuccess()
+                                GoogleSignInOutcome.OAUTH_REDIRECT_STARTED -> {
+                                    successMessage =
+                                        "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
+                                }
+                            }
                         } else {
                             val exception = res.exceptionOrNull()
                             Log.e("AuthScreen", "Google Login Error", exception)
