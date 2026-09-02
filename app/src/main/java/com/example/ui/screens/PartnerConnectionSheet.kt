@@ -40,16 +40,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.data.session.AppSession
 import com.example.data.session.PartnerInvite
 import com.example.data.session.UserProfile
+import com.example.ui.session.AppSessionViewModel
+import com.example.ui.session.shouldPollPartnerInvite
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonyText
+import kotlinx.coroutines.delay
 
 private enum class PartnerConnectionMode {
     CHOOSE,
@@ -72,11 +76,19 @@ fun PartnerConnectionSheet(
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sessionViewModel: AppSessionViewModel = viewModel()
     var mode by remember { mutableStateOf(PartnerConnectionMode.CHOOSE) }
     var codeInput by remember { mutableStateOf("") }
 
     LaunchedEffect(activeInvite) {
         if (activeInvite != null) mode = PartnerConnectionMode.GENERATED_CODE
+    }
+
+    LaunchedEffect(session.isPaired, activeInvite?.code) {
+        while (shouldPollPartnerInvite(session.isPaired, activeInvite != null)) {
+            delay(4000)
+            sessionViewModel.refreshSilently()
+        }
     }
 
     ModalBottomSheet(
