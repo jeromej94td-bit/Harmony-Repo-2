@@ -13,7 +13,7 @@ internal fun sessionErrorCopy(rawReason: String?): String {
             "Bitte melde dich erneut mit deinem Harmony-Konto an."
         "couple_disconnect_failed" in reason ->
             "Die Partner-Verbindung konnte vor dem Löschen nicht sauber getrennt werden."
-        "account_deletion_failed" in reason ->
+        "avatar_cleanup_failed" in reason || "account_deletion_failed" in reason ->
             "Dein Konto konnte gerade nicht gelöscht werden. Bitte versuche es erneut."
         "server_not_configured" in reason ->
             "Die Konto-Funktion ist gerade nicht verfügbar. Bitte versuche es später erneut."
