@@ -26,6 +26,19 @@ Do this before choosing asset paths, playback code, build tasks, or trigger/stat
 
 The current repository implementation is the source of truth. Reuse the newest working Harmony video path where appropriate; do not invent folders, duplicate the player stack, copy another video's integrity constants, or rely on conversation memory instead of inspecting the current branch.
 
+## Google authentication is protected infrastructure
+
+The production Google login is intentionally centralized in:
+
+`app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt`
+
+- **NEVER** replace the Google button in `AuthScreen.kt` with a direct `SupabaseConfig.client.auth.signInWith(Google)` / `auth.signInWith(Google)` call.
+- **NEVER** delete or bypass `GoogleAuthCoordinator.kt` as a cleanup/refactor unless the user explicitly asks to replace the complete Google authentication architecture.
+- The coordinator's required behavior is: Credential Manager / Google ID token first, clear stale credential state and retry once for `[16] Account reauth failed`, then use Supabase browser OAuth only as the fallback.
+- Preserve email/password login, password recovery, and demo-mode callbacks independently; changes to those flows must not rewrite the Google auth path.
+- Before merging authentication-related changes, preserve `GoogleAuthRegressionContractTest.kt`. Any deliberate replacement architecture must update that test in the same change.
+- Do not introduce anonymous Supabase sign-in as a Google-login fallback.
+
 ## Custom UI / Image Choice Routing (Happy Couple, etc.)
 When updating questions, translating packs, or importing data via GitHub, you MUST preserve the exact logic for visual questions (like "Happy Couple" / "Liebe im Gleichgewicht").
 - **NEVER** use hardcoded question texts (e.g., `HAPPY_COUPLE_PROMPTS`) or text-matching to route UI components in `HarmonyImageChoicePolicy` or `QuizRunnerScreen`.
