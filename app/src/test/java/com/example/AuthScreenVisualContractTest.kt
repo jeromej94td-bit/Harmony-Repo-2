@@ -23,7 +23,7 @@ class AuthScreenVisualContractTest {
 
         assertTrue(auth.contains("GoogleBrandMark("))
         assertFalse(auth.contains("G  Mit Google anmelden"))
-        assertTrue(auth.contains("performResilientGoogleSignIn"))
+        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
         assertTrue(auth.contains("auth.signInWith(EmailProvider)"))
         assertTrue(auth.contains("auth.signUpWith(EmailProvider)"))
         assertTrue(auth.contains("App im Demo-Modus testen"))
@@ -31,28 +31,14 @@ class AuthScreenVisualContractTest {
     }
 
     @Test
-    fun `explicit Google button uses dedicated Google button credential flow`() {
-        val googleAuth = source("app/src/main/java/com/example/ui/screens/GoogleAuthRecovery.kt")
-
-        assertTrue(googleAuth.contains("GetSignInWithGoogleOption.Builder("))
-        assertFalse(googleAuth.contains("GetGoogleIdOption.Builder("))
-    }
-
-    @Test
-    fun `Google button recovers from account reauth failure and has OAuth fallback`() {
+    fun `Google button uses Supabase OAuth instead of Android Credential Manager`() {
         val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
-        val googleAuth = source("app/src/main/java/com/example/ui/screens/GoogleAuthRecovery.kt")
 
-        assertTrue(auth.contains("performResilientGoogleSignIn"))
-        assertTrue(googleAuth.contains("ClearCredentialStateRequest"))
-        assertTrue(googleAuth.contains("credentialManager.clearCredentialState"))
-        assertTrue(googleAuth.contains("isGoogleAccountReauthFailure"))
-        assertTrue(googleAuth.contains("retryAfterCredentialReset"))
-        assertTrue(googleAuth.contains("retryAfterCredentialReset = false"))
-        assertTrue(googleAuth.contains("Account reauth failed"))
-        assertTrue(googleAuth.contains("[16]"))
-        assertTrue(googleAuth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
-        assertTrue(googleAuth.contains("GoogleSignInOutcome.OAUTH_REDIRECT_STARTED"))
+        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertFalse(auth.contains("performResilientGoogleSignIn"))
+        assertFalse(auth.contains("CredentialManager"))
+        assertFalse(auth.contains("GetSignInWithGoogleOption"))
+        assertFalse(auth.contains("Account reauth failed"))
     }
 
     @Test
