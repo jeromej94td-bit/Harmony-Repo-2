@@ -1,9 +1,5 @@
 package com.example.ui.screens
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -61,28 +57,20 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.credentials.CredentialManager
-import androidx.credentials.exceptions.GetCredentialException
 import com.example.data.SupabaseConfig
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email as EmailProvider
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
-
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
 
 private val harmonyPink = Color(0xFFFF3F8E)
 private val harmonyViolet = Color(0xFFA555FF)
@@ -106,7 +94,8 @@ private data class HeartParticle(
 
 @Composable
 fun AuthScreen(
-    onAuthSuccess: () -> Unit
+    onAuthSuccess: () -> Unit,
+    onDemoRequested: () -> Unit = onAuthSuccess
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -116,8 +105,6 @@ fun AuthScreen(
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val context = LocalContext.current
-    val credentialManager = remember { CredentialManager.create(context) }
     val accentGradient = remember {
         Brush.horizontalGradient(listOf(harmonyPink, harmonyViolet, harmonyBlue))
     }
@@ -163,33 +150,19 @@ fun AuthScreen(
                         errorMessage = null
                         successMessage = null
                         val res = kotlin.runCatching {
-                            val activity = context.findActivity()
-                                ?: throw Exception("Activity Context nicht gefunden")
-                            performResilientGoogleSignIn(
-                                activity = activity,
-                                credentialManager = credentialManager
-                            )
+                            SupabaseConfig.client.auth.signInWith(Google)
                         }
                         isLoading = false
                         if (res.isSuccess) {
-                            when (res.getOrThrow()) {
-                                GoogleSignInOutcome.SESSION_CREATED -> onAuthSuccess()
-                                GoogleSignInOutcome.OAUTH_REDIRECT_STARTED -> {
-                                    successMessage =
-                                        "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
-                                }
-                            }
+                            successMessage =
+                                "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
                         } else {
-                            val exception = res.exceptionOrNull()
-                            Log.e("AuthScreen", "Google Login Error", exception)
-                            errorMessage = if (exception is GetCredentialException) {
-                                "Google-Login abgebrochen oder fehlgeschlagen: ${exception.message}"
-                            } else {
-                                exception?.message ?: "Fehler beim Google-Login"
-                            }
+                            errorMessage = res.exceptionOrNull()?.message
+                                ?: "Google-Anmeldung konnte nicht geöffnet werden."
                         }
                     }
                 },
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF171321)
@@ -328,6 +301,7 @@ fun AuthScreen(
                         else errorMessage = res.exceptionOrNull()?.message ?: "Fehler beim Anmelden"
                     }
                 },
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 contentPadding = PaddingValues(),
                 shape = RoundedCornerShape(16.dp),
@@ -392,6 +366,7 @@ fun AuthScreen(
                         }
                     }
                 },
+                enabled = !isLoading,
                 border = null,
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
                 shape = RoundedCornerShape(16.dp),
@@ -406,9 +381,8 @@ fun AuthScreen(
             Spacer(modifier = Modifier.height(7.dp))
 
             TextButton(
-                onClick = {
-                    onAuthSuccess()
-                }
+                onClick = onDemoRequested,
+                enabled = !isLoading
             ) {
                 Text(
                     "App im Demo-Modus testen",
