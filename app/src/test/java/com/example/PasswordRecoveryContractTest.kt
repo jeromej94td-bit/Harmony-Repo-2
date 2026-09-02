@@ -13,7 +13,10 @@ class PasswordRecoveryContractTest {
         val supabase = source("app/src/main/java/com/example/data/SupabaseClient.kt")
         val manifest = source("app/src/main/AndroidManifest.xml")
 
-        assertTrue(auth.contains("SupabaseConfig.client.auth.resetPasswordForEmail(currentEmail)"))
+        assertTrue(auth.contains("resetPasswordForEmail("))
+        assertTrue(auth.contains("email = currentEmail"))
+        assertTrue(auth.contains("redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL"))
+        assertFalse(auth.contains("resetPasswordForEmail(currentEmail)"))
 
         assertTrue(supabase.contains("AUTH_DEEP_LINK_SCHEME = \"harmony\""))
         assertTrue(supabase.contains("AUTH_DEEP_LINK_HOST = \"auth\""))

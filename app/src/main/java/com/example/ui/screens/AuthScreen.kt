@@ -459,7 +459,10 @@ fun AuthScreen(
                             errorMessage = null
                             successMessage = null
                             val res = kotlin.runCatching {
-                                SupabaseConfig.client.auth.resetPasswordForEmail(currentEmail)
+                                SupabaseConfig.client.auth.resetPasswordForEmail(
+                                    email = currentEmail,
+                                    redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL
+                                )
                             }
                             isLoading = false
 
