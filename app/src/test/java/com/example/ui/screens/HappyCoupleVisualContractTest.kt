@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import com.example.ui.components.AmbientBackground
 import com.example.ui.theme.HarmonyTheme
+import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,5 +56,9 @@ class HappyCoupleVisualContractTest {
             composeRule.onNodeWithTag("happy_couple_number_$number")
                 .assertTextEquals(number.toString())
         }
+
+        composeRule.onNodeWithTag("harmony_happy_couple_question").captureRoboImage(
+            filePath = "build/happy-couple-preview/happy-couple-question.png"
+        )
     }
 }
