@@ -50,6 +50,23 @@ export function createDeleteAccountHandler({ fetchImpl = fetch, getServiceRole, 
       return json({ ok: false, error: 'couple_disconnect_failed' }, 502)
     }
 
+    // Private Storage objects must be removed before auth.users. Supabase refuses
+    // to delete an auth user while that user still owns Storage objects.
+    const avatarCleanupResponse = await fetchImpl(
+      `${baseUrl}/storage/v1/object/harmony-avatars/${encodeURIComponent(user.id)}/avatar`,
+      {
+        method: 'DELETE',
+        headers: {
+          authorization: `Bearer ${serviceRole}`,
+          apikey: serviceRole,
+        },
+      },
+    ).catch(() => null)
+
+    if (!avatarCleanupResponse || (!avatarCleanupResponse.ok && avatarCleanupResponse.status !== 404)) {
+      return json({ ok: false, error: 'avatar_cleanup_failed' }, 502)
+    }
+
     const deletionResponse = await fetchImpl(
       `${baseUrl}/auth/v1/admin/users/${encodeURIComponent(user.id)}`,
       {
