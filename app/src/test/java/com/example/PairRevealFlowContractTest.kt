@@ -1,6 +1,5 @@
 package com.example
 
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -45,10 +44,10 @@ class PairRevealFlowContractTest {
         composeTestRule.onNodeWithTag("prediction_handoff_ready").performClick()
         composeTestRule.onNodeWithTag("prediction_actual_option_1").performClick()
 
-        composeTestRule.onNodeWithTag("prediction_reveal_ready").assertExists()
-        composeTestRule.onNodeWithTag("prediction_reveal_button").assertExists().performClick()
-        composeTestRule.onNodeWithTag("prediction_result_guess").assertExists()
-        composeTestRule.onNodeWithTag("prediction_result_actual").assertExists()
+        composeTestRule.onNodeWithTag("prediction_reveal_ready").fetchSemanticsNode()
+        composeTestRule.onNodeWithTag("prediction_reveal_button").performClick()
+        composeTestRule.onNodeWithTag("prediction_result_guess").fetchSemanticsNode()
+        composeTestRule.onNodeWithTag("prediction_result_actual").fetchSemanticsNode()
     }
 
     @Test
@@ -69,9 +68,9 @@ class PairRevealFlowContractTest {
         composeTestRule.onNodeWithTag("secret_handoff_ready").performClick()
         composeTestRule.onNodeWithTag("secret_second_option_1").performClick()
 
-        composeTestRule.onNodeWithTag("secret_reveal_ready").assertExists()
-        composeTestRule.onNodeWithTag("secret_reveal_button").assertExists().performClick()
-        composeTestRule.onNodeWithTag("secret_result_first").assertExists()
-        composeTestRule.onNodeWithTag("secret_result_second").assertExists()
+        composeTestRule.onNodeWithTag("secret_reveal_ready").fetchSemanticsNode()
+        composeTestRule.onNodeWithTag("secret_reveal_button").performClick()
+        composeTestRule.onNodeWithTag("secret_result_first").fetchSemanticsNode()
+        composeTestRule.onNodeWithTag("secret_result_second").fetchSemanticsNode()
     }
 }
