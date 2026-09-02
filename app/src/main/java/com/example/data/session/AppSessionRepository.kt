@@ -32,6 +32,14 @@ class AppSessionRepository(
         return rows.getJSONObject(0).toAppSession()
     }
 
+    suspend fun updateProfile(displayName: String): AppSession {
+        postRpc(
+            "update_harmony_profile",
+            JSONObject().put("p_display_name", displayName)
+        )
+        return refresh()
+    }
+
     suspend fun createPartnerInvite(): PartnerInvite {
         val response = postRpc("create_partner_invite", JSONObject())
         val rows = JSONArray(response)
