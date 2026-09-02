@@ -1,0 +1,2 @@
+[functions.harmony-brain-generate]
+verify_jwt = true

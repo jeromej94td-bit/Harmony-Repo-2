@@ -54,4 +54,4 @@ jobs:
           gradle-version: '9.3.1'
 
       - name: Compile debug Kotlin
-        run: gradle :app:compileDebugKotlin --no-daemon
+        run: gradle :app:compileDebugKotlin --no-daemon --no-configuration-cache
