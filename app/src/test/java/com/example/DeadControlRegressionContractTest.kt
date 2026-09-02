@@ -8,20 +8,21 @@ import org.junit.Test
 class DeadControlRegressionContractTest {
 
     @Test
-    fun `result cards can be rendered without click semantics`() {
+    fun `large option cards can be rendered without click semantics`() {
         val common = source("app/src/main/java/com/example/ui/screens/FullscreenMechanicCommon.kt")
-        val pairMechanics = source("app/src/main/java/com/example/ui/screens/FullscreenPairMechanics.kt")
 
         assertTrue(common.contains("onClick: (() -> Unit)? = null"))
         assertTrue(common.contains("onClick?.let"))
-        assertFalse(pairMechanics.contains("onClick = {}"))
     }
 
     @Test
-    fun `tot results header does not show a fake overflow control`() {
-        val runner = source("app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt")
+    fun `result-only mechanic cards do not install empty click handlers`() {
+        val pairMechanics = source("app/src/main/java/com/example/ui/screens/FullscreenPairMechanics.kt")
+        val choiceMechanics = source("app/src/main/java/com/example/ui/screens/FullscreenChoiceMechanics.kt")
 
-        assertFalse(runner.contains("text = \"•••\""))
+        assertFalse(pairMechanics.contains("onClick = {}"))
+        assertFalse(choiceMechanics.contains("onClick = {}"))
+        assertFalse(choiceMechanics.contains("true,\n                    {},"))
     }
 
     private fun source(path: String): String =
