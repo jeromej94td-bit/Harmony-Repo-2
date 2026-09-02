@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.BuildConfig
@@ -90,8 +91,6 @@ fun ProfileSheet(
     isPaired: Boolean,
     isDemoMode: Boolean,
     partnerDisplayName: String?,
-    userAvatarRef: String?,
-    partnerAvatarRef: String?,
     onDismiss: () -> Unit,
     onToggleSimulator: () -> Unit,
     onOpenEditProfile: () -> Unit,
@@ -112,6 +111,10 @@ fun ProfileSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
     val sessionViewModel: AppSessionViewModel = viewModel()
+    val liveSessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    val liveSession = liveSessionState.session
+    val userAvatarRef = if (isDemoMode) null else liveSession?.profile?.avatarUrl
+    val partnerAvatarRef = if (isDemoMode) null else liveSession?.partner?.avatarUrl
     val accountEmail = if (isDemoMode) {
         null
     } else {
@@ -121,7 +124,12 @@ fun ProfileSheet(
     }
 
     val userAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { onUpdateAvatar(it, true) }
+        uri?.let {
+            onUpdateAvatar(it, true)
+            if (!isDemoMode) {
+                sessionViewModel.updateProfileAvatar(it)
+            }
+        }
     }
     val partnerAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (isDemoMode) uri?.let { onUpdateAvatar(it, false) }
@@ -151,7 +159,7 @@ fun ProfileSheet(
                 ) {
                     CoupleProfileAvatar(
                         path = profile.userAvatarPath,
-                        remoteAvatarRef = if (isDemoMode) null else userAvatarRef,
+                        remoteAvatarRef = userAvatarRef,
                         fallback = profile.userName.take(1),
                         label = tr("Dein Bild", "Your photo"),
                         editable = true,
@@ -160,7 +168,7 @@ fun ProfileSheet(
                     Text(text = if (isPaired) "💕" else "♡", fontSize = 24.sp)
                     CoupleProfileAvatar(
                         path = profile.partnerAvatarPath,
-                        remoteAvatarRef = if (isDemoMode) null else partnerAvatarRef,
+                        remoteAvatarRef = partnerAvatarRef,
                         fallback = profile.partnerName.take(1),
                         label = tr("Partnerbild", "Partner photo"),
                         editable = isDemoMode,
