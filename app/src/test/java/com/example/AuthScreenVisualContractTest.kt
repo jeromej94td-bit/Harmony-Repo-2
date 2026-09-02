@@ -23,7 +23,7 @@ class AuthScreenVisualContractTest {
 
         assertTrue(auth.contains("GoogleBrandMark("))
         assertFalse(auth.contains("G  Mit Google anmelden"))
-        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertTrue(auth.contains("performResilientGoogleSignIn"))
         assertTrue(auth.contains("auth.signInWith(EmailProvider)"))
         assertTrue(auth.contains("auth.signUpWith(EmailProvider)"))
         assertTrue(auth.contains("App im Demo-Modus testen"))
@@ -31,14 +31,15 @@ class AuthScreenVisualContractTest {
     }
 
     @Test
-    fun `Google button uses Supabase OAuth instead of Android Credential Manager`() {
-        val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
+    fun `Google button delegates to Supabase OAuth and does not invoke native credential APIs`() {
+        val googleAuth = source("app/src/main/java/com/example/ui/screens/GoogleAuthRecovery.kt")
 
-        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
-        assertFalse(auth.contains("performResilientGoogleSignIn"))
-        assertFalse(auth.contains("CredentialManager"))
-        assertFalse(auth.contains("GetSignInWithGoogleOption"))
-        assertFalse(auth.contains("Account reauth failed"))
+        assertTrue(googleAuth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertFalse(googleAuth.contains("credentialManager.getCredential"))
+        assertFalse(googleAuth.contains("GetSignInWithGoogleOption"))
+        assertFalse(googleAuth.contains("GetGoogleIdOption"))
+        assertFalse(googleAuth.contains("Account reauth failed"))
+        assertFalse(googleAuth.contains("[16]"))
     }
 
     @Test
