@@ -1,6 +1,6 @@
 package com.example.ui.screens
 
-internal data class StandardQuizLayoutMetrics(
+data class StandardQuizLayoutMetrics(
     val questionHorizontalPaddingDp: Int = 19,
     val questionVerticalPaddingDp: Int = 21,
     val questionFontSizeSp: Float = 24f,
