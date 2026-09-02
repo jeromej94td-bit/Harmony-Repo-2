@@ -53,3 +53,4 @@ jobs:
           --tests 'com.example.ui.session.SessionErrorCopyTest'
           --stacktrace
           --no-daemon
+          --no-configuration-cache
