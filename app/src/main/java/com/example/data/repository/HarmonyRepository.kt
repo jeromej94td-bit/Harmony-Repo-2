@@ -44,33 +44,41 @@ class HarmonyRepository(
     private val answerSaveMutex = Mutex()
 
     suspend fun ensureInitialData() {
-        // Initialize profile if not present
+        // Production starts neutral. Real identity/couple names come from AppSession.
         val existingProfile = db.profileDao().getProfile().firstOrNull()
         if (existingProfile == null) {
-            db.profileDao().insertOrUpdateProfile(
-                ProfileEntity(
-                    id = 1,
-                    userName = "Jerome",
-                    partnerName = "Alex",
-                    startDate = System.currentTimeMillis() - (830L * 24 * 3600 * 1000),
-                    simulatorEnabled = true
-                )
-            )
+            db.profileDao().insertOrUpdateProfile(ProfileEntity(id = 1))
         }
 
-        // Initialize chat messages if empty
-        val messages = db.chatDao().getAllMessages().firstOrNull()
-        if (messages.isNullOrEmpty()) {
-            val now = System.currentTimeMillis()
+        val stats = db.coupleStatsDao().getStats().firstOrNull()
+        if (stats == null) {
+            db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1))
+        }
+
+        // Perform initial idempotent backfill of legacy answers into BrainAnswerHistory
+        val legacyAnswers = db.answerDao().getAllAnswers().firstOrNull().orEmpty()
+        brainRepository.performInitialBackfillIfNeeded(legacyAnswers)
+    }
+
+    suspend fun ensureDemoData() {
+        val now = System.currentTimeMillis()
+        val profile = db.profileDao().getProfile().firstOrNull() ?: ProfileEntity(id = 1)
+        db.profileDao().insertOrUpdateProfile(
+            profile.copy(
+                userName = "Jerome",
+                partnerName = "Alex",
+                startDate = now - (830L * 24 * 3600 * 1000),
+                simulatorEnabled = true
+            )
+        )
+
+        if (db.chatDao().getAllMessages().firstOrNull().isNullOrEmpty()) {
             db.chatDao().insertMessage(ChatMessageEntity(sender = "them", text = "Hey du 💕 wie war dein Tag?", timestamp = now - 3 * 3600000))
             db.chatDao().insertMessage(ChatMessageEntity(sender = "me", text = "Stressig — aber jetzt wird’s besser ☺️", timestamp = now - 3 * 3600000 + 60000))
             db.chatDao().insertMessage(ChatMessageEntity(sender = "them", text = "Ich hab schon an unser Wiedersehen gedacht 🥹", timestamp = now - 2 * 3600000))
         }
 
-        // Initialize moments if empty
-        val moments = db.momentDao().getAllMoments().firstOrNull()
-        if (moments.isNullOrEmpty()) {
-            val now = System.currentTimeMillis()
+        if (db.momentDao().getAllMoments().firstOrNull().isNullOrEmpty()) {
             db.momentDao().insertMoment(
                 MomentEntity(
                     title = "Unser erstes Videodate",
@@ -89,15 +97,9 @@ class HarmonyRepository(
             )
         }
 
-        // Initialize stats if empty
-        val stats = db.coupleStatsDao().getStats().firstOrNull()
-        if (stats == null) {
-            db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = 7, visitedCountries = 3))
-        }
-
-        // Perform initial idempotent backfill of legacy answers into BrainAnswerHistory
-        val legacyAnswers = db.answerDao().getAllAnswers().firstOrNull().orEmpty()
-        brainRepository.performInitialBackfillIfNeeded(legacyAnswers)
+        db.coupleStatsDao().insertOrUpdateStats(
+            CoupleStatsEntity(id = 1, visitedCities = 7, visitedCountries = 3)
+        )
     }
 
     suspend fun updateProfile(userName: String, partnerName: String, startDate: Long) {

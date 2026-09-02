@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +40,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.couple.CoupleQuestionRepository
 import com.example.data.model.AnswerEntity
 import com.example.data.model.CoupleChoice
 import com.example.data.model.EitherOrAnswerCodec
 import com.example.data.model.ProfileEntity
 import com.example.data.model.QuestionPack
 import com.example.ui.contentText
+import com.example.ui.session.AppSessionViewModel
+import com.example.ui.session.SessionPhase
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
@@ -108,6 +114,23 @@ fun PackResultsScreen(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val sessionViewModel: AppSessionViewModel = viewModel()
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    val session = sessionState.session
+
+    if (sessionState.phase == SessionPhase.READY && session?.isPaired == true) {
+        val repository = remember { CoupleQuestionRepository() }
+        CouplePackRevealScreen(
+            pack = pack,
+            session = session,
+            answers = answers.associate { it.questionIndex to it.answerText },
+            repository = repository,
+            onClose = onClose,
+            modifier = modifier
+        )
+        return
+    }
+
     val displayPack = remember(pack, appLanguage) { LanguageManager.translatePack(pack, appLanguage) }
     val rows = remember(displayPack, answers) { buildPackResultRows(displayPack, answers) }
     val answeredCount = rows.count { !it.answerText.isNullOrBlank() }
