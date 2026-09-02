@@ -197,7 +197,7 @@ fun AuthScreen(
                     }
                 } else {
                     Text(
-                        text = "Wir haben dir einen Passwort-Code an $email geschickt. Gib den Code hier ein und lege direkt dein neues Passwort fest.",
+                        text = "Gib den Passwort-Code aus deiner E-Mail hier ein und lege direkt dein neues Passwort fest.",
                         color = Color(0xFFC9B7D7),
                         fontSize = 13.5.sp
                     )
@@ -641,35 +641,37 @@ fun AuthScreen(
                     modifier = Modifier
                         .padding(top = 1.dp)
                         .clickable(enabled = !isLoading) {
-                            scope.launch {
-                                val currentEmail = email.trim()
-                                if (currentEmail.isEmpty() ||
-                                    !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
-                                ) {
-                                    errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
-                                    successMessage = null
-                                    return@launch
-                                }
+                            val currentEmail = email.trim()
+                            if (currentEmail.isEmpty() ||
+                                !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
+                            ) {
+                                errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
+                                successMessage = null
+                            } else {
+                                recoveryMode = true
+                                recoveryDone = false
+                                recoveryCode = ""
+                                recoveryNewPassword = ""
+                                recoveryConfirmPassword = ""
                                 isLoading = true
                                 errorMessage = null
-                                successMessage = null
-                                val res = kotlin.runCatching {
-                                    SupabaseConfig.client.auth.resetPasswordForEmail(
-                                        email = currentEmail,
-                                        redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL
-                                    )
-                                }
-                                isLoading = false
-                                if (res.isSuccess) {
-                                    recoveryMode = true
-                                    recoveryDone = false
-                                    recoveryCode = ""
-                                    recoveryNewPassword = ""
-                                    recoveryConfirmPassword = ""
-                                    successMessage = "Passwort-Code wurde gesendet. Bitte prüfe dein Postfach."
-                                } else {
-                                    errorMessage = res.exceptionOrNull()?.message
-                                        ?: "Passwort-Reset konnte nicht gestartet werden."
+                                successMessage = "Passwort-Code wird gesendet..."
+
+                                scope.launch {
+                                    val res = kotlin.runCatching {
+                                        SupabaseConfig.client.auth.resetPasswordForEmail(
+                                            email = currentEmail,
+                                            redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL
+                                        )
+                                    }
+                                    isLoading = false
+                                    if (res.isSuccess) {
+                                        successMessage = "Passwort-Code wurde gesendet. Bitte prüfe dein Postfach."
+                                    } else {
+                                        successMessage = null
+                                        errorMessage = res.exceptionOrNull()?.message
+                                            ?: "Passwort-Reset konnte nicht gestartet werden."
+                                    }
                                 }
                             }
                         }
