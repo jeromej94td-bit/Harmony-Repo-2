@@ -1,0 +1,40 @@
+name: Stage 06.4 Repetition Audit
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'app/src/main/java/com/example/data/model/ContentRepetitionAudit.kt'
+      - 'app/src/test/java/com/example/data/model/ContentRepetitionAuditTest.kt'
+      - 'app/src/test/java/com/example/data/model/ContentRepetitionRuntimeAuditTest.kt'
+      - '.github/workflows/stage-06-4-repetition-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  repetition-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Run Stage 06.4 focused tests
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests com.example.data.model.ContentRepetitionAuditTest
+          --tests com.example.data.model.ContentRepetitionRuntimeAuditTest
+          --stacktrace
