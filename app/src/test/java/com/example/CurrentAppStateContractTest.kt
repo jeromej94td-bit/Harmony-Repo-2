@@ -17,6 +17,19 @@ class CurrentAppStateContractTest {
     }
 
     @Test
+    fun `partner invite code flow remains reachable from profile`() {
+        val profile = source("app/src/main/java/com/example/ui/screens/ProfileSheet.kt")
+        val partnerConnection = source("app/src/main/java/com/example/ui/screens/PartnerConnectionSheet.kt")
+
+        assertTrue(profile.contains("onOpenPartnerConnection"))
+        assertTrue(profile.contains("partner_connection_button"))
+        assertTrue(partnerConnection.contains("Code erstellen"))
+        assertTrue(partnerConnection.contains("Code eingeben"))
+        assertTrue(partnerConnection.contains("Code teilen"))
+        assertTrue(partnerConnection.contains("24 Stunden gültig"))
+    }
+
+    @Test
     fun `stale Brain chat callsite resolves only to private couple chat`() {
         val activeChat = source("app/src/main/java/com/example/ui/screens/ChatScreen.kt")
         val bridge = source("app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt")
