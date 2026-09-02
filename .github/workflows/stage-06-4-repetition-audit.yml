@@ -38,3 +38,4 @@ jobs:
           --tests com.example.data.model.ContentRepetitionAuditTest
           --tests com.example.data.model.ContentRepetitionRuntimeAuditTest
           --stacktrace
+          --info
