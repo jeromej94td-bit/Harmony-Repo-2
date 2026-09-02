@@ -64,6 +64,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.SupabaseConfig
+import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email as EmailProvider
@@ -103,8 +104,15 @@ fun AuthScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
+    var recoveryMode by remember { mutableStateOf(false) }
+    var recoveryCode by remember { mutableStateOf("") }
+    var recoveryNewPassword by remember { mutableStateOf("") }
+    var recoveryConfirmPassword by remember { mutableStateOf("") }
+    var recoveryPasswordVisible by remember { mutableStateOf(false) }
+    var recoveryDone by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
     val accentGradient = remember {
         Brush.horizontalGradient(listOf(harmonyPink, harmonyViolet, harmonyBlue))
     }
@@ -128,9 +136,7 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HarmonyLoginLogo()
-
             Spacer(modifier = Modifier.height(10.dp))
-
             Text(
                 text = "HARMONY",
                 style = TextStyle(
@@ -140,296 +146,527 @@ fun AuthScreen(
                     brush = accentGradient
                 )
             )
+            Spacer(modifier = Modifier.height(if (recoveryMode) 22.dp else 30.dp))
 
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Button(
-                onClick = {
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        successMessage = null
-                        val res = kotlin.runCatching {
-                            SupabaseConfig.client.auth.signInWith(Google)
-                        }
-                        isLoading = false
-                        if (res.isSuccess) {
-                            successMessage =
-                                "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
-                        } else {
-                            errorMessage = res.exceptionOrNull()?.message
-                                ?: "Google-Anmeldung konnte nicht geöffnet werden."
-                        }
-                    }
-                },
-                enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF171321)
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 9.dp),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(58.dp)
-            ) {
-                GoogleBrandMark(modifier = Modifier.size(25.dp))
-                Spacer(modifier = Modifier.width(14.dp))
+            if (recoveryMode) {
                 Text(
-                    "Mit Google anmelden",
-                    fontSize = 16.sp,
+                    text = if (recoveryDone) "Passwort geändert" else "Passwort zurücksetzen",
+                    color = Color.White,
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
-            }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
+                if (recoveryDone) {
+                    Text(
+                        text = "Dein neues Passwort wurde gespeichert. Du kannst dich jetzt damit anmelden.",
+                        color = Color(0xFF8FF0BA),
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(22.dp))
+                    Button(
+                        onClick = {
+                            recoveryMode = false
+                            recoveryDone = false
+                            recoveryCode = ""
+                            recoveryNewPassword = ""
+                            recoveryConfirmPassword = ""
+                            password = ""
+                            errorMessage = null
+                            successMessage = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        contentPadding = PaddingValues(),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(accentGradient),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Zur Anmeldung", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "Wir haben dir einen Passwort-Code an $email geschickt. Gib den Code hier ein und lege direkt dein neues Passwort fest.",
+                        color = Color(0xFFC9B7D7),
+                        fontSize = 13.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(18.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.20f)
-                )
-                Text(
-                    "oder",
-                    color = Color(0xFFB7A2C7),
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(horizontal = 14.dp)
-                )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = Color.White.copy(alpha = 0.20f)
-                )
-            }
+                    HarmonyAuthField(
+                        value = recoveryCode,
+                        onValueChange = { value ->
+                            recoveryCode = value.filter(Char::isDigit).take(8)
+                            errorMessage = null
+                        },
+                        placeholder = "Passwort-Code",
+                        leadingIcon = {
+                            Icon(Icons.Filled.Email, contentDescription = null, tint = Color(0xFFD0B3F3))
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(11.dp))
 
-            Spacer(modifier = Modifier.height(18.dp))
+                    HarmonyAuthField(
+                        value = recoveryNewPassword,
+                        onValueChange = {
+                            recoveryNewPassword = it
+                            errorMessage = null
+                        },
+                        placeholder = "Neues Passwort",
+                        leadingIcon = {
+                            Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFFD0B3F3))
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { recoveryPasswordVisible = !recoveryPasswordVisible }) {
+                                Icon(
+                                    Icons.Filled.Visibility,
+                                    contentDescription = null,
+                                    tint = Color(0xFFD0B3F3)
+                                )
+                            }
+                        },
+                        visualTransformation = if (recoveryPasswordVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(11.dp))
 
-            HarmonyAuthField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = "E-Mail",
-                leadingIcon = {
-                    Icon(Icons.Filled.Email, contentDescription = null, tint = Color(0xFFD0B3F3))
-                }
-            )
+                    HarmonyAuthField(
+                        value = recoveryConfirmPassword,
+                        onValueChange = {
+                            recoveryConfirmPassword = it
+                            errorMessage = null
+                        },
+                        placeholder = "Passwort wiederholen",
+                        leadingIcon = {
+                            Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFFD0B3F3))
+                        },
+                        visualTransformation = if (recoveryPasswordVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        }
+                    )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            HarmonyAuthField(
-                value = password,
-                onValueChange = { password = it },
-                placeholder = "Passwort",
-                leadingIcon = {
-                    Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFFD0B3F3))
-                },
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            Icons.Filled.Visibility,
-                            contentDescription = if (passwordVisible) "Passwort verbergen" else "Passwort anzeigen",
-                            tint = Color(0xFFD0B3F3)
+                    if (errorMessage != null) {
+                        Text(
+                            text = errorMessage!!,
+                            color = Color(0xFFFF8EAA),
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 8.dp)
                         )
                     }
-                },
-                visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                }
-            )
-
-            if (errorMessage != null) {
-                Text(
-                    text = errorMessage!!,
-                    color = Color(0xFFFF8EAA),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-
-            if (successMessage != null) {
-                Text(
-                    text = successMessage!!,
-                    color = Color(0xFF8FF0BA),
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-
-            if (isLoading) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .fillMaxWidth(),
-                    color = harmonyPink,
-                    trackColor = Color.White.copy(alpha = 0.14f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Button(
-                onClick = {
-                    scope.launch {
-                        val currentEmail = email.trim()
-                        val currentPassword = password
-
-                        if (currentEmail.isEmpty() ||
-                            !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
-                        ) {
-                            errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
-                            return@launch
-                        }
-                        if (currentPassword.isEmpty()) {
-                            errorMessage = "Bitte gib dein Passwort ein."
-                            return@launch
-                        }
-
-                        isLoading = true
-                        errorMessage = null
-                        successMessage = null
-                        val res = kotlin.runCatching {
-                            SupabaseConfig.client.auth.signInWith(EmailProvider) {
-                                this.email = currentEmail
-                                this.password = currentPassword
-                            }
-                        }
-                        isLoading = false
-                        if (res.isSuccess) onAuthSuccess()
-                        else errorMessage = res.exceptionOrNull()?.message ?: "Fehler beim Anmelden"
+                    if (successMessage != null) {
+                        Text(
+                            text = successMessage!!,
+                            color = Color(0xFF8FF0BA),
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
-                },
-                enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                contentPadding = PaddingValues(),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(accentGradient),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Anmelden", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        val currentEmail = email.trim()
-                        val currentPassword = password
-
-                        if (currentEmail.isEmpty() ||
-                            !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
-                        ) {
-                            errorMessage =
-                                "Bitte gib eine gültige E-Mail-Adresse für die Registrierung ein."
-                            return@launch
-                        }
-                        if (currentPassword.length < 6) {
-                            errorMessage = "Das Passwort muss mindestens 6 Zeichen lang sein."
-                            return@launch
-                        }
-
-                        isLoading = true
-                        errorMessage = null
-                        successMessage = null
-                        val res = kotlin.runCatching {
-                            SupabaseConfig.client.auth.signUpWith(EmailProvider) {
-                                this.email = currentEmail
-                                this.password = currentPassword
-                            }
-                        }
-                        isLoading = false
-                        if (res.isSuccess) {
-                            val session = kotlin.runCatching {
-                                SupabaseConfig.client.auth.currentSessionOrNull()
-                            }.getOrNull()
-                            if (session != null) {
-                                onAuthSuccess()
-                            } else {
-                                successMessage =
-                                    "Registrierung erfolgreich! Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse über den Link."
-                            }
-                        } else {
-                            errorMessage =
-                                res.exceptionOrNull()?.message ?: "Fehler bei der Registrierung"
-                        }
+                    if (isLoading) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .fillMaxWidth(),
+                            color = harmonyPink,
+                            trackColor = Color.White.copy(alpha = 0.14f)
+                        )
                     }
-                },
-                enabled = !isLoading,
-                border = null,
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .border(1.5.dp, accentGradient, RoundedCornerShape(16.dp))
-            ) {
-                Text("Registrieren", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
 
-            Spacer(modifier = Modifier.height(7.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val currentEmail = email.trim()
+                                when {
+                                    recoveryCode.trim().length < 6 -> {
+                                        errorMessage = "Bitte gib den vollständigen Passwort-Code aus der E-Mail ein."
+                                        return@launch
+                                    }
+                                    recoveryNewPassword.length < 6 -> {
+                                        errorMessage = "Das neue Passwort muss mindestens 6 Zeichen lang sein."
+                                        return@launch
+                                    }
+                                    recoveryNewPassword != recoveryConfirmPassword -> {
+                                        errorMessage = "Die beiden Passwörter stimmen nicht überein."
+                                        return@launch
+                                    }
+                                }
 
-            TextButton(
-                onClick = onDemoRequested,
-                enabled = !isLoading
-            ) {
-                Text(
-                    "App im Demo-Modus testen",
-                    color = Color(0xFF9FCEFF),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Text(
-                text = "Passwort vergessen?",
-                color = Color(0xFFD6A9FF),
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(top = 1.dp)
-                    .clickable(enabled = !isLoading) {
-                        scope.launch {
-                            val currentEmail = email.trim()
-                            if (currentEmail.isEmpty() ||
-                                !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
-                            ) {
-                                errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
+                                isLoading = true
+                                errorMessage = null
                                 successMessage = null
-                                return@launch
-                            }
+                                val result = runCatching {
+                                    SupabaseConfig.client.auth.verifyEmailOtp(
+                                        type = OtpType.Email.RECOVERY,
+                                        email = currentEmail,
+                                        token = recoveryCode.trim()
+                                    )
+                                    SupabaseConfig.client.auth.updateUser {
+                                        password = recoveryNewPassword
+                                    }
+                                    runCatching { SupabaseConfig.client.auth.signOut() }
+                                }
+                                isLoading = false
 
+                                if (result.isSuccess) {
+                                    recoveryDone = true
+                                    recoveryCode = ""
+                                    recoveryNewPassword = ""
+                                    recoveryConfirmPassword = ""
+                                } else {
+                                    errorMessage = result.exceptionOrNull()?.message
+                                        ?: "Der Passwort-Code ist ungültig oder abgelaufen."
+                                }
+                            }
+                        },
+                        enabled = !isLoading,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        contentPadding = PaddingValues(),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(accentGradient),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Passwort speichern", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                isLoading = true
+                                errorMessage = null
+                                successMessage = null
+                                val resend = runCatching {
+                                    SupabaseConfig.client.auth.resetPasswordForEmail(
+                                        email = email.trim(),
+                                        redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL
+                                    )
+                                }
+                                isLoading = false
+                                if (resend.isSuccess) {
+                                    successMessage = "Ein neuer Passwort-Code wurde gesendet."
+                                } else {
+                                    errorMessage = resend.exceptionOrNull()?.message
+                                        ?: "Der Code konnte nicht erneut gesendet werden."
+                                }
+                            }
+                        },
+                        enabled = !isLoading
+                    ) {
+                        Text("Code erneut senden", color = Color(0xFF9FCEFF))
+                    }
+
+                    TextButton(
+                        onClick = {
+                            recoveryMode = false
+                            recoveryCode = ""
+                            recoveryNewPassword = ""
+                            recoveryConfirmPassword = ""
+                            errorMessage = null
+                            successMessage = null
+                        },
+                        enabled = !isLoading
+                    ) {
+                        Text("Zurück zur Anmeldung", color = Color(0xFFD6A9FF))
+                    }
+                }
+            } else {
+                Button(
+                    onClick = {
+                        scope.launch {
                             isLoading = true
                             errorMessage = null
                             successMessage = null
                             val res = kotlin.runCatching {
-                                SupabaseConfig.client.auth.resetPasswordForEmail(
-                                    email = currentEmail,
-                                    redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL
-                                )
+                                SupabaseConfig.client.auth.signInWith(Google)
                             }
                             isLoading = false
-
                             if (res.isSuccess) {
                                 successMessage =
-                                    "Passwort-Reset-Link wurde gesendet. Bitte prüfe dein Postfach."
+                                    "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
                             } else {
                                 errorMessage = res.exceptionOrNull()?.message
-                                    ?: "Passwort-Reset konnte nicht gestartet werden."
+                                    ?: "Google-Anmeldung konnte nicht geöffnet werden."
                             }
                         }
+                    },
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF171321)
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 9.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp)
+                ) {
+                    GoogleBrandMark(modifier = Modifier.size(25.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Text(
+                        "Mit Google anmelden",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        color = Color.White.copy(alpha = 0.20f)
+                    )
+                    Text(
+                        "oder",
+                        color = Color(0xFFB7A2C7),
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 14.dp)
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        color = Color.White.copy(alpha = 0.20f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+                HarmonyAuthField(
+                    value = email,
+                    onValueChange = { email = it },
+                    placeholder = "E-Mail",
+                    leadingIcon = {
+                        Icon(Icons.Filled.Email, contentDescription = null, tint = Color(0xFFD0B3F3))
                     }
-            )
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                HarmonyAuthField(
+                    value = password,
+                    onValueChange = { password = it },
+                    placeholder = "Passwort",
+                    leadingIcon = {
+                        Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFFD0B3F3))
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                Icons.Filled.Visibility,
+                                contentDescription = if (passwordVisible) "Passwort verbergen" else "Passwort anzeigen",
+                                tint = Color(0xFFD0B3F3)
+                            )
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    }
+                )
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color(0xFFFF8EAA),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                if (successMessage != null) {
+                    Text(
+                        text = successMessage!!,
+                        color = Color(0xFF8FF0BA),
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                if (isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth(),
+                        color = harmonyPink,
+                        trackColor = Color.White.copy(alpha = 0.14f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val currentEmail = email.trim()
+                            val currentPassword = password
+                            if (currentEmail.isEmpty() ||
+                                !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
+                            ) {
+                                errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
+                                return@launch
+                            }
+                            if (currentPassword.isEmpty()) {
+                                errorMessage = "Bitte gib dein Passwort ein."
+                                return@launch
+                            }
+                            isLoading = true
+                            errorMessage = null
+                            successMessage = null
+                            val res = kotlin.runCatching {
+                                SupabaseConfig.client.auth.signInWith(EmailProvider) {
+                                    this.email = currentEmail
+                                    this.password = currentPassword
+                                }
+                            }
+                            isLoading = false
+                            if (res.isSuccess) onAuthSuccess()
+                            else errorMessage = res.exceptionOrNull()?.message ?: "Fehler beim Anmelden"
+                        }
+                    },
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                    contentPadding = PaddingValues(),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(accentGradient),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Anmelden", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            val currentEmail = email.trim()
+                            val currentPassword = password
+                            if (currentEmail.isEmpty() ||
+                                !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
+                            ) {
+                                errorMessage =
+                                    "Bitte gib eine gültige E-Mail-Adresse für die Registrierung ein."
+                                return@launch
+                            }
+                            if (currentPassword.length < 6) {
+                                errorMessage = "Das Passwort muss mindestens 6 Zeichen lang sein."
+                                return@launch
+                            }
+                            isLoading = true
+                            errorMessage = null
+                            successMessage = null
+                            val res = kotlin.runCatching {
+                                SupabaseConfig.client.auth.signUpWith(EmailProvider) {
+                                    this.email = currentEmail
+                                    this.password = currentPassword
+                                }
+                            }
+                            isLoading = false
+                            if (res.isSuccess) {
+                                val session = kotlin.runCatching {
+                                    SupabaseConfig.client.auth.currentSessionOrNull()
+                                }.getOrNull()
+                                if (session != null) {
+                                    onAuthSuccess()
+                                } else {
+                                    successMessage =
+                                        "Registrierung erfolgreich! Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse über den Link."
+                                }
+                            } else {
+                                errorMessage =
+                                    res.exceptionOrNull()?.message ?: "Fehler bei der Registrierung"
+                            }
+                        }
+                    },
+                    enabled = !isLoading,
+                    border = null,
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                        .border(1.5.dp, accentGradient, RoundedCornerShape(16.dp))
+                ) {
+                    Text("Registrieren", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(7.dp))
+                TextButton(
+                    onClick = onDemoRequested,
+                    enabled = !isLoading
+                ) {
+                    Text(
+                        "App im Demo-Modus testen",
+                        color = Color(0xFF9FCEFF),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Text(
+                    text = "Passwort vergessen?",
+                    color = Color(0xFFD6A9FF),
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(top = 1.dp)
+                        .clickable(enabled = !isLoading) {
+                            scope.launch {
+                                val currentEmail = email.trim()
+                                if (currentEmail.isEmpty() ||
+                                    !android.util.Patterns.EMAIL_ADDRESS.matcher(currentEmail).matches()
+                                ) {
+                                    errorMessage = "Bitte gib eine gültige E-Mail-Adresse ein."
+                                    successMessage = null
+                                    return@launch
+                                }
+                                isLoading = true
+                                errorMessage = null
+                                successMessage = null
+                                val res = kotlin.runCatching {
+                                    SupabaseConfig.client.auth.resetPasswordForEmail(
+                                        email = currentEmail,
+                                        redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL
+                                    )
+                                }
+                                isLoading = false
+                                if (res.isSuccess) {
+                                    recoveryMode = true
+                                    recoveryDone = false
+                                    recoveryCode = ""
+                                    recoveryNewPassword = ""
+                                    recoveryConfirmPassword = ""
+                                    successMessage = "Passwort-Code wurde gesendet. Bitte prüfe dein Postfach."
+                                } else {
+                                    errorMessage = res.exceptionOrNull()?.message
+                                        ?: "Passwort-Reset konnte nicht gestartet werden."
+                                }
+                            }
+                        }
+                )
+            }
         }
     }
 }
