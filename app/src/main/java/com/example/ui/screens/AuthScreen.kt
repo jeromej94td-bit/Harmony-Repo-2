@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -64,9 +65,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.SupabaseConfig
+import com.example.ui.auth.GoogleSignInOutcome
+import com.example.ui.auth.performHarmonyGoogleSignIn
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email as EmailProvider
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -113,6 +115,7 @@ fun AuthScreen(
     var recoveryDone by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val accentGradient = remember {
         Brush.horizontalGradient(listOf(harmonyPink, harmonyViolet, harmonyBlue))
     }
@@ -397,15 +400,20 @@ fun AuthScreen(
                             errorMessage = null
                             successMessage = null
                             val res = kotlin.runCatching {
-                                SupabaseConfig.client.auth.signInWith(Google)
+                                performHarmonyGoogleSignIn(context)
                             }
                             isLoading = false
                             if (res.isSuccess) {
-                                successMessage =
-                                    "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
+                                when (res.getOrThrow()) {
+                                    GoogleSignInOutcome.SESSION_CREATED -> onAuthSuccess()
+                                    GoogleSignInOutcome.OAUTH_REDIRECT_STARTED -> {
+                                        successMessage =
+                                            "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
+                                    }
+                                }
                             } else {
                                 errorMessage = res.exceptionOrNull()?.message
-                                    ?: "Google-Anmeldung konnte nicht geöffnet werden."
+                                    ?: "Google-Anmeldung konnte nicht gestartet werden."
                             }
                         }
                     },
