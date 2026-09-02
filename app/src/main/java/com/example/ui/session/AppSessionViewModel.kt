@@ -110,6 +110,21 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun updateProfileDisplayName(rawDisplayName: String) {
+        val displayName = normalizeHarmonyDisplayName(rawDisplayName)
+        if (displayName == null) {
+            _uiState.value = _uiState.value.copy(
+                errorMessage = "Bitte gib einen Namen mit maximal 60 Zeichen ein."
+            )
+            return
+        }
+
+        runReadyAction { current ->
+            val session = repository.updateProfile(displayName)
+            current.copy(session = session)
+        }
+    }
+
     fun createPartnerInvite() {
         runReadyAction { current ->
             val invite = repository.createPartnerInvite()
