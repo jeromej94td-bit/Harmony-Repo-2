@@ -173,7 +173,6 @@ internal fun PartnerPredictionBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == prediction } ?: MechanicOption("", "–"),
                             selected = hit,
-                            onClick = {},
                             badge = tr("Dein Tipp", "Your prediction"),
                             modifier = Modifier.weight(1f).heightIn(min = revealMetrics.predictionCardMinHeightDp.dp),
                             testTag = "prediction_result_guess"
@@ -181,7 +180,6 @@ internal fun PartnerPredictionBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == actual } ?: MechanicOption("", "–"),
                             selected = true,
-                            onClick = {},
                             badge = profile.partnerName,
                             modifier = Modifier.weight(1f).heightIn(min = revealMetrics.predictionCardMinHeightDp.dp),
                             testTag = "prediction_result_actual"
@@ -312,7 +310,6 @@ internal fun SecretChoiceBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == first } ?: MechanicOption("", "–"),
                             selected = same,
-                            onClick = {},
                             badge = profile.userName,
                             modifier = Modifier
                                 .weight(1f)
@@ -326,7 +323,6 @@ internal fun SecretChoiceBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == second } ?: MechanicOption("", "–"),
                             selected = same,
-                            onClick = {},
                             badge = profile.partnerName,
                             modifier = Modifier
                                 .weight(1f)

@@ -310,9 +310,8 @@ internal fun MatchTournamentBoard(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 LargeOptionCard(
-                    items.first(),
-                    true,
-                    {},
+                    item = items.first(),
+                    selected = true,
                     modifier = Modifier.fillMaxWidth().weight(1f)
                 )
                 Spacer(Modifier.height(14.dp))
@@ -336,7 +335,6 @@ internal fun MatchTournamentBoard(
                     LargeOptionCard(
                         item = winner,
                         selected = true,
-                        onClick = {},
                         badge = tr("Dein Sieger", "Your winner"),
                         modifier = Modifier
                             .fillMaxWidth()
