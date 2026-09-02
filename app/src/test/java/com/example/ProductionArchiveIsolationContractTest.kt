@@ -30,17 +30,32 @@ class ProductionArchiveIsolationContractTest {
         val home = source("app/src/main/java/com/example/ui/screens/HomeScreen.kt")
         val games = source("app/src/main/java/com/example/ui/screens/GamesScreen.kt")
         val main = source("app/src/main/java/com/example/MainActivity.kt")
+        val viewModel = source("app/src/main/java/com/example/ui/HarmonyViewModel.kt")
 
         assertTrue(home.contains("brainEnabled: Boolean = false"))
         assertTrue(games.contains("brainEnabled: Boolean = false"))
+        assertTrue(viewModel.contains("HARMONY_BRAIN_ENABLED = false"))
         assertFalse(main.contains("brainEnabled = true"))
     }
 
     @Test
-    fun `removed Mischung category stays tombstoned`() {
+    fun `archived brain network gateway fails closed`() {
+        val gateway = source("app/src/main/java/com/example/data/brain/gateway/SupabaseHarmonyBrainGateway.kt")
+        assertTrue(gateway.contains("feature_removed"))
+        assertTrue(gateway.contains("Harmony Brain wurde aus der aktiven App entfernt"))
+        assertFalse(gateway.contains("OkHttpClient"))
+        assertFalse(gateway.contains("executeEdgeCall"))
+    }
+
+    @Test
+    fun `removed Mischung category stays tombstoned at final catalog boundary`() {
         val policy = source("app/src/main/java/com/example/data/model/RemovedGameCatalogPolicy.kt")
+        val models = source("app/src/main/java/com/example/data/model/Models.kt")
+
         assertTrue(policy.contains("MISCHUNG_CATEGORY_ID = \"mischung\""))
         assertTrue(policy.contains("categoryId != MISCHUNG_CATEGORY_ID"))
+        assertTrue(models.contains("RemovedGameCatalogPolicy.allowsCategoryId(it.id)"))
+        assertTrue(models.contains("RemovedGameCatalogPolicy.allowsPackCategoryId(it.cat)"))
     }
 
     @Test
