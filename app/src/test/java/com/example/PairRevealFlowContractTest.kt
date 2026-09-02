@@ -5,8 +5,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.example.data.model.ProfileEntity
-import com.example.ui.screens.PartnerPredictionBoard
-import com.example.ui.screens.SecretChoiceBoard
+import com.example.ui.screens.PartnerPredictionRevealBoard
+import com.example.ui.screens.SecretChoiceRevealBoard
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import org.junit.Rule
@@ -31,7 +31,7 @@ class PairRevealFlowContractTest {
     fun partnerPredictionRequiresExplicitRevealAfterPartnerChoice() {
         composeTestRule.setContent {
             HarmonyTheme(darkTheme = true) {
-                PartnerPredictionBoard(
+                PartnerPredictionRevealBoard(
                     question = "Was wählt Alex?",
                     options = options,
                     selectedAnswer = null,
@@ -42,18 +42,20 @@ class PairRevealFlowContractTest {
         }
 
         composeTestRule.onNodeWithTag("prediction_option_0").performClick()
-        composeTestRule.onNodeWithTag("handoff_ready").performClick()
+        composeTestRule.onNodeWithTag("prediction_handoff_ready").performClick()
         composeTestRule.onNodeWithTag("prediction_actual_option_1").performClick()
 
         composeTestRule.onNodeWithTag("prediction_reveal_ready").assertExists()
-        composeTestRule.onNodeWithTag("prediction_reveal_button").assertExists()
+        composeTestRule.onNodeWithTag("prediction_reveal_button").assertExists().performClick()
+        composeTestRule.onNodeWithTag("prediction_result_guess").assertExists()
+        composeTestRule.onNodeWithTag("prediction_result_actual").assertExists()
     }
 
     @Test
     fun secretChoiceRequiresExplicitRevealAfterBothHiddenChoices() {
         composeTestRule.setContent {
             HarmonyTheme(darkTheme = true) {
-                SecretChoiceBoard(
+                SecretChoiceRevealBoard(
                     question = "Was würdet ihr wählen?",
                     options = options,
                     selectedAnswer = null,
@@ -64,10 +66,12 @@ class PairRevealFlowContractTest {
         }
 
         composeTestRule.onNodeWithTag("secret_first_option_0").performClick()
-        composeTestRule.onNodeWithTag("handoff_ready").performClick()
+        composeTestRule.onNodeWithTag("secret_handoff_ready").performClick()
         composeTestRule.onNodeWithTag("secret_second_option_1").performClick()
 
         composeTestRule.onNodeWithTag("secret_reveal_ready").assertExists()
-        composeTestRule.onNodeWithTag("secret_reveal_button").assertExists()
+        composeTestRule.onNodeWithTag("secret_reveal_button").assertExists().performClick()
+        composeTestRule.onNodeWithTag("secret_result_first").assertExists()
+        composeTestRule.onNodeWithTag("secret_result_second").assertExists()
     }
 }
