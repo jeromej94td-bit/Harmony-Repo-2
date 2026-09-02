@@ -9,11 +9,20 @@ object SupabaseConfig {
     const val SUPABASE_URL = "https://$SUPABASE_PROJECT_ID.supabase.co"
     const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_qNtemRRaLIW0nbFb52uKLw_rWwlgUo1"
 
+    const val AUTH_DEEP_LINK_SCHEME = "com.aistudio.harmony.couples.xqvz"
+    const val AUTH_DEEP_LINK_HOST = "auth-callback"
+    const val PASSWORD_RECOVERY_REDIRECT_URL =
+        "com.aistudio.harmony.couples.xqvz://auth-callback"
+
     val client = createSupabaseClient(
         supabaseUrl = SUPABASE_URL,
         supabaseKey = SUPABASE_PUBLISHABLE_KEY
     ) {
-        install(Auth)
+        install(Auth) {
+            scheme = AUTH_DEEP_LINK_SCHEME
+            host = AUTH_DEEP_LINK_HOST
+            defaultRedirectUrl = PASSWORD_RECOVERY_REDIRECT_URL
+        }
         install(Functions)
     }
 
