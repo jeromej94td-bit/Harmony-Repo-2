@@ -32,18 +32,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.example.data.couple.CouplePackQuestionResult
 import com.example.data.couple.CoupleQuestionRepository
 import com.example.data.couple.CoupleRevealState
 import com.example.data.model.QuestionPack
 import com.example.data.session.AppSession
 import com.example.data.session.UserProfile
+import com.example.ui.components.AuthenticatedAvatarImage
 import com.example.ui.contentText
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
@@ -377,21 +376,12 @@ private fun CoupleRemoteAvatar(profile: UserProfile, size: Int) {
             .border(1.5.dp, Color.White.copy(alpha = 0.62f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        if (!profile.avatarUrl.isNullOrBlank()) {
-            AsyncImage(
-                model = profile.avatarUrl,
-                contentDescription = profile.displayName,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().clip(CircleShape)
-            )
-        } else {
-            Text(
-                text = profile.displayName.take(1).uppercase(),
-                color = Color.White,
-                fontWeight = FontWeight.Black,
-                fontSize = (size * 0.36f).sp
-            )
-        }
+        AuthenticatedAvatarImage(
+            avatarRef = profile.avatarUrl,
+            displayName = profile.displayName,
+            contentDescription = profile.displayName,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
