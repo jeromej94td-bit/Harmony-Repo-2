@@ -47,21 +47,8 @@ export function createDeleteAccountHandler({ fetchImpl = fetch, getServiceRole, 
       return json({ ok: false, error: 'couple_disconnect_failed' }, 502)
     }
 
-    const avatarCleanupResponse = await fetchImpl(
-      `${baseUrl}/storage/v1/object/harmony-avatars/${encodeURIComponent(user.id)}/avatar`,
-      {
-        method: 'DELETE',
-        headers: {
-          authorization: `Bearer ${serviceRole}`,
-          apikey: serviceRole,
-        },
-      },
-    ).catch(() => null)
-
-    if (!avatarCleanupResponse || (!avatarCleanupResponse.ok && avatarCleanupResponse.status !== 404)) {
-      return json({ ok: false, error: 'avatar_cleanup_failed' }, 502)
-    }
-
+    // Harmony profile photos are currently stored locally on-device. Optional cloud
+    // avatar cleanup must never block irreversible account deletion.
     const deletionResponse = await fetchImpl(
       `${baseUrl}/auth/v1/admin/users/${encodeURIComponent(user.id)}`,
       {
