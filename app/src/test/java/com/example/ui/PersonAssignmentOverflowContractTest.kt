@@ -36,6 +36,6 @@ class PersonAssignmentOverflowContractTest {
     private fun source(path: String): String {
         val candidates = listOf(File(path.removePrefix("app/")), File(path))
         return candidates.firstOrNull(File::exists)?.readText()
-            ?: error("$path not found from ${'$'}{File(".").absolutePath}")
+            ?: error("$path not found from ${File(".").absolutePath}")
     }
 }
