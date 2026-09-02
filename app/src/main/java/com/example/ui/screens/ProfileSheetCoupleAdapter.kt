@@ -57,6 +57,7 @@ import com.example.BuildConfig
 import com.example.data.SupabaseConfig
 import com.example.data.model.ProfileEntity
 import com.example.ui.AppLanguage
+import com.example.ui.components.AuthenticatedAvatarImage
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.formatTimestamp
 import com.example.ui.session.AppSessionViewModel
@@ -89,6 +90,8 @@ fun ProfileSheet(
     isPaired: Boolean,
     isDemoMode: Boolean,
     partnerDisplayName: String?,
+    userAvatarRef: String?,
+    partnerAvatarRef: String?,
     onDismiss: () -> Unit,
     onToggleSimulator: () -> Unit,
     onOpenEditProfile: () -> Unit,
@@ -148,6 +151,7 @@ fun ProfileSheet(
                 ) {
                     CoupleProfileAvatar(
                         path = profile.userAvatarPath,
+                        remoteAvatarRef = if (isDemoMode) null else userAvatarRef,
                         fallback = profile.userName.take(1),
                         label = tr("Dein Bild", "Your photo"),
                         editable = true,
@@ -156,6 +160,7 @@ fun ProfileSheet(
                     Text(text = if (isPaired) "💕" else "♡", fontSize = 24.sp)
                     CoupleProfileAvatar(
                         path = profile.partnerAvatarPath,
+                        remoteAvatarRef = if (isDemoMode) null else partnerAvatarRef,
                         fallback = profile.partnerName.take(1),
                         label = tr("Partnerbild", "Partner photo"),
                         editable = isDemoMode,
@@ -533,6 +538,7 @@ private fun CoupleProfileTextField(
 @Composable
 private fun CoupleProfileAvatar(
     path: String?,
+    remoteAvatarRef: String?,
     fallback: String,
     label: String,
     editable: Boolean,
@@ -548,20 +554,31 @@ private fun CoupleProfileAvatar(
                 .let { base -> if (editable) base.clickable(onClick = onClick) else base },
             contentAlignment = Alignment.Center
         ) {
-            if (!path.isNullOrBlank()) {
-                AsyncImage(
-                    model = File(path),
-                    contentDescription = label,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Text(
-                    fallback.ifBlank { "?" }.uppercase(),
-                    color = Color.White,
-                    fontSize = 27.sp,
-                    fontWeight = FontWeight.Black
-                )
+            when {
+                !remoteAvatarRef.isNullOrBlank() -> {
+                    AuthenticatedAvatarImage(
+                        avatarRef = remoteAvatarRef,
+                        displayName = fallback,
+                        contentDescription = label,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                !path.isNullOrBlank() -> {
+                    AsyncImage(
+                        model = File(path),
+                        contentDescription = label,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                else -> {
+                    Text(
+                        fallback.ifBlank { "?" }.uppercase(),
+                        color = Color.White,
+                        fontSize = 27.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
             }
             if (editable) {
                 Box(
