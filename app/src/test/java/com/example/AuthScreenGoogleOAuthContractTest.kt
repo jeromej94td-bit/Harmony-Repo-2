@@ -13,7 +13,7 @@ class AuthScreenGoogleOAuthContractTest {
 
         assertTrue(auth.contains("onDemoRequested: () -> Unit"))
         assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
-        assertTrue(auth.contains("onDemoRequested()"))
+        assertTrue(auth.contains("onClick = onDemoRequested"))
         assertFalse(auth.contains("CredentialManager"))
         assertFalse(auth.contains("GetCredentialException"))
         assertFalse(auth.contains("performResilientGoogleSignIn"))
