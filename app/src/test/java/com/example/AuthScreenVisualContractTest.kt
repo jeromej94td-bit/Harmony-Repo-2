@@ -39,7 +39,7 @@ class AuthScreenVisualContractTest {
     }
 
     @Test
-    fun `Google button clears stale credential state and retries once after account reauth failure`() {
+    fun `Google button recovers from account reauth failure and has OAuth fallback`() {
         val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
 
         assertTrue(auth.contains("ClearCredentialStateRequest"))
@@ -49,6 +49,8 @@ class AuthScreenVisualContractTest {
         assertTrue(auth.contains("retryAfterCredentialReset = false"))
         assertTrue(auth.contains("Account reauth failed"))
         assertTrue(auth.contains("[16]"))
+        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertTrue(auth.contains("GoogleSignInOutcome.OAUTH_REDIRECT_STARTED"))
     }
 
     @Test
