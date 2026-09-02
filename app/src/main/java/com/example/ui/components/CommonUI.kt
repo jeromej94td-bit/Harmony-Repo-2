@@ -163,9 +163,7 @@ fun HarmonyTopBar(
             }
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             androidx.compose.material3.IconButton(
                 onClick = onRefresh,
                 modifier = Modifier.padding(end = 8.dp)
@@ -176,43 +174,13 @@ fun HarmonyTopBar(
                     tint = HarmonyText
                 )
             }
-            Row(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(onClick = onProfileClick)
-                    .padding(2.dp)
-                    .testTag("avatars_button"),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPinkSoft))),
-                contentAlignment = Alignment.Center
-            ) {
-                if (userAvatarPath != null) {
-                    AsyncImage(model = File(userAvatarPath), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                } else {
-                    Text(userName.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .offset(x = (-12).dp)
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, HarmonySurface, CircleShape)
-                    .background(Brush.linearGradient(listOf(HarmonyPurple, HarmonyPurpleLight))),
-                contentAlignment = Alignment.Center
-            ) {
-                if (partnerAvatarPath != null) {
-                    AsyncImage(model = File(partnerAvatarPath), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                } else {
-                    Text(partnerName.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-                }
-            }
-        }
+            SessionAwareTopBarAvatars(
+                userName = userName,
+                partnerName = partnerName,
+                userAvatarPath = userAvatarPath,
+                partnerAvatarPath = partnerAvatarPath,
+                onProfileClick = onProfileClick
+            )
         }
     }
 }
