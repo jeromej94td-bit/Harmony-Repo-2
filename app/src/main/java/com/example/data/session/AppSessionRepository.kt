@@ -40,6 +40,14 @@ class AppSessionRepository(
         return refresh()
     }
 
+    suspend fun updateAvatar(avatarRef: String?): AppSession {
+        postRpc(
+            "update_harmony_avatar",
+            JSONObject().put("p_avatar_ref", avatarRef ?: JSONObject.NULL)
+        )
+        return refresh()
+    }
+
     suspend fun createPartnerInvite(): PartnerInvite {
         val response = postRpc("create_partner_invite", JSONObject())
         val rows = JSONArray(response)
