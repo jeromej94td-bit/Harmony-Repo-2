@@ -50,35 +50,16 @@ class AuthDeepLinkActivity : ComponentActivity() {
 
     private var sessionReady by mutableStateOf(false)
     private var deepLinkError by mutableStateOf<String?>(null)
+    private var linkType by mutableStateOf<String?>(null)
+    private var recoveryFlowActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val linkType = authLinkParameter(intent, "type")
-        val callbackUri = intent.data
-        deepLinkError = authLinkParameter(intent, "error_description")
-            ?: authLinkParameter(intent, "error")
-
-        if (
-            callbackUri == null ||
-            callbackUri.scheme != SupabaseConfig.AUTH_DEEP_LINK_SCHEME ||
-            callbackUri.host != SupabaseConfig.AUTH_DEEP_LINK_HOST
-        ) {
-            deepLinkError = "Dieser Link ist ungültig oder gehört nicht zu Harmony."
-        } else if (deepLinkError == null) {
-            SupabaseConfig.client.handleDeeplinks(intent) {
-                runOnUiThread {
-                    sessionReady = true
-                    if (linkType != "recovery") {
-                        navigateToMainApp()
-                    }
-                }
-            }
-        }
+        processAuthIntent(intent)
 
         setContent {
             HarmonyTheme(darkTheme = true) {
-                if (linkType == "recovery") {
+                if (linkType == "recovery" || recoveryFlowActive) {
                     PasswordRecoveryContent(
                         sessionReady = sessionReady,
                         deepLinkError = deepLinkError,
@@ -89,6 +70,55 @@ class AuthDeepLinkActivity : ComponentActivity() {
                         deepLinkError = deepLinkError,
                         onReturnToLogin = ::navigateToLogin
                     )
+                }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+
+        if (recoveryFlowActive && isConsumedRecoveryError(intent)) {
+            return
+        }
+
+        processAuthIntent(intent)
+    }
+
+    private fun processAuthIntent(authIntent: Intent) {
+        val incomingLinkType = authLinkParameter(authIntent, "type")
+        val incomingError = authLinkParameter(authIntent, "error_description")
+            ?: authLinkParameter(authIntent, "error")
+        val callbackUri = authIntent.data
+
+        linkType = incomingLinkType
+        deepLinkError = incomingError
+
+        if (
+            callbackUri == null ||
+            callbackUri.scheme != SupabaseConfig.AUTH_DEEP_LINK_SCHEME ||
+            callbackUri.host != SupabaseConfig.AUTH_DEEP_LINK_HOST
+        ) {
+            deepLinkError = "Dieser Link ist ungültig oder gehört nicht zu Harmony."
+            return
+        }
+
+        if (deepLinkError != null) {
+            return
+        }
+
+        if (incomingLinkType == "recovery") {
+            recoveryFlowActive = true
+        }
+
+        sessionReady = false
+        SupabaseConfig.client.handleDeeplinks(authIntent) {
+            runOnUiThread {
+                sessionReady = true
+                deepLinkError = null
+                if (incomingLinkType != "recovery") {
+                    navigateToMainApp()
                 }
             }
         }
@@ -111,6 +141,16 @@ class AuthDeepLinkActivity : ComponentActivity() {
         )
         finish()
     }
+}
+
+private fun isConsumedRecoveryError(intent: Intent): Boolean {
+    val errorCode = authLinkParameter(intent, "error_code")
+    val description = authLinkParameter(intent, "error_description")
+        ?: authLinkParameter(intent, "error")
+
+    return errorCode == "otp_expired" ||
+        description?.contains("invalid or has expired", ignoreCase = true) == true ||
+        description?.contains("one-time token", ignoreCase = true) == true
 }
 
 private fun authLinkParameter(intent: Intent, name: String): String? {
