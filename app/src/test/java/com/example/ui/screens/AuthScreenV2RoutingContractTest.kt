@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import java.io.File
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -18,12 +17,14 @@ class AuthScreenV2RoutingContractTest {
     }
 
     @Test
-    fun `signed out app routes through fresh auth v2 screen`() {
-        val mainActivity = source("app/src/main/java/com/example/MainActivity.kt")
+    fun `launcher uses fresh auth gateway instead of legacy login path`() {
+        val manifest = source("app/src/main/AndroidManifest.xml")
+        val gateway = source("app/src/main/java/com/example/HarmonyEntryActivity.kt")
 
-        assertTrue(mainActivity.contains("import com.example.ui.screens.AuthScreenV2"))
-        assertTrue(mainActivity.contains("AuthScreenV2("))
-        assertFalse(mainActivity.contains("import com.example.ui.screens.AuthScreen\n"))
+        assertTrue(manifest.contains("android:name=\".HarmonyEntryActivity\""))
+        assertTrue(gateway.contains("AuthScreenV2("))
+        assertTrue(gateway.contains("sessionViewModel.enterDemo()"))
+        assertTrue(gateway.contains("HarmonyApp("))
     }
 
     @Test
