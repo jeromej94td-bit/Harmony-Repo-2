@@ -8,10 +8,10 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "profiles")
 data class ProfileEntity(
     @PrimaryKey val id: Int = 1,
-    val userName: String = "Jerome",
-    val partnerName: String = "Alex",
-    val startDate: Long = System.currentTimeMillis() - (830L * 24 * 3600 * 1000), // ~2.28 years ago
-    val simulatorEnabled: Boolean = true,
+    val userName: String = "Du",
+    val partnerName: String = "Partner",
+    val startDate: Long = 0L,
+    val simulatorEnabled: Boolean = false,
     val userAvatarPath: String? = null,
     val partnerAvatarPath: String? = null
 )
@@ -61,8 +61,8 @@ data class MomentEntity(
 @Entity(tableName = "couple_stats")
 data class CoupleStatsEntity(
     @PrimaryKey val id: Int = 1,
-    val visitedCities: Int = 7,
-    val visitedCountries: Int = 3
+    val visitedCities: Int = 0,
+    val visitedCountries: Int = 0
 )
 
 // --- DOMAIN MODELS & PACK DEFINITIONS ---

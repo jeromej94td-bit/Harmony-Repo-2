@@ -101,6 +101,7 @@ fun HomeScreen(
     onAddSharedPictures: (List<Uri>, String) -> Unit,
     onUpdateSharedPicture: (SharedPicEntity) -> Unit,
     onPinWidget: () -> Unit,
+    brainEnabled: Boolean = false,
     brainInterests: List<com.example.data.model.BrainInterestEntity> = emptyList(),
     brainSuggestions: List<com.example.data.model.BrainSuggestionEntity> = emptyList(),
     brainQuestions: List<com.example.data.model.BrainQuestionEntity> = emptyList(),
@@ -184,6 +185,7 @@ fun HomeScreen(
             StatCard(stats.visitedCountries.toString(), LanguageManager.tr("Besuchte Länder", appLanguage), Modifier.weight(1f))
         }
         
+        if (brainEnabled) {
         // --- HARMONY BRAIN COACH ---
         Spacer(Modifier.height(14.dp))
         Box(
@@ -543,6 +545,7 @@ fun HomeScreen(
                     }
                 }
             }
+        }
         }
         Spacer(Modifier.height(20.dp))
     }

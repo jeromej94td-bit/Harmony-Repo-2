@@ -42,19 +42,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.util.LanguageManager
 import com.example.data.model.MomentEntity
 import com.example.data.model.ProfileEntity
+import com.example.ui.HarmonyViewModel
 import com.example.ui.components.CategoryTag
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.formatTimestamp
+import com.example.ui.session.isConnectedPartnerName
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
+import com.example.util.LanguageManager
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -109,9 +112,19 @@ fun MomentsScreen(
     onAddMoment: (String, String, List<Uri>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (!isConnectedPartnerName(profile.partnerName)) {
+        val harmonyViewModel: HarmonyViewModel = viewModel()
+        PartnerRequiredScreen(
+            title = "Gemeinsame Momente starten zu zweit",
+            description = "Deine Spiele bleiben solo verfügbar. Für eure gemeinsame Timeline verbindet ihr zuerst eure beiden Harmony-Konten.",
+            onConnectPartner = { harmonyViewModel.openProfileSheet() },
+            modifier = modifier
+        )
+        return
+    }
+
     val scrollState = rememberScrollState()
 
-    // Calculate dynamic milestones from relationship start date
     val dayMs = 86400000L
     val daysTogether = TimeUnit.MILLISECONDS.toDays(
         (System.currentTimeMillis() - profile.startDate).coerceAtLeast(0)
@@ -230,7 +243,6 @@ fun MomentsScreen(
         }
     }
 
-    // Add Moment Dialog
     if (isAddMomentOpen) {
         var titleInput by remember { mutableStateOf("") }
         var contentInput by remember { mutableStateOf("") }
