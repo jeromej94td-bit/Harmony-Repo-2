@@ -16,6 +16,12 @@ concurrency:
   group: android-apk-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  # This fingerprint belongs to the one CI debug key used for installable Harmony APKs.
+  # Changing it is an explicit signing-key rotation and requires updating the Android
+  # OAuth client for package com.aistudio.harmony.couples.xqvz before publishing an APK.
+  HARMONY_CI_SIGNING_SHA1: 73:85:7C:7D:A2:C1:0A:29:79:14:6C:20:15:0C:AE:4E:7A:77:B3:92
+
 jobs:
   build-debug-apk:
     runs-on: ubuntu-latest
@@ -42,25 +48,78 @@ jobs:
             cp .env.example .env
           fi
 
-      - name: Create debug keystore
+      - name: Restore stable Harmony CI signing key
+        if: github.event_name != 'pull_request'
+        env:
+          HARMONY_CI_DEBUG_KEYSTORE_B64: ${{ secrets.HARMONY_CI_DEBUG_KEYSTORE_B64 }}
         run: |
-          if [ ! -f debug.keystore ]; then
-            keytool -genkeypair \
-              -v \
+          set -euo pipefail
+          if [ -z "${HARMONY_CI_DEBUG_KEYSTORE_B64:-}" ]; then
+            echo "::error::Stable Harmony signing key is missing. Add repository secret HARMONY_CI_DEBUG_KEYSTORE_B64. Refusing to create a new installable APK with a random certificate."
+            exit 1
+          fi
+
+          printf '%s' "$HARMONY_CI_DEBUG_KEYSTORE_B64" | base64 --decode > debug.keystore
+
+          ACTUAL_SHA1="$(
+            keytool -list -v \
               -keystore debug.keystore \
               -storepass android \
               -alias androiddebugkey \
-              -keypass android \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=Android Debug,O=Harmony,C=DE"
+            | sed -n 's/^[[:space:]]*SHA1: //p' \
+            | head -n 1 \
+            | tr -d '\r'
+          )"
+
+          if [ "$ACTUAL_SHA1" != "$HARMONY_CI_SIGNING_SHA1" ]; then
+            echo "::error::Harmony signing fingerprint mismatch. Expected $HARMONY_CI_SIGNING_SHA1 but got ${ACTUAL_SHA1:-<empty>}. Refusing to publish an APK under a different Android identity."
+            exit 1
           fi
+
+          echo "Stable Harmony signing certificate verified: $ACTUAL_SHA1"
+
+      - name: Create ephemeral PR-only debug keystore
+        if: github.event_name == 'pull_request'
+        run: |
+          keytool -genkeypair \
+            -v \
+            -keystore debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Harmony PR Debug,O=Harmony,C=DE"
 
       - name: Build Harmony debug APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon --no-configuration-cache
 
+      - name: Verify installable APK signing certificate
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          if [ -z "$APKSIGNER" ]; then
+            echo "::error::apksigner not found"
+            exit 1
+          fi
+
+          ACTUAL_APK_SHA1="$($APKSIGNER verify --print-certs app/build/outputs/apk/debug/app-debug.apk \
+            | sed -n 's/^Signer #1 certificate SHA-1 digest: //p' \
+            | head -n 1 \
+            | tr '[:lower:]' '[:upper:]' \
+            | sed 's/../&:/g;s/:$//')"
+
+          if [ "$ACTUAL_APK_SHA1" != "$HARMONY_CI_SIGNING_SHA1" ]; then
+            echo "::error::Built APK certificate mismatch. Expected $HARMONY_CI_SIGNING_SHA1 but got ${ACTUAL_APK_SHA1:-<empty>}."
+            exit 1
+          fi
+
+          echo "Built APK certificate verified: $ACTUAL_APK_SHA1"
+
       - name: Upload Harmony APK
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: Harmony-App-${{ github.sha }}
