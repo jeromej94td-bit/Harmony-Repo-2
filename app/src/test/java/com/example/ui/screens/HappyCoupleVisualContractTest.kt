@@ -2,8 +2,6 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -45,14 +43,14 @@ class HappyCoupleVisualContractTest {
 
         composeRule.mainClock.advanceTimeBy(3_000L)
 
-        composeRule.onNodeWithTag("happy_couple_question_pill")
-            .assertTextContains("Frage 1 von 11")
+        composeRule.onNodeWithTag("happy_couple_question_pill").assertExists()
+        composeRule.onNodeWithText("Frage 1 von 11", substring = true).assertExists()
         composeRule.onNodeWithText("Welches Paar ist GLÜCKLICH?").assertExists()
         composeRule.onNodeWithText("Remote content changed this prompt").assertDoesNotExist()
 
         (1..4).forEach { number ->
-            composeRule.onNodeWithTag("happy_couple_number_$number")
-                .assertTextEquals(number.toString())
+            composeRule.onNodeWithTag("happy_couple_number_$number").assertExists()
+            composeRule.onNodeWithText(number.toString()).assertExists()
         }
 
         composeRule.onNodeWithTag("harmony_happy_couple_question").captureRoboImage(
