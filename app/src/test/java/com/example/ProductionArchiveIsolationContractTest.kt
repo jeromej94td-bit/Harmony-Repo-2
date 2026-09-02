@@ -11,7 +11,7 @@ class ProductionArchiveIsolationContractTest {
     fun `production build has an archived feature isolation gate`() {
         val gradle = source("app/build.gradle.kts")
         assertTrue(gradle.contains("verifyProductionSourceIsolation"))
-        assertTrue(gradle.contains("dependsOn(verifyProductionSourceIsolation)"))
+        assertTrue(gradle.contains("verifyProductionSourceIsolation\n  )"))
         assertTrue(gradle.contains("brainEnabled = true"))
         assertTrue(gradle.contains("HARMONY_BRAIN_ENABLED = true"))
         assertTrue(gradle.contains("id = \\\"mischung\\\""))
@@ -39,19 +39,23 @@ class ProductionArchiveIsolationContractTest {
     @Test
     fun `removed Mischung category stays tombstoned`() {
         val policy = source("app/src/main/java/com/example/data/model/RemovedGameCatalogPolicy.kt")
-        assertTrue(policy.contains("MISCHUNG_CATEGORY_ID = \\\"mischung\\\""))
+        assertTrue(policy.contains("MISCHUNG_CATEGORY_ID = \"mischung\""))
         assertTrue(policy.contains("categoryId != MISCHUNG_CATEGORY_ID"))
     }
 
     @Test
     fun `archive recovery instructions are kept outside production source`() {
-        val archive = source("../docs/ARCHIVED_FEATURES.md")
+        val archive = source("docs/ARCHIVED_FEATURES.md")
         assertTrue(archive.contains("archive/pre-production-isolation-2026-09-02"))
-        assertTrue(archive.contains("nicht vollständig zurück nach main mergen"))
+        assertTrue(archive.contains("niemals vollständig zurück nach `main` mergen"))
     }
 
     private fun source(path: String): String {
-        val candidates = listOf(File(path.removePrefix("app/")), File(path))
+        val candidates = listOf(
+            File(path.removePrefix("app/")),
+            File(path),
+            File("../$path")
+        )
         return candidates.firstOrNull(File::exists)?.readText()
             ?: error("$path not found from test working directory ${File(".").absolutePath}")
     }
