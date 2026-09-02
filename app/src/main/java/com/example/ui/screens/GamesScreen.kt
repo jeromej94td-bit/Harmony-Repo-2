@@ -118,9 +118,13 @@ fun GamesScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showUnansweredQuestions by remember { mutableStateOf(false) }
+    var showStartChoice by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val answerCounts = remember(answers) { answerCountsByPack(answers) }
+    val quickstartPool = remember(answers) {
+        buildGamesQuickstartPool(HarmonyPacksData.CATALOG_PACKS, answers)
+    }
 
     LaunchedEffect(isSearchActive) {
         if (isSearchActive) {
@@ -539,6 +543,22 @@ fun GamesScreen(
                 onStartPack(packId)
             },
             onDismiss = { showUnansweredQuestions = false }
+        )
+    }
+
+    if (showStartChoice) {
+        GamesQuickstartEntryDialog(
+            appLanguage = appLanguage,
+            onQuickstart = {
+                val candidate = quickstartPool.pick()
+                showStartChoice = false
+                if (candidate != null) {
+                    onStartPack(candidate.packId)
+                } else {
+                    showUnansweredQuestions = true
+                }
+            },
+            onChooseBrowse = { showStartChoice = false }
         )
     }
 }
