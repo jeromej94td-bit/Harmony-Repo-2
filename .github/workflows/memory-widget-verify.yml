@@ -1,9 +1,6 @@
 name: Memory Widget Verification
 
 on:
-  push:
-    branches:
-      - feat/memory-home-widget
   pull_request:
     branches:
       - main
@@ -18,14 +15,19 @@ on:
       - 'app/src/main/res/values/strings.xml'
       - 'app/src/test/java/com/example/widget/**'
       - '.github/workflows/memory-widget-verify.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: memory-widget-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   widget-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,15 +43,15 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Run memory widget migration gate
-        run: gradle :app:testDebugUnitTest --tests 'com.example.widget.MemoryWidgetMigrationTest' --stacktrace
+      - name: Run focused memory widget tests
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests 'com.example.widget.MemoryWidget*Test'
+          --stacktrace
+          --no-daemon
 
-      - name: Run all memory widget tests
-        if: success()
-        run: gradle :app:testDebugUnitTest --tests 'com.example.widget.MemoryWidget*Test' --stacktrace
-
-      - name: Create ephemeral debug keystore
-        if: success()
+      - name: Create ephemeral debug keystore for manual APK verification
+        if: github.event_name == 'workflow_dispatch'
         run: >-
           keytool -genkeypair -v
           -keystore debug.keystore
@@ -61,6 +63,6 @@ jobs:
           -keysize 2048
           -validity 10000
 
-      - name: Assemble debug APK
-        if: success()
-        run: gradle :app:assembleDebug --stacktrace
+      - name: Assemble debug APK manually
+        if: github.event_name == 'workflow_dispatch'
+        run: gradle :app:assembleDebug --stacktrace --no-daemon
