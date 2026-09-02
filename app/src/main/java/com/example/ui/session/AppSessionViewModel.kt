@@ -71,7 +71,7 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
             }.onFailure { error ->
                 _uiState.value = AppSessionUiState(
                     phase = SessionPhase.ERROR,
-                    errorMessage = error.message ?: "Session konnte nicht geladen werden"
+                    errorMessage = sessionErrorCopy(error.message)
                 )
             }
         }
@@ -101,10 +101,10 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
                     phase = SessionPhase.DEMO,
                     session = demoSession
                 )
-            }.onFailure { error ->
+            }.onFailure {
                 _uiState.value = AppSessionUiState(
                     phase = SessionPhase.ERROR,
-                    errorMessage = error.message ?: "Demo-Modus konnte nicht gestartet werden"
+                    errorMessage = "Demo-Modus konnte nicht gestartet werden."
                 )
             }
         }
@@ -159,10 +159,10 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
             _uiState.value = current.copy(actionInProgress = true, errorMessage = null)
             runCatching { SupabaseConfig.client.auth.signOut() }
                 .onSuccess { _uiState.value = AppSessionUiState(phase = SessionPhase.SIGNED_OUT) }
-                .onFailure { error ->
+                .onFailure {
                     _uiState.value = current.copy(
                         actionInProgress = false,
-                        errorMessage = error.message ?: "Abmelden fehlgeschlagen"
+                        errorMessage = "Abmelden fehlgeschlagen. Bitte versuche es erneut."
                     )
                 }
         }
@@ -184,7 +184,7 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
             }.onFailure { error ->
                 _uiState.value = current.copy(
                     actionInProgress = false,
-                    errorMessage = error.message ?: "Konto konnte nicht gelöscht werden"
+                    errorMessage = sessionErrorCopy(error.message)
                 )
             }
         }
@@ -209,7 +209,7 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
                 .onFailure { error ->
                     _uiState.value = current.copy(
                         actionInProgress = false,
-                        errorMessage = error.message ?: "Aktion fehlgeschlagen"
+                        errorMessage = sessionErrorCopy(error.message)
                     )
                 }
         }
