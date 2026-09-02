@@ -71,7 +71,7 @@ abstract class ReconstructMerlinThemeTask : DefaultTask() {
       .joinToString(separator = "") { "%02x".format(it) }
     if (actualSha256 != expectedSha256.get()) {
       throw GradleException(
-        "Merlin theme SHA-256 is $actualSha256; expected $expectedSha256.get()"
+        "Merlin theme SHA-256 is $actualSha256; expected ${expectedSha256.get()}"
       )
     }
 
