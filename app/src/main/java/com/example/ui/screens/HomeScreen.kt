@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,15 +53,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.ui.text.TextStyle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.data.model.AnswerEntity
 import com.example.data.model.CoupleStatsEntity
 import com.example.data.model.EitherOrAnswerCodec
@@ -73,6 +76,8 @@ import com.example.ui.components.AuroraProgressBar
 import com.example.ui.components.CategoryTag
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.HarmonyPackIcon
+import com.example.ui.session.AppSessionViewModel
+import com.example.ui.session.SessionPhase
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
@@ -110,6 +115,14 @@ fun HomeScreen(
     onOpenBrainChat: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val sessionViewModel: AppSessionViewModel = viewModel()
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    val liveSession = sessionState.session
+    val isDemoMode = sessionState.phase == SessionPhase.DEMO
+    val isPaired = isDemoMode || liveSession?.isPaired == true
+    val resolvedPartnerName = if (isDemoMode) profile.partnerName else liveSession?.partner?.displayName.orEmpty()
+    var isPartnerConnectionOpen by rememberSaveable { mutableStateOf(false) }
+
     val scrollState = rememberScrollState()
     var showAnswerList by remember { mutableStateOf(false) }
     val answeredPackIds = answers.mapTo(mutableSetOf()) { it.packId }
@@ -127,20 +140,30 @@ fun HomeScreen(
             .verticalScroll(scrollState)
             .padding(bottom = 90.dp)
     ) {
-        ConnectBanner(
-            appLanguage = appLanguage,
-            partnerName = profile.partnerName,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
-        )
+        if (isPaired) {
+            ConnectBanner(
+                appLanguage = appLanguage,
+                partnerName = resolvedPartnerName,
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
+            )
+        } else {
+            SoloHomeConnectCard(
+                appLanguage = appLanguage,
+                onConnectPartner = { isPartnerConnectionOpen = true },
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
+            )
+        }
 
-        PicShareHomeCard(
-            pics = sharedPics,
-            profile = profile,
-            onAddPictures = onAddSharedPictures,
-            onUpdatePicture = onUpdateSharedPicture,
-            onPinWidget = onPinWidget,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
-        )
+        if (isPaired) {
+            PicShareHomeCard(
+                pics = sharedPics,
+                profile = profile,
+                onAddPictures = onAddSharedPictures,
+                onUpdatePicture = onUpdateSharedPicture,
+                onPinWidget = onPinWidget,
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
+            )
+        }
 
         Spacer(Modifier.height(10.dp))
         AuroraGlassSectionTitle(
@@ -157,34 +180,55 @@ fun HomeScreen(
 
         Spacer(Modifier.height(14.dp))
         AuroraGlassSectionTitle(
-            LanguageManager.tr("Paar-Statistiken", appLanguage),
+            LanguageManager.tr(
+                if (isPaired) "Paar-Statistiken" else "Dein Harmony-Fortschritt",
+                appLanguage
+            ),
             Modifier.padding(horizontal = 18.dp, vertical = 4.dp)
         )
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            StatCard(
-                value = daysTogether.toString(),
-                label = LanguageManager.tr("Gemeinsame Tage", appLanguage),
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                value = answers.size.toString(),
-                label = LanguageManager.tr("Beantwortete Fragen", appLanguage),
-                onClick = { showAnswerList = true },
-                modifier = Modifier.weight(1f)
-            )
+        if (isPaired) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StatCard(
+                    value = daysTogether.toString(),
+                    label = LanguageManager.tr("Gemeinsame Tage", appLanguage),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    value = answers.size.toString(),
+                    label = LanguageManager.tr("Beantwortete Fragen", appLanguage),
+                    onClick = { showAnswerList = true },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StatCard(stats.visitedCities.toString(), LanguageManager.tr("Besuchte Städte", appLanguage), Modifier.weight(1f))
+                StatCard(stats.visitedCountries.toString(), LanguageManager.tr("Besuchte Länder", appLanguage), Modifier.weight(1f))
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StatCard(
+                    value = answers.size.toString(),
+                    label = LanguageManager.tr("Beantwortete Fragen", appLanguage),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    value = answeredPackIds.size.toString(),
+                    label = LanguageManager.tr("Begonnene Spiele", appLanguage),
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
-        Spacer(Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            StatCard(stats.visitedCities.toString(), LanguageManager.tr("Besuchte Städte", appLanguage), Modifier.weight(1f))
-            StatCard(stats.visitedCountries.toString(), LanguageManager.tr("Besuchte Länder", appLanguage), Modifier.weight(1f))
-        }
-        
+
         if (brainEnabled) {
         // --- HARMONY BRAIN COACH ---
         Spacer(Modifier.height(14.dp))
@@ -268,7 +312,6 @@ fun HomeScreen(
 
                 Spacer(Modifier.height(14.dp))
 
-                // Section 1: Erkannte Interessen
                 if (brainInterests.isNotEmpty()) {
                     Text(
                         LanguageManager.tr("Erkannte gemeinsame Interessen:", appLanguage),
@@ -315,7 +358,6 @@ fun HomeScreen(
                     Spacer(Modifier.height(14.dp))
                 }
 
-                // Section 2: Vorschläge & Empfehlungen
                 val activeSuggestions = brainSuggestions.filter { it.feedback == "none" }
                 if (activeSuggestions.isNotEmpty()) {
                     Text(
@@ -363,7 +405,7 @@ fun HomeScreen(
                                             color = HarmonyText
                                         )
                                     }
-                                    
+
                                     Box(
                                         modifier = Modifier
                                             .clip(CircleShape)
@@ -434,7 +476,6 @@ fun HomeScreen(
                     Spacer(Modifier.height(6.dp))
                 }
 
-                // Section 3: Offene Coach-Fragen
                 val openQuestions = brainQuestions.filter { !it.answered }
                 if (openQuestions.isNotEmpty()) {
                     Text(
@@ -469,9 +510,9 @@ fun HomeScreen(
                                         lineHeight = 17.sp
                                     )
                                 }
-                                
+
                                 Spacer(Modifier.height(10.dp))
-                                
+
                                 if (!isAnswering) {
                                     Button(
                                         onClick = { isAnswering = true },
@@ -496,9 +537,9 @@ fun HomeScreen(
                                         ),
                                         shape = RoundedCornerShape(12.dp)
                                     )
-                                    
+
                                     Spacer(Modifier.height(8.dp))
-                                    
+
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.End
@@ -525,7 +566,7 @@ fun HomeScreen(
                         }
                     }
                 }
-                
+
                 if (brainInterests.isEmpty() && activeSuggestions.isEmpty() && openQuestions.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -550,6 +591,24 @@ fun HomeScreen(
         Spacer(Modifier.height(20.dp))
     }
 
+    if (!isPaired && isPartnerConnectionOpen && liveSession != null) {
+        PartnerConnectionSheet(
+            session = liveSession,
+            activeInvite = sessionState.activeInvite,
+            actionInProgress = sessionState.actionInProgress,
+            errorMessage = sessionState.errorMessage,
+            onDismiss = {
+                isPartnerConnectionOpen = false
+                sessionViewModel.clearInvite()
+                sessionViewModel.clearError()
+            },
+            onCreateCode = { sessionViewModel.createPartnerInvite() },
+            onJoinCode = { code -> sessionViewModel.joinPartnerInvite(code) },
+            onClearInvite = { sessionViewModel.clearInvite() },
+            onDisconnect = { sessionViewModel.leaveCurrentCouple() }
+        )
+    }
+
     if (showAnswerList) {
         AnswerHistoryDialog(
             answers = answers,
@@ -557,6 +616,53 @@ fun HomeScreen(
             appLanguage = appLanguage,
             onDismiss = { showAnswerList = false }
         )
+    }
+}
+
+@Composable
+private fun SoloHomeConnectCard(
+    appLanguage: String,
+    onConnectPartner: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    HarmonyCard(modifier = modifier) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(HarmonyPink.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Favorite, contentDescription = null, tint = HarmonyPinkSoft)
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        LanguageManager.tr("Harmony zu zweit", appLanguage),
+                        color = HarmonyText,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Text(
+                        LanguageManager.tr("Du kannst Spiele schon solo entdecken. Verbinde deinen Partner, sobald ihr gemeinsam starten möchtet.", appLanguage),
+                        color = HarmonyMuted,
+                        fontSize = 11.5.sp,
+                        lineHeight = 16.sp
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = onConnectPartner,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
+            ) {
+                Text(LanguageManager.tr("Partner verbinden", appLanguage), color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }
 
@@ -1004,8 +1110,8 @@ fun ConnectBanner(appLanguage: String, partnerName: String, modifier: Modifier =
         }
         Spacer(Modifier.width(12.dp))
         Column {
-            Text("${LanguageManager.tr("Verbinde dich mit", appLanguage)} $partnerName", color = HarmonyText, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
-            Text(LanguageManager.tr("Beantwortet Fragen gleichzeitig — Antworten werden erst sichtbar, wenn ihr beide fertig seid.", appLanguage), color = HarmonyMuted, fontSize = 12.sp, lineHeight = 16.sp)
+            Text("${LanguageManager.tr("Verbunden mit", appLanguage)} $partnerName", color = HarmonyText, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+            Text(LanguageManager.tr("Eure Antworten bleiben getrennt, bis ihr beide dieselbe Frage beantwortet habt.", appLanguage), color = HarmonyMuted, fontSize = 12.sp, lineHeight = 16.sp)
         }
     }
 }
