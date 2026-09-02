@@ -18,6 +18,18 @@ class PasswordRecoveryContractTest {
         assertTrue(auth.contains("redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL"))
         assertFalse(auth.contains("resetPasswordForEmail(currentEmail)"))
 
+        // Recovery emails currently contain a numeric code. The login screen must
+        // immediately switch into a dedicated code + new-password step after sending it.
+        assertTrue(auth.contains("recoveryMode"))
+        assertTrue(auth.contains("Passwort-Code"))
+        assertTrue(auth.contains("verifyEmailOtp("))
+        assertTrue(auth.contains("OtpType.Email.RECOVERY"))
+        assertTrue(auth.contains("token = recoveryCode.trim()"))
+        assertTrue(auth.contains("auth.updateUser"))
+        assertTrue(auth.contains("password = recoveryNewPassword"))
+        assertTrue(auth.contains("recoveryNewPassword != recoveryConfirmPassword"))
+        assertTrue(auth.contains("Code erneut senden"))
+
         assertTrue(supabase.contains("AUTH_DEEP_LINK_SCHEME = \"harmony\""))
         assertTrue(supabase.contains("AUTH_DEEP_LINK_HOST = \"auth\""))
         assertTrue(supabase.contains("AUTH_DEEP_LINK_PATH = \"/callback\""))
