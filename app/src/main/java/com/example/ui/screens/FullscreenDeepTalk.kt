@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,11 +68,11 @@ internal fun DeepTalkBoard(
     val prompt = mechanicPrompt(question, items, profile)
     val restored = remember(selectedAnswer) { selectedAnswer?.let(PairedChoiceAnswerCodec::decode) }
 
-    var firstAnswer by remember(question, selectedAnswer) { mutableStateOf(restored?.first.orEmpty()) }
-    var secondAnswer by remember(question, selectedAnswer) { mutableStateOf(restored?.second.orEmpty()) }
-    var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
-    var discussionOpen by remember(question) { mutableStateOf(false) }
-    var memorySaved by remember(question) { mutableStateOf(false) }
+    var firstAnswer by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.first.orEmpty()) }
+    var secondAnswer by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.second.orEmpty()) }
+    var phase by rememberSaveable(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    var discussionOpen by rememberSaveable(question) { mutableStateOf(false) }
+    var memorySaved by rememberSaveable(question) { mutableStateOf(false) }
     var memorySaving by remember(question) { mutableStateOf(false) }
 
     val memoryRepository = remember(context.applicationContext) {
