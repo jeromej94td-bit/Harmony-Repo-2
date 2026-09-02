@@ -162,6 +162,49 @@ fun ProfileSheet(
                     fontSize = 12.sp,
                     color = HarmonyMuted
                 )
+
+                if (!isDemoMode && accountEmail != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
+                            .padding(horizontal = 14.dp, vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = tr("Angemeldet als", "Signed in as"),
+                                fontSize = 10.5.sp,
+                                color = HarmonyMuted
+                            )
+                            Spacer(modifier = Modifier.height(1.dp))
+                            Text(
+                                text = accountEmail,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = HarmonyText,
+                                modifier = Modifier.testTag("account_email")
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -260,51 +303,6 @@ fun ProfileSheet(
             HarmonyCard {
                 Column {
                     Text(text = tr("Konto", "Account"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.AccountCircle,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(25.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = if (isDemoMode) tr("Demo-Modus", "Demo mode") else tr("Angemeldet als", "Signed in as"),
-                                fontSize = 11.5.sp,
-                                color = HarmonyMuted
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = when {
-                                    isDemoMode -> tr("Lokale Demo ohne Cloud-Konto", "Local demo without cloud account")
-                                    accountEmail != null -> accountEmail
-                                    else -> tr("Harmony-Konto", "Harmony account")
-                                },
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = HarmonyText,
-                                modifier = Modifier.testTag("account_email")
-                            )
-                        }
-                    }
 
                     if (!isDemoMode) {
                         Spacer(modifier = Modifier.height(12.dp))
