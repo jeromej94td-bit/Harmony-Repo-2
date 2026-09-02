@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -233,7 +234,7 @@ internal fun PriorityPokerBoard(
     val context = LocalContext.current
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
-    var selected by remember(question, selectedAnswer) {
+    var selected by rememberSaveable(question, selectedAnswer) {
         mutableStateOf(selectedAnswer?.takeIf { answer -> items.any { it.raw == answer } })
     }
 
@@ -281,9 +282,9 @@ internal fun MatchTournamentBoard(
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
     val existingIndex = items.indexOfFirst { it.raw == selectedAnswer }
-    var championIndex by remember(question, selectedAnswer) { mutableStateOf(existingIndex.coerceAtLeast(0)) }
-    var challengerIndex by remember(question, selectedAnswer) { mutableStateOf(1) }
-    var finished by remember(question, selectedAnswer) { mutableStateOf(existingIndex >= 0) }
+    var championIndex by rememberSaveable(question, selectedAnswer) { mutableStateOf(existingIndex.coerceAtLeast(0)) }
+    var challengerIndex by rememberSaveable(question, selectedAnswer) { mutableStateOf(1) }
+    var finished by rememberSaveable(question, selectedAnswer) { mutableStateOf(existingIndex >= 0) }
     val configuration = context.resources.configuration
     val resultMetrics = MatchTournamentResultLayoutPolicy.metrics(
         screenHeightDp = configuration.screenHeightDp,
@@ -416,11 +417,11 @@ internal fun ScenarioBoard(
     val context = LocalContext.current
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
-    var selected by remember(question, selectedAnswer) {
+    var selected by rememberSaveable(question, selectedAnswer) {
         mutableStateOf(selectedAnswer?.takeIf { answer -> items.any { it.raw == answer } })
     }
-    var journeyChoices by remember { mutableStateOf(emptyList<Int>()) }
-    var showJourneyResult by remember(question) { mutableStateOf(false) }
+    var journeyChoices by rememberSaveable { mutableStateOf(IntArray(0)) }
+    var showJourneyResult by rememberSaveable(question) { mutableStateOf(false) }
     val configuration = context.resources.configuration
     val resultMetrics = ScenarioResultLayoutPolicy.metrics(
         screenHeightDp = configuration.screenHeightDp,
