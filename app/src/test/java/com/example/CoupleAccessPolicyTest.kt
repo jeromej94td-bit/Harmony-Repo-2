@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.ui.session.isConnectedPartnerName
 import com.example.ui.session.requiresPartnerForTab
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -17,5 +18,12 @@ class CoupleAccessPolicyTest {
         listOf(0, 1, 4, 5, 6).forEach { tab ->
             assertFalse("tab $tab should remain available in solo mode", requiresPartnerForTab(tab))
         }
+    }
+
+    @Test
+    fun `solo placeholder is never treated as a real partner`() {
+        assertFalse(isConnectedPartnerName("Partner"))
+        assertFalse(isConnectedPartnerName("  "))
+        assertTrue(isConnectedPartnerName("Giulia"))
     }
 }
