@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.example.data.DeveloperDataManager
 import com.example.data.DevExporter
 import com.example.data.OkHttpLinkPreviewResolver
+import com.example.data.couple.CoupleQuestionRepository
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.HarmonyPacksData
 import com.example.data.model.MemoryEntryKind
@@ -60,6 +61,7 @@ import com.example.ui.components.HarmonyBottomNav
 import com.example.ui.components.HarmonyToast
 import com.example.ui.components.HarmonyTopBar
 import com.example.ui.screens.ChatScreen
+import com.example.ui.screens.CouplePackRevealScreen
 import com.example.ui.screens.DevStudioScreen
 import com.example.ui.screens.GamesScreen
 import com.example.ui.screens.HomeScreen
@@ -223,6 +225,7 @@ fun HarmonyApp(
     val keyboardController = LocalSoftwareKeyboardController.current
     val isImeVisible = WindowInsets.isImeVisible
     val runnerScope = rememberCoroutineScope()
+    val coupleQuestionRepository = remember { CoupleQuestionRepository() }
     val appDb = remember(context.applicationContext) {
         HarmonyDatabase.getInstance(context.applicationContext)
     }
@@ -700,11 +703,35 @@ fun HarmonyApp(
                             if (optText == skipLabel) {
                                 viewModel.skipCurrentQuestion(expectedIndex = activeRun.currentIndex)
                             } else {
-                                viewModel.pickAnswer(optText, expectedIndex = activeRun.currentIndex)
+                                val answerIndex = activeRun.currentIndex
+                                if (!isDemoMode && appSession.isPaired) {
+                                    runnerScope.launch {
+                                        runCatching {
+                                            coupleQuestionRepository.submitAnswer(
+                                                activeRun.pack.id,
+                                                answerIndex,
+                                                optText
+                                            )
+                                        }
+                                    }
+                                }
+                                viewModel.pickAnswer(optText, expectedIndex = answerIndex)
                             }
                         },
                         onPickTot = { optionText ->
-                            viewModel.pickAnswer(optionText, expectedIndex = activeRun.currentIndex)
+                            val answerIndex = activeRun.currentIndex
+                            if (!isDemoMode && appSession.isPaired) {
+                                runnerScope.launch {
+                                    runCatching {
+                                        coupleQuestionRepository.submitAnswer(
+                                            activeRun.pack.id,
+                                            answerIndex,
+                                            optionText
+                                        )
+                                    }
+                                }
+                            }
+                            viewModel.pickAnswer(optionText, expectedIndex = answerIndex)
                         },
                         onNextStep = {
                             viewModel.nextStep(expectedIndex = activeRun.currentIndex)
@@ -720,7 +747,21 @@ fun HarmonyApp(
                             }
                         },
                         onCloseOwnAnswerDialog = { viewModel.closeOwnAnswerDialog() },
-                        onSaveOwnAnswer = { ansText -> viewModel.saveOwnAnswer(ansText) }
+                        onSaveOwnAnswer = { ansText ->
+                            val answerIndex = uiState.ownAnswerTargetIndex ?: activeRun.currentIndex
+                            if (!isDemoMode && appSession.isPaired && ansText.isNotBlank()) {
+                                runnerScope.launch {
+                                    runCatching {
+                                        coupleQuestionRepository.submitAnswer(
+                                            activeRun.pack.id,
+                                            answerIndex,
+                                            ansText
+                                        )
+                                    }
+                                }
+                            }
+                            viewModel.saveOwnAnswer(ansText)
+                        }
                     )
 
                     val isHappyCoupleQuestion = activeRun.pack.id == com.example.data.model.LoveBalanceQuestionPolicy.PACK_ID && activeRun.currentIndex == 0
@@ -760,6 +801,16 @@ fun HarmonyApp(
                                 .align(Alignment.TopEnd)
                                 .statusBarsPadding()
                                 .padding(top = 19.dp, end = 18.dp)
+                        )
+                    }
+
+                    if (!isDemoMode && appSession.isPaired && activeRun.isFinished) {
+                        CouplePackRevealScreen(
+                            pack = activeRun.pack,
+                            session = appSession,
+                            answers = activeRun.currentAnswers,
+                            repository = coupleQuestionRepository,
+                            onClose = { viewModel.closeRunner() }
                         )
                     }
                 }
