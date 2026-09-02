@@ -152,7 +152,7 @@ fun PartnerConnectionSheet(
             if (!errorMessage.isNullOrBlank()) {
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    text = pairingErrorCopy(errorMessage),
+                    text = errorMessage,
                     color = Color(0xFFFF8CA8),
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
@@ -440,12 +440,4 @@ private fun HarmonySecondaryAction(
     ) {
         Text(text, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
-}
-
-private fun pairingErrorCopy(reason: String): String = when {
-    reason.contains("already_paired", ignoreCase = true) -> "Einer von euch ist bereits mit einem Partner verbunden."
-    reason.contains("cannot_pair_with_self", ignoreCase = true) -> "Deinen eigenen Code kannst du nicht verwenden."
-    reason.contains("invite_not_available", ignoreCase = true) -> "Dieser Code ist ungültig, abgelaufen oder wurde bereits verwendet."
-    reason.contains("invalid_invite_code", ignoreCase = true) -> "Bitte prüfe den sechsstelligen Code."
-    else -> "Die Verbindung konnte gerade nicht hergestellt werden. Bitte versuche es erneut."
 }
