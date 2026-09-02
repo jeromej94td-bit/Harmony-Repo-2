@@ -8,14 +8,12 @@ import org.junit.Test
 class PrivateAvatarUiContractTest {
     @Test
     fun `real profile avatar picker uploads through authenticated session`() {
-        val main = source("app/src/main/java/com/example/MainActivity.kt")
         val profile = source("app/src/main/java/com/example/ui/screens/ProfileSheetCoupleAdapter.kt")
 
-        assertTrue(main.contains("sessionViewModel.updateProfileAvatar(uri)"))
-        assertTrue(main.contains("!isDemoMode && isUser"))
-        assertTrue(profile.contains("userAvatarRef: String?"))
-        assertTrue(profile.contains("partnerAvatarRef: String?"))
+        assertTrue(profile.contains("sessionViewModel.updateProfileAvatar(it)"))
+        assertTrue(profile.contains("collectAsStateWithLifecycle"))
         assertTrue(profile.contains("AuthenticatedAvatarImage("))
+        assertTrue(profile.contains("isDemoMode"))
     }
 
     @Test
