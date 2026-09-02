@@ -8,38 +8,45 @@ import org.junit.Test
 class CurrentAppStateContractTest {
 
     @Test
-    fun `profile email is sourced from the active app session`() {
-        val main = source("app/src/main/java/com/example/MainActivity.kt")
+    fun `signed in email remains visible in profile`() {
         val profile = source("app/src/main/java/com/example/ui/screens/ProfileSheet.kt")
 
-        assertTrue(main.contains("accountEmail = appSession.email"))
-        assertTrue(profile.contains("accountEmail: String?"))
-        assertFalse(profile.contains("currentSessionOrNull()?.user?.email"))
+        assertTrue(profile.contains("currentSessionOrNull()?.user?.email"))
+        assertTrue(profile.contains("Angemeldet als"))
+        assertTrue(profile.contains("account_email"))
     }
 
     @Test
-    fun `archived Harmony Brain is not wired into active screens`() {
-        val main = source("app/src/main/java/com/example/MainActivity.kt")
+    fun `stale Brain chat callsite resolves only to private couple chat`() {
+        val activeChat = source("app/src/main/java/com/example/ui/screens/ChatScreen.kt")
+        val bridge = source("app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt")
 
-        assertFalse(main.contains("brainInterests = uiState.brainInterests"))
-        assertFalse(main.contains("brainSuggestions = uiState.brainSuggestions"))
-        assertFalse(main.contains("brainQuestions = uiState.brainQuestions"))
-        assertFalse(main.contains("generatedGames = uiState.generatedGames"))
-        assertFalse(main.contains("isBrainChatMode = uiState.isBrainChatMode"))
-        assertFalse(main.contains("brainMessages = uiState.brainMessages"))
-        assertFalse(main.contains("onSendBrainMessage"))
+        assertFalse(activeChat.contains("Harmony Brain"))
+        assertFalse(activeChat.contains("BrainMessage"))
+        assertTrue(bridge.contains("intentionally ignores every archived Brain argument"))
+        assertTrue(bridge.contains("onSendVoiceMessage = onSendVoiceMessage"))
+        assertFalse(bridge.contains("onSendBrainMessage("))
+        assertFalse(bridge.contains("onToggleBrainChatMode("))
     }
 
     @Test
-    fun `removed Mischung content is filtered at every dynamic content boundary`() {
-        val content = source("app/src/main/java/com/example/data/HarmonyContentRepository.kt")
-        val devData = source("app/src/main/java/com/example/data/DeveloperDataManager.kt")
+    fun `archived Brain sections remain disabled in home and games`() {
+        val home = source("app/src/main/java/com/example/ui/screens/HomeScreen.kt")
+        val games = source("app/src/main/java/com/example/ui/screens/GamesScreen.kt")
 
-        assertTrue(content.contains("RemovedGameCatalogPolicy.allowsCategory"))
-        assertTrue(content.contains("RemovedGameCatalogPolicy.allowsPack"))
-        assertTrue(devData.contains("purgeRemovedCatalogEntries"))
-        assertTrue(devData.contains("RemovedGameCatalogPolicy.allowsCategory"))
-        assertTrue(devData.contains("RemovedGameCatalogPolicy.allowsPack"))
+        assertTrue(home.contains("brainEnabled: Boolean = false"))
+        assertTrue(games.contains("brainEnabled: Boolean = false"))
+        assertTrue(games.contains("if (brainEnabled && generatedGames.isNotEmpty())"))
+    }
+
+    @Test
+    fun `removed Mischung category has a permanent runtime tombstone`() {
+        val policy = source("app/src/main/java/com/example/data/model/RemovedGameCatalogPolicy.kt")
+        val models = source("app/src/main/java/com/example/data/model/Models.kt")
+
+        assertTrue(policy.contains("MISCHUNG_CATEGORY_ID = \"mischung\""))
+        assertTrue(models.contains("RemovedGameCatalogPolicy.allowsCategoryId"))
+        assertTrue(models.contains("RemovedGameCatalogPolicy.allowsPackCategoryId"))
     }
 
     private fun source(path: String): String {
