@@ -39,6 +39,17 @@ The production Google login is intentionally centralized in:
 - Before merging authentication-related changes, preserve `GoogleAuthRegressionContractTest.kt`. Any deliberate replacement architecture must update that test in the same change.
 - Do not introduce anonymous Supabase sign-in as a Google-login fallback.
 
+## Android signing identity is protected infrastructure
+
+Installable Harmony APKs from `main` must keep one stable Android signing identity because Google Sign-In and Android updates depend on the package/signing-certificate pair.
+
+- **NEVER** generate a fresh keystore for an installable `main` APK.
+- `.github/workflows/android-apk-build.yml` must restore `HARMONY_CI_DEBUG_KEYSTORE_B64` from GitHub Actions secrets and verify the pinned SHA-1 before publishing an APK.
+- The pinned CI signing SHA-1 is `73:85:7C:7D:A2:C1:0A:29:79:14:6C:20:15:0C:AE:4E:7A:77:B3:92`.
+- A different SHA-1 is an explicit signing-key rotation, not a cleanup. Before changing it, update the Android OAuth client for package `com.aistudio.harmony.couples.xqvz` and make the migration explicit.
+- Pull-request-only compile builds may use an ephemeral debug key, but those APKs must not be published as installable Harmony artifacts.
+- If the stable signing secret is unavailable, fail the installable build. Do not silently fall back to a newly generated key.
+
 ## Custom UI / Image Choice Routing (Happy Couple, etc.)
 When updating questions, translating packs, or importing data via GitHub, you MUST preserve the exact logic for visual questions (like "Happy Couple" / "Liebe im Gleichgewicht").
 - **NEVER** use hardcoded question texts (e.g., `HAPPY_COUPLE_PROMPTS`) or text-matching to route UI components in `HarmonyImageChoicePolicy` or `QuizRunnerScreen`.
