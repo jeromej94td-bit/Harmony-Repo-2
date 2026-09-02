@@ -395,6 +395,7 @@ private fun CoupleRemoteAvatar(profile: UserProfile, size: Int) {
     }
 }
 
+@Composable
 private fun questionLabel(pack: QuestionPack, index: Int): String = when (pack.type) {
     "tot" -> pack.pairs.getOrNull(index)?.let { "${contentText(it.first)} oder ${contentText(it.second)}?" }.orEmpty()
     else -> contentText(pack.questions.getOrNull(index)?.q.orEmpty())
