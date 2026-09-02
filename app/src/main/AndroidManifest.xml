@@ -39,8 +39,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="com.aistudio.harmony.couples.xqvz"
-                    android:host="auth-callback" />
+                    android:scheme="harmony"
+                    android:host="auth"
+                    android:path="/callback" />
             </intent-filter>
         </activity>
 

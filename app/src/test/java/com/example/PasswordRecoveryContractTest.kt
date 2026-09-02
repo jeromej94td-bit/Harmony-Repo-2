@@ -1,6 +1,7 @@
 package com.example
 
 import java.io.File
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -13,12 +14,20 @@ class PasswordRecoveryContractTest {
         val manifest = source("app/src/main/AndroidManifest.xml")
 
         assertTrue(auth.contains("SupabaseConfig.client.auth.resetPasswordForEmail(currentEmail)"))
-        assertTrue(supabase.contains("PASSWORD_RECOVERY_REDIRECT_URL"))
+
+        assertTrue(supabase.contains("AUTH_DEEP_LINK_SCHEME = \"harmony\""))
+        assertTrue(supabase.contains("AUTH_DEEP_LINK_HOST = \"auth\""))
+        assertTrue(supabase.contains("AUTH_DEEP_LINK_PATH = \"/callback\""))
+        assertTrue(supabase.contains("\"harmony://auth/callback\""))
         assertTrue(supabase.contains("scheme = AUTH_DEEP_LINK_SCHEME"))
         assertTrue(supabase.contains("host = AUTH_DEEP_LINK_HOST"))
+        assertTrue(supabase.contains("defaultRedirectUrl = PASSWORD_RECOVERY_REDIRECT_URL"))
+
         assertTrue(manifest.contains(".AuthDeepLinkActivity"))
-        assertTrue(manifest.contains("android:scheme=\"com.aistudio.harmony.couples.xqvz\""))
-        assertTrue(manifest.contains("android:host=\"auth-callback\""))
+        assertTrue(manifest.contains("android:scheme=\"harmony\""))
+        assertTrue(manifest.contains("android:host=\"auth\""))
+        assertTrue(manifest.contains("android:path=\"/callback\""))
+        assertFalse(manifest.contains("android:scheme=\"com.aistudio.harmony.couples.xqvz\""))
 
         val recovery = source("app/src/main/java/com/example/AuthDeepLinkActivity.kt")
         assertTrue(recovery.contains("handleDeeplinks"))
