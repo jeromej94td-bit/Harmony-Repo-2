@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.data.model.ProfileEntity
 import com.example.ui.AppLanguage
@@ -64,6 +65,7 @@ import com.example.ui.TranslationCatalog
 import com.example.ui.tr
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.formatTimestamp
+import com.example.ui.session.AppSessionViewModel
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
@@ -103,6 +105,7 @@ fun ProfileSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
+    val sessionViewModel: AppSessionViewModel = viewModel()
 
     var isLanguageExpanded by remember { mutableStateOf(false) }
 
@@ -127,7 +130,6 @@ fun ProfileSheet(
                 .verticalScroll(scrollState)
                 .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
-            // Header
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -168,7 +170,6 @@ fun ProfileSheet(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Profile Details Card
             HarmonyCard {
                 Column {
                     Text(
@@ -241,7 +242,6 @@ fun ProfileSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Language
             LanguageSelectorCard(
                 language = language,
                 onLanguageChange = onLanguageChange
@@ -249,7 +249,6 @@ fun ProfileSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Developer Studio Card
             if (onOpenDevStudio != null) {
                 HarmonyCard {
                     Column {
@@ -378,7 +377,6 @@ fun ProfileSheet(
         }
     }
 
-    // Edit Profile Dialog
     if (isEditProfileOpen) {
         var userEdit by remember { mutableStateOf(profile.userName) }
         var partnerEdit by remember { mutableStateOf(profile.partnerName) }
@@ -401,7 +399,11 @@ fun ProfileSheet(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = tr("Namen und Startdatum eurer Beziehung.", "Your names and relationship start date."),
+                        text = if (isDemoMode) {
+                            tr("Namen und Startdatum eurer Beziehung.", "Your names and relationship start date.")
+                        } else {
+                            tr("Dein Profilname und eure lokalen Beziehungsdaten.", "Your profile name and local relationship details.")
+                        },
                         fontSize = 13.sp,
                         color = HarmonyMuted
                     )
@@ -424,22 +426,23 @@ fun ProfileSheet(
 
                     Spacer(modifier = Modifier.height(9.dp))
 
-                    OutlinedTextField(
-                        value = partnerEdit,
-                        onValueChange = { partnerEdit = it },
-                        placeholder = { Text(tr("Name Partnerin", "Partner's name"), color = HarmonyMuted) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("edit_partner_name_input"),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = HarmonyPink,
-                            unfocusedBorderColor = HarmonyLine,
-                            focusedTextColor = HarmonyText,
-                            unfocusedTextColor = HarmonyText
+                    if (isDemoMode) {
+                        OutlinedTextField(
+                            value = partnerEdit,
+                            onValueChange = { partnerEdit = it },
+                            placeholder = { Text(tr("Name Partnerin", "Partner's name"), color = HarmonyMuted) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("edit_partner_name_input"),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = HarmonyPink,
+                                unfocusedBorderColor = HarmonyLine,
+                                focusedTextColor = HarmonyText,
+                                unfocusedTextColor = HarmonyText
+                            )
                         )
-                    )
-
-                    Spacer(modifier = Modifier.height(9.dp))
+                        Spacer(modifier = Modifier.height(9.dp))
+                    }
 
                     OutlinedTextField(
                         value = startEdit,
@@ -478,7 +481,12 @@ fun ProfileSheet(
                                 } catch (e: Exception) {
                                     profile.startDate
                                 }
-                                onSaveEditProfile(userEdit, partnerEdit, parsedDate)
+                                if (isDemoMode) {
+                                    onSaveEditProfile(userEdit, partnerEdit, parsedDate)
+                                } else {
+                                    sessionViewModel.updateProfileDisplayName(userEdit)
+                                    onSaveEditProfile(userEdit, profile.partnerName, parsedDate)
+                                }
                             },
                             modifier = Modifier.weight(1f),
                             shape = CircleShape,
