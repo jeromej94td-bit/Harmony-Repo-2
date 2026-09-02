@@ -19,7 +19,7 @@ import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.LEGACY)
-@Config(qualifiers = "w411dp-h1100dp-xxhdpi", sdk = [35])
+@Config(qualifiers = "de-rDE-w411dp-h1100dp-xxhdpi", sdk = [35])
 class HappyCoupleVisualContractTest {
 
     @get:Rule
