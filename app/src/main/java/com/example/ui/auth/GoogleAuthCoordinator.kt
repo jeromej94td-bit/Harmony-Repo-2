@@ -70,7 +70,7 @@ private suspend fun performResilientGoogleSignIn(
             provider = Google
         }
         GoogleSignInOutcome.SESSION_CREATED
-    } catch (exception: Exception) {
+    } catch (exception: GetCredentialException) {
         val accountReauthFailure = isGoogleAccountReauthFailure(exception)
 
         if (accountReauthFailure && retryAfterCredentialReset) {
@@ -99,16 +99,16 @@ private suspend fun performResilientGoogleSignIn(
             return startGoogleOAuthFallback()
         }
 
-        if (exception is androidx.credentials.exceptions.GetCredentialCancellationException) {
-            throw exception
+        if (isNativeGoogleCredentialUnavailable(exception)) {
+            Log.w(
+                "HarmonyGoogleAuth",
+                "Native Google credential unavailable; using OAuth fallback",
+                exception
+            )
+            return startGoogleOAuthFallback()
         }
 
-        Log.w(
-            "HarmonyGoogleAuth",
-            "Native Google credential failed (possibly SHA-1 mismatch or unavailable); using OAuth fallback",
-            exception
-        )
-        return startGoogleOAuthFallback()
+        throw exception
     }
 }
 
@@ -124,6 +124,18 @@ private fun isGoogleAccountReauthFailure(error: Throwable): Boolean {
 
     return details.contains("Account reauth failed", ignoreCase = true) ||
         details.contains("[16]", ignoreCase = true)
+}
+
+private fun isNativeGoogleCredentialUnavailable(error: Throwable): Boolean {
+    val errorChain = generateSequence(error) { it.cause }.toList()
+    val details = errorChain
+        .mapNotNull { it.message }
+        .joinToString(separator = " ")
+
+    return errorChain.any { it::class.java.simpleName == "NoCredentialException" } ||
+        details.contains("No credentials available", ignoreCase = true) ||
+        details.contains("No credential available", ignoreCase = true) ||
+        details.contains("NoCredentialException", ignoreCase = true)
 }
 
 private fun Context.findActivity(): Activity? = when (this) {
