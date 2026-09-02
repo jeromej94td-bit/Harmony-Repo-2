@@ -125,6 +125,25 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun refreshSilently() {
+        val current = _uiState.value
+        if (current.phase != SessionPhase.READY || current.session == null || current.actionInProgress) return
+
+        viewModelScope.launch {
+            runCatching { repository.refresh() }
+                .onSuccess { session ->
+                    val latest = _uiState.value
+                    if (latest.phase != SessionPhase.READY || latest.actionInProgress) return@onSuccess
+                    _uiState.value = latest.copy(
+                        session = session,
+                        activeInvite = if (session.isPaired) null else current.activeInvite,
+                        errorMessage = null
+                    )
+                }
+            // Polling is best-effort. A transient network error must not replace the invite screen.
+        }
+    }
+
     fun createPartnerInvite() {
         runReadyAction { current ->
             val invite = repository.createPartnerInvite()
