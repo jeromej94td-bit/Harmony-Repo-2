@@ -71,7 +71,7 @@ abstract class ReconstructMerlinThemeTask : DefaultTask() {
       .joinToString(separator = "") { "%02x".format(it) }
     if (actualSha256 != expectedSha256.get()) {
       throw GradleException(
-        "Merlin theme SHA-256 is $actualSha256; expected ${expectedSha256.get()}"
+        "Merlin theme SHA-256 is $actualSha256; expected $expectedSha256.get()"
       )
     }
 
@@ -236,8 +236,8 @@ android {
     applicationId = "com.aistudio.harmony.couples.xqvz"
     minSdk = 24
     targetSdk = 36
-    versionCode = 2
-    versionName = "1.1"
+    versionCode = 3
+    versionName = "1.2"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
