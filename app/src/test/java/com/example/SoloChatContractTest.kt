@@ -21,8 +21,8 @@ class SoloChatContractTest {
         val chat = source("app/src/main/java/com/example/ui/screens/ChatScreen.kt")
 
         assertTrue(chat.contains("AuthenticatedAvatarImage("))
-        assertTrue(chat.contains("livePartner.avatarUrl"))
-        assertTrue(chat.contains("livePartner.displayName"))
+        assertTrue(chat.contains("avatarRef = livePartner?.avatarUrl"))
+        assertTrue(chat.contains("displayName = livePartner?.displayName.orEmpty()"))
     }
 
     private fun source(path: String): String =
