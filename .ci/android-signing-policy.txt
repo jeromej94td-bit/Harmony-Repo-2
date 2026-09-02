@@ -1,0 +1,11 @@
+Harmony installable APK signing policy
+
+Package: com.aistudio.harmony.couples.xqvz
+Secret: HARMONY_CI_DEBUG_KEYSTORE_B64
+Alias: androiddebugkey
+Keystore password: android
+Key password: android
+Pinned SHA-1: 73:85:7C:7D:A2:C1:0A:29:79:14:6C:20:15:0C:AE:4E:7A:77:B3:92
+Pinned SHA-256: 18:03:EF:CF:18:20:41:1C:8D:0D:92:E4:91:F3:E4:8E:A7:D9:9A:59:BB:3E:D4:BC:86:12:E3:21:F2:B5:CE:A7
+
+Installable main APKs must fail closed if the stable key is unavailable or mismatched. Do not generate or publish an installable main APK with a fresh certificate.
