@@ -92,6 +92,14 @@ jobs:
             -validity 10000 \
             -dname "CN=Harmony PR Debug,O=Harmony,C=DE"
 
+      - name: Verify Happy Couple visual contract
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests 'com.example.ui.screens.HappyCoupleVisualContractTest'
+          --stacktrace
+          --no-daemon
+          --no-configuration-cache
+
       - name: Build Harmony debug APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon --no-configuration-cache
 
