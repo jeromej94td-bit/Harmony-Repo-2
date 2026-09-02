@@ -36,6 +36,7 @@ Dieser Vertrag gilt ausschließlich für **Beziehungen → Liebe im Gleichgewich
 ## Regression-Schutz
 
 - `HappyCoupleVisualContractTest` verlangt die sichtbare `Frage 1 von 11`-Pille, den kanonischen Fragetext und sichtbare Nummern `1`–`4`, auch wenn ein veralteter Runtime-Override anderen Text bzw. A–D liefert.
+- Derselbe Test erzeugt das visuelle Referenzartefakt `build/happy-couple-preview/happy-couple-question.png`.
 - `HappyCoupleNumberPickRegressionTest` schützt Klickflächen, Auswahlzustand und die Rückgabe `1`–`4`.
 - `HappyCoupleQuizRunnerRoutingRegressionTest` schützt die Route des echten Quiz-Runners.
 - Die bestehenden Love-Balance-Runtime-Tests schützen die Position als erste von insgesamt elf Fragen und die Reparatur alter 10er-Custom-Packs.
