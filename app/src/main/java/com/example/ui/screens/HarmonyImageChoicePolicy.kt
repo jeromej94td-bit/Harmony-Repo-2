@@ -15,6 +15,12 @@ internal enum class HarmonyImageChoiceKind {
     STEAK,
     TRAVEL,
     TRAUMHAUS,
+    AUTUMN_STORY,
+    AUTUMN_DRINK,
+    AUTUMN_SNACK,
+    AUTUMN_NOOK,
+    AUTUMN_SOUND,
+    AUTUMN_SCENT,
     PROPOSAL_LOCATION,
     HAPPY_COUPLE,
     RANK_ORDER,
@@ -38,6 +44,15 @@ private const val EGG_PROMPT = "Wie möchtest du dein Ei am liebsten?"
 private const val STEAK_PROMPT = "Wie willst du dein Steak?"
 private const val TRAVEL_PROMPT = "Wie sieht deine Traumreise aus?"
 private const val PROPOSAL_LOCATION_PROMPT = "Welche Umgebung würdest du dir für einen Antrag wünschen?"
+
+internal val AUTUMN_EVENING_KINDS = listOf(
+    HarmonyImageChoiceKind.AUTUMN_STORY,
+    HarmonyImageChoiceKind.AUTUMN_DRINK,
+    HarmonyImageChoiceKind.AUTUMN_SNACK,
+    HarmonyImageChoiceKind.AUTUMN_NOOK,
+    HarmonyImageChoiceKind.AUTUMN_SOUND,
+    HarmonyImageChoiceKind.AUTUMN_SCENT
+)
 
 internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
 
@@ -75,6 +90,10 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
 }
 
 internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): HarmonyImageChoiceKind? {
+    if (pack.id == "herbstabend") {
+        return AUTUMN_EVENING_KINDS.getOrNull(questionIndex)
+    }
+
     val q = pack.questions.getOrNull(questionIndex)
     if (pack.id == LoveBalanceQuestionPolicy.PACK_ID && questionIndex == 0) {
         return HarmonyImageChoiceKind.HAPPY_COUPLE
@@ -137,5 +156,12 @@ private fun stableVisualQuestionKind(packId: String, rawQuestion: String?): Harm
 internal fun harmonyImageChoiceRevealDelayMillis(index: Int): Long {
     val row = index / 3
     val column = index % 3
+    return row * 420L + column * 110L
+}
+
+internal fun autumnEveningRevealDelayMillis(index: Int): Long {
+    val safeIndex = index.coerceAtLeast(0)
+    val row = safeIndex / 2
+    val column = safeIndex % 2
     return row * 420L + column * 110L
 }

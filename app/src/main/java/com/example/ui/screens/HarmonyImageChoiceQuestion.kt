@@ -155,6 +155,18 @@ internal fun HarmonyImageChoiceQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind in AUTUMN_EVENING_KINDS) {
+        AutumnEveningQuestion(
+            kind = kind,
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     if (kind == HarmonyImageChoiceKind.HAPPY_COUPLE) {
         HarmonyHappyCoupleQuestion(
             question = question,
