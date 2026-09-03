@@ -30,16 +30,18 @@ class CurrentAppStateContractTest {
     }
 
     @Test
-    fun `stale Brain chat callsite resolves only to private couple chat`() {
+    fun `Brain chat bridge is removed and private couple chat remains wired`() {
         val activeChat = source("app/src/main/java/com/example/ui/screens/ChatScreen.kt")
-        val bridge = source("app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt")
+        val main = source("app/src/main/java/com/example/MainActivity.kt")
 
         assertFalse(activeChat.contains("Harmony Brain"))
         assertFalse(activeChat.contains("BrainMessage"))
-        assertTrue(bridge.contains("intentionally ignores every archived Brain argument"))
-        assertTrue(bridge.contains("onSendVoiceMessage = onSendVoiceMessage"))
-        assertFalse(bridge.contains("onSendBrainMessage("))
-        assertFalse(bridge.contains("onToggleBrainChatMode("))
+        assertFalse(exists("app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt"))
+        assertFalse(main.contains("onSendBrainMessage ="))
+        assertFalse(main.contains("onToggleBrainChatMode ="))
+        assertTrue(main.contains("onSendMessage ="))
+        assertTrue(main.contains("onSendImage ="))
+        assertTrue(main.contains("onSendVoiceMessage ="))
     }
 
     @Test
@@ -67,4 +69,7 @@ class CurrentAppStateContractTest {
         return candidates.firstOrNull(File::exists)?.readText()
             ?: error("$path not found from test working directory ${File(".").absolutePath}")
     }
+
+    private fun exists(path: String): Boolean =
+        listOf(File(path.removePrefix("app/")), File(path)).any(File::exists)
 }
