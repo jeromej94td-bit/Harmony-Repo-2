@@ -10,6 +10,7 @@ class IntrospectionGoldenMasterAudioContractTest {
         val moduleRoot = sequenceOf(File("."), File(".."))
             .first { File(it, "build.gradle.kts").exists() && File(it, "src/main/java").exists() }
         val gradle = File(moduleRoot, "build.gradle.kts").readText()
+        val goldenBuildScript = File(moduleRoot, "introspection-golden-audio.gradle.kts")
         val media = File(
             moduleRoot,
             "src/main/java/com/example/ui/introspection/IntrospectionMediaController.kt"
@@ -38,15 +39,19 @@ class IntrospectionGoldenMasterAudioContractTest {
             )
         )
 
-        assertTrue(gradle.contains("SyncIntrospectionGoldenMasterAudioTask"))
-        assertTrue(gradle.contains("harmony-static-assets/introspection"))
-        assertTrue(gradle.contains("generated/goldenMasterIntrospectionRes"))
-        assertTrue(gradle.contains("syncIntrospectionGoldenMasterAudio"))
+        assertTrue(gradle.contains("apply(from = \"introspection-golden-audio.gradle.kts\")"))
+        assertTrue(goldenBuildScript.exists())
+        val script = goldenBuildScript.readText()
+        assertTrue(script.contains("syncIntrospectionGoldenMasterAudio"))
+        assertTrue(script.contains("harmony-static-assets/introspection"))
+        assertTrue(script.contains("src/main/res/raw"))
+        assertTrue(script.contains("MessageDigest.getInstance(\"SHA-256\")"))
+        assertTrue(script.contains("preBuild"))
 
         assets.forEach { (name, sha256, size) ->
-            assertTrue("Missing generated golden resource $name", gradle.contains(name))
-            assertTrue("Missing SHA-256 contract for $name", gradle.contains(sha256))
-            assertTrue("Missing size contract for $name", gradle.contains(size.toString()))
+            assertTrue("Missing generated golden resource $name", script.contains(name))
+            assertTrue("Missing SHA-256 contract for $name", script.contains(sha256))
+            assertTrue("Missing size contract for $name", script.contains(size.toString()))
         }
 
         assertTrue(media.contains("R.raw.introspection_color_golden"))
@@ -54,7 +59,7 @@ class IntrospectionGoldenMasterAudioContractTest {
         assertTrue(media.contains("R.raw.introspection_water_golden"))
         assertTrue(media.contains("R.raw.introspection_reveal_golden"))
 
-        // Existing source resources remain in place; the Golden Master is an additive build resource.
+        // Existing Repo-2 source resources stay in place; the Golden Master is additive.
         assertTrue(File(moduleRoot, "src/main/res/raw/introspection_color.mp3").exists())
         assertTrue(File(moduleRoot, "src/main/res/raw/introspection_animal.mp3").exists())
         assertTrue(File(moduleRoot, "src/main/res/raw/introspection_water.mp3").exists())
