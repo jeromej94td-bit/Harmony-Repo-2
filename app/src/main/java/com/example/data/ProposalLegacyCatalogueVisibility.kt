@@ -7,14 +7,19 @@ import com.example.data.model.QuestionPack
 /**
  * Stage 04.3 controls presentation only.
  *
- * These standalone proposal/ring/wedding packs remain in their source registries and in the full
- * runtime pack set for compatibility with saved answers, direct ids, Dev Studio and Stage 04.4.
- * Normal user-facing catalogue/navigation surfaces filter them after their strong material has
- * been migrated or superseded by the reusable Experience flow.
+ * Migrated standalone ring/wedding packs remain in their source registries and in the full runtime
+ * pack set for compatibility with saved answers, direct ids, Dev Studio and Stage 04.4.
+ *
+ * Important: `antrag` is not merely a legacy source. It is the live user-facing catalogue entry
+ * that ProposalExperienceEntryPolicy routes into the complete "Unser perfekter Antrag" experience.
+ * Hiding it makes the finished experience unreachable even though all of its UI, images and
+ * animations are still present. Therefore the entry stays visible while the superseded source-only
+ * packs remain filtered from normal catalogue/navigation surfaces.
  */
 object ProposalLegacyCatalogueVisibility {
+    const val PROPOSAL_EXPERIENCE_ENTRY_PACK_ID = "antrag"
+
     val hiddenPackIds: Set<String> = linkedSetOf(
-        "antrag",
         "ringe",
         "straeusse",
         "traumhochzeit",
@@ -25,13 +30,17 @@ object ProposalLegacyCatalogueVisibility {
 
     init {
         val inventoried = ProposalLegacyContentInventory.items.map { it.packId }.toSet()
-        require(hiddenPackIds == inventoried) {
-            "Stage 04.3 catalogue hide set must match the complete Stage-04 inventory."
+        require(hiddenPackIds == inventoried - PROPOSAL_EXPERIENCE_ENTRY_PACK_ID) {
+            "Stage 04.3 catalogue hide set must match the Stage-04 inventory except the live proposal experience entry."
         }
 
-        val migratedOrSuperseded = ProposalLegacyExperienceMigration.migratedSourcePackIds + "antrag"
-        require(hiddenPackIds == migratedOrSuperseded) {
-            "Stage 04.3 may hide only content already migrated or superseded by the Experience flow."
+        val migratedOrSuperseded = ProposalLegacyExperienceMigration.migratedSourcePackIds + PROPOSAL_EXPERIENCE_ENTRY_PACK_ID
+        require(hiddenPackIds == migratedOrSuperseded - PROPOSAL_EXPERIENCE_ENTRY_PACK_ID) {
+            "Stage 04.3 may hide only migrated source-only content; the live proposal experience entry must remain visible."
+        }
+
+        require(isVisible(PROPOSAL_EXPERIENCE_ENTRY_PACK_ID)) {
+            "The perfect-proposal experience entry must stay reachable from the user catalogue."
         }
     }
 }

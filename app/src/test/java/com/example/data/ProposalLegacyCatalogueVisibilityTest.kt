@@ -10,17 +10,19 @@ import org.junit.Test
 class ProposalLegacyCatalogueVisibilityTest {
 
     @Test
-    fun `stage 04 inventory is exactly the standalone catalogue hide set`() {
+    fun `stage 04 inventory except live proposal entry is the standalone catalogue hide set`() {
         assertEquals(
-            ProposalLegacyContentInventory.items.map { it.packId }.toSet(),
+            ProposalLegacyContentInventory.items.map { it.packId }.toSet() -
+                ProposalLegacyCatalogueVisibility.PROPOSAL_EXPERIENCE_ENTRY_PACK_ID,
             ProposalLegacyCatalogueVisibility.hiddenPackIds
         )
     }
 
     @Test
-    fun `catalogue view hides migrated standalone packs but keeps their sources intact`() {
+    fun `catalogue keeps perfect proposal entry visible while hiding migrated source-only packs`() {
         val catalogueIds = HarmonyPacksData.CATALOG_PACKS.map { it.id }.toSet()
 
+        assertTrue(ProposalLegacyCatalogueVisibility.PROPOSAL_EXPERIENCE_ENTRY_PACK_ID in catalogueIds)
         assertTrue(ProposalLegacyCatalogueVisibility.hiddenPackIds.none { it in catalogueIds })
 
         val defaultIds = HarmonyPacksData.DEFAULT_PACKS.map { it.id }.toSet()
@@ -36,9 +38,10 @@ class ProposalLegacyCatalogueVisibilityTest {
     }
 
     @Test
-    fun `ordinary runtime packs remain available in the catalogue`() {
+    fun `ordinary runtime packs and perfect proposal entry remain available in the catalogue`() {
         assertTrue(HarmonyPacksData.CATALOG_PACKS.any { it.id == "essenreden" })
-        assertFalse(ProposalLegacyCatalogueVisibility.isVisible("antrag"))
+        assertTrue(ProposalLegacyCatalogueVisibility.isVisible("antrag"))
+        assertFalse(ProposalLegacyCatalogueVisibility.isVisible("ringe"))
         assertTrue(ProposalLegacyCatalogueVisibility.isVisible("essenreden"))
     }
 }
