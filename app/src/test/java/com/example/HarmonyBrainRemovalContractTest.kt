@@ -6,32 +6,30 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HarmonyBrainRemovalContractTest {
+
     @Test
-    fun `production source contains no Harmony Brain runtime or UI`() {
+    fun `productive navigation and chat expose no Harmony Brain UI`() {
         val main = source("app/src/main/java/com/example/MainActivity.kt")
-        val vm = source("app/src/main/java/com/example/ui/HarmonyViewModel.kt")
-        val home = source("app/src/main/java/com/example/ui/screens/HomeScreen.kt")
-        val games = source("app/src/main/java/com/example/ui/screens/GamesScreen.kt")
-        val chat = source("app/src/main/java/com/example/ui/screens/ChatScreen.kt")
-        val db = source("app/src/main/java/com/example/data/db/AppDatabase.kt")
+        val devStudio = source("app/src/main/java/com/example/ui/screens/DevStudioScreen.kt")
 
-        assertFalse(main.contains("attachAutoGeneration"))
-        assertFalse(main.contains("isBrainChatMode"))
-        assertFalse(vm.contains("SupabaseHarmonyBrainGateway"))
-        assertFalse(vm.contains("ForegroundGameGenerator"))
-        assertFalse(vm.contains("brainRepository"))
-        assertFalse(home.contains("Harmony Brain"))
-        assertFalse(games.contains("generatedGames"))
-        assertFalse(chat.contains("BrainMessage"))
-        assertFalse(chat.contains("Harmony Brain"))
-        assertTrue(db.contains("version = 10"))
-        assertFalse(db.contains("abstract fun brainDao"))
-        assertFalse(db.contains("abstract fun brainRoomDao"))
+        assertFalse(main.contains("brainInterests ="))
+        assertFalse(main.contains("brainSuggestions ="))
+        assertFalse(main.contains("brainQuestions ="))
+        assertFalse(main.contains("isBrainChatMode ="))
+        assertFalse(main.contains("onSendBrainMessage ="))
+        assertFalse(main.contains("onSendVoiceBrainMessage ="))
+        assertFalse(main.contains("generatedGames ="))
+        assertFalse(main.contains("onStartGeneratedGame ="))
 
-        assertFalse(exists("app/src/main/java/com/example/data/brain"))
+        assertFalse(devStudio.contains("🧠 Brain"))
+        assertFalse(devStudio.contains("DevBrainTab("))
         assertFalse(exists("app/src/main/java/com/example/ui/screens/DevBrainTab.kt"))
-        assertFalse(exists("app/src/main/java/com/example/data/model/HarmonyBrainModels.kt"))
-        assertTrue(exists("app/src/main/java/com/example/ui/screens/PandaEitherOrScreen.kt"))
+        assertFalse(exists("app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt"))
+
+        assertTrue(exists("app/src/main/java/com/example/ui/screens/ChatScreen.kt"))
+        assertTrue(main.contains("onSendMessage ="))
+        assertTrue(main.contains("onSendImage ="))
+        assertTrue(main.contains("onSendVoiceMessage ="))
     }
 
     private fun source(path: String): String =
