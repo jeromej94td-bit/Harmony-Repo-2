@@ -10,13 +10,15 @@ class RealUserProfileAndBrainRemovalContractTest {
     @Test
     fun `real account profile is driven by AppSession and exposes pairing directly`() {
         val profile = source("app/src/main/java/com/example/ui/screens/ProfileSheet.kt")
-        val main = source("app/src/main/java/com/example/MainActivity.kt")
+        val bridge = source("app/src/main/java/com/example/ui/screens/ProfileSheetSessionBridge.kt")
 
         assertTrue(profile.contains("session: AppSession"))
         assertTrue(profile.contains("session.profile.displayName"))
         assertTrue(profile.contains("session.email"))
         assertTrue(profile.contains("partner_connection_button"))
-        assertTrue(main.contains("session = appSession"))
+        assertTrue(profile.contains("Code erstellen oder eingeben"))
+        assertTrue(bridge.contains("session = realSession"))
+        assertTrue(bridge.contains("sessionViewModel.updateProfileDisplayName(userName)"))
 
         assertFalse(profile.contains("currentSessionOrNull()?.user?.email"))
         assertFalse(profile.contains("val sessionViewModel: AppSessionViewModel = viewModel()"))
@@ -26,14 +28,15 @@ class RealUserProfileAndBrainRemovalContractTest {
     }
 
     @Test
-    fun `unpaired real account never renders a fake partner identity`() {
+    fun `unpaired real account never renders a fake partner identity in profile`() {
         val profile = source("app/src/main/java/com/example/ui/screens/ProfileSheet.kt")
-        val main = source("app/src/main/java/com/example/MainActivity.kt")
 
         assertTrue(profile.contains("session.partner"))
         assertTrue(profile.contains("Noch nicht verbunden"))
+        assertTrue(profile.contains("else -> session.profile.displayName"))
+        assertTrue(profile.contains("if (isDemoMode || isPaired)"))
         assertFalse(profile.contains("text = \"${'$'}{profile.userName} & ${'$'}{profile.partnerName}\""))
-        assertFalse(main.contains("partnerName = appSession.partner?.displayName ?: \"Partner\""))
+        assertFalse(profile.contains("Partner-Simulator"))
     }
 
     @Test
