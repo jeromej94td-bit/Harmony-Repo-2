@@ -40,11 +40,11 @@
 - Create: `app/src/test/java/com/example/ui/screens/AutumnEveningImageChoicePolicyTest.kt`
 - Modify: `app/src/main/java/com/example/ui/screens/HarmonyImageChoicePolicy.kt`
 
-- [ ] Write failing tests that assert question indices 0–5 route to `AUTUMN_STORY`, `AUTUMN_DRINK`, `AUTUMN_SNACK`, `AUTUMN_NOOK`, `AUTUMN_SOUND`, and `AUTUMN_SCENT`; out-of-range indices and another pack with identical text must return no autumn kind.
-- [ ] Add those six enum values and a private ordered list used only when `pack.id == "herbstabend"`.
-- [ ] Add `autumnEveningRevealDelayMillis(index)` with row-major delays for a 2×2 grid: 0, 110, 420, and 530 milliseconds.
-- [ ] Re-run the focused policy test and confirm it passes.
-- [ ] Commit with `feat: route autumn evening image rounds`.
+- [x] Write failing tests that assert question indices 0–5 route to `AUTUMN_STORY`, `AUTUMN_DRINK`, `AUTUMN_SNACK`, `AUTUMN_NOOK`, `AUTUMN_SOUND`, and `AUTUMN_SCENT`; out-of-range indices and another pack with identical text must return no autumn kind.
+- [x] Add those six enum values and a private ordered list used only when `pack.id == "herbstabend"`.
+- [x] Add `autumnEveningRevealDelayMillis(index)` with row-major delays for a 2×2 grid: 0, 110, 420, and 530 milliseconds.
+- [x] Re-run the focused policy test and confirm it passes.
+- [x] Commit with `feat: route autumn evening image rounds`.
 
 ### Task 3: Create and validate the 24 production image assets
 
