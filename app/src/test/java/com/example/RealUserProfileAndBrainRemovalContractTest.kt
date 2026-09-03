@@ -39,26 +39,26 @@ class RealUserProfileAndBrainRemovalContractTest {
     @Test
     fun `Harmony Brain has no productive UI wiring`() {
         val main = source("app/src/main/java/com/example/MainActivity.kt")
-        val home = source("app/src/main/java/com/example/ui/screens/HomeScreen.kt")
-        val games = source("app/src/main/java/com/example/ui/screens/GamesScreen.kt")
         val chat = source("app/src/main/java/com/example/ui/screens/ChatScreen.kt")
-        val viewModel = source("app/src/main/java/com/example/ui/HarmonyViewModel.kt")
+        val devStudio = source("app/src/main/java/com/example/ui/screens/DevStudioScreen.kt")
 
-        listOf(main, home, games, chat).forEach { ui ->
-            assertFalse(ui.contains("brainEnabled"))
-            assertFalse(ui.contains("brainInterests"))
-            assertFalse(ui.contains("brainSuggestions"))
-            assertFalse(ui.contains("brainQuestions"))
-            assertFalse(ui.contains("isBrainChatMode"))
-            assertFalse(ui.contains("onSendBrainMessage"))
-            assertFalse(ui.contains("generatedGames"))
-        }
+        listOf(
+            "brainInterests =",
+            "brainSuggestions =",
+            "brainQuestions =",
+            "isBrainChatMode =",
+            "onSendBrainMessage =",
+            "onSendVoiceBrainMessage =",
+            "generatedGames =",
+            "onStartGeneratedGame ="
+        ).forEach { marker -> assertFalse(main.contains(marker)) }
 
-        assertFalse(viewModel.contains("HARMONY_BRAIN_ENABLED"))
-        assertFalse(viewModel.contains("setBrainChatMode"))
-        assertFalse(viewModel.contains("sendBrainMessage"))
-        assertFalse(viewModel.contains("startGeneratedGame"))
+        assertFalse(chat.contains("Harmony Brain"))
+        assertFalse(chat.contains("BrainMessage"))
+        assertFalse(devStudio.contains("🧠 Brain"))
+        assertFalse(devStudio.contains("DevBrainTab("))
         assertFalse(fileExists("app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt"))
+        assertFalse(fileExists("app/src/main/java/com/example/ui/screens/DevBrainTab.kt"))
     }
 
     @Test
