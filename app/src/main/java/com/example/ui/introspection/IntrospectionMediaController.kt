@@ -351,10 +351,10 @@ class IntrospectionMediaController(
 
     fun playNarratorForStage(stage: IntrospectionStage, onComplete: () -> Unit = {}) {
         val rawRes = when (stage) {
-            IntrospectionStage.COLOR -> R.raw.introspection_color
-            IntrospectionStage.ANIMAL -> R.raw.introspection_animal
-            IntrospectionStage.WATER -> R.raw.introspection_water
-            IntrospectionStage.REVELATION -> R.raw.introspection_reveal
+            IntrospectionStage.COLOR -> R.raw.introspection_color_golden
+            IntrospectionStage.ANIMAL -> R.raw.introspection_animal_golden
+            IntrospectionStage.WATER -> R.raw.introspection_water_golden
+            IntrospectionStage.REVELATION -> R.raw.introspection_reveal_golden
             IntrospectionStage.RESULTS -> return
         }
         Log.i(TAG, "playNarratorForStage: stage=$stage, resId=$rawRes")
@@ -665,4 +665,3 @@ class IntrospectionMediaController(
         Log.i(TAG, "releaseAll completed")
     }
 }
-
