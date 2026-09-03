@@ -45,10 +45,12 @@ Installable Harmony APKs from `main` must keep one stable Android signing identi
 
 - **NEVER** generate a fresh keystore for an installable `main` APK.
 - `.github/workflows/android-apk-build.yml` must restore `HARMONY_CI_DEBUG_KEYSTORE_B64` from GitHub Actions secrets and verify the pinned SHA-1 before publishing an APK.
-- The pinned CI signing SHA-1 is `73:85:7C:7D:A2:C1:0A:29:79:14:6C:20:15:0C:AE:4E:7A:77:B3:92`.
-- A different SHA-1 is an explicit signing-key rotation, not a cleanup. Before changing it, update the Android OAuth client for package `com.aistudio.harmony.couples.xqvz` and make the migration explicit.
+- The permanent CI signing SHA-1 is `7F:F5:D5:66:BB:0F:6E:AB:BC:B7:03:E8:8F:64:C7:9A:38:3A:BB:89`.
+- The permanent certificate SHA-256 is `24:22:E7:AE:95:80:3A:C9:F6:DF:E0:8D:6C:5F:A0:DB:07:04:28:00:D7:7A:EA:0D:ED:67:22:66:48:4E:21:5D`.
+- A different fingerprint is an explicit signing-key rotation, not a cleanup. Before changing it, update the Android OAuth client for package `com.aistudio.harmony.couples.xqvz` and make the migration explicit.
 - Pull-request-only compile builds may use an ephemeral debug key, but those APKs must not be published as installable Harmony artifacts.
 - If the stable signing secret is unavailable, fail the installable build. Do not silently fall back to a newly generated key.
+- Never commit `debug.keystore`, its Base64 encoding, or any private signing material to Git. Keep the private key only in protected secret storage and an offline owner backup.
 
 ## Custom UI / Image Choice Routing (Happy Couple, etc.)
 When updating questions, translating packs, or importing data via GitHub, you MUST preserve the exact logic for visual questions (like "Happy Couple" / "Liebe im Gleichgewicht").
