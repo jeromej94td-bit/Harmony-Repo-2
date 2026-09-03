@@ -42,7 +42,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.PARTNER_PREDICTION -> PartnerPredictionBoard(
+        FullscreenGameMechanicKind.PARTNER_PREDICTION -> PartnerPredictionRevealBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
@@ -51,7 +51,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.SECRET_CHOICE -> SecretChoiceBoard(
+        FullscreenGameMechanicKind.SECRET_CHOICE -> SecretChoiceRevealBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
