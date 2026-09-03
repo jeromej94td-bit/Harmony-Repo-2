@@ -17,10 +17,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # This fingerprint belongs to the one CI debug key used for installable Harmony APKs.
-  # Changing it is an explicit signing-key rotation and requires updating the Android
-  # OAuth client for package com.aistudio.harmony.couples.xqvz before publishing an APK.
-  HARMONY_CI_SIGNING_SHA1: 73:85:7C:7D:A2:C1:0A:29:79:14:6C:20:15:0C:AE:4E:7A:77:B3:92
+  # Permanent Harmony CI debug identity for installable APKs.
+  # Private key material MUST live only in repository secret HARMONY_CI_DEBUG_KEYSTORE_B64.
+  # Changing this fingerprint is an explicit signing-key rotation and requires updating
+  # the Android OAuth client for package com.aistudio.harmony.couples.xqvz first.
+  HARMONY_CI_SIGNING_SHA1: 7F:F5:D5:66:BB:0F:6E:AB:BC:B7:03:E8:8F:64:C7:9A:38:3A:BB:89
 
 jobs:
   build-debug-apk:
@@ -55,11 +56,12 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${HARMONY_CI_DEBUG_KEYSTORE_B64:-}" ]; then
-            echo "::error::Stable Harmony signing key is missing. Add repository secret HARMONY_CI_DEBUG_KEYSTORE_B64. Refusing to create a new installable APK with a random certificate."
+            echo "::error::Stable Harmony signing key is missing. Add repository secret HARMONY_CI_DEBUG_KEYSTORE_B64. Refusing to create an installable APK with a random certificate."
             exit 1
           fi
 
           printf '%s' "$HARMONY_CI_DEBUG_KEYSTORE_B64" | base64 --decode > debug.keystore
+          chmod 600 debug.keystore
 
           ACTUAL_SHA1="$(
             keytool -list -v \
