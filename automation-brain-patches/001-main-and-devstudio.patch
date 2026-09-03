@@ -1,25 +1,6 @@
 diff --git a/app/src/main/java/com/example/MainActivity.kt b/app/src/main/java/com/example/MainActivity.kt
 @@
-     override fun onCreate(savedInstanceState: Bundle?) {
-         super.onCreate(savedInstanceState)
--        viewModel.attachAutoGeneration(this)
-         memoryWidgetOpenRequest = parseMemoryWidgetOpenRequest(intent)
-@@
-                 runnerScope.launch {
-                     appDb.answerDao().deleteAnswersForPack(packId)
--                    appDb.brainRoomDao().clearFinishedPack(packId)
-                     viewModel.startPackForTest(pack, currentIndex = 0)
-                 }
-@@
--        runnerScope.launch {
--            if (appDb.brainRoomDao().hasFinishedPack(packId)) {
--                resultsPackId = packId
--            } else {
--                openPackForPlay(packId)
--            }
--        }
-+        openPackForPlay(packId)
-@@
+                         onUpdateSharedPicture = { pic -> viewModel.updateSharedPicture(pic) },
                          onPinWidget = {
                              val requested = PicShareWidgetProvider.requestPin(context)
                              viewModel.showToast(if (requested) "Widget-Auswahl geöffnet" else "Widget bitte über den Startbildschirm hinzufügen")
