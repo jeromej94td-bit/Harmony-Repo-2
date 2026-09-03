@@ -99,7 +99,7 @@ val syncIntrospectionGoldenMasterAudio by tasks.registering {
                 runCatching { sha256(target) == asset.expectedSha256 }.getOrDefault(false)
 
             if (!alreadyValid) {
-                val remoteUrl = "$introspectionGoldenAudioBaseUrl/${asset.fileName.removeSuffix("_golden.mp3")}.mp3"
+                val remoteUrl = "$introspectionGoldenAudioBaseUrl/${asset.remotePath.substringAfterLast('/')}"
                 val temporary = Files.createTempFile(
                     introspectionGoldenRawDir.toPath(),
                     "${asset.fileName.removeSuffix(".mp3")}_",
@@ -144,6 +144,7 @@ val syncIntrospectionGoldenMasterAudio by tasks.registering {
     }
 }
 
-tasks.named("preBuild").configure {
+// Safe even when the Android plugin registers preBuild later in configuration.
+tasks.matching { it.name == "preBuild" }.configureEach {
     dependsOn(syncIntrospectionGoldenMasterAudio)
 }
