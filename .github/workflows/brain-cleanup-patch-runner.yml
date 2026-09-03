@@ -1,0 +1,38 @@
+name: Harmony Brain cleanup patch runner
+
+on:
+  push:
+    branches:
+      - cleanup/remove-harmony-brain
+    paths:
+      - 'automation-brain-patches/*.patch'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply queued Harmony Brain cleanup patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          patches=(automation-brain-patches/*.patch)
+          if [ ${#patches[@]} -eq 0 ]; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for patch in "${patches[@]}"; do
+            git apply --recount "$patch"
+            git add -A
+            git rm "$patch"
+          done
+          git commit -m 'cleanup: align production isolation with Brain removal'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
