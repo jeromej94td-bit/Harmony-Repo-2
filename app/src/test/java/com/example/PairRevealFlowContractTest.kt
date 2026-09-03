@@ -4,11 +4,11 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.example.data.model.FullscreenGameMechanicKind
 import com.example.data.model.ProfileEntity
+import com.example.ui.screens.FullscreenQuestionMechanicBoard
 import com.example.ui.screens.PartnerPredictionRevealBoard
-import com.example.ui.screens.ScaleMatchBoard
 import com.example.ui.screens.SecretChoiceRevealBoard
-import com.example.ui.screens.WhoWouldBoard
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import org.junit.Assert.assertEquals
@@ -85,7 +85,8 @@ class PairRevealFlowContractTest {
 
         composeTestRule.setContent {
             HarmonyTheme(darkTheme = true) {
-                ScaleMatchBoard(
+                FullscreenQuestionMechanicBoard(
+                    kind = FullscreenGameMechanicKind.SCALE_MATCH,
                     question = "Wie spontan seid ihr?",
                     options = scaleOptions,
                     selectedAnswer = null,
@@ -112,7 +113,8 @@ class PairRevealFlowContractTest {
 
         composeTestRule.setContent {
             HarmonyTheme(darkTheme = true) {
-                WhoWouldBoard(
+                FullscreenQuestionMechanicBoard(
+                    kind = FullscreenGameMechanicKind.WHO_WOULD,
                     question = "Wer plant eher spontan einen Ausflug?",
                     options = whoOptions,
                     selectedAnswer = null,
