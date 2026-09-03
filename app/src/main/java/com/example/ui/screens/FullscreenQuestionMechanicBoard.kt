@@ -60,7 +60,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.SCALE_MATCH -> ScaleMatchBoard(
+        FullscreenGameMechanicKind.SCALE_MATCH -> ScaleMatchRevealBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
@@ -69,7 +69,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.WHO_WOULD -> WhoWouldBoard(
+        FullscreenGameMechanicKind.WHO_WOULD -> WhoWouldConfirmBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
