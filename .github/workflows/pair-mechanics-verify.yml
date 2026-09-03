@@ -7,6 +7,8 @@ on:
     paths:
       - 'app/src/main/java/com/example/ui/screens/FullscreenPairMechanics.kt'
       - 'app/src/main/java/com/example/ui/screens/PrivatePairRevealBoards.kt'
+      - 'app/src/main/java/com/example/ui/screens/ScaleWhoWouldReworkBoards.kt'
+      - 'app/src/main/java/com/example/ui/screens/WhoWouldLayoutPolicy.kt'
       - 'app/src/main/java/com/example/ui/screens/ExperiencePartnerPredictionBoard.kt'
       - 'app/src/main/java/com/example/ui/screens/FullscreenMechanicCommon.kt'
       - 'app/src/main/java/com/example/ui/screens/FullscreenQuestionMechanicBoard.kt'
