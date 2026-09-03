@@ -77,7 +77,7 @@ class RealUserProfileAndBrainRemovalContractTest {
     private fun source(path: String): String {
         val candidates = listOf(File(path.removePrefix("app/")), File(path))
         return candidates.firstOrNull(File::exists)?.readText()
-            ?: error("$path not found from test working directory ${'$'}{File(".").absolutePath}")
+            ?: error("$path not found from test working directory ${File(".").absolutePath}")
     }
 
     private fun fileExists(path: String): Boolean {
