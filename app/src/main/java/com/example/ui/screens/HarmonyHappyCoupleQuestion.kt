@@ -27,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -69,8 +68,10 @@ internal fun HarmonyHappyCoupleQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val answerOptions = if (options.size >= 4) options.take(4) else happyCoupleFallbackOptions
-    val displayQuestion = question.takeIf { it.isNotBlank() } ?: LoveBalanceQuestionPolicy.QUESTION_TEXT
+    val answerOptions = options.takeIf {
+        it.size >= 4 && it.take(4) == happyCoupleFallbackOptions
+    }?.take(4) ?: happyCoupleFallbackOptions
+    val displayQuestion = LoveBalanceQuestionPolicy.QUESTION_TEXT
     val containerShape = RoundedCornerShape(28.dp)
 
     Column(
@@ -87,33 +88,50 @@ internal fun HarmonyHappyCoupleQuestion(
                 )
             )
             .border(1.2.dp, HarmonyPink.copy(alpha = 0.42f), containerShape)
-            .padding(horizontal = 6.dp, vertical = 12.dp)
+            .padding(horizontal = 10.dp, vertical = 18.dp)
             .testTag("harmony_happy_couple_question"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(HarmonyPurple.copy(alpha = 0.46f))
+                .border(1.dp, HarmonyPink.copy(alpha = 0.50f), CircleShape)
+                .padding(horizontal = 18.dp, vertical = 7.dp)
+                .testTag("happy_couple_question_pill"),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "✦ ${tr("Frage 1 von 11", "Question 1 of 11")}",
+                color = HarmonyText,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = displayQuestion,
             color = HarmonyText,
-            fontSize = 22.sp,
+            fontSize = 27.sp,
             fontWeight = FontWeight.ExtraBold,
-            lineHeight = 26.sp,
+            lineHeight = 31.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp)
+            modifier = Modifier.padding(horizontal = 10.dp)
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = tr(
                 "Wähle das Paar, das für dich am glücklichsten wirkt.",
                 "Choose the couple that looks happiest to you."
             ),
             color = Color(0xFFFFB8DB),
-            fontSize = 13.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 17.sp,
+            lineHeight = 19.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp)
+            modifier = Modifier.padding(horizontal = 10.dp)
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         answerOptions.chunked(2).forEachIndexed { rowIndex, rowOptions ->
             Row(
@@ -222,6 +240,32 @@ private fun HarmonyHappyCoupleCard(
                 )
         )
 
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp)
+                .size(46.dp)
+                .clip(CircleShape)
+                .background(
+                    if (selected) HarmonyPink.copy(alpha = 0.94f)
+                    else HarmonyBg.copy(alpha = 0.88f)
+                )
+                .border(
+                    width = if (selected) 2.dp else 1.4.dp,
+                    color = if (selected) Color.White else HarmonyPink.copy(alpha = 0.90f),
+                    shape = CircleShape
+                )
+                .testTag("happy_couple_number_$option"),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = option,
+                color = Color.White,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
+
         if (selected) {
             Box(
                 modifier = Modifier
@@ -236,13 +280,5 @@ private fun HarmonyHappyCoupleCard(
                     )
             )
         }
-
-        // Invisible test tag to preserve existing regression tests while removing visible numbers as requested by the user
-        Box(
-            modifier = Modifier
-                .size(1.dp)
-                .alpha(0f)
-                .testTag("happy_couple_number_${index + 1}")
-        )
     }
 }
