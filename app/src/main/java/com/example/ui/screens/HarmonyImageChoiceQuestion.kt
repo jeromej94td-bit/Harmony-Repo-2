@@ -166,6 +166,20 @@ internal fun HarmonyImageChoiceQuestion(
         return
     }
 
+    val goldenMasterLayout = GoldenMasterImageChoiceLayoutPolicy.forKindName(kind.name)
+    if (goldenMasterLayout != null) {
+        GoldenMasterLegacyImageChoiceQuestion(
+            kind = kind,
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            onPick = onPick,
+            layout = goldenMasterLayout,
+            modifier = modifier
+        )
+        return
+    }
+
     if (!isLegacyImageChoice(kind)) {
         val context = LocalContext.current
         val profileFlow = remember(context.applicationContext) {

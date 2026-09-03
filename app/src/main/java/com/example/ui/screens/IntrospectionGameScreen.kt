@@ -214,7 +214,7 @@ fun IntrospectionExperienceScreen(
             }
             mediaController.playNarratorForStage(progress.stage)
         } else if (screenState == ScreenState.REVELATION) {
-            mediaController.playNarrator(com.example.R.raw.introspection_reveal) {
+            mediaController.playNarratorForStage(IntrospectionStage.REVELATION) {
                 // IMPORTANT: Revelation transition MUST only trigger onCompletion callback!
                 val completedProgress = progress.finishRevelation()
                 progress = completedProgress
