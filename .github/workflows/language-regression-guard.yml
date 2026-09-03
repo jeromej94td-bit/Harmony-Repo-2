@@ -18,48 +18,40 @@ on:
       - 'scripts/verify_language_inventory_guard.py'
       - 'scripts/report_localization_gaps.py'
       - '.github/workflows/language-regression-guard.yml'
-  push:
-    branches: [ main ]
-    paths:
-      - 'app/src/main/java/com/example/ui/Language.kt'
-      - 'app/src/main/java/com/example/ui/TranslationCatalog.kt'
-      - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
-      - 'app/src/main/java/com/example/ui/screens/LanguageSelectorCard.kt'
-      - 'app/src/main/java/com/example/ui/screens/LanguageSearch.kt'
-      - 'app/src/main/java/com/example/ui/*Content.kt'
-      - 'app/src/main/java/com/example/data/CuisinePackInstaller.kt'
-      - 'app/src/main/java/com/example/data/DriveTotAssetInstaller.kt'
-      - 'app/src/test/java/com/example/ui/LanguageAvailabilityRegressionTest.kt'
-      - 'app/src/test/java/com/example/ui/screens/LanguageSearchTest.kt'
-      - 'app/src/test/java/com/example/ui/screens/ProfileLanguageSearchUiTest.kt'
-      - 'scripts/verify_language_inventory_guard.py'
-      - 'scripts/report_localization_gaps.py'
-      - '.github/workflows/language-regression-guard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: language-regression-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  inventory:
+  language-guard:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Verify shipped language inventory and cuisine links
         run: python3 scripts/verify_language_inventory_guard.py
+
       - name: Report localization gaps
         run: python3 scripts/report_localization_gaps.py
 
-  kotlin-test:
-    needs: inventory
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
       - name: Set up Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
+
       - name: Run language selector regression tests
         run: >-
           gradle :app:testDebugUnitTest

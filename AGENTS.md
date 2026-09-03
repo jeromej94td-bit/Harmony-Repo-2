@@ -26,6 +26,32 @@ Do this before choosing asset paths, playback code, build tasks, or trigger/stat
 
 The current repository implementation is the source of truth. Reuse the newest working Harmony video path where appropriate; do not invent folders, duplicate the player stack, copy another video's integrity constants, or rely on conversation memory instead of inspecting the current branch.
 
+## Google authentication is protected infrastructure
+
+The production Google login is intentionally centralized in:
+
+`app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt`
+
+- **NEVER** replace the Google button in `AuthScreen.kt` with a direct `SupabaseConfig.client.auth.signInWith(Google)` / `auth.signInWith(Google)` call.
+- **NEVER** delete or bypass `GoogleAuthCoordinator.kt` as a cleanup/refactor unless the user explicitly asks to replace the complete Google authentication architecture.
+- The coordinator's required behavior is: Credential Manager / Google ID token first, clear stale credential state and retry once for `[16] Account reauth failed`, then use Supabase browser OAuth only as the fallback.
+- Preserve email/password login, password recovery, and demo-mode callbacks independently; changes to those flows must not rewrite the Google auth path.
+- Before merging authentication-related changes, preserve `GoogleAuthRegressionContractTest.kt`. Any deliberate replacement architecture must update that test in the same change.
+- Do not introduce anonymous Supabase sign-in as a Google-login fallback.
+
+## Android signing identity is protected infrastructure
+
+Installable Harmony APKs from `main` must keep one stable Android signing identity because Google Sign-In and Android updates depend on the package/signing-certificate pair.
+
+- **NEVER** generate a fresh keystore for an installable `main` APK.
+- `.github/workflows/android-apk-build.yml` must restore `HARMONY_CI_DEBUG_KEYSTORE_B64` from GitHub Actions secrets and verify the pinned SHA-1 before publishing an APK.
+- The permanent CI signing SHA-1 is `7F:F5:D5:66:BB:0F:6E:AB:BC:B7:03:E8:8F:64:C7:9A:38:3A:BB:89`.
+- The permanent certificate SHA-256 is `24:22:E7:AE:95:80:3A:C9:F6:DF:E0:8D:6C:5F:A0:DB:07:04:28:00:D7:7A:EA:0D:ED:67:22:66:48:4E:21:5D`.
+- A different fingerprint is an explicit signing-key rotation, not a cleanup. Before changing it, update the Android OAuth client for package `com.aistudio.harmony.couples.xqvz` and make the migration explicit.
+- Pull-request-only compile builds may use an ephemeral debug key, but those APKs must not be published as installable Harmony artifacts.
+- If the stable signing secret is unavailable, fail the installable build. Do not silently fall back to a newly generated key.
+- Never commit `debug.keystore`, its Base64 encoding, or any private signing material to Git. Keep the private key only in protected secret storage and an offline owner backup.
+
 ## Custom UI / Image Choice Routing (Happy Couple, etc.)
 When updating questions, translating packs, or importing data via GitHub, you MUST preserve the exact logic for visual questions (like "Happy Couple" / "Liebe im Gleichgewicht").
 - **NEVER** use hardcoded question texts (e.g., `HAPPY_COUPLE_PROMPTS`) or text-matching to route UI components in `HarmonyImageChoicePolicy` or `QuizRunnerScreen`.

@@ -4,24 +4,40 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'app/src/main/java/com/example/ui/**'
-      - 'app/src/main/java/com/example/widget/**'
       - 'app/src/main/java/com/example/MainActivity.kt'
-      - 'scripts/**'
-      - 'docs/superpowers/specs/**'
-      - 'docs/superpowers/plans/**'
+      - 'app/src/main/java/com/example/ui/Language.kt'
+      - 'app/src/main/java/com/example/ui/TranslationCatalog.kt'
+      - 'app/src/main/java/com/example/ui/LocalizationUpdates.kt'
+      - 'app/src/main/java/com/example/ui/introspection/IntrospectionStrings.kt'
+      - 'app/src/main/java/com/example/ui/*Content.kt'
+      - 'scripts/*locale*.py'
+      - 'scripts/*localization*.py'
+      - 'scripts/verify_language_inventory_guard.py'
+      - 'scripts/verify_ptbr_ready.py'
+      - 'scripts/repair_build_blockers.py'
       - '.github/workflows/localization-audit.yml'
+  workflow_dispatch:
+
+env:
+  TARGET_REF: ${{ github.head_ref || github.ref_name }}
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: localization-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # Cheap PR guard. Full 41-locale generation is intentionally manual because it
+  # fans out into many hosted-runner jobs and should not consume minutes for normal UI work.
   preflight:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ env.TARGET_REF }}
           fetch-depth: 0
       - name: Verify generic generator regression
         run: python3 scripts/verify_production_locale_generator.py
@@ -31,6 +47,7 @@ jobs:
         run: python3 scripts/verify_rtl_locales.py
 
   generate-new-locales:
+    if: github.event_name == 'workflow_dispatch'
     needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -61,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ env.TARGET_REF }}
           fetch-depth: 0
       - name: Verify generic generator regression
         run: python3 scripts/verify_production_locale_generator.py
@@ -83,13 +100,14 @@ jobs:
           if-no-files-found: error
 
   refresh-existing-locales:
+    if: github.event_name == 'workflow_dispatch'
     needs: generate-new-locales
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ env.TARGET_REF }}
           fetch-depth: 0
       - name: Refresh the 16 pre-41 production locales
         run: python3 scripts/refresh_existing_locale_catalogs.py --artifact-dir build/refreshed-locales
@@ -101,13 +119,16 @@ jobs:
           if-no-files-found: error
 
   audit:
+    if: github.event_name == 'workflow_dispatch'
     needs: [generate-new-locales, refresh-existing-locales]
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ env.TARGET_REF }}
           fetch-depth: 0
       - name: Apply existing six-locale scaffolding
         run: python3 scripts/scaffold_six_new_locales.py
@@ -162,7 +183,7 @@ jobs:
           git add app/src/main/java/com/example/ui/*Content.kt
           if ! git diff --cached --quiet; then
             git commit -m "Refresh complete production locale catalogs"
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin HEAD:${TARGET_REF}
           fi
       - name: Set up Java 21
         uses: actions/setup-java@v4

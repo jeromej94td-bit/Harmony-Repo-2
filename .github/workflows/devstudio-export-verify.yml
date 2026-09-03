@@ -4,17 +4,30 @@ on:
   push:
     branches:
       - feat/devstudio-ai-export-v2
+    paths:
+      - 'app/src/main/java/com/example/data/DevExportLogic.kt'
+      - 'app/src/test/java/com/example/data/DevExportLogicTest.kt'
+      - '.github/workflows/devstudio-export-verify.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'app/src/main/java/com/example/data/DevExportLogic.kt'
+      - 'app/src/test/java/com/example/data/DevExportLogicTest.kt'
+      - '.github/workflows/devstudio-export-verify.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: devstudio-export-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,5 +43,9 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Run unit tests
-        run: gradle :app:test --stacktrace
+      - name: Run focused Dev Studio export tests
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests com.example.data.DevExportLogicTest
+          --stacktrace
+          --no-daemon

@@ -8,10 +8,10 @@ import com.example.data.model.ExperiencePartnerPredictionSelectionCodec
 import com.example.data.model.ProfileEntity
 
 /**
- * Stable-ID adapter around the shipped partner-prediction board.
+ * Stable-ID adapter around the shipped partner-prediction reveal board.
  *
- * The visual A → B → Reveal interaction remains in the existing board while experience callers
- * receive a typed selection instead of the legacy encoded payload.
+ * Experience callers receive a typed selection while the board owns the private prediction,
+ * handoff, partner choice and explicit reveal phases.
  */
 @Composable
 internal fun ExperiencePartnerPredictionBoard(
@@ -21,7 +21,7 @@ internal fun ExperiencePartnerPredictionBoard(
     onPick: (ExperiencePartnerPredictionSelection) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    PartnerPredictionBoard(
+    PartnerPredictionRevealBoard(
         question = round.prompt,
         options = round.options,
         selectedAnswer = selectedSelection?.let(ExperiencePartnerPredictionSelectionCodec::encode),

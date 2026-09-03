@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,10 +64,10 @@ internal fun PartnerPredictionBoard(
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
     val restored = remember(selectedAnswer) { selectedAnswer?.let(PredictionAnswerCodec::decode) }
-    var prediction by remember(question, selectedAnswer) { mutableStateOf(restored?.prediction) }
-    var actual by remember(question, selectedAnswer) { mutableStateOf(restored?.actual) }
-    var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
-    var predictionSeries by remember { mutableStateOf(emptyList<Boolean>()) }
+    var prediction by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.prediction) }
+    var actual by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.actual) }
+    var phase by rememberSaveable(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    var predictionSeries by rememberSaveable { mutableStateOf(BooleanArray(0)) }
     val configuration = context.resources.configuration
     val revealMetrics = PairMechanicRevealLayoutPolicy.metrics(
         screenHeightDp = configuration.screenHeightDp,
@@ -172,7 +173,6 @@ internal fun PartnerPredictionBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == prediction } ?: MechanicOption("", "–"),
                             selected = hit,
-                            onClick = {},
                             badge = tr("Dein Tipp", "Your prediction"),
                             modifier = Modifier.weight(1f).heightIn(min = revealMetrics.predictionCardMinHeightDp.dp),
                             testTag = "prediction_result_guess"
@@ -180,7 +180,6 @@ internal fun PartnerPredictionBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == actual } ?: MechanicOption("", "–"),
                             selected = true,
-                            onClick = {},
                             badge = profile.partnerName,
                             modifier = Modifier.weight(1f).heightIn(min = revealMetrics.predictionCardMinHeightDp.dp),
                             testTag = "prediction_result_actual"
@@ -245,9 +244,9 @@ internal fun SecretChoiceBoard(
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
     val restored = remember(selectedAnswer) { selectedAnswer?.let(PairedChoiceAnswerCodec::decode) }
-    var first by remember(question, selectedAnswer) { mutableStateOf(restored?.first) }
-    var second by remember(question, selectedAnswer) { mutableStateOf(restored?.second) }
-    var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    var first by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.first) }
+    var second by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.second) }
+    var phase by rememberSaveable(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
     val configuration = context.resources.configuration
     val revealMetrics = PairMechanicRevealLayoutPolicy.metrics(
         screenHeightDp = configuration.screenHeightDp,
@@ -311,7 +310,6 @@ internal fun SecretChoiceBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == first } ?: MechanicOption("", "–"),
                             selected = same,
-                            onClick = {},
                             badge = profile.userName,
                             modifier = Modifier
                                 .weight(1f)
@@ -325,7 +323,6 @@ internal fun SecretChoiceBoard(
                         LargeOptionCard(
                             item = items.firstOrNull { it.raw == second } ?: MechanicOption("", "–"),
                             selected = same,
-                            onClick = {},
                             badge = profile.partnerName,
                             modifier = Modifier
                                 .weight(1f)
@@ -365,10 +362,10 @@ internal fun ScaleMatchBoard(
     val items = mechanicOptions(options, profile)
     val prompt = mechanicPrompt(question, items, profile)
     val restored = remember(selectedAnswer) { selectedAnswer?.let(PairedChoiceAnswerCodec::decode) }
-    var first by remember(question, selectedAnswer) { mutableStateOf(restored?.first) }
-    var second by remember(question, selectedAnswer) { mutableStateOf(restored?.second) }
-    var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
-    var sliderValue by remember(question, selectedAnswer) { mutableStateOf(1f) }
+    var first by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.first) }
+    var second by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.second) }
+    var phase by rememberSaveable(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    var sliderValue by rememberSaveable(question, selectedAnswer) { mutableStateOf(1f) }
     val max = items.size.coerceAtLeast(2)
     val configuration = context.resources.configuration
     val revealMetrics = PairMechanicRevealLayoutPolicy.metrics(

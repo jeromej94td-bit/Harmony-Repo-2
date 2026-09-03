@@ -172,7 +172,7 @@ internal fun FullscreenMechanicShell(
 internal fun LargeOptionCard(
     item: MechanicOption,
     selected: Boolean,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     testTag: String? = null,
     badge: String? = null,
@@ -215,7 +215,7 @@ internal fun LargeOptionCard(
                 if (selected) Color.White.copy(alpha = 0.72f) else accent.copy(alpha = 0.58f),
                 shape
             )
-            .clickable(onClick = onClick)
+            .then(onClick?.let { action -> Modifier.clickable(onClick = action) } ?: Modifier)
             .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
         contentAlignment = Alignment.Center
     ) {

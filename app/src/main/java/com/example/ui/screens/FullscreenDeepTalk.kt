@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,11 +68,11 @@ internal fun DeepTalkBoard(
     val prompt = mechanicPrompt(question, items, profile)
     val restored = remember(selectedAnswer) { selectedAnswer?.let(PairedChoiceAnswerCodec::decode) }
 
-    var firstAnswer by remember(question, selectedAnswer) { mutableStateOf(restored?.first.orEmpty()) }
-    var secondAnswer by remember(question, selectedAnswer) { mutableStateOf(restored?.second.orEmpty()) }
-    var phase by remember(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
-    var discussionOpen by remember(question) { mutableStateOf(false) }
-    var memorySaved by remember(question) { mutableStateOf(false) }
+    var firstAnswer by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.first.orEmpty()) }
+    var secondAnswer by rememberSaveable(question, selectedAnswer) { mutableStateOf(restored?.second.orEmpty()) }
+    var phase by rememberSaveable(question, selectedAnswer) { mutableStateOf(if (restored != null) 3 else 0) }
+    var discussionOpen by rememberSaveable(question) { mutableStateOf(false) }
+    var memorySaved by rememberSaveable(question) { mutableStateOf(false) }
     var memorySaving by remember(question) { mutableStateOf(false) }
 
     val memoryRepository = remember(context.applicationContext) {
@@ -278,7 +281,9 @@ private fun DeepTalkAnswerPane(
     testTag: String
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -311,7 +316,7 @@ private fun DeepTalkAnswerPane(
                     .fillMaxSize()
                     .testTag("${testTag}_input")
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.width(8.dp))
             VoiceInputButton(
                 appLanguage = appLanguage,
                 onTextTranscribed = { spoken ->

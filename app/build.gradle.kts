@@ -100,7 +100,6 @@ abstract class ReconstructMerlinThemeTask : DefaultTask() {
   }
 }
 
-
 abstract class ReconstructMoralGreyZonesIntroTask : DefaultTask() {
   @get:InputFiles
   @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -158,7 +157,6 @@ abstract class ReconstructMoralGreyZonesIntroTask : DefaultTask() {
     logger.lifecycle("Moral grey zones intro reconstructed: $actualSize bytes, sha256=$actualSha256")
   }
 }
-
 
 abstract class ReconstructIntrospectionIntroTask : DefaultTask() {
   @get:InputFiles
@@ -238,8 +236,8 @@ android {
     applicationId = "com.aistudio.harmony.couples.xqvz"
     minSdk = 24
     targetSdk = 36
-    versionCode = 2
-    versionName = "1.1"
+    versionCode = 3
+    versionName = "1.2"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -295,8 +293,8 @@ ksp {
 }
 
 secrets {
-    propertiesFileName = ".env"
-    defaultPropertiesFileName = ".env.example"
+  propertiesFileName = ".env"
+  defaultPropertiesFileName = ".env.example"
 }
 
 val reconstructMerlinTheme by tasks.registering(ReconstructMerlinThemeTask::class) {
@@ -338,8 +336,110 @@ val reconstructIntrospectionIntro by tasks.registering(ReconstructIntrospectionI
   expectedSha256.set("dbb693c0b39920e7b88aab52b99277d4a4d78446eff1d3d33463ca98e3c37778")
 }
 
+val verifyProductionSourceIsolation by tasks.registering {
+  group = "verification"
+  description = "Fails the build if archived Harmony features are reactivated in production sources."
+
+  doLast {
+    val sourceRoot = file("src/main/java")
+    val violations = mutableListOf<String>()
+
+    fun read(relativePath: String): String {
+      val target = file("src/main/java/$relativePath")
+      if (!target.exists()) {
+        violations += "$relativePath is missing"
+        return ""
+      }
+      return target.readText()
+    }
+
+    val mainActivity = read("com/example/MainActivity.kt")
+    val chatScreen = read("com/example/ui/screens/ChatScreen.kt")
+    val homeScreen = read("com/example/ui/screens/HomeScreen.kt")
+    val gamesScreen = read("com/example/ui/screens/GamesScreen.kt")
+    val legacyBridge = read("com/example/ui/screens/ChatScreenLegacyBridge.kt")
+
+    if (mainActivity.contains("brainEnabled = true")) {
+      violations += "MainActivity.kt explicitly re-enables an archived Brain surface"
+    }
+    if (mainActivity.contains("HARMONY_BRAIN_ENABLED = true")) {
+      violations += "MainActivity.kt explicitly re-enables Harmony Brain"
+    }
+
+    listOf("Harmony Brain", "isBrainChatMode", "onSendBrainMessage", "onSendVoiceBrainMessage").forEach { marker ->
+      if (chatScreen.contains(marker)) {
+        violations += "ChatScreen.kt contains archived Brain marker: $marker"
+      }
+    }
+
+    if (!homeScreen.contains("brainEnabled: Boolean = false")) {
+      violations += "HomeScreen.kt lost the fail-closed archived Brain default"
+    }
+    if (!gamesScreen.contains("brainEnabled: Boolean = false")) {
+      violations += "GamesScreen.kt lost the fail-closed archived Brain default"
+    }
+
+    val bridgeBody = legacyBridge.substringAfter(") {", missingDelimiterValue = "")
+    listOf(
+      "onSendBrainMessage",
+      "onSendVoiceBrainMessage",
+      "onToggleBrainChatMode",
+      "onResetBrainChat",
+      "onSaveSuggestionToNotes",
+      "onSuggestionFeedback"
+    ).forEach { marker ->
+      if (bridgeBody.contains(marker)) {
+        violations += "ChatScreenLegacyBridge.kt executes archived callback: $marker"
+      }
+    }
+
+    sourceRoot.walkTopDown()
+      .filter { it.isFile && it.extension == "kt" && it.name != "RemovedGameCatalogPolicy.kt" }
+      .forEach { sourceFile ->
+        val text = sourceFile.readText()
+        val relative = sourceFile.relativeTo(projectDir).invariantSeparatorsPath
+
+        if (text.contains("HARMONY_BRAIN_ENABLED = true")) {
+          violations += "$relative sets HARMONY_BRAIN_ENABLED to true"
+        }
+        if (text.contains("brainEnabled = true")) {
+          violations += "$relative explicitly enables an archived Brain surface"
+        }
+
+        listOf(
+          "id = \"mischung\"",
+          "id=\"mischung\"",
+          "cat = \"mischung\"",
+          "cat=\"mischung\""
+        ).forEach { marker ->
+          if (text.contains(marker)) {
+            violations += "$relative reintroduces removed catalog marker: $marker"
+          }
+        }
+      }
+
+    if (violations.isNotEmpty()) {
+      throw GradleException(
+        buildString {
+          appendLine("Archived feature isolation check failed.")
+          appendLine("Do not merge archived Harmony Brain / Mischung code directly into production.")
+          appendLine("Restore ideas from archive/pre-production-isolation-2026-09-02 on a fresh feature branch.")
+          violations.distinct().forEach { appendLine(" - $it") }
+        }
+      )
+    }
+
+    logger.lifecycle("Archived feature isolation check passed.")
+  }
+}
+
 tasks.named("preBuild").configure {
-  dependsOn(reconstructMerlinTheme, reconstructMoralGreyZonesIntro, reconstructIntrospectionIntro)
+  dependsOn(
+    reconstructMerlinTheme,
+    reconstructMoralGreyZonesIntro,
+    reconstructIntrospectionIntro,
+    verifyProductionSourceIsolation
+  )
 }
 
 // googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }

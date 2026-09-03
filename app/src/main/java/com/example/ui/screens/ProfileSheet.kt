@@ -1,16 +1,8 @@
 package com.example.ui.screens
 
 import android.net.Uri
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.functions.functions
-import kotlinx.coroutines.launch
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,13 +51,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.data.SupabaseConfig
 import com.example.data.model.ProfileEntity
 import com.example.ui.AppLanguage
-import com.example.ui.TranslationCatalog
 import com.example.ui.tr
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.formatTimestamp
+import com.example.ui.session.AppSessionViewModel
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
@@ -75,8 +68,9 @@ import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
-import java.text.SimpleDateFormat
+import io.github.jan.supabase.auth.auth
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,20 +89,21 @@ fun ProfileSheet(
     onToggleDarkMode: ((Boolean) -> Unit)? = null,
     language: AppLanguage = AppLanguage.GERMAN,
     onLanguageChange: (AppLanguage) -> Unit = {},
+    isPaired: Boolean = false,
+    isDemoMode: Boolean = false,
+    partnerDisplayName: String? = null,
+    onOpenPartnerConnection: () -> Unit = {},
+    onOpenHarmonyReset: () -> Unit = {},
+    onOpenDeleteAccount: () -> Unit = {},
     onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val sessionViewModel: AppSessionViewModel = viewModel()
     val accountEmail = runCatching {
-        com.example.data.SupabaseConfig.client.auth.currentSessionOrNull()?.user?.email
+        SupabaseConfig.client.auth.currentSessionOrNull()?.user?.email
     }.getOrNull()?.takeIf { it.isNotBlank() }
-
-    var isLanguageExpanded by remember { mutableStateOf(false) }
-    var isDeleteDialogOpen by remember { mutableStateOf(false) }
-    var isDeleting by remember { mutableStateOf(false) }
-    var deleteError by remember { mutableStateOf<String?>(null) }
 
     val userAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { onUpdateAvatar(it, true) }
@@ -131,7 +126,6 @@ fun ProfileSheet(
                 .verticalScroll(scrollState)
                 .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
-            // Header
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -160,53 +154,91 @@ fun ProfileSheet(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = tr("Invite-Code: HRM-8731 · alles freigeschaltet", "Invite code: HRM-8731 · everything unlocked"),
+                    text = when {
+                        isDemoMode -> "Demo-Modus · keine Cloud-Kontodaten werden angelegt"
+                        isPaired -> "Verbunden mit ${partnerDisplayName ?: profile.partnerName}"
+                        else -> "Noch nicht verbunden · Harmony ist auch solo nutzbar"
+                    },
                     fontSize = 12.sp,
                     color = HarmonyMuted
                 )
+
+                if (!isDemoMode && accountEmail != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
+                            .padding(horizontal = 14.dp, vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = tr("Angemeldet als", "Signed in as"),
+                                fontSize = 10.5.sp,
+                                color = HarmonyMuted
+                            )
+                            Spacer(modifier = Modifier.height(1.dp))
+                            Text(
+                                text = accountEmail,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = HarmonyText,
+                                modifier = Modifier.testTag("account_email")
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Profile Details Card
             HarmonyCard {
                 Column {
-                    Text(
-                        text = tr("Profil", "Profile"),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = HarmonyText
-                    )
-
+                    Text(text = tr("Profil", "Profile"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
                     Spacer(modifier = Modifier.height(8.dp))
                     ProfileRow(label = tr("Dein Name", "Your name"), value = profile.userName)
                     ProfileRow(label = tr("Partnerin", "Partner"), value = profile.partnerName)
                     ProfileRow(label = tr("Zusammen seit", "Together since"), value = formatTimestamp(profile.startDate))
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = tr("Partner-Simulator", "Partner simulator"), fontSize = 13.5.sp, color = HarmonyText)
-                        Switch(
-                            checked = profile.simulatorEnabled,
-                            onCheckedChange = { onToggleSimulator() },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = HarmonyPink
-                            ),
-                            modifier = Modifier.testTag("simulator_toggle")
-                        )
+                    if (com.example.BuildConfig.DEBUG) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = tr("Partner-Simulator", "Partner simulator"), fontSize = 13.5.sp, color = HarmonyText)
+                            Switch(
+                                checked = profile.simulatorEnabled,
+                                onCheckedChange = { onToggleSimulator() },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = HarmonyPink
+                                ),
+                                modifier = Modifier.testTag("simulator_toggle")
+                            )
+                        }
                     }
 
                     if (onToggleDarkMode != null) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 10.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -224,13 +256,9 @@ fun ProfileSheet(
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
-
                     Button(
                         onClick = onOpenEditProfile,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("edit_profile_button"),
+                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("edit_profile_button"),
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.06f))
                     ) {
@@ -240,38 +268,20 @@ fun ProfileSheet(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
-            // Language
-            LanguageSelectorCard(
-                language = language,
-                onLanguageChange = onLanguageChange
-            )
-
+            LanguageSelectorCard(language = language, onLanguageChange = onLanguageChange)
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Developer Studio Card
             if (onOpenDevStudio != null) {
                 HarmonyCard {
                     Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = tr("🛠️ Entwickler-Modus", "🛠️ Developer mode"),
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = HarmonyText
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = tr("Spiele & Städte bearbeiten, Ordner reinladen, Bilder anpassen", "Edit games and destinations, import folders, adjust images"),
-                                    fontSize = 11.5.sp,
-                                    color = HarmonyMuted
-                                )
-                            }
+                        Column {
+                            Text(text = tr("🛠️ Entwickler-Modus", "🛠️ Developer mode"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = tr("Spiele & Städte bearbeiten, Ordner reinladen, Bilder anpassen", "Edit games and destinations, import folders, adjust images"),
+                                fontSize = 11.5.sp,
+                                color = HarmonyMuted
+                            )
                         }
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
@@ -279,10 +289,7 @@ fun ProfileSheet(
                                 onDismiss()
                                 onOpenDevStudio()
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .testTag("open_dev_studio_button"),
+                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("open_dev_studio_button"),
                             shape = CircleShape,
                             colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple)
                         ) {
@@ -296,167 +303,73 @@ fun ProfileSheet(
             HarmonyCard {
                 Column {
                     Text(text = tr("Konto", "Account"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
-                    Spacer(modifier = Modifier.height(10.dp))
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, HarmonyLine, RoundedCornerShape(16.dp))
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .background(
-                                    Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)),
-                                    CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
+                    if (!isDemoMode) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onOpenPartnerConnection,
+                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("partner_connection_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.AccountCircle,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(25.dp)
+                            Text(
+                                text = if (isPaired) "Verbindung ansehen" else "Partner verbinden",
+                                color = Color.White,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = if (accountEmail != null) {
-                                    tr("Angemeldet als", "Signed in as")
-                                } else {
-                                    tr("Demo-Modus", "Demo mode")
-                                },
-                                fontSize = 11.5.sp,
-                                color = HarmonyMuted
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = accountEmail
-                                    ?: tr("Kein Benutzerkonto angemeldet", "No user account signed in"),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = HarmonyText,
-                                modifier = Modifier.testTag("account_email")
-                            )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            onClick = onOpenHarmonyReset,
+                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("reset_harmony_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.08f))
+                        ) {
+                            Text("Harmony zurücksetzen", color = HarmonyText, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Button(
                         onClick = {
-                            scope.launch {
-                                runCatching {
-                                    com.example.data.SupabaseConfig.client.auth.signOut()
-                                }
-                                onDismiss()
-                                onLogout()
-                            }
+                            onDismiss()
+                            onLogout()
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("logout_button"),
+                        modifier = Modifier.fillMaxWidth().height(52.dp).testTag("logout_button"),
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple)
                     ) {
-                        Text(text = tr("Abmelden", "Log out"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = if (isDemoMode) "Demo beenden" else tr("Abmelden", "Log out"),
+                            color = Color.White,
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Button(
-                        onClick = { isDeleteDialogOpen = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("delete_account_button"),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f))
-                    ) {
-                        Text(text = tr("Konto löschen", "Delete account"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+
+                    if (!isDemoMode) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Button(
+                            onClick = onOpenDeleteAccount,
+                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("delete_account_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f))
+                        ) {
+                            Text(text = tr("Konto löschen", "Delete account"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("close_profile_sheet_button")
-            ) {
-                Text(
-                    text = tr("Schließen", "Close"),
-                    color = HarmonyPink,
-                    fontSize = 13.5.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
+            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth().testTag("close_profile_sheet_button")) {
+                Text(text = tr("Schließen", "Close"), color = HarmonyPink, fontSize = 13.5.sp, fontWeight = FontWeight.ExtraBold)
             }
-
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
 
-    if (isDeleteDialogOpen) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { if (!isDeleting) isDeleteDialogOpen = false },
-            title = { Text(tr("Konto wirklich löschen?", "Really delete account?")) },
-            text = {
-                Column {
-                    Text(tr("Dein Konto und deine persönlichen Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.", "Your account and personal data will be permanently deleted. This action cannot be undone."))
-                    if (deleteError != null) {
-                        Text(deleteError!!, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
-                    }
-                    if (isDeleting) {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            modifier = Modifier.padding(top = 16.dp).align(Alignment.CenterHorizontally),
-                            color = Color.Red
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        scope.launch {
-                            isDeleting = true
-                            deleteError = null
-                            val res = runCatching {
-                                com.example.data.SupabaseConfig.client.functions.invoke("delete-account")
-                                com.example.data.SupabaseConfig.client.auth.signOut()
-                            }
-                            isDeleting = false
-                            if (res.isSuccess) {
-                                isDeleteDialogOpen = false
-                                onDismiss()
-                                onLogout()
-                            } else {
-                                deleteError = res.exceptionOrNull()?.message ?: "Fehler beim Löschen des Kontos"
-                            }
-                        }
-                    },
-                    enabled = !isDeleting,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Text(tr("Endgültig löschen", "Delete permanently"), color = Color.White)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { isDeleteDialogOpen = false },
-                    enabled = !isDeleting
-                ) {
-                    Text(tr("Abbrechen", "Cancel"), color = HarmonyText)
-                }
-            }
-        )
-    }
-
-    // Edit Profile Dialog
     if (isEditProfileOpen) {
         var userEdit by remember { mutableStateOf(profile.userName) }
         var partnerEdit by remember { mutableStateOf(profile.partnerName) }
@@ -471,15 +384,14 @@ fun ProfileSheet(
                     .padding(22.dp)
             ) {
                 Column {
-                    Text(
-                        text = tr("Profil bearbeiten", "Edit profile"),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = HarmonyText
-                    )
+                    Text(text = tr("Profil bearbeiten", "Edit profile"), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = tr("Namen und Startdatum eurer Beziehung.", "Your names and relationship start date."),
+                        text = if (isDemoMode) {
+                            tr("Namen und Startdatum eurer Beziehung.", "Your names and relationship start date.")
+                        } else {
+                            tr("Dein Profilname und eure lokalen Beziehungsdaten.", "Your profile name and local relationship details.")
+                        },
                         fontSize = 13.sp,
                         color = HarmonyMuted
                     )
@@ -489,9 +401,7 @@ fun ProfileSheet(
                         value = userEdit,
                         onValueChange = { userEdit = it },
                         placeholder = { Text(tr("Dein Name", "Your name"), color = HarmonyMuted) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("edit_user_name_input"),
+                        modifier = Modifier.fillMaxWidth().testTag("edit_user_name_input"),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = HarmonyPink,
                             unfocusedBorderColor = HarmonyLine,
@@ -501,31 +411,27 @@ fun ProfileSheet(
                     )
 
                     Spacer(modifier = Modifier.height(9.dp))
-
-                    OutlinedTextField(
-                        value = partnerEdit,
-                        onValueChange = { partnerEdit = it },
-                        placeholder = { Text(tr("Name Partnerin", "Partner's name"), color = HarmonyMuted) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("edit_partner_name_input"),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = HarmonyPink,
-                            unfocusedBorderColor = HarmonyLine,
-                            focusedTextColor = HarmonyText,
-                            unfocusedTextColor = HarmonyText
+                    if (isDemoMode) {
+                        OutlinedTextField(
+                            value = partnerEdit,
+                            onValueChange = { partnerEdit = it },
+                            placeholder = { Text(tr("Name Partnerin", "Partner's name"), color = HarmonyMuted) },
+                            modifier = Modifier.fillMaxWidth().testTag("edit_partner_name_input"),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = HarmonyPink,
+                                unfocusedBorderColor = HarmonyLine,
+                                focusedTextColor = HarmonyText,
+                                unfocusedTextColor = HarmonyText
+                            )
                         )
-                    )
-
-                    Spacer(modifier = Modifier.height(9.dp))
+                        Spacer(modifier = Modifier.height(9.dp))
+                    }
 
                     OutlinedTextField(
                         value = startEdit,
                         onValueChange = { startEdit = it },
                         placeholder = { Text(tr("Zusammen seit (TT.MM.JJJJ)", "Together since (DD.MM.YYYY)"), color = HarmonyMuted) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("edit_start_date_input"),
+                        modifier = Modifier.fillMaxWidth().testTag("edit_start_date_input"),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = HarmonyPink,
                             unfocusedBorderColor = HarmonyLine,
@@ -535,11 +441,7 @@ fun ProfileSheet(
                     )
 
                     Spacer(modifier = Modifier.height(18.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Button(
                             onClick = onCloseEditProfile,
                             modifier = Modifier.weight(1f),
@@ -551,12 +453,16 @@ fun ProfileSheet(
                         Button(
                             onClick = {
                                 val parsedDate = try {
-                                    val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.GERMAN)
-                                    sdf.parse(startEdit)?.time ?: profile.startDate
-                                } catch (e: Exception) {
+                                    SimpleDateFormat("dd.MM.yyyy", Locale.GERMAN).parse(startEdit)?.time ?: profile.startDate
+                                } catch (_: Exception) {
                                     profile.startDate
                                 }
-                                onSaveEditProfile(userEdit, partnerEdit, parsedDate)
+                                if (isDemoMode) {
+                                    onSaveEditProfile(userEdit, partnerEdit, parsedDate)
+                                } else {
+                                    sessionViewModel.updateProfileDisplayName(userEdit)
+                                    onSaveEditProfile(userEdit, profile.partnerName, parsedDate)
+                                }
                             },
                             modifier = Modifier.weight(1f),
                             shape = CircleShape,
@@ -574,10 +480,7 @@ fun ProfileSheet(
 @Composable
 fun ProfileRow(label: String, value: String) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp)
-            .border(width = 0.dp, color = Color.Transparent),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).border(width = 0.dp, color = Color.Transparent),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

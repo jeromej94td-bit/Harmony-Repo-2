@@ -23,19 +23,33 @@ class AuthScreenVisualContractTest {
 
         assertTrue(auth.contains("GoogleBrandMark("))
         assertFalse(auth.contains("G  Mit Google anmelden"))
-        assertTrue(auth.contains("credentialManager.getCredential"))
+        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
         assertTrue(auth.contains("auth.signInWith(EmailProvider)"))
         assertTrue(auth.contains("auth.signUpWith(EmailProvider)"))
         assertTrue(auth.contains("App im Demo-Modus testen"))
-        assertTrue(auth.contains("onAuthSuccess()"))
+        assertTrue(auth.contains("onDemoRequested: () -> Unit"))
     }
 
     @Test
-    fun `explicit Google button uses dedicated Google button credential flow`() {
+    fun `Google button uses direct Supabase OAuth without native credential APIs`() {
         val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
 
-        assertTrue(auth.contains("GetSignInWithGoogleOption.Builder("))
-        assertFalse(auth.contains("GetGoogleIdOption.Builder("))
+        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertFalse(auth.contains("CredentialManager"))
+        assertFalse(auth.contains("GetCredentialException"))
+        assertFalse(auth.contains("GetSignInWithGoogleOption"))
+        assertFalse(auth.contains("GetGoogleIdOption"))
+        assertFalse(auth.contains("performResilientGoogleSignIn"))
+        assertFalse(auth.contains("Account reauth failed"))
+        assertFalse(auth.contains("[16]"))
+    }
+
+    @Test
+    fun `demo button uses its dedicated callback`() {
+        val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
+
+        assertTrue(auth.contains("onDemoRequested: () -> Unit = onAuthSuccess"))
+        assertTrue(auth.contains("onClick = onDemoRequested"))
     }
 
     @Test
@@ -43,6 +57,7 @@ class AuthScreenVisualContractTest {
         val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
 
         assertTrue(auth.contains("auth.resetPasswordForEmail("))
+        assertTrue(auth.contains("redirectUrl = SupabaseConfig.PASSWORD_RECOVERY_REDIRECT_URL"))
         assertTrue(auth.contains("Bitte gib eine gültige E-Mail-Adresse ein."))
         assertTrue(auth.contains("Passwort-Reset-Link wurde gesendet"))
         assertFalse(auth.contains("TODO: Forgot Password"))

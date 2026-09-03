@@ -1,32 +1,30 @@
 name: Render Universal Studios intro
 
 on:
-  push:
-    branches:
-      - feature/universal-studios-intro
-    paths:
-      - 'tools/remotion/universal-intro/**'
-      - '.github/scripts/apply_universal_intro.py'
-      - '.github/workflows/render-universal-intro.yml'
   workflow_dispatch:
+    inputs:
+      target_ref:
+        description: Branch or ref to render and update
+        required: true
+        default: feature/universal-studios-intro
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: universal-intro-render-${{ github.ref }}
+  group: universal-intro-manual-${{ inputs.target_ref }}
   cancel-in-progress: true
 
 jobs:
   render-integrate-test:
-    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, 'feat: integrate rendered Universal intro') }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - name: Checkout feature branch
+      - name: Checkout target ref
         uses: actions/checkout@v4
         with:
-          ref: feature/universal-studios-intro
+          ref: ${{ inputs.target_ref }}
           fetch-depth: 0
 
       - name: Set up Node
@@ -79,10 +77,10 @@ jobs:
           gradle-version: '9.3.1'
 
       - name: Run Universal intro contract tests
-        run: gradle :app:testDebugUnitTest --tests com.example.ui.UniversalStudiosIntroContractTest --stacktrace
+        run: gradle :app:testDebugUnitTest --tests com.example.ui.UniversalStudiosIntroContractTest --stacktrace --no-daemon
 
       - name: Compile app
-        run: gradle :app:compileDebugKotlin --stacktrace
+        run: gradle :app:compileDebugKotlin --stacktrace --no-daemon
 
       - name: Upload rendered verification artifact
         uses: actions/upload-artifact@v4
@@ -99,5 +97,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt app/src/main/res/raw/universal_studios_intro.mp4
-          git commit -m "feat: integrate rendered Universal intro"
-          git push origin HEAD:feature/universal-studios-intro
+          if ! git diff --cached --quiet; then
+            git commit -m "feat: integrate rendered Universal intro"
+            git push origin HEAD:${{ inputs.target_ref }}
+          fi
