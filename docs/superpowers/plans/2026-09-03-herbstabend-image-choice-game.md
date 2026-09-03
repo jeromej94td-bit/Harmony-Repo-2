@@ -28,11 +28,11 @@
 - Create: `app/src/test/java/com/example/data/model/AutumnEveningPackContractTest.kt`
 - Modify: `app/src/main/java/com/example/data/model/Models.kt`
 
-- [ ] Write a failing test that selects `HarmonyPacksData.DEFAULT_PACKS.single { it.id == "herbstabend" }` and asserts title, category `lieber`, topic `hobbys`, type `quiz`, emoji, tags, six exact prompts, and four exact options per prompt from the approved spec.
-- [ ] Run `:app:testDebugUnitTest --tests com.example.data.model.AutumnEveningPackContractTest` and confirm failure because the pack is absent.
-- [ ] Add the `herbstabend` `QuestionPack` to `DEFAULT_PACKS` with the exact approved German copy.
-- [ ] Re-run the focused test and confirm it passes.
-- [ ] Commit with `feat: add autumn evening question pack`.
+- [x] Write a failing test that selects `HarmonyPacksData.DEFAULT_PACKS.single { it.id == "herbstabend" }` and asserts title, category `lieber`, topic `hobbys`, type `quiz`, emoji, tags, six exact prompts, and four exact options per prompt from the approved spec.
+- [x] Run `:app:testDebugUnitTest --tests com.example.data.model.AutumnEveningPackContractTest` and confirm failure because the pack is absent.
+- [x] Add the `herbstabend` `QuestionPack` to `DEFAULT_PACKS` with the exact approved German copy.
+- [x] Re-run the focused test and confirm it passes.
+- [x] Commit with `feat: add autumn evening question pack`.
 
 ### Task 2: Add stable routing and animation policy
 

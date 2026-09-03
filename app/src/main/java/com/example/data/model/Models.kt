@@ -156,6 +156,23 @@ object HarmonyPacksData {
 
     val DEFAULT_PACKS = listOf(
         QuestionPack(
+            id = "herbstabend",
+            title = "Unser Herbstabend",
+            tags = listOf("herbst", "cozy", "fürpaare", "bildauswahl"),
+            cat = "lieber",
+            topic = "hobbys",
+            type = "quiz",
+            emoji = "🍂",
+            questions = listOf(
+                Question("Welche Geschichte zieht dich in den Herbst?", listOf("Mystery", "Thriller", "Dark Academia", "Cozy Fantasy")),
+                Question("Was wärmt deinen Abend?", listOf("Chai Latte", "Heiße Schokolade", "Apfel-Zimt-Tee", "Pumpkin Spice")),
+                Question("Welcher Snack gehört dazu?", listOf("Zimtschnecke", "Chocolate Cookie", "Kürbismuffin", "Apfelkuchen")),
+                Question("Wo wird es richtig gemütlich?", listOf("Fensternest", "Kaminsofa", "Deckenhöhle", "Bibliotheksecke")),
+                Question("Welcher Klang begleitet euch?", listOf("Regen am Fenster", "Kaminfeuer", "Herbstwind", "Völlige Ruhe")),
+                Question("Welcher Duft macht es vollkommen?", listOf("Vanille & Holz", "Herbstlaub", "Kürbisgewürz", "Bratapfel"))
+            )
+        ),
+        QuestionPack(
             id = "entweder_oder_panda",
             title = "Entweder oder",
             tags = listOf("dasoderdas", "fürpaare"),
