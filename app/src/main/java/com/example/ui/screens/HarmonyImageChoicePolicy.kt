@@ -45,7 +45,7 @@ private const val STEAK_PROMPT = "Wie willst du dein Steak?"
 private const val TRAVEL_PROMPT = "Wie sieht deine Traumreise aus?"
 private const val PROPOSAL_LOCATION_PROMPT = "Welche Umgebung würdest du dir für einen Antrag wünschen?"
 
-private val autumnEveningKinds = listOf(
+internal val AUTUMN_EVENING_KINDS = listOf(
     HarmonyImageChoiceKind.AUTUMN_STORY,
     HarmonyImageChoiceKind.AUTUMN_DRINK,
     HarmonyImageChoiceKind.AUTUMN_SNACK,
@@ -91,7 +91,7 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
 
 internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): HarmonyImageChoiceKind? {
     if (pack.id == "herbstabend") {
-        return autumnEveningKinds.getOrNull(questionIndex)
+        return AUTUMN_EVENING_KINDS.getOrNull(questionIndex)
     }
 
     val q = pack.questions.getOrNull(questionIndex)
