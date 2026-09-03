@@ -1,0 +1,58 @@
+name: Port introspection golden-master assets
+
+on:
+  push:
+    branches:
+      - fix/golden-master-image-introspection-port-20260903
+    paths:
+      - '.github/workflows/port-introspection-golden-master-assets.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  port-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/golden-master-image-introspection-port-20260903
+          fetch-depth: 1
+
+      - name: Restore working narrator assets from Harmony-App main
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://raw.githubusercontent.com/jeromej94td-bit/Harmony-App/main/app/src/main/res/raw'
+          target='app/src/main/res/raw'
+          curl -fL "$base/introspection_animal.mp3" -o "$target/introspection_animal.mp3"
+          curl -fL "$base/introspection_color.mp3" -o "$target/introspection_color.mp3"
+          curl -fL "$base/introspection_reveal.mp3" -o "$target/introspection_reveal.mp3"
+          curl -fL "$base/introspection_water.mp3" -o "$target/introspection_water.mp3"
+
+          test "$(wc -c < "$target/introspection_animal.mp3" | tr -d ' ')" = '2320970'
+          test "$(wc -c < "$target/introspection_color.mp3" | tr -d ' ')" = '1949822'
+          test "$(wc -c < "$target/introspection_reveal.mp3" | tr -d ' ')" = '2159220'
+          test "$(wc -c < "$target/introspection_water.mp3" | tr -d ' ')" = '2923458'
+
+          test "$(git hash-object "$target/introspection_animal.mp3")" = '193b8b9701f50c5bba0248211cb209d79161a871'
+          test "$(git hash-object "$target/introspection_color.mp3")" = '2325462013787473ed31d2c7871d7e785e3ebefd'
+          test "$(git hash-object "$target/introspection_reveal.mp3")" = 'bbf652cf2f7fc708774015005643bb6a0fa010ba'
+          test "$(git hash-object "$target/introspection_water.mp3")" = '30253797743f4e9c9dc40975a9efde9752e9d5c6'
+
+      - name: Commit only the verified audio restoration
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/port-introspection-golden-master-assets.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/src/main/res/raw/introspection_animal.mp3 \
+                  app/src/main/res/raw/introspection_color.mp3 \
+                  app/src/main/res/raw/introspection_reveal.mp3 \
+                  app/src/main/res/raw/introspection_water.mp3 \
+                  .github/workflows/port-introspection-golden-master-assets.yml
+          git commit -m 'fix: restore introspection golden-master narrator audio'
+          git push origin HEAD:fix/golden-master-image-introspection-port-20260903
