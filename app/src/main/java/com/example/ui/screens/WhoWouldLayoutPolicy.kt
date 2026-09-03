@@ -14,8 +14,8 @@ internal data class WhoWouldLayoutMetrics(
 
 /**
  * Protects the Paarlabor person cards from clipping when the fullscreen stage becomes short,
- * narrow or Android font scaling grows. Normal phones retain the current 122dp portrait
- * proportions.
+ * narrow or Android font scaling grows. On regular phones the portraits deliberately dominate
+ * the interaction so the two people are immediately readable as the primary answer targets.
  */
 internal object WhoWouldLayoutPolicy {
     fun metrics(screenWidthDp: Int, screenHeightDp: Int, fontScale: Float): WhoWouldLayoutMetrics {
@@ -25,27 +25,27 @@ internal object WhoWouldLayoutPolicy {
 
         return when {
             veryCompact -> WhoWouldLayoutMetrics(
-                avatarSizeDp = 76,
-                cardPaddingDp = 10,
-                nameSizeSp = 17,
+                avatarSizeDp = 84,
+                cardPaddingDp = 9,
+                nameSizeSp = 18,
                 avatarNameGapDp = 8,
-                bottomRowHeightDp = 74,
+                bottomRowHeightDp = 72,
                 rowGapDp = 8
             )
             compact -> WhoWouldLayoutMetrics(
-                avatarSizeDp = 96,
-                cardPaddingDp = 12,
-                nameSizeSp = 19,
+                avatarSizeDp = 108,
+                cardPaddingDp = 11,
+                nameSizeSp = 20,
                 avatarNameGapDp = 10,
-                bottomRowHeightDp = 84,
+                bottomRowHeightDp = 82,
                 rowGapDp = 10
             )
             else -> WhoWouldLayoutMetrics(
-                avatarSizeDp = 122,
-                cardPaddingDp = 16,
-                nameSizeSp = 22,
-                avatarNameGapDp = 16,
-                bottomRowHeightDp = 94,
+                avatarSizeDp = 140,
+                cardPaddingDp = 15,
+                nameSizeSp = 23,
+                avatarNameGapDp = 14,
+                bottomRowHeightDp = 90,
                 rowGapDp = 12
             )
         }
