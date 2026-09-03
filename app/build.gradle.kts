@@ -357,13 +357,27 @@ val verifyProductionSourceIsolation by tasks.registering {
     val chatScreen = read("com/example/ui/screens/ChatScreen.kt")
     val homeScreen = read("com/example/ui/screens/HomeScreen.kt")
     val gamesScreen = read("com/example/ui/screens/GamesScreen.kt")
-    val legacyBridge = read("com/example/ui/screens/ChatScreenLegacyBridge.kt")
 
     if (mainActivity.contains("brainEnabled = true")) {
       violations += "MainActivity.kt explicitly re-enables an archived Brain surface"
     }
     if (mainActivity.contains("HARMONY_BRAIN_ENABLED = true")) {
       violations += "MainActivity.kt explicitly re-enables Harmony Brain"
+    }
+
+    listOf(
+      "brainInterests =",
+      "brainSuggestions =",
+      "brainQuestions =",
+      "isBrainChatMode =",
+      "onSendBrainMessage =",
+      "onSendVoiceBrainMessage =",
+      "generatedGames =",
+      "onStartGeneratedGame ="
+    ).forEach { marker ->
+      if (mainActivity.contains(marker)) {
+        violations += "MainActivity.kt contains removed Brain wiring: $marker"
+      }
     }
 
     listOf("Harmony Brain", "isBrainChatMode", "onSendBrainMessage", "onSendVoiceBrainMessage").forEach { marker ->
@@ -379,18 +393,9 @@ val verifyProductionSourceIsolation by tasks.registering {
       violations += "GamesScreen.kt lost the fail-closed archived Brain default"
     }
 
-    val bridgeBody = legacyBridge.substringAfter(") {", missingDelimiterValue = "")
-    listOf(
-      "onSendBrainMessage",
-      "onSendVoiceBrainMessage",
-      "onToggleBrainChatMode",
-      "onResetBrainChat",
-      "onSaveSuggestionToNotes",
-      "onSuggestionFeedback"
-    ).forEach { marker ->
-      if (bridgeBody.contains(marker)) {
-        violations += "ChatScreenLegacyBridge.kt executes archived callback: $marker"
-      }
+    val legacyBridge = file("src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt")
+    if (legacyBridge.exists()) {
+      violations += "ChatScreenLegacyBridge.kt must stay removed; production chat is ChatScreen.kt only"
     }
 
     sourceRoot.walkTopDown()

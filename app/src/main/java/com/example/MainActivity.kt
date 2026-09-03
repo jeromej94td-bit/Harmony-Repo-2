@@ -452,22 +452,12 @@ fun HarmonyApp(
                         onPinWidget = {
                             val requested = PicShareWidgetProvider.requestPin(context)
                             viewModel.showToast(if (requested) "Widget-Auswahl geöffnet" else "Widget bitte über den Startbildschirm hinzufügen")
-                        },
-                        brainInterests = uiState.brainInterests,
-                        brainSuggestions = uiState.brainSuggestions,
-                        brainQuestions = uiState.brainQuestions,
-                        onSuggestionFeedback = { id, feedback -> viewModel.setSuggestionFeedback(id, feedback) },
-                        onAnswerBrainQuestion = { id, text -> viewModel.answerBrainQuestion(id, text) },
-                        onOpenBrainChat = {
-                            viewModel.setBrainChatMode(true)
-                            viewModel.selectTab(2)
                         }
                     )
 
                     1 -> GamesScreen(
                         answers = uiState.answers,
                         packFilter = uiState.packFilter,
-                        generatedGames = uiState.generatedGames,
                         appLanguage = uiState.appLanguage,
                         onSetFilter = { filter -> viewModel.setPackFilter(filter) },
                         onCategoryClick = { catId ->
@@ -478,8 +468,7 @@ fun HarmonyApp(
                             }
                         },
                         onTopicClick = { topicId -> viewModel.openTopic(topicId) },
-                        onStartPack = { packId -> openPack(packId) },
-                        onStartGeneratedGame = { gameId -> viewModel.startGeneratedGame(gameId) }
+                        onStartPack = { packId -> openPack(packId) }
                     )
 
                     2 -> ChatScreen(
@@ -490,16 +479,7 @@ fun HarmonyApp(
                         onSendMessage = { text -> viewModel.sendChatMessage(text) },
                         onSendImage = { uri -> viewModel.sendChatImage(uri) },
                         onReportUser = { viewModel.reportPartner() },
-                        isBrainChatMode = uiState.isBrainChatMode,
-                        isBrainGenerating = uiState.isBrainGenerating,
-                        brainMessages = uiState.brainMessages,
-                        onToggleBrainChatMode = { enabled -> viewModel.setBrainChatMode(enabled) },
-                        onSendBrainMessage = { text -> viewModel.sendBrainMessage(text) },
-                        onResetBrainChat = { viewModel.resetBrainChat() },
-                        onSendVoiceMessage = { path, duration -> viewModel.sendVoiceChatMessage(path, duration) },
-                        onSendVoiceBrainMessage = { path, duration -> viewModel.sendVoiceBrainMessage(path, duration) },
-                        onSaveSuggestionToNotes = { suggestion -> viewModel.saveSuggestionToNotes(suggestion) },
-                        onSuggestionFeedback = { id, feedback -> viewModel.setSuggestionFeedback(id, feedback) }
+                        onSendVoiceMessage = { path, duration -> viewModel.sendVoiceChatMessage(path, duration) }
                     )
 
                     3 -> MomentsScreen(

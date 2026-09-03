@@ -51,15 +51,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.data.SupabaseConfig
 import com.example.data.model.ProfileEntity
+import com.example.data.session.AppSession
 import com.example.ui.AppLanguage
-import com.example.ui.tr
 import com.example.ui.components.HarmonyCard
 import com.example.ui.components.formatTimestamp
-import com.example.ui.session.AppSessionViewModel
+import com.example.ui.tr
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
@@ -68,7 +66,6 @@ import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonySurface
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
-import io.github.jan.supabase.auth.auth
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -77,9 +74,9 @@ import java.util.Locale
 @Composable
 fun ProfileSheet(
     profile: ProfileEntity,
+    session: AppSession,
     isEditProfileOpen: Boolean,
     onDismiss: () -> Unit,
-    onToggleSimulator: () -> Unit,
     onOpenEditProfile: () -> Unit,
     onCloseEditProfile: () -> Unit,
     onSaveEditProfile: (String, String, Long) -> Unit,
@@ -89,9 +86,7 @@ fun ProfileSheet(
     onToggleDarkMode: ((Boolean) -> Unit)? = null,
     language: AppLanguage = AppLanguage.GERMAN,
     onLanguageChange: (AppLanguage) -> Unit = {},
-    isPaired: Boolean = false,
     isDemoMode: Boolean = false,
-    partnerDisplayName: String? = null,
     onOpenPartnerConnection: () -> Unit = {},
     onOpenHarmonyReset: () -> Unit = {},
     onOpenDeleteAccount: () -> Unit = {},
@@ -100,16 +95,25 @@ fun ProfileSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scrollState = rememberScrollState()
-    val sessionViewModel: AppSessionViewModel = viewModel()
-    val accountEmail = runCatching {
-        SupabaseConfig.client.auth.currentSessionOrNull()?.user?.email
-    }.getOrNull()?.takeIf { it.isNotBlank() }
+    val isPaired = session.isPaired
+    val partner = session.partner
+    val accountEmail = session.email?.takeIf { it.isNotBlank() }
+    val ownName = if (isDemoMode) profile.userName else session.profile.displayName
+    val partnerName = if (isDemoMode) profile.partnerName else partner?.displayName.orEmpty()
 
     val userAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { onUpdateAvatar(it, true) }
     }
     val partnerAvatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { onUpdateAvatar(it, false) }
+        if (isDemoMode) uri?.let { onUpdateAvatar(it, false) }
+    }
+
+    val userAvatarModel: Any? = profile.userAvatarPath?.let(::File)
+        ?: if (!isDemoMode) session.profile.avatarUrl else null
+    val partnerAvatarModel: Any? = if (isDemoMode) {
+        profile.partnerAvatarPath?.let(::File)
+    } else {
+        partner?.avatarUrl
     }
 
     ModalBottomSheet(
@@ -130,41 +134,63 @@ fun ProfileSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (isDemoMode || isPaired) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileAvatar(
+                            model = userAvatarModel,
+                            fallback = ownName.take(1),
+                            label = tr("Dein Bild", "Your photo"),
+                            editable = true,
+                            onClick = { userAvatarPicker.launch("image/*") }
+                        )
+                        Text(text = "💕", fontSize = 24.sp)
+                        ProfileAvatar(
+                            model = partnerAvatarModel,
+                            fallback = partnerName.take(1),
+                            label = tr("Partnerbild", "Partner photo"),
+                            editable = isDemoMode,
+                            onClick = { if (isDemoMode) partnerAvatarPicker.launch("image/*") }
+                        )
+                    }
+                } else {
                     ProfileAvatar(
-                        path = profile.userAvatarPath,
-                        fallback = profile.userName.take(1),
+                        model = userAvatarModel,
+                        fallback = ownName.take(1),
                         label = tr("Dein Bild", "Your photo"),
+                        editable = true,
                         onClick = { userAvatarPicker.launch("image/*") }
                     )
-                    Text(text = "💕", fontSize = 24.sp)
-                    ProfileAvatar(
-                        path = profile.partnerAvatarPath,
-                        fallback = profile.partnerName.take(1),
-                        label = tr("Partnerbild", "Partner photo"),
-                        onClick = { partnerAvatarPicker.launch("image/*") }
-                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(modifier = Modifier.height(9.dp))
                 Text(
-                    text = "${profile.userName} & ${profile.partnerName}",
-                    fontSize = 18.sp,
+                    text = when {
+                        isDemoMode -> "$ownName & $partnerName"
+                        isPaired -> "$ownName & $partnerName"
+                        else -> session.profile.displayName
+                    },
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = HarmonyText
+                    color = HarmonyText,
+                    modifier = Modifier.testTag("real_profile_title")
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(3.dp))
                 Text(
                     text = when {
                         isDemoMode -> "Demo-Modus · keine Cloud-Kontodaten werden angelegt"
-                        isPaired -> "Verbunden mit ${partnerDisplayName ?: profile.partnerName}"
-                        else -> "Noch nicht verbunden · Harmony ist auch solo nutzbar"
+                        isPaired -> "Verbunden mit ${partner?.displayName.orEmpty()}"
+                        else -> "Noch nicht verbunden · verbinde einen echten Harmony-Account"
                     },
                     fontSize = 12.sp,
-                    color = HarmonyMuted
+                    color = HarmonyMuted,
+                    modifier = Modifier.testTag("pairing_status")
                 )
 
                 if (!isDemoMode && accountEmail != null) {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -194,7 +220,6 @@ fun ProfileSheet(
                                 fontSize = 10.5.sp,
                                 color = HarmonyMuted
                             )
-                            Spacer(modifier = Modifier.height(1.dp))
                             Text(
                                 text = accountEmail,
                                 fontSize = 13.5.sp,
@@ -207,31 +232,59 @@ fun ProfileSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            if (!isDemoMode) {
+                Spacer(modifier = Modifier.height(16.dp))
+                HarmonyCard {
+                    Column {
+                        Text(
+                            text = if (isPaired) "💕 Eure Verbindung" else "💕 Partner verbinden",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = HarmonyText
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Text(
+                            text = if (isPaired) {
+                                "Ihr seid mit zwei echten Supabase-Konten verbunden. Öffne hier eure Verbindung oder trenne sie."
+                            } else {
+                                "Erstelle einen echten 6-stelligen Harmony-Code oder gib den Code deines Partners ein."
+                            },
+                            fontSize = 12.5.sp,
+                            color = HarmonyMuted
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onOpenPartnerConnection,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp)
+                                .testTag("partner_connection_button"),
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
+                        ) {
+                            Text(
+                                text = if (isPaired) "Verbindung ansehen" else "Code erstellen oder eingeben",
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    }
+                }
+            }
 
+            Spacer(modifier = Modifier.height(12.dp))
             HarmonyCard {
                 Column {
                     Text(text = tr("Profil", "Profile"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
                     Spacer(modifier = Modifier.height(8.dp))
-                    ProfileRow(label = tr("Dein Name", "Your name"), value = profile.userName)
-                    ProfileRow(label = tr("Partnerin", "Partner"), value = profile.partnerName)
-                    ProfileRow(label = tr("Zusammen seit", "Together since"), value = formatTimestamp(profile.startDate))
-
-                    if (com.example.BuildConfig.DEBUG) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = tr("Partner-Simulator", "Partner simulator"), fontSize = 13.5.sp, color = HarmonyText)
-                            Switch(
-                                checked = profile.simulatorEnabled,
-                                onCheckedChange = { onToggleSimulator() },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = HarmonyPink
-                                ),
-                                modifier = Modifier.testTag("simulator_toggle")
+                    ProfileRow(label = tr("Dein Name", "Your name"), value = ownName)
+                    if (isDemoMode || isPaired) {
+                        ProfileRow(label = tr("Partnerin", "Partner"), value = partnerName)
+                        if (profile.startDate > 0L) {
+                            ProfileRow(
+                                label = tr("Zusammen seit", "Together since"),
+                                value = formatTimestamp(profile.startDate)
                             )
                         }
                     }
@@ -245,7 +298,7 @@ fun ProfileSheet(
                             Text(text = tr("Dunkles Design", "Dark mode"), fontSize = 13.5.sp, color = HarmonyText)
                             Switch(
                                 checked = isDarkMode,
-                                onCheckedChange = { onToggleDarkMode(it) },
+                                onCheckedChange = onToggleDarkMode,
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
                                     checkedTrackColor = HarmonyPink
@@ -274,15 +327,21 @@ fun ProfileSheet(
             if (onOpenDevStudio != null) {
                 HarmonyCard {
                     Column {
-                        Column {
-                            Text(text = tr("🛠️ Entwickler-Modus", "🛠️ Developer mode"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HarmonyText)
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = tr("Spiele & Städte bearbeiten, Ordner reinladen, Bilder anpassen", "Edit games and destinations, import folders, adjust images"),
-                                fontSize = 11.5.sp,
-                                color = HarmonyMuted
-                            )
-                        }
+                        Text(
+                            text = tr("🛠️ Entwickler-Modus", "🛠️ Developer mode"),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = HarmonyText
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = tr(
+                                "Spiele & Städte bearbeiten, Ordner reinladen, Bilder anpassen",
+                                "Edit games and destinations, import folders, adjust images"
+                            ),
+                            fontSize = 11.5.sp,
+                            color = HarmonyMuted
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
                             onClick = {
@@ -293,7 +352,12 @@ fun ProfileSheet(
                             shape = CircleShape,
                             colors = ButtonDefaults.buttonColors(containerColor = HarmonyPurple)
                         ) {
-                            Text(text = tr("Entwickler Studio Öffnen", "Open Developer Studio"), color = Color.White, fontSize = 13.5.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = tr("Entwickler Studio Öffnen", "Open Developer Studio"),
+                                color = Color.White,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -306,20 +370,6 @@ fun ProfileSheet(
 
                     if (!isDemoMode) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        Button(
-                            onClick = onOpenPartnerConnection,
-                            modifier = Modifier.fillMaxWidth().height(52.dp).testTag("partner_connection_button"),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
-                        ) {
-                            Text(
-                                text = if (isPaired) "Verbindung ansehen" else "Partner verbinden",
-                                color = Color.White,
-                                fontSize = 13.5.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
                         Button(
                             onClick = onOpenHarmonyReset,
                             modifier = Modifier.fillMaxWidth().height(52.dp).testTag("reset_harmony_button"),
@@ -371,7 +421,9 @@ fun ProfileSheet(
     }
 
     if (isEditProfileOpen) {
-        var userEdit by remember { mutableStateOf(profile.userName) }
+        var userEdit by remember(session.userId, isDemoMode) {
+            mutableStateOf(if (isDemoMode) profile.userName else session.profile.displayName)
+        }
         var partnerEdit by remember { mutableStateOf(profile.partnerName) }
         var startEdit by remember { mutableStateOf(formatTimestamp(profile.startDate)) }
 
@@ -390,7 +442,7 @@ fun ProfileSheet(
                         text = if (isDemoMode) {
                             tr("Namen und Startdatum eurer Beziehung.", "Your names and relationship start date.")
                         } else {
-                            tr("Dein Profilname und eure lokalen Beziehungsdaten.", "Your profile name and local relationship details.")
+                            tr("Dein Name wird in deinem echten Harmony-Profil gespeichert.", "Your name is stored in your real Harmony profile.")
                         },
                         fontSize = 13.sp,
                         color = HarmonyMuted
@@ -402,43 +454,30 @@ fun ProfileSheet(
                         onValueChange = { userEdit = it },
                         placeholder = { Text(tr("Dein Name", "Your name"), color = HarmonyMuted) },
                         modifier = Modifier.fillMaxWidth().testTag("edit_user_name_input"),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = HarmonyPink,
-                            unfocusedBorderColor = HarmonyLine,
-                            focusedTextColor = HarmonyText,
-                            unfocusedTextColor = HarmonyText
-                        )
+                        colors = profileTextFieldColors()
                     )
 
-                    Spacer(modifier = Modifier.height(9.dp))
                     if (isDemoMode) {
+                        Spacer(modifier = Modifier.height(9.dp))
                         OutlinedTextField(
                             value = partnerEdit,
                             onValueChange = { partnerEdit = it },
                             placeholder = { Text(tr("Name Partnerin", "Partner's name"), color = HarmonyMuted) },
                             modifier = Modifier.fillMaxWidth().testTag("edit_partner_name_input"),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = HarmonyPink,
-                                unfocusedBorderColor = HarmonyLine,
-                                focusedTextColor = HarmonyText,
-                                unfocusedTextColor = HarmonyText
-                            )
+                            colors = profileTextFieldColors()
                         )
-                        Spacer(modifier = Modifier.height(9.dp))
                     }
 
-                    OutlinedTextField(
-                        value = startEdit,
-                        onValueChange = { startEdit = it },
-                        placeholder = { Text(tr("Zusammen seit (TT.MM.JJJJ)", "Together since (DD.MM.YYYY)"), color = HarmonyMuted) },
-                        modifier = Modifier.fillMaxWidth().testTag("edit_start_date_input"),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = HarmonyPink,
-                            unfocusedBorderColor = HarmonyLine,
-                            focusedTextColor = HarmonyText,
-                            unfocusedTextColor = HarmonyText
+                    if (isDemoMode || isPaired) {
+                        Spacer(modifier = Modifier.height(9.dp))
+                        OutlinedTextField(
+                            value = startEdit,
+                            onValueChange = { startEdit = it },
+                            placeholder = { Text(tr("Zusammen seit (TT.MM.JJJJ)", "Together since (DD.MM.YYYY)"), color = HarmonyMuted) },
+                            modifier = Modifier.fillMaxWidth().testTag("edit_start_date_input"),
+                            colors = profileTextFieldColors()
                         )
-                    )
+                    }
 
                     Spacer(modifier = Modifier.height(18.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -457,12 +496,8 @@ fun ProfileSheet(
                                 } catch (_: Exception) {
                                     profile.startDate
                                 }
-                                if (isDemoMode) {
-                                    onSaveEditProfile(userEdit, partnerEdit, parsedDate)
-                                } else {
-                                    sessionViewModel.updateProfileDisplayName(userEdit)
-                                    onSaveEditProfile(userEdit, profile.partnerName, parsedDate)
-                                }
+                                val savedPartnerName = if (isDemoMode) partnerEdit else partner?.displayName.orEmpty()
+                                onSaveEditProfile(userEdit, savedPartnerName, parsedDate)
                             },
                             modifier = Modifier.weight(1f),
                             shape = CircleShape,
@@ -478,9 +513,17 @@ fun ProfileSheet(
 }
 
 @Composable
+private fun profileTextFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = HarmonyPink,
+    unfocusedBorderColor = HarmonyLine,
+    focusedTextColor = HarmonyText,
+    unfocusedTextColor = HarmonyText
+)
+
+@Composable
 fun ProfileRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).border(width = 0.dp, color = Color.Transparent),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -491,9 +534,10 @@ fun ProfileRow(label: String, value: String) {
 
 @Composable
 private fun ProfileAvatar(
-    path: String?,
+    model: Any?,
     fallback: String,
     label: String,
+    editable: Boolean,
     onClick: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -503,28 +547,35 @@ private fun ProfileAvatar(
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(HarmonyPink, HarmonyPurple)))
                 .border(2.dp, Color.White.copy(alpha = 0.72f), CircleShape)
-                .clickable(onClick = onClick),
+                .then(if (editable) Modifier.clickable(onClick = onClick) else Modifier),
             contentAlignment = Alignment.Center
         ) {
-            if (path != null) {
+            if (model != null) {
                 AsyncImage(
-                    model = File(path),
+                    model = model,
                     contentDescription = label,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().clip(CircleShape)
                 )
             } else {
-                Text(fallback.uppercase(), color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
+                Text(
+                    fallback.ifBlank { "?" }.uppercase(),
+                    color = Color.White,
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.Black
+                )
             }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(25.dp)
-                    .background(HarmonyPink, CircleShape)
-                    .border(1.dp, Color.White, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("＋", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Black)
+            if (editable) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(25.dp)
+                        .background(HarmonyPink, CircleShape)
+                        .border(1.dp, Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("＋", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Black)
+                }
             }
         }
         Spacer(Modifier.height(4.dp))

@@ -168,8 +168,7 @@ fun DevStudioScreen(
                 "🔗 Ketten",
                 "🖼️ Bilder",
                 "⚡ Test",
-                "📤 Export",
-                "🧠 Brain"
+                "📤 Export"
             )
             tabs.forEachIndexed { idx, title ->
                 Tab(
@@ -244,11 +243,6 @@ fun DevStudioScreen(
                 packs = packs,
                 onShowToast = onShowToast,
                 onChanged = { updateCounter++ }
-            )
-
-            7 -> DevBrainTab(
-                profile = profile,
-                onShowToast = onShowToast
             )
         }
     }
