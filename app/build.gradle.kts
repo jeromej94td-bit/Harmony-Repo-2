@@ -25,6 +25,8 @@ plugins {
 //  alias(libs.plugins.google.services)
 }
 
+apply(from = "introspection-golden-audio.gradle.kts")
+
 abstract class ReconstructMerlinThemeTask : DefaultTask() {
   @get:InputFiles
   @get:PathSensitive(PathSensitivity.RELATIVE)
