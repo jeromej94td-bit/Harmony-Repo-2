@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'app/src/main/java/com/example/MainActivity.kt'
+      - 'app/src/main/java/com/example/ui/HarmonyViewModel.kt'
       - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
       - 'app/src/main/java/com/example/ui/screens/PartnerConnectionSheet.kt'
       - 'app/src/main/java/com/example/ui/screens/ChatScreen.kt'
@@ -18,12 +19,14 @@ on:
       - 'app/src/main/java/com/example/data/SupabaseKidGeneratorGateway.kt'
       - 'app/src/test/java/com/example/CurrentAppStateContractTest.kt'
       - 'app/src/test/java/com/example/EureMischungRemovalContractTest.kt'
+      - 'app/src/test/java/com/example/RealUserProfileAndBrainRemovalContractTest.kt'
       - '.github/workflows/current-app-state-regression.yml'
   push:
     branches:
       - main
     paths:
       - 'app/src/main/java/com/example/MainActivity.kt'
+      - 'app/src/main/java/com/example/ui/HarmonyViewModel.kt'
       - 'app/src/main/java/com/example/ui/screens/ProfileSheet.kt'
       - 'app/src/main/java/com/example/ui/screens/PartnerConnectionSheet.kt'
       - 'app/src/main/java/com/example/ui/screens/ChatScreen.kt'
@@ -36,6 +39,7 @@ on:
       - 'app/src/main/java/com/example/data/SupabaseKidGeneratorGateway.kt'
       - 'app/src/test/java/com/example/CurrentAppStateContractTest.kt'
       - 'app/src/test/java/com/example/EureMischungRemovalContractTest.kt'
+      - 'app/src/test/java/com/example/RealUserProfileAndBrainRemovalContractTest.kt'
       - '.github/workflows/current-app-state-regression.yml'
   workflow_dispatch:
 
@@ -76,6 +80,7 @@ jobs:
           gradle :app:testDebugUnitTest
           --tests 'com.example.CurrentAppStateContractTest'
           --tests 'com.example.EureMischungRemovalContractTest'
+          --tests 'com.example.RealUserProfileAndBrainRemovalContractTest'
           --stacktrace
           --no-daemon
           --no-configuration-cache
