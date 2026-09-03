@@ -2,13 +2,8 @@ package com.example.data.repository
 
 import android.content.Context
 import android.net.Uri
-import com.example.data.brain.db.BrainAnswerHistoryEntity
-import com.example.data.brain.repository.BrainRepository
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.AnswerEntity
-import com.example.data.model.BrainInterestEntity
-import com.example.data.model.BrainQuestionEntity
-import com.example.data.model.BrainSuggestionEntity
 import com.example.data.model.ChatMessageEntity
 import com.example.data.model.CoupleStatsEntity
 import com.example.data.model.EitherOrAnswerCodec
@@ -35,13 +30,7 @@ class HarmonyRepository(
     val chatMessagesFlow: Flow<List<ChatMessageEntity>> = db.chatDao().getAllMessages()
     val sharedPicsFlow: Flow<List<SharedPicEntity>> = db.sharedPicDao().getAllPics()
     val momentsFlow: Flow<List<MomentEntity>> = db.momentDao().getAllMoments()
-    val statsFlow: Flow<CoupleStatsEntity?> = db.coupleStatsDao().getStats()
-    val brainInterestsFlow: Flow<List<BrainInterestEntity>> = db.brainDao().getAllInterestsFlow()
-    val brainSuggestionsFlow: Flow<List<BrainSuggestionEntity>> = db.brainDao().getAllSuggestionsFlow()
-    val brainQuestionsFlow: Flow<List<BrainQuestionEntity>> = db.brainDao().getAllQuestionsFlow()
-
-    val brainRepository = BrainRepository(db.brainRoomDao(), context)
-    private val answerSaveMutex = Mutex()
+    val statsFlow: Flow<CoupleStatsEntity?> = db.coupleStatsDao().getStats()    private val answerSaveMutex = Mutex()
 
     suspend fun ensureInitialData() {
         // Production starts neutral. Real identity/couple names come from AppSession.
@@ -54,10 +43,6 @@ class HarmonyRepository(
         if (stats == null) {
             db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1))
         }
-
-        // Perform initial idempotent backfill of legacy answers into BrainAnswerHistory
-        val legacyAnswers = db.answerDao().getAllAnswers().firstOrNull().orEmpty()
-        brainRepository.performInitialBackfillIfNeeded(legacyAnswers)
     }
 
     suspend fun ensureDemoData() {
@@ -123,21 +108,9 @@ class HarmonyRepository(
             val existing = db.answerDao().getAllAnswersDirect().firstOrNull {
                 it.packId == packId && it.questionIndex == questionIndex
             }
-
             if (existing?.answerText == answerText) {
-                val latestBrainAnswer = db.brainRoomDao()
-                    .getLatestAnswerForQuestion("$packId-$questionIndex")
-                if (brainHistoryMatches(latestBrainAnswer, answerText)) {
-                    return@withLock
-                }
-
-                // The durable answer exists but its Brain history may have been interrupted
-                // between the Room write and the append-only Brain write. Repair only the
-                // missing signal; do not replace the user's answer or create duplicates.
-                brainRepository.recordAnswer(packId, questionIndex, answerText)
                 return@withLock
             }
-
             db.answerDao().insertAnswer(
                 AnswerEntity(
                     packId = packId,
@@ -145,31 +118,10 @@ class HarmonyRepository(
                     answerText = answerText
                 )
             )
-            brainRepository.recordAnswer(packId, questionIndex, answerText)
         }
     }
 
-    private fun brainHistoryMatches(
-        history: BrainAnswerHistoryEntity?,
-        answerText: String
-    ): Boolean {
-        history ?: return false
-        val coupleChoice = EitherOrAnswerCodec.decode(answerText)
-        return if (coupleChoice != null) {
-            history.answerPersonA == coupleChoice.userChoice &&
-                history.answerPersonB == coupleChoice.partnerChoice
-        } else {
-            history.answerPersonA == answerText && history.answerPersonB == null
-        }
-    }
-
-    suspend fun recordBrainSkip(packId: String, questionIndex: Int) {
-        brainRepository.recordSkip(packId, questionIndex)
-    }
-
-    suspend fun recordBrainPackFinished(packId: String) {
-        brainRepository.recordPackFinished(packId)
-    }
+    
 
     suspend fun sendChatMessage(text: String, sender: String = "me") {
         db.chatDao().insertMessage(ChatMessageEntity(sender = sender, text = text))
@@ -226,30 +178,11 @@ class HarmonyRepository(
                 imagePathsJson = pathsJson
             )
         )
-        brainRepository.recordMoment(title, content)
     }
 
     suspend fun updateStats(cities: Int, countries: Int) {
         db.coupleStatsDao().insertOrUpdateStats(CoupleStatsEntity(id = 1, visitedCities = cities, visitedCountries = countries))
-    }
-
-    // --- HARMONY BRAIN PERSISTENCE ---
-    suspend fun getAllInterests(): List<BrainInterestEntity> = db.brainDao().getAllInterests()
-    suspend fun saveInterest(interest: BrainInterestEntity) = db.brainDao().insertInterest(interest)
-    suspend fun saveInterests(interests: List<BrainInterestEntity>) = db.brainDao().insertInterests(interests)
-    suspend fun clearInterests() = db.brainDao().clearInterests()
-
-    suspend fun getAllSuggestions(): List<BrainSuggestionEntity> = db.brainDao().getAllSuggestions()
-    suspend fun saveSuggestion(suggestion: BrainSuggestionEntity) = db.brainDao().insertSuggestion(suggestion)
-    suspend fun saveSuggestions(suggestions: List<BrainSuggestionEntity>) = db.brainDao().insertSuggestions(suggestions)
-    suspend fun updateSuggestion(suggestion: BrainSuggestionEntity) = db.brainDao().updateSuggestion(suggestion)
-    suspend fun clearSuggestions() = db.brainDao().clearSuggestions()
-
-    suspend fun getAllQuestions(): List<BrainQuestionEntity> = db.brainDao().getAllQuestions()
-    suspend fun saveQuestion(question: BrainQuestionEntity) = db.brainDao().insertQuestion(question)
-    suspend fun saveQuestions(questions: List<BrainQuestionEntity>) = db.brainDao().insertQuestions(questions)
-    suspend fun updateQuestion(question: BrainQuestionEntity) = db.brainDao().updateQuestion(question)
-    suspend fun clearQuestions() = db.brainDao().clearQuestions()
+    } = db.brainDao().clearQuestions()
 
     private suspend fun copyMediaToApp(uri: Uri, folder: String): String? = withContext(Dispatchers.IO) {
         runCatching {

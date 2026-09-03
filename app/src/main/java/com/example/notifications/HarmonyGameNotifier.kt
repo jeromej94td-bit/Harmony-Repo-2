@@ -80,7 +80,7 @@ object HarmonyGameNotifier {
 
             val notifTitle = "✨ Neues Spiel für euch"
             val notifText = "$emoji $title wartet in Für dich"
-            val expandedText = "Euer Harmony Brain hat ein neues Spiel für euch erstellt: $emoji $title"
+            val expandedText = "Harmony hat ein neues Spiel für euch erstellt: $emoji $title"
 
             val largeIconBitmap = createEmojiBadgeBitmap(emoji)
 

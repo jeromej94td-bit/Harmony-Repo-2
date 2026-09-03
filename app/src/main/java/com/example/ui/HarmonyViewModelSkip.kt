@@ -32,7 +32,6 @@ fun HarmonyViewModel.skipCurrentQuestion() {
     val db = HarmonyDatabase.getInstance(app)
     viewModelScope.launch {
         db.deleteAnswerForSkip(packId, questionIndex)
-        HarmonyRepository(db, app).recordBrainSkip(packId, questionIndex)
     }
 
     nextStep()

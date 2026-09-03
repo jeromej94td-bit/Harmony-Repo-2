@@ -1,0 +1,466 @@
+Starting a Gradle Daemon, 1 busy and 7 stopped Daemons could not be reused, use --status for details
+> Task :app:reconstructIntrospectionIntro UP-TO-DATE
+> Task :app:reconstructMerlinTheme UP-TO-DATE
+> Task :app:reconstructMoralGreyZonesIntro UP-TO-DATE
+
+> Task :app:verifyProductionSourceIsolation
+Archived feature isolation check passed.
+
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:compileDebugKotlin
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:298:27 Unresolved reference 'brainRoomDao'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:299:31 Unresolved reference 'startPackForTest'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:302:31 Unresolved reference 'startPack'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:317:23 Unresolved reference 'brainRoomDao'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:362:31 Unresolved reference 'closeExitConfirm'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:364:31 Unresolved reference 'closeOwnAnswerDialog'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:366:31 Unresolved reference 'askExitRun'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:370:27 Unresolved reference 'closeProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:373:27 Unresolved reference 'closeAddMomentDialog'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:416:54 Unresolved reference 'openProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:450:76 Unresolved reference 'addSharedPictures'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:451:68 Unresolved reference 'updateSharedPicture'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:456:25 No parameter with name 'brainInterests' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:456:50 Unresolved reference 'brainInterests'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:457:25 No parameter with name 'brainSuggestions' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:457:52 Unresolved reference 'brainSuggestions'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:458:25 No parameter with name 'brainQuestions' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:458:50 Unresolved reference 'brainQuestions'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:459:25 No parameter with name 'onSuggestionFeedback' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:459:50 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:459:54 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:459:76 Unresolved reference 'setSuggestionFeedback'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:460:25 No parameter with name 'onCategoryClick' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:460:45 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:467:25 No parameter with name 'onTopicClick' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:467:42 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:468:25 Argument already passed for this parameter.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:468:41 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:469:25 No parameter with name 'onStartGeneratedGame' found.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:469:50 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:469:70 Unresolved reference 'startGeneratedGame'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:477:43 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:477:61 Unresolved reference 'sendChatMessage'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:478:41 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:478:58 Unresolved reference 'sendChatImage'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:479:52 Unresolved reference 'reportPartner'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:480:49 Unresolved reference 'brainMessages'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:481:48 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:481:54 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:481:76 Unresolved reference 'sendVoiceChatMessage'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:482:53 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:482:77 Unresolved reference 'saveSuggestionToNotes'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:483:50 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:483:54 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:483:76 Unresolved reference 'setSuggestionFeedback'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:491:55 Unresolved reference 'openAddMomentDialog'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:492:56 Unresolved reference 'closeAddMomentDialog'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:493:80 Unresolved reference 'addMoment'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:576:39 Unresolved reference 'closeProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:602:67 Unresolved reference 'toggleDarkMode'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:604:64 Unresolved reference 'setLanguage'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:605:49 Unresolved reference 'closeProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:606:57 Unresolved reference 'toggleSimulator'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:607:57 Unresolved reference 'openEditProfile'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:608:58 Unresolved reference 'closeEditProfile'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:609:68 Unresolved reference 'saveEditProfile'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:610:69 Unresolved reference 'updateProfileAvatar'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:613:39 Unresolved reference 'closeProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:617:39 Unresolved reference 'closeProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:621:39 Unresolved reference 'closeProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:720:49 Unresolved reference 'previousStep'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:721:58 Unresolved reference 'closeExitConfirm'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:722:53 Unresolved reference 'closeRunner'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:727:43 Unresolved reference 'openOwnAnswerDialog'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:730:62 Unresolved reference 'closeOwnAnswerDialog'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:744:39 Unresolved reference 'saveOwnAnswer'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:794:51 Unresolved reference 'closeRunner'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:862:43 Unresolved reference 'startPack'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:865:79 No value passed for parameter 'expectedIndex'.
+e: file:///app/applet/app/src/main/java/com/example/MainActivity.kt:886:39 Unresolved reference 'saveEitherOrAnswer'.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:33:81 Unresolved reference 'private'.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:107:9 Unresolved reference 'answerSaveMutex'.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:7 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:9 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:11 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:12 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:20 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:21 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:22 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:23 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:37 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/data/repository/HarmonyRepository.kt:185:38 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:133:30 Unresolved reference 'rawGenerated'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:134:23 Unresolved reference 'it'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:134:51 Unresolved reference 'it'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:135:35 Unresolved reference 'it'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:248:14 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:249:9 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:249:33 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:249:35 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:9 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:23 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:24 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:33 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:34 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:45 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:46 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:250:55 Syntax error: Expecting member declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:253:9 Unresolved reference '_toastMessage'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:257:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:258:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:272:30 Unresolved reference 'uiState'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:272:61 Unresolved reference 'it'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:273:26 Unresolved reference 'it'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:273:43 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:273:46 Unresolved reference 'it'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:278:72 Unresolved reference 'keys'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:280:9 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:289:9 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:298:19 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:303:42 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:304:9 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:307:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:308:13 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:309:17 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:316:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:317:13 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:25 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:25 Not enough information to infer type argument for 'K'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:25 Not enough information to infer type argument for 'V'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:36 Not enough information to infer type argument for 'K'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:36 Not enough information to infer type argument for 'V'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:43 Not enough information to infer type argument for 'K'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:43 Not enough information to infer type argument for 'V'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:318:54 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:321:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:322:13 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:323:17 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:329:19 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:332:23 'operator' modifier is required on 'FirNamedFunctionSymbol kotlin/text/compareTo' in 'compareTo'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:335:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:340:19 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:349:9 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:350:9 Unresolved reference '_isExitConfirmOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:355:19 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:357:19 'operator' modifier is required on 'FirNamedFunctionSymbol kotlin/compareTo' in 'compareTo'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:358:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:361:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:362:42 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:362:42 Function 'component1()' is ambiguous for this expression: 
+fun <T> Array<out T>.component1(): T
+fun ByteArray.component1(): Byte
+fun ShortArray.component1(): Short
+fun IntArray.component1(): Int
+fun LongArray.component1(): Long
+fun FloatArray.component1(): Float
+fun DoubleArray.component1(): Double
+fun BooleanArray.component1(): Boolean
+fun CharArray.component1(): Char
+fun <T> List<T>.component1(): T
+fun <K, V> Map.Entry<K, V>.component1(): K
+fun UIntArray.component1(): UInt
+fun ULongArray.component1(): ULong
+fun UByteArray.component1(): UByte
+fun UShortArray.component1(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:362:42 Function 'component2()' is ambiguous for this expression: 
+fun <T> Array<out T>.component2(): T
+fun ByteArray.component2(): Byte
+fun ShortArray.component2(): Short
+fun IntArray.component2(): Int
+fun LongArray.component2(): Long
+fun FloatArray.component2(): Float
+fun DoubleArray.component2(): Double
+fun BooleanArray.component2(): Boolean
+fun CharArray.component2(): Char
+fun <T> List<T>.component2(): T
+fun <K, V> Map.Entry<K, V>.component2(): V
+fun UIntArray.component2(): UInt
+fun ULongArray.component2(): ULong
+fun UByteArray.component2(): UByte
+fun UShortArray.component2(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:363:17 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:365:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:370:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:371:13 Unresolved reference '_isExitConfirmOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:376:9 Unresolved reference '_isExitConfirmOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:380:19 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:382:9 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:383:9 Unresolved reference '_isExitConfirmOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:387:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:388:13 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:389:21 Unresolved reference 'currentAnswers'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:389:46 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:389:46 Function 'component1()' is ambiguous for this expression: 
+fun <T> Array<out T>.component1(): T
+fun ByteArray.component1(): Byte
+fun ShortArray.component1(): Short
+fun IntArray.component1(): Int
+fun LongArray.component1(): Long
+fun FloatArray.component1(): Float
+fun DoubleArray.component1(): Double
+fun BooleanArray.component1(): Boolean
+fun CharArray.component1(): Char
+fun <T> List<T>.component1(): T
+fun <K, V> Map.Entry<K, V>.component1(): K
+fun UIntArray.component1(): UInt
+fun ULongArray.component1(): ULong
+fun UByteArray.component1(): UByte
+fun UShortArray.component1(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:389:46 Function 'component2()' is ambiguous for this expression: 
+fun <T> Array<out T>.component2(): T
+fun ByteArray.component2(): Byte
+fun ShortArray.component2(): Short
+fun IntArray.component2(): Int
+fun LongArray.component2(): Long
+fun FloatArray.component2(): Float
+fun DoubleArray.component2(): Double
+fun BooleanArray.component2(): Boolean
+fun CharArray.component2(): Char
+fun <T> List<T>.component2(): T
+fun <K, V> Map.Entry<K, V>.component2(): V
+fun UIntArray.component2(): UInt
+fun ULongArray.component2(): ULong
+fun UByteArray.component2(): UByte
+fun UShortArray.component2(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:390:21 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:390:47 Unresolved reference 'pack'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:392:15 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:392:15 Not enough information to infer type argument for 'T'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:394:17 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:400:9 Unresolved reference '_ownAnswerTargetIndex'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:401:9 Unresolved reference '_ownAnswerMode'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:402:9 Unresolved reference '_isOwnAnswerDialogOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:406:9 Unresolved reference '_isOwnAnswerDialogOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:407:9 Unresolved reference '_ownAnswerTargetIndex'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:408:9 Unresolved reference '_ownAnswerMode'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:412:19 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:413:27 Unresolved reference '_ownAnswerTargetIndex'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:417:42 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:417:57 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:417:57 Not enough information to infer type argument for 'T'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:417:63 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:418:13 Unresolved reference 'put'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:426:43 Unresolved reference 'keys'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:430:17 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:435:17 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:436:39 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:436:39 Function 'component1()' is ambiguous for this expression: 
+fun <T> Array<out T>.component1(): T
+fun ByteArray.component1(): Byte
+fun ShortArray.component1(): Short
+fun IntArray.component1(): Int
+fun LongArray.component1(): Long
+fun FloatArray.component1(): Float
+fun DoubleArray.component1(): Double
+fun BooleanArray.component1(): Boolean
+fun CharArray.component1(): Char
+fun <T> List<T>.component1(): T
+fun <K, V> Map.Entry<K, V>.component1(): K
+fun UIntArray.component1(): UInt
+fun ULongArray.component1(): ULong
+fun UByteArray.component1(): UByte
+fun UShortArray.component1(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:436:39 Function 'component2()' is ambiguous for this expression: 
+fun <T> Array<out T>.component2(): T
+fun ByteArray.component2(): Byte
+fun ShortArray.component2(): Short
+fun IntArray.component2(): Int
+fun LongArray.component2(): Long
+fun FloatArray.component2(): Float
+fun DoubleArray.component2(): Double
+fun BooleanArray.component2(): Boolean
+fun CharArray.component2(): Char
+fun <T> List<T>.component2(): T
+fun <K, V> Map.Entry<K, V>.component2(): V
+fun UIntArray.component2(): UInt
+fun ULongArray.component2(): ULong
+fun UByteArray.component2(): UByte
+fun UShortArray.component2(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:436:51 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:439:17 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:444:17 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:445:21 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:451:25 'operator' modifier is required on 'FirNamedFunctionSymbol kotlin/text/compareTo' in 'compareTo'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:452:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:453:13 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:454:35 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:454:35 Function 'component1()' is ambiguous for this expression: 
+fun <T> Array<out T>.component1(): T
+fun ByteArray.component1(): Byte
+fun ShortArray.component1(): Short
+fun IntArray.component1(): Int
+fun LongArray.component1(): Long
+fun FloatArray.component1(): Float
+fun DoubleArray.component1(): Double
+fun BooleanArray.component1(): Boolean
+fun CharArray.component1(): Char
+fun <T> List<T>.component1(): T
+fun <K, V> Map.Entry<K, V>.component1(): K
+fun UIntArray.component1(): UInt
+fun ULongArray.component1(): ULong
+fun UByteArray.component1(): UByte
+fun UShortArray.component1(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:454:35 Function 'component2()' is ambiguous for this expression: 
+fun <T> Array<out T>.component2(): T
+fun ByteArray.component2(): Byte
+fun ShortArray.component2(): Short
+fun IntArray.component2(): Int
+fun LongArray.component2(): Long
+fun FloatArray.component2(): Float
+fun DoubleArray.component2(): Double
+fun BooleanArray.component2(): Boolean
+fun CharArray.component2(): Char
+fun <T> List<T>.component2(): T
+fun <K, V> Map.Entry<K, V>.component2(): V
+fun UIntArray.component2(): UInt
+fun ULongArray.component2(): ULong
+fun UByteArray.component2(): UByte
+fun UShortArray.component2(): UShort.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:454:47 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:457:13 Unresolved reference '_activeRun'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:458:13 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:459:17 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:481:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:482:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:483:27 Unresolved reference 'uiState'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:487:17 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:494:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:495:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:496:27 Unresolved reference 'uiState'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:500:17 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:506:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:507:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:508:13 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:513:9 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:519:9 Unresolved reference '_isAddMomentOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:523:9 Unresolved reference '_isAddMomentOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:528:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:529:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:530:13 Unresolved reference '_isAddMomentOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:531:13 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:538:9 Unresolved reference '_isProfileSheetOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:542:9 Unresolved reference '_isProfileSheetOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:546:9 Unresolved reference '_isDarkMode'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:547:9 Unresolved reference 'settingsPrefs'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:547:66 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:551:9 Unresolved reference '_appLanguage'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:552:9 Unresolved reference 'settingsPrefs'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:552:62 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:556:23 Unresolved reference 'uiState'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:557:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:558:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:563:9 Unresolved reference '_isEditProfileOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:567:9 Unresolved reference '_isEditProfileOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:571:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:572:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:573:13 Unresolved reference '_isEditProfileOpen'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:574:13 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:579:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:580:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:581:13 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:587:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:588:13 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:589:13 Unresolved reference 'showToast'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:594:9 Unresolved reference 'viewModelScope'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:594:33 Unresolved reference 'repository'.
+e: file:///app/applet/app/src/main/java/com/example/ui/HarmonyViewModel.kt:599:5 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:95:17 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:96:13 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:13 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:19 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:20 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:29 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:31 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:39 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:40 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:47 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:48 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:50 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:51 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:53 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:54 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:56 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:56 Functions which invoke @Composable functions must be marked with the @Composable annotation
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:99:56 Function declaration must have a name.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:101:28 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:108:21 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:109:21 @Composable invocations can only happen from the context of a @Composable function
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:111:32 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:113:33 @Composable invocations can only happen from the context of a @Composable function
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:118:17 @Composable invocations can only happen from the context of a @Composable function
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:121:17 @Composable invocations can only happen from the context of a @Composable function
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:131:45 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:132:47 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:134:54 Function invocation 'context(...)' expected.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:135:33 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:136:33 Unresolved reference 'onSaveToNotes'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:136:47 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:143:51 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:145:44 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:150:44 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:153:45 Unresolved reference 'isSaved'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:159:26 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:167:58 Function invocation 'context(...)' expected.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:168:37 Unresolved reference 'onOpenMaps'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:168:48 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:196:45 Unresolved reference 'isLiked'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:197:47 Unresolved reference 'isLiked'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:199:54 Function invocation 'context(...)' expected.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:200:33 Unresolved reference 'isLiked'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:200:44 Unresolved reference 'isLiked'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:201:33 Unresolved reference 'onLike'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:201:40 Unresolved reference 'suggestion'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:208:40 Unresolved reference 'isLiked'.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:214:9 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:215:5 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/components/VoiceComponents.kt:216:1 Syntax error: Expecting a top level declaration.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:63:34 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:64:34 Unresolved reference 'VoiceMessageBubble'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:65:34 Unresolved reference 'VoiceRecordingBar'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:154:13 Unresolved reference 'VoiceRecordingBar'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:158:40 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:158:51 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:162:40 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:221:25 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:223:51 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/ChatScreen.kt:321:13 Unresolved reference 'VoiceMessageBubble'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/FullscreenDeepTalk.kt:44:34 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/FullscreenDeepTalk.kt:320:13 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/FullscreenDeepTalk.kt:322:39 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/FullscreenMemoryMatch.kt:43:34 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/FullscreenMemoryMatch.kt:145:25 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/FullscreenMemoryMatch.kt:147:51 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/MomentsScreen.kt:120:51 Unresolved reference 'openProfileSheet'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt:96:34 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt:1362:33 Unresolved reference 'VoiceInputButton'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt:1364:59 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/SexIntimacyChoiceBoards.kt:69:50 Unresolved reference 'openOwnAnswerDialog'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/SexIntimacyChoiceBoards.kt:81:50 Unresolved reference 'nextStep'.
+e: file:///app/applet/app/src/main/java/com/example/ui/screens/SexIntimacyChoiceBoards.kt:124:42 Unresolved reference 'nextStep'.
+
+> Task :app:compileDebugKotlin FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 5s
+12 actionable tasks: 2 executed, 10 up-to-date
