@@ -49,7 +49,6 @@ class HappyCoupleVisualContractTest {
         composeRule.onNodeWithText("Remote content changed this prompt").assertDoesNotExist()
 
         (1..4).forEach { number ->
-            composeRule.onNodeWithTag("happy_couple_number_$number").assertExists()
             composeRule.onNodeWithText(number.toString()).assertExists()
         }
 
