@@ -283,6 +283,7 @@ private fun cinematicLerp(start: Float, end: Float, fraction: Float): Float =
 private fun AnimatedQuestionCard(
     question: String,
     glitchAmount: Float = 0f,
+    layoutMetrics: StandardQuizLayoutMetrics = StandardQuizLayoutMetrics(),
     modifier: Modifier = Modifier
 ) {
     val transition = rememberInfiniteTransition(label = "question_spotlight")
@@ -337,15 +338,18 @@ private fun AnimatedQuestionCard(
                 ),
                 shape = shape
             )
-            .padding(horizontal = 19.dp, vertical = 21.dp)
+            .padding(
+                horizontal = layoutMetrics.questionHorizontalPaddingDp.dp,
+                vertical = layoutMetrics.questionVerticalPaddingDp.dp
+            )
     ) {
         if (glitch > 0.025f) {
             Text(
                 text = displayedQuestion,
-                fontSize = 24.sp,
+                fontSize = layoutMetrics.questionFontSizeSp.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF7CF7FF).copy(alpha = glitch * 0.48f),
-                lineHeight = 31.sp,
+                lineHeight = layoutMetrics.questionLineHeightSp.sp,
                 modifier = Modifier.graphicsLayer {
                     translationX = 11f * glitch + sin(glitch * 41f) * 5f
                     translationY = sin(glitch * 27f) * 3f
@@ -353,10 +357,10 @@ private fun AnimatedQuestionCard(
             )
             Text(
                 text = displayedQuestion,
-                fontSize = 24.sp,
+                fontSize = layoutMetrics.questionFontSizeSp.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFFFF63D6).copy(alpha = glitch * 0.42f),
-                lineHeight = 31.sp,
+                lineHeight = layoutMetrics.questionLineHeightSp.sp,
                 modifier = Modifier.graphicsLayer {
                     translationX = -10f * glitch + sin(glitch * 33f) * 4f
                     translationY = -sin(glitch * 23f) * 2.5f
@@ -365,10 +369,10 @@ private fun AnimatedQuestionCard(
         }
         Text(
             text = displayedQuestion,
-            fontSize = 24.sp,
+            fontSize = layoutMetrics.questionFontSizeSp.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color.White,
-            lineHeight = 31.sp,
+            lineHeight = layoutMetrics.questionLineHeightSp.sp,
             modifier = Modifier.graphicsLayer {
                 translationX = sin(glitch * 52f) * 4.5f * glitch
                 translationY = sin(glitch * 37f) * 1.8f * glitch
@@ -993,6 +997,37 @@ fun QuizRunnerScreen(
                             QuestionInteractionPolicy.resolveSpec(pack, activeRun.currentIndex, it)
                         }
                         val fullscreenMechanic = if (imageChoiceKind == null) interactionSpec?.fullscreenMechanic else null
+                        val isPizzaBurgerTensionQuestion = q?.q == PIZZA_BURGER_TENSION_QUESTION
+                        val rawOptions = q?.options ?: emptyList()
+                        val processedOptions = rawOptions.map {
+                            it.replace("{user}", profile.userName).replace("{partner}", profile.partnerName)
+                        }
+                        val customTextLabel = tr("Schreibe deine eigene Antwort", "Write your own answer")
+                        val skipLabel = tr("Überspringen", "Skip")
+                        val baseOptions = if (isPizzaBurgerTensionQuestion) {
+                            processedOptions.take(2)
+                        } else {
+                            processedOptions
+                        }
+                        val options = if (isPizzaBurgerTensionQuestion || interactionSpec == null) {
+                            baseOptions
+                        } else {
+                            QuizAnswerOptionsPolicy.build(
+                                options = baseOptions,
+                                spec = interactionSpec,
+                                customTextLabel = customTextLabel,
+                                skipLabel = skipLabel
+                            )
+                        }
+                        val configuration = LocalConfiguration.current
+                        val localizedQuestion = contentText(q?.q ?: "")
+                        val standardLayoutMetrics = StandardQuizLayoutPolicy.metrics(
+                            screenHeightDp = configuration.screenHeightDp,
+                            optionCount = options.size,
+                            questionLength = localizedQuestion.length,
+                            longestOptionLength = options.maxOfOrNull { contentText(it).length } ?: 0,
+                            fontScale = configuration.fontScale
+                        )
 
                         if (fullscreenMechanic != null && q != null) {
                             FullscreenQuestionMechanicBoard(
@@ -1011,11 +1046,15 @@ fun QuizRunnerScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .verticalScroll(scrollState),
+                                    .then(if (imageChoiceKind != null) Modifier.verticalScroll(scrollState) else Modifier),
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 CategoryTag(tag = contentText(pack.tags.firstOrNull() ?: "unterhaltung"))
-                                Spacer(modifier = Modifier.height(14.dp))
+                                Spacer(
+                                    modifier = Modifier.height(
+                                        if (imageChoiceKind != null) 14.dp else standardLayoutMetrics.categoryGapDp.dp
+                                    )
+                                )
 
                                 if (imageChoiceKind != null) {
                                     HarmonyImageChoiceQuestion(
@@ -1050,8 +1089,9 @@ fun QuizRunnerScreen(
                                         AnimatedQuestionCard(
                                             question = compactPizzaBurgerQuestion(
                                                 rawQuestion = q?.q ?: "",
-                                                localizedQuestion = contentText(q?.q ?: "")
-                                            )
+                                                localizedQuestion = localizedQuestion
+                                            ),
+                                            layoutMetrics = standardLayoutMetrics
                                         )
                                     }
                                 } else if (isIntimacyPack) {
@@ -1068,45 +1108,28 @@ fun QuizRunnerScreen(
                                         AnimatedQuestionCard(
                                             question = compactPizzaBurgerQuestion(
                                                 rawQuestion = q?.q ?: "",
-                                                localizedQuestion = contentText(q?.q ?: "")
+                                                localizedQuestion = localizedQuestion
                                             ),
-                                            glitchAmount = glitchAmount
+                                            glitchAmount = glitchAmount,
+                                            layoutMetrics = standardLayoutMetrics
                                         )
                                     }
                                 } else {
                                     AnimatedQuestionCard(
                                         question = compactPizzaBurgerQuestion(
                                             rawQuestion = q?.q ?: "",
-                                            localizedQuestion = contentText(q?.q ?: "")
-                                        )
+                                            localizedQuestion = localizedQuestion
+                                        ),
+                                        layoutMetrics = standardLayoutMetrics
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(if (imageChoiceKind == null) 26.dp else 12.dp))
+                                Spacer(
+                                    modifier = Modifier.height(
+                                        if (imageChoiceKind == null) standardLayoutMetrics.questionToOptionsGapDp.dp else 12.dp
+                                    )
+                                )
 
                                 if (imageChoiceKind == null) {
-                                    val isPizzaBurgerTensionQuestion = q?.q == PIZZA_BURGER_TENSION_QUESTION
-                                    val rawOptions = q?.options ?: emptyList()
-                                    val processedOptions = rawOptions.map {
-                                        it.replace("{user}", profile.userName).replace("{partner}", profile.partnerName)
-                                    }
-                                    val customTextLabel = tr("Schreibe deine eigene Antwort", "Write your own answer")
-                                    val skipLabel = tr("Überspringen", "Skip")
-                                    val baseOptions = if (isPizzaBurgerTensionQuestion) {
-                                        processedOptions.take(2)
-                                    } else {
-                                        processedOptions
-                                    }
-                                    val options = if (isPizzaBurgerTensionQuestion || interactionSpec == null) {
-                                        baseOptions
-                                    } else {
-                                        QuizAnswerOptionsPolicy.build(
-                                            options = baseOptions,
-                                            spec = interactionSpec,
-                                            customTextLabel = customTextLabel,
-                                            skipLabel = skipLabel
-                                        )
-                                    }
-
                                     var visibleMoralOptions by remember(questionAnimationKey) {
                                         mutableStateOf(if (isMoralGreyZone) 0 else Int.MAX_VALUE)
                                     }
@@ -1148,7 +1171,8 @@ fun QuizRunnerScreen(
                                                         onPickAnswer(optText)
                                                     }
                                                 },
-                                                glitchAmount = glitchAmount
+                                                glitchAmount = glitchAmount,
+                                                layoutMetrics = standardLayoutMetrics
                                             )
                                         }
 
@@ -1163,7 +1187,7 @@ fun QuizRunnerScreen(
                                                 shape = RoundedCornerShape(18.dp),
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(bottom = 11.dp)
+                                                    .padding(bottom = standardLayoutMetrics.optionGapDp.dp)
                                             ) { glitchAmount -> optionButton(glitchAmount) }
                                         } else if (isMoralGreyZone) {
                                             AnimatedVisibility(
@@ -1187,7 +1211,8 @@ fun QuizRunnerScreen(
                                                             onPickAnswer(optText)
                                                         }
                                                     },
-                                                    modifier = Modifier.padding(bottom = 11.dp)
+                                                    layoutMetrics = standardLayoutMetrics,
+                                                    modifier = Modifier.padding(bottom = standardLayoutMetrics.optionGapDp.dp)
                                                 )
                                             }
                                         } else {
@@ -1204,7 +1229,8 @@ fun QuizRunnerScreen(
                                                         onPickAnswer(optText)
                                                     }
                                                 },
-                                                modifier = Modifier.padding(bottom = 11.dp)
+                                                layoutMetrics = standardLayoutMetrics,
+                                                modifier = Modifier.padding(bottom = standardLayoutMetrics.optionGapDp.dp)
                                             )
                                         }
                                     }
@@ -1418,7 +1444,8 @@ fun QuizOptionButton(
     isOwn: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    glitchAmount: Float = 0f
+    glitchAmount: Float = 0f,
+    layoutMetrics: StandardQuizLayoutMetrics = StandardQuizLayoutMetrics()
 ) {
     val optionAccent = optionAccentColor(number)
     val optionLabel = ('A'.code + number - 1).toChar().toString()
@@ -1465,13 +1492,13 @@ fun QuizOptionButton(
                 shape = shape
             )
             .clickable(onClick = onClick)
-            .padding(15.dp)
+            .padding(layoutMetrics.optionPaddingDp.dp)
             .testTag("quiz_option_$number")
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(27.dp)
+                    .size(layoutMetrics.optionBadgeSizeDp.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -1487,14 +1514,14 @@ fun QuizOptionButton(
                 if (glitch > 0.03f) {
                     Text(
                         text = displayedLabel,
-                        fontSize = 12.sp,
+                        fontSize = layoutMetrics.optionBadgeFontSizeSp.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFF7CF7FF).copy(alpha = glitch * 0.55f),
                         modifier = Modifier.graphicsLayer { translationX = 4.5f * glitch }
                     )
                     Text(
                         text = displayedLabel,
-                        fontSize = 12.sp,
+                        fontSize = layoutMetrics.optionBadgeFontSizeSp.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF63D6).copy(alpha = glitch * 0.46f),
                         modifier = Modifier.graphicsLayer { translationX = -4f * glitch }
@@ -1502,7 +1529,7 @@ fun QuizOptionButton(
                 }
                 Text(
                     text = displayedLabel,
-                    fontSize = 12.sp,
+                    fontSize = layoutMetrics.optionBadgeFontSizeSp.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
                     modifier = Modifier.graphicsLayer {
@@ -1510,16 +1537,16 @@ fun QuizOptionButton(
                     }
                 )
             }
-            Spacer(modifier = Modifier.width(13.dp))
+            Spacer(modifier = Modifier.width(layoutMetrics.optionBadgeGapDp.dp))
             Box(modifier = Modifier.weight(1f)) {
                 if (glitch > 0.025f) {
                     Text(
                         text = displayedText,
-                        fontSize = 14.5.sp,
+                        fontSize = layoutMetrics.optionFontSizeSp.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF7CF7FF).copy(alpha = glitch * 0.43f),
                         fontStyle = if (isOwn) FontStyle.Italic else FontStyle.Normal,
-                        lineHeight = 19.sp,
+                        lineHeight = layoutMetrics.optionLineHeightSp.sp,
                         modifier = Modifier.graphicsLayer {
                             translationX = 8f * glitch + sin(glitch * 39f) * 3f
                             translationY = sin(glitch * 24f) * 2f
@@ -1527,11 +1554,11 @@ fun QuizOptionButton(
                     )
                     Text(
                         text = displayedText,
-                        fontSize = 14.5.sp,
+                        fontSize = layoutMetrics.optionFontSizeSp.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFFFF63D6).copy(alpha = glitch * 0.37f),
                         fontStyle = if (isOwn) FontStyle.Italic else FontStyle.Normal,
-                        lineHeight = 19.sp,
+                        lineHeight = layoutMetrics.optionLineHeightSp.sp,
                         modifier = Modifier.graphicsLayer {
                             translationX = -7f * glitch + sin(glitch * 31f) * 2.5f
                             translationY = -sin(glitch * 28f) * 1.8f
@@ -1540,11 +1567,11 @@ fun QuizOptionButton(
                 }
                 Text(
                     text = displayedText,
-                    fontSize = 14.5.sp,
+                    fontSize = layoutMetrics.optionFontSizeSp.sp,
                     fontWeight = FontWeight.Medium,
                     color = if (isOwn && !isSelected) Color.White.copy(alpha = 0.72f) else Color.White,
                     fontStyle = if (isOwn) FontStyle.Italic else FontStyle.Normal,
-                    lineHeight = 19.sp,
+                    lineHeight = layoutMetrics.optionLineHeightSp.sp,
                     modifier = Modifier.graphicsLayer {
                         translationX = sin(glitch * 51f) * 3.5f * glitch
                         translationY = sin(glitch * 34f) * 1.4f * glitch
@@ -1839,20 +1866,7 @@ fun TotResultsView(
                 color = Color.White
             )
 
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "•••",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
-                )
-            }
+            Spacer(modifier = Modifier.size(36.dp))
         }
 
         Spacer(modifier = Modifier.height(10.dp))
