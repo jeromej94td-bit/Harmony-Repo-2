@@ -9,7 +9,7 @@ import com.example.data.model.QuestionInteractionKind
 /**
  * Single rendering entry point for question mechanics that own the complete interaction surface.
  * The quiz runner must not render its generic question card or numbered answer buttons alongside
- * these boards; each mechanic is responsible for its own large prompt, controls and reveal flow.
+ * these boards; each mechanic is responsible for its own large prompt and controls.
  */
 @Composable
 internal fun FullscreenQuestionMechanicBoard(
@@ -42,7 +42,8 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.PARTNER_PREDICTION -> PartnerPredictionRevealBoard(
+        // Harmony 360 stores both private choices here; Treffer/Ergebnis comes only at round end.
+        FullscreenGameMechanicKind.PARTNER_PREDICTION -> PartnerPredictionCollectionBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,

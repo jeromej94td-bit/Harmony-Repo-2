@@ -8,10 +8,11 @@ import com.example.data.model.ExperiencePartnerPredictionSelectionCodec
 import com.example.data.model.ProfileEntity
 
 /**
- * Stable-ID adapter around the shipped partner-prediction reveal board.
+ * Stable-ID adapter for experience partner predictions.
  *
  * Experience callers receive a typed selection while the board owns the private prediction,
- * handoff, partner choice and explicit reveal phases.
+ * handoff and partner choice. Hit/miss feedback is intentionally deferred to the experience's
+ * final reveal instead of interrupting every question.
  */
 @Composable
 internal fun ExperiencePartnerPredictionBoard(
@@ -21,7 +22,7 @@ internal fun ExperiencePartnerPredictionBoard(
     onPick: (ExperiencePartnerPredictionSelection) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    PartnerPredictionRevealBoard(
+    PartnerPredictionCollectionBoard(
         question = round.prompt,
         options = round.options,
         selectedAnswer = selectedSelection?.let(ExperiencePartnerPredictionSelectionCodec::encode),
