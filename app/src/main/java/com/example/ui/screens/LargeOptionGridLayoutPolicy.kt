@@ -6,9 +6,8 @@ internal data class LargeOptionGridLayoutMetrics(
 )
 
 /**
- * Keeps multi-row fullscreen option grids usable when the available stage becomes too short.
- * Normal layouts keep the existing equal-weight rows; only compressed layouts switch to a
- * bounded vertical scroll area with a readable minimum row height.
+ * Fullscreen option grids are glanceable interactions: every card must stay in the viewport.
+ * Rows therefore compress to the available stage instead of switching to a scroll container.
  */
 internal object LargeOptionGridLayoutPolicy {
     fun metrics(
@@ -19,21 +18,24 @@ internal object LargeOptionGridLayoutPolicy {
     ): LargeOptionGridLayoutMetrics {
         val safeRows = rowCount.coerceAtLeast(0)
         val safeGap = gapDp.coerceAtLeast(0)
+        val safeHeight = availableHeightDp.coerceAtLeast(0)
         val safeFontScale = fontScale.coerceAtLeast(1f)
-        val minimumRowHeight = when {
+        val preferredRowHeight = when {
             safeFontScale >= 1.30f -> 92
             safeFontScale >= 1.15f -> 82
             else -> 72
         }
-        val requiredHeight = if (safeRows == 0) {
-            0
+        val fittedRowHeight = if (safeRows == 0) {
+            preferredRowHeight
         } else {
-            safeRows * minimumRowHeight + (safeRows - 1) * safeGap
+            ((safeHeight - (safeRows - 1) * safeGap) / safeRows)
+                .coerceAtLeast(1)
+                .coerceAtMost(preferredRowHeight)
         }
 
         return LargeOptionGridLayoutMetrics(
-            useScroll = safeRows > 0 && requiredHeight > availableHeightDp.coerceAtLeast(0),
-            scrollRowHeightDp = minimumRowHeight
+            useScroll = false,
+            scrollRowHeightDp = fittedRowHeight
         )
     }
 }
