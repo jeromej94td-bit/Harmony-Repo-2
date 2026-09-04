@@ -28,7 +28,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -51,18 +51,54 @@ jobs:
             cp .env.example .env
           fi
 
-      - name: Run focused Herbstabend tests
+      - name: Run Herbstabend core contracts
+        id: core
+        continue-on-error: true
         run: >-
           gradle :app:testDebugUnitTest
           --tests 'com.example.data.model.AutumnEveningPackContractTest'
-          --tests 'com.example.ui.AutumnEveningTranslationTest'
           --tests 'com.example.ui.screens.AutumnEveningAssetContractTest'
           --tests 'com.example.ui.screens.AutumnEveningImageChoicePolicyTest'
           --tests 'com.example.ui.screens.AutumnEveningRendererContractTest'
+          --stacktrace
+          --no-daemon
+          --no-configuration-cache
+
+      - name: Run Herbstabend translation contract
+        id: translation
+        continue-on-error: true
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests 'com.example.ui.AutumnEveningTranslationTest'
+          --stacktrace
+          --no-daemon
+          --no-configuration-cache
+
+      - name: Run Herbstabend visual contract
+        id: visual
+        continue-on-error: true
+        run: >-
+          gradle :app:testDebugUnitTest
           --tests 'com.example.ui.screens.AutumnEveningVisualContractTest'
           --stacktrace
           --no-daemon
           --no-configuration-cache
 
       - name: Compile debug Kotlin
+        id: compile
+        continue-on-error: true
         run: gradle :app:compileDebugKotlin --stacktrace --no-daemon --no-configuration-cache
+
+      - name: Enforce Herbstabend verification
+        if: always()
+        env:
+          CORE: ${{ steps.core.outcome }}
+          TRANSLATION: ${{ steps.translation.outcome }}
+          VISUAL: ${{ steps.visual.outcome }}
+          COMPILE: ${{ steps.compile.outcome }}
+        run: |
+          echo "core=$CORE translation=$TRANSLATION visual=$VISUAL compile=$COMPILE"
+          test "$CORE" = success
+          test "$TRANSLATION" = success
+          test "$VISUAL" = success
+          test "$COMPILE" = success
