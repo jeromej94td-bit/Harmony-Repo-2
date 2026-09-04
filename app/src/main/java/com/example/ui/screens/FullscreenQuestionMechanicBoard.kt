@@ -96,7 +96,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.PRIORITY_POKER -> PriorityPokerBoard(
+        FullscreenGameMechanicKind.PRIORITY_POKER -> DirectPriorityPokerBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
