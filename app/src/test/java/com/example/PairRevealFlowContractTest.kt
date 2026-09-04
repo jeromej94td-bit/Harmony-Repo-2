@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import com.example.data.model.ExperiencePartnerPredictionRound
 import com.example.data.model.ExperiencePartnerPredictionSelection
 import com.example.data.model.FullscreenGameMechanicKind
+import com.example.data.model.PredictionAnswerCodec
 import com.example.data.model.ProfileEntity
 import com.example.ui.screens.ExperiencePartnerPredictionBoard
 import com.example.ui.screens.FullscreenQuestionMechanicBoard
@@ -88,6 +89,35 @@ class PairRevealFlowContractTest {
             ExperiencePartnerPredictionSelection(prediction = "A", actual = "B"),
             picked
         )
+        composeTestRule.onAllNodesWithTag("prediction_reveal_ready").assertCountEquals(0)
+        composeTestRule.onAllNodesWithTag("prediction_result_guess").assertCountEquals(0)
+        composeTestRule.onAllNodesWithTag("prediction_result_actual").assertCountEquals(0)
+    }
+
+    @Test
+    fun harmony360FullscreenPartnerPredictionSubmitsAndSkipsQuestionReveal() {
+        var picked: String? = null
+
+        composeTestRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                FullscreenQuestionMechanicBoard(
+                    kind = FullscreenGameMechanicKind.PARTNER_PREDICTION,
+                    question = "Wie hört Alex kritisches Feedback am liebsten?",
+                    options = options,
+                    selectedAnswer = null,
+                    profile = profile,
+                    onPick = { picked = it }
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithTag("prediction_option_0").performClick()
+        composeTestRule.onNodeWithTag("prediction_handoff_ready").performClick()
+        composeTestRule.onNodeWithTag("prediction_actual_option_1").performClick()
+
+        val decoded = picked?.let(PredictionAnswerCodec::decode)
+        assertEquals("A", decoded?.prediction)
+        assertEquals("B", decoded?.actual)
         composeTestRule.onAllNodesWithTag("prediction_reveal_ready").assertCountEquals(0)
         composeTestRule.onAllNodesWithTag("prediction_result_guess").assertCountEquals(0)
         composeTestRule.onAllNodesWithTag("prediction_result_actual").assertCountEquals(0)
