@@ -47,7 +47,7 @@ object TranslationCatalog {
 
     private fun baseExact(german: String, language: AppLanguage): String? = when (language) {
         AppLanguage.GERMAN -> german
-        AppLanguage.ENGLISH -> EXACT_ENGLISH_CONTENT[german]
+        AppLanguage.ENGLISH -> AUTUMN_EVENING_ENGLISH_CONTENT[german] ?: EXACT_ENGLISH_CONTENT[german]
         AppLanguage.ITALIAN -> EXACT_ITALIAN_CONTENT[german]
         AppLanguage.FRENCH -> EXACT_FRENCH_CONTENT[german]
         AppLanguage.JAPANESE -> EXACT_JAPANESE_CONTENT[german]
