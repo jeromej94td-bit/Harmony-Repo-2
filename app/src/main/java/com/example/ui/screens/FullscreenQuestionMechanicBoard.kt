@@ -42,6 +42,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
+        // Harmony 360 stores both private choices here; Treffer/Ergebnis comes only at round end.
         FullscreenGameMechanicKind.PARTNER_PREDICTION -> PartnerPredictionCollectionBoard(
             question = question,
             options = options,
