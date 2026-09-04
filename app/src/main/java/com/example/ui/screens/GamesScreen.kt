@@ -75,6 +75,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.CATALOG_PACKS
+import com.example.data.brain.db.BrainGeneratedContentEntity
+import com.example.data.brain.model.GeneratedGamePayload
 import com.example.data.model.AnswerEntity
 import com.example.data.model.Category
 import com.example.data.model.HarmonyPacksData
@@ -104,8 +106,8 @@ import kotlin.math.sin
 fun GamesScreen(
     answers: List<AnswerEntity>,
     packFilter: String,
+    generatedGames: List<BrainGeneratedContentEntity> = emptyList(),
     brainEnabled: Boolean = false,
-    generatedGames: List<Any> = emptyList(),
     appLanguage: String = "de",
     onSetFilter: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
@@ -429,6 +431,75 @@ fun GamesScreen(
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
+            if (brainEnabled && generatedGames.isNotEmpty()) {
+                item(key = "generated_games_section") {
+                    Column {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 18.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("🧠", fontSize = 18.sp)
+                                Spacer(modifier = Modifier.width(7.dp))
+                                Text(
+                                    text = LanguageManager.tr("Persönliche Spiele von Harmony", appLanguage),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = HarmonyText
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFFE056FD).copy(alpha = 0.2f))
+                                    .border(1.dp, Color(0xFFE056FD).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "${generatedGames.size} Neu",
+                                    color = Color(0xFFE056FD),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 18.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(generatedGames, key = { it.id }) { gameEntity ->
+                                val payload = remember(gameEntity.payloadJson) {
+                                    runCatching {
+                                        Json { ignoreUnknownKeys = true }.decodeFromString(
+                                            GeneratedGamePayload.serializer(),
+                                            gameEntity.payloadJson
+                                        )
+                                    }.getOrNull()
+                                }
+                                val emoji = payload?.emoji ?: "✨"
+                                val title = payload?.title ?: gameEntity.title ?: "Neues Spiel"
+                                val questionCount = payload?.questions?.size ?: 7
+                                val isOpened = gameEntity.playedCount > 0 || gameEntity.firstShownAt != null
+
+                                GeneratedGameCard(
+                                    title = title,
+                                    emoji = emoji,
+                                    questionCount = questionCount,
+                                    isOpened = isOpened,
+                                    appLanguage = appLanguage,
+                                    onClick = { onStartGeneratedGame(gameEntity.id) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             item(key = "topics_header") {
                 Spacer(modifier = Modifier.height(20.dp))
                 AuroraGlassSectionTitle(
@@ -541,8 +612,6 @@ private data class UnansweredQuestionItem(
 private fun UnansweredQuestionsDialog(
     answers: List<AnswerEntity>,
     appLanguage: String,
-    brainEnabled: Boolean = false,
-    generatedGames: List<Any> = emptyList(),
     onStartPack: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -902,8 +971,6 @@ fun GeneratedGameCard(
     questionCount: Int,
     isOpened: Boolean,
     appLanguage: String,
-    brainEnabled: Boolean = false,
-    generatedGames: List<Any> = emptyList(),
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -1006,5 +1073,3 @@ fun GeneratedGameCard(
         }
     }
 }
-
-fun dummyMethod(brainEnabled: Boolean, generatedGames: List<Any>) { if (brainEnabled && generatedGames.isNotEmpty()) {} }

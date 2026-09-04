@@ -6,9 +6,11 @@ import java.util.Base64
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
@@ -338,16 +340,18 @@ val reconstructIntrospectionIntro by tasks.registering(ReconstructIntrospectionI
   expectedSha256.set("dbb693c0b39920e7b88aab52b99277d4a4d78446eff1d3d33463ca98e3c37778")
 }
 
-val verifyProductionSourceIsolation by tasks.registering {
-  group = "verification"
-  description = "Fails the build if archived Harmony features are reactivated in production sources."
+abstract class VerifyProductionSourceIsolationTask : DefaultTask() {
+  @get:InputDirectory
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val sourceDir: DirectoryProperty
 
-  doLast {
-    val sourceRoot = file("src/main/java")
+  @TaskAction
+  fun verify() {
+    val sourceRoot = sourceDir.get().asFile
     val violations = mutableListOf<String>()
 
     fun read(relativePath: String): String {
-      val target = file("src/main/java/$relativePath")
+      val target = File(sourceRoot, relativePath)
       if (!target.exists()) {
         violations += "$relativePath is missing"
         return ""
@@ -395,7 +399,7 @@ val verifyProductionSourceIsolation by tasks.registering {
       violations += "GamesScreen.kt lost the fail-closed archived Brain default"
     }
 
-    val legacyBridge = file("src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt")
+    val legacyBridge = File(sourceRoot, "com/example/ui/screens/ChatScreenLegacyBridge.kt")
     if (legacyBridge.exists()) {
       violations += "ChatScreenLegacyBridge.kt must stay removed; production chat is ChatScreen.kt only"
     }
@@ -404,7 +408,7 @@ val verifyProductionSourceIsolation by tasks.registering {
       .filter { it.isFile && it.extension == "kt" && it.name != "RemovedGameCatalogPolicy.kt" }
       .forEach { sourceFile ->
         val text = sourceFile.readText()
-        val relative = sourceFile.relativeTo(projectDir).invariantSeparatorsPath
+        val relative = sourceFile.relativeTo(sourceRoot).invariantSeparatorsPath
 
         if (text.contains("HARMONY_BRAIN_ENABLED = true")) {
           violations += "$relative sets HARMONY_BRAIN_ENABLED to true"
@@ -438,6 +442,12 @@ val verifyProductionSourceIsolation by tasks.registering {
 
     logger.lifecycle("Archived feature isolation check passed.")
   }
+}
+
+val verifyProductionSourceIsolation by tasks.registering(VerifyProductionSourceIsolationTask::class) {
+  group = "verification"
+  description = "Fails the build if archived Harmony features are reactivated in production sources."
+  sourceDir.set(layout.projectDirectory.dir("src/main/java"))
 }
 
 tasks.named("preBuild").configure {

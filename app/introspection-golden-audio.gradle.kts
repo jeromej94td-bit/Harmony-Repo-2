@@ -4,7 +4,11 @@ import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
 /**
  * Additive Golden-Master narrator restore for "Tauche ins Unterbewusstsein".
@@ -22,86 +26,84 @@ data class IntrospectionGoldenAudioAsset(
     val expectedSha256: String
 )
 
-val introspectionGoldenAudioAssets = listOf(
-    IntrospectionGoldenAudioAsset(
-        fileName = "introspection_animal_golden.mp3",
-        remotePath = "introspection/introspection_animal.mp3",
-        expectedSize = 2_320_970L,
-        expectedSha256 = "66118d56ba8e038f36b687a22dd6e7d945391622d9133da4bb469d5cf5dc74a5"
-    ),
-    IntrospectionGoldenAudioAsset(
-        fileName = "introspection_color_golden.mp3",
-        remotePath = "introspection/introspection_color.mp3",
-        expectedSize = 1_949_822L,
-        expectedSha256 = "840a4943e15eb5a3c10a136124de1f446c6ffbac1a40e250943d7a0cb76f41e2"
-    ),
-    IntrospectionGoldenAudioAsset(
-        fileName = "introspection_reveal_golden.mp3",
-        remotePath = "introspection/introspection_reveal.mp3",
-        expectedSize = 2_159_220L,
-        expectedSha256 = "ce220eab86bbf679e90b36842d5a0d75529d1432e281f9010822d5bb0a46b7de"
-    ),
-    IntrospectionGoldenAudioAsset(
-        fileName = "introspection_water_golden.mp3",
-        remotePath = "introspection/introspection_water.mp3",
-        expectedSize = 2_923_458L,
-        expectedSha256 = "80c13ee1070157b62f72c2d2bd77f08d66a48303f54b165628f2b987b7c99bf1"
-    )
-)
+abstract class SyncIntrospectionGoldenMasterAudioTask : DefaultTask() {
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
 
-val introspectionGoldenAudioBaseUrl =
-    "https://rspgnonlpkxdudbjxnrl.supabase.co/storage/v1/object/public/harmony-static-assets/introspection"
-val introspectionGoldenRawDir = file("src/main/res/raw")
+    @TaskAction
+    fun sync() {
+        val targetDir = outputDir.get().asFile
+        Files.createDirectories(targetDir.toPath())
 
-fun sha256(file: File): String {
-    val digest = MessageDigest.getInstance("SHA-256")
-    file.inputStream().buffered().use { input ->
-        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-        while (true) {
-            val read = input.read(buffer)
-            if (read < 0) break
-            if (read > 0) digest.update(buffer, 0, read)
+        val assets = listOf(
+            IntrospectionGoldenAudioAsset(
+                fileName = "introspection_animal_golden.mp3",
+                remotePath = "introspection/introspection_animal.mp3",
+                expectedSize = 2_320_970L,
+                expectedSha256 = "66118d56ba8e038f36b687a22dd6e7d945391622d9133da4bb469d5cf5dc74a5"
+            ),
+            IntrospectionGoldenAudioAsset(
+                fileName = "introspection_color_golden.mp3",
+                remotePath = "introspection/introspection_color.mp3",
+                expectedSize = 1_949_822L,
+                expectedSha256 = "840a4943e15eb5a3c10a136124de1f446c6ffbac1a40e250943d7a0cb76f41e2"
+            ),
+            IntrospectionGoldenAudioAsset(
+                fileName = "introspection_reveal_golden.mp3",
+                remotePath = "introspection/introspection_reveal.mp3",
+                expectedSize = 2_159_220L,
+                expectedSha256 = "ce220eab86bbf679e90b36842d5a0d75529d1432e281f9010822d5bb0a46b7de"
+            ),
+            IntrospectionGoldenAudioAsset(
+                fileName = "introspection_water_golden.mp3",
+                remotePath = "introspection/introspection_water.mp3",
+                expectedSize = 2_923_458L,
+                expectedSha256 = "80c13ee1070157b62f72c2d2bd77f08d66a48303f54b165628f2b987b7c99bf1"
+            )
+        )
+
+        val baseUrl = "https://rspgnonlpkxdudbjxnrl.supabase.co/storage/v1/object/public/harmony-static-assets/introspection"
+
+        fun computeSha256(file: File): String {
+            val digest = MessageDigest.getInstance("SHA-256")
+            file.inputStream().buffered().use { input ->
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    if (read > 0) digest.update(buffer, 0, read)
+                }
+            }
+            return digest.digest().joinToString(separator = "") { "%02x".format(it) }
         }
-    }
-    return digest.digest().joinToString(separator = "") { "%02x".format(it) }
-}
 
-fun verifyGoldenAudio(file: File, asset: IntrospectionGoldenAudioAsset) {
-    if (!file.isFile) {
-        throw GradleException("Golden narrator audio is missing: ${asset.fileName}")
-    }
-    if (file.length() != asset.expectedSize) {
-        throw GradleException(
-            "Golden narrator ${asset.fileName} has ${file.length()} bytes; expected ${asset.expectedSize}"
-        )
-    }
-    val actualSha256 = sha256(file)
-    if (actualSha256 != asset.expectedSha256) {
-        throw GradleException(
-            "Golden narrator ${asset.fileName} SHA-256 is $actualSha256; expected ${asset.expectedSha256}"
-        )
-    }
-}
+        fun checkGoldenAudio(file: File, asset: IntrospectionGoldenAudioAsset) {
+            if (!file.isFile) {
+                throw GradleException("Golden narrator audio is missing: ${asset.fileName}")
+            }
+            if (file.length() != asset.expectedSize) {
+                throw GradleException(
+                    "Golden narrator ${asset.fileName} has ${file.length()} bytes; expected ${asset.expectedSize}"
+                )
+            }
+            val actualSha256 = computeSha256(file)
+            if (actualSha256 != asset.expectedSha256) {
+                throw GradleException(
+                    "Golden narrator ${asset.fileName} SHA-256 is $actualSha256; expected ${asset.expectedSha256}"
+                )
+            }
+        }
 
-val syncIntrospectionGoldenMasterAudio by tasks.registering {
-    group = "build"
-    description = "Downloads and verifies the working old-main introspection narrator audio as additive Repo-2 resources."
-
-    outputs.files(introspectionGoldenAudioAssets.map { File(introspectionGoldenRawDir, it.fileName) })
-
-    doLast {
-        Files.createDirectories(introspectionGoldenRawDir.toPath())
-
-        introspectionGoldenAudioAssets.forEach { asset ->
-            val target = File(introspectionGoldenRawDir, asset.fileName)
+        assets.forEach { asset ->
+            val target = File(targetDir, asset.fileName)
             val alreadyValid = target.isFile &&
                 target.length() == asset.expectedSize &&
-                runCatching { sha256(target) == asset.expectedSha256 }.getOrDefault(false)
+                runCatching { computeSha256(target) == asset.expectedSha256 }.getOrDefault(false)
 
             if (!alreadyValid) {
-                val remoteUrl = "$introspectionGoldenAudioBaseUrl/${asset.remotePath.substringAfterLast('/')}"
+                val remoteUrl = "$baseUrl/${asset.remotePath.substringAfterLast('/')}"
                 val temporary = Files.createTempFile(
-                    introspectionGoldenRawDir.toPath(),
+                    targetDir.toPath(),
                     "${asset.fileName.removeSuffix(".mp3")}_",
                     ".tmp"
                 )
@@ -116,7 +118,7 @@ val syncIntrospectionGoldenMasterAudio by tasks.registering {
                     }
 
                     val downloaded = temporary.toFile()
-                    verifyGoldenAudio(downloaded, asset)
+                    checkGoldenAudio(downloaded, asset)
                     try {
                         Files.move(
                             temporary,
@@ -136,12 +138,18 @@ val syncIntrospectionGoldenMasterAudio by tasks.registering {
                 }
             }
 
-            verifyGoldenAudio(target, asset)
+            checkGoldenAudio(target, asset)
             logger.lifecycle(
                 "Golden narrator ready: ${asset.fileName} (${asset.expectedSize} bytes, sha256=${asset.expectedSha256})"
             )
         }
     }
+}
+
+val syncIntrospectionGoldenMasterAudio by tasks.registering(SyncIntrospectionGoldenMasterAudioTask::class) {
+    group = "build"
+    description = "Downloads and verifies the working old-main introspection narrator audio as additive Repo-2 resources."
+    outputDir.set(layout.projectDirectory.dir("src/main/res/raw"))
 }
 
 // Safe even when the Android plugin registers preBuild later in configuration.

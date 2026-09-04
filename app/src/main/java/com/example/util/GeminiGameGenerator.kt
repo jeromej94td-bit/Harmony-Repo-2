@@ -6,6 +6,7 @@ import com.example.data.model.AnswerEntity
 import com.example.data.model.Question
 import com.example.data.model.QuestionPack
 import com.example.data.DeveloperDataManager
+import com.example.data.HarmonyBrainEngine
 import com.example.data.model.ProfileEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,6 +40,7 @@ object GeminiGameGenerator {
             }
 
             // 1. Analyze previous answers to obtain interests
+            val interests = HarmonyBrainEngine.analyzeAnswers(answers)
 
             // 2. Build answers context for the last 15 answers
             val answersContext = answers.takeLast(15).map { ans ->
@@ -65,6 +67,14 @@ object GeminiGameGenerator {
                     append("Hier sind einige ihrer bisherigen individuellen Antworten und Entscheidungen:\n")
                     append(answersContext)
                     append("\n\n")
+                }
+
+                if (interests.isNotEmpty()) {
+                    append("Hier sind ihre erkannten gemeinsamen Interessen:\n")
+                    interests.forEach {
+                        append("- ${it.name} (Kategorie: ${it.category}, Vertrauen: ${it.confidence})\n")
+                    }
+                    append("\n")
                 }
 
                 append("Deine Aufgabe:\n")

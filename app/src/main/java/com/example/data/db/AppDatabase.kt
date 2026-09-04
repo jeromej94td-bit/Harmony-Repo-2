@@ -19,6 +19,16 @@ import com.example.data.model.MemoryCategoryEntity
 import com.example.data.model.MemoryEntryEntity
 import com.example.data.model.ProfileEntity
 import com.example.data.model.SharedPicEntity
+import com.example.data.model.BrainInterestEntity
+import com.example.data.model.BrainSuggestionEntity
+import com.example.data.model.BrainQuestionEntity
+import com.example.data.brain.db.BrainAnswerHistoryEntity
+import com.example.data.brain.db.BrainPreferenceEntity
+import com.example.data.brain.db.BrainInteractionEntity
+import com.example.data.brain.db.BrainMemoryFactEntity
+import com.example.data.brain.db.BrainGeneratedContentEntity
+import com.example.data.brain.db.BrainPendingGenerationEntity
+import com.example.data.brain.db.BrainRoomDao
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -102,7 +112,17 @@ interface CoupleStatsDao {
         MomentEntity::class,
         CoupleStatsEntity::class,
         MemoryCategoryEntity::class,
-        MemoryEntryEntity::class],
+        MemoryEntryEntity::class,
+        BrainInterestEntity::class,
+        BrainSuggestionEntity::class,
+        BrainQuestionEntity::class,
+        BrainAnswerHistoryEntity::class,
+        BrainPreferenceEntity::class,
+        BrainInteractionEntity::class,
+        BrainMemoryFactEntity::class,
+        BrainGeneratedContentEntity::class,
+        BrainPendingGenerationEntity::class
+    ],
     version = 9,
     exportSchema = true
 )
@@ -114,6 +134,9 @@ abstract class HarmonyDatabase : RoomDatabase() {
     abstract fun momentDao(): MomentDao
     abstract fun coupleStatsDao(): CoupleStatsDao
     abstract fun memoryDao(): MemoryDao
+    abstract fun brainDao(): BrainDao
+    abstract fun brainRoomDao(): BrainRoomDao
+
     companion object {
         @Volatile
         private var INSTANCE: HarmonyDatabase? = null
