@@ -52,6 +52,7 @@ class FineDiningVisualRankingContractTest {
             appendLine("candidateRepo=${candidateRepo.absolutePath} exists=${candidateRepo.exists()} length=${candidateRepo.length()}")
             appendLine("resolved=${atlas.absolutePath} exists=${atlas.exists()} length=${atlas.length()}")
         }
+        println("FINE_DINING_ATLAS_DIAGNOSTICS\n$diagnostics")
 
         assertTrue("Missing Fine Dining visual atlas\n$diagnostics", atlas.exists())
         if (atlas.exists()) {
