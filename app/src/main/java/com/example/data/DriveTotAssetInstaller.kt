@@ -19,6 +19,21 @@ object DriveTotAssetInstaller {
     private const val OUTPUT_DIR = "drive_tot_assets_v3"
     private const val INSTALL_MARKER = ".install-complete"
 
+    // Targeted repair for the blank Tokyo card in Reiseziele. The source image is
+    // Harmony Brain > ChatGPT Generierte Bilder - strukturiert > 01_Reiseziele >
+    // "Tokyo Tower über Zōjō-ji im Abendlicht.png" (Drive file ID below).
+    // A separate marker intentionally makes this run once on existing installs too,
+    // where the general bundle may already be marked as installed.
+    private const val TOKYO_REPAIR_MARKER = ".tokyo-image-v1"
+    private const val TOKYO_OPTION = "Tokyo, Japan"
+    private const val TOKYO_FILE = "travel_tokyo.webp"
+    private const val TOKYO_DRIVE_FILE_ID = "1ehJCs9FJ3Htwl3MqBIwOYtSgC3vynNxZ"
+    private const val TOKYO_MIN_BYTES = 1_024L
+
+    private val TOKYO_ASSET_CHUNKS = listOf(
+        "travel_tokyo_asset.b64"
+    )
+
     private val BRAND_ASSET_CHUNKS = listOf(
         "brand_everyday_assets_01.b64",
         "brand_everyday_assets_02.b64",
@@ -90,7 +105,7 @@ object DriveTotAssetInstaller {
         "Kopenhagen, Dänemark" to "travel_kopenhagen.webp",
         "Prag, Tschechien" to "travel_prag.webp",
         "Budapest, Ungarn" to "travel_budapest.webp",
-        "Tokyo, Japan" to "travel_tokyo.webp"
+        TOKYO_OPTION to TOKYO_FILE
     )
 
     private val brandOptionToFile = linkedMapOf(
@@ -213,6 +228,22 @@ object DriveTotAssetInstaller {
         return Base64.decode(encoded, Base64.DEFAULT)
     }
 
+    private fun repairTokyoImage(context: Context, outputDir: File) {
+        val marker = File(outputDir, TOKYO_REPAIR_MARKER)
+        val target = File(outputDir, TOKYO_FILE)
+        if (marker.isFile && target.isFile && target.length() >= TOKYO_MIN_BYTES) return
+
+        val repaired = runCatching {
+            ByteArrayInputStream(decodeChunkedZip(context, TOKYO_ASSET_CHUNKS)).use { input ->
+                extractZip(input, outputDir, setOf(TOKYO_FILE))
+            }
+        }.getOrDefault(false)
+
+        if (repaired && target.isFile && target.length() >= TOKYO_MIN_BYTES) {
+            marker.writeText("drive:$TOKYO_DRIVE_FILE_ID")
+        }
+    }
+
     fun install(context: Context): Map<String, String> {
         CuisinePackInstaller.install(context)
         applyEngagementRingPack()
@@ -234,6 +265,10 @@ object DriveTotAssetInstaller {
             }
             installMarker.writeText("1")
         }
+
+        // Always check the dedicated Tokyo repair marker after the general install.
+        // This makes the selected Drive image appear for both fresh and upgraded users.
+        repairTokyoImage(context, outputDir)
 
         // Developer/exported images are installed before this legacy bundle. Do not
         // overwrite them afterwards just because an option has the same display name.
