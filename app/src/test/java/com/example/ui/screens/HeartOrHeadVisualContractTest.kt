@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import com.example.ui.theme.AppTheme
+import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +25,7 @@ class HeartOrHeadVisualContractTest {
     fun `date round renders four Harmony Panda cards`() {
         val selected = mutableStateOf<String?>(null)
         composeRule.setContent {
-            AppTheme {
+            HarmonyTheme(darkTheme = true) {
                 HeartOrHeadQuestion(
                     question = "Welcher Abend fühlt sich am meisten nach dir an?",
                     options = listOf(
@@ -52,7 +52,7 @@ class HeartOrHeadVisualContractTest {
     @Test
     fun `final round renders symbolic heart head instinct balance cards`() {
         composeRule.setContent {
-            AppTheme {
+            HarmonyTheme(darkTheme = true) {
                 HeartOrHeadQuestion(
                     question = "Wenn du lieben müsstest – worauf vertraust du zuerst?",
                     options = listOf("Herz", "Kopf", "Bauchgefühl", "Balance"),
