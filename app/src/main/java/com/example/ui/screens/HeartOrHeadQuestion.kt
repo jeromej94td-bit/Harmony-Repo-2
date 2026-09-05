@@ -85,50 +85,50 @@ private fun a2(x: Int, y: Int, width: Int = 256, height: Int = 320) =
 private fun heartOrHeadVisuals(kind: HarmonyImageChoiceKind): HeartHeadRoundVisuals = when (kind) {
     HarmonyImageChoiceKind.HEART_HEAD_DATE -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a1(128, 615), // rain walk
-            a1(516, 185), // dinner
-            a2(128, 615), // adventure / sunset
-            a1(128, 185)  // couch
+            a1(128, 615),
+            a1(516, 185),
+            a2(128, 615),
+            a1(128, 185)
         ),
         subtitleDe = "Welcher Moment zieht dich spontan an?",
         subtitleEn = "Which moment pulls you in first?"
     )
     HarmonyImageChoiceKind.HEART_HEAD_GIFT -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a2(174, 185), // breakfast + handwritten note
-            a2(516, 185), // wrapped gift
-            a2(548, 205, 224, 280), // tighter surprise crop
-            a2(128, 615)  // shared adventure
+            a2(174, 185),
+            a2(516, 185),
+            a2(548, 205, 224, 280),
+            a2(128, 615)
         ),
         subtitleDe = "Welche Geste fühlt sich für dich besonders an?",
         subtitleEn = "Which gesture feels most meaningful to you?"
     )
     HarmonyImageChoiceKind.HEART_HEAD_CONFLICT -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a2(516, 615), // conversation
-            a1(128, 185), // calm pause
-            a1(128, 615), // closeness
-            a1(516, 615)  // thoughts / planning
+            a2(516, 615),
+            a1(128, 185),
+            a1(128, 615),
+            a1(516, 615)
         ),
         subtitleDe = "Wie findet ihr nach Spannung wieder zueinander?",
         subtitleEn = "How do you find your way back to each other?"
     )
     HarmonyImageChoiceKind.HEART_HEAD_FUTURE -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a1(516, 185), // feeling
-            a1(516, 615), // plan
-            a2(128, 615), // memories / adventures
-            a2(516, 615)  // heart + mind / stability
+            a1(516, 185),
+            a1(516, 615),
+            a2(128, 615),
+            a2(516, 615)
         ),
         subtitleDe = "Was trägt euch gemeinsam nach vorn?",
         subtitleEn = "What carries you forward together?"
     )
     HarmonyImageChoiceKind.HEART_HEAD_LOVE -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a1(540, 205, 224, 280), // deep look
-            a2(128, 185), // everyday care
-            a1(128, 185), // tenderness
-            a1(516, 615)  // planning / thinking ahead
+            a1(540, 205, 224, 280),
+            a2(128, 185),
+            a1(128, 185),
+            a1(516, 615)
         ),
         subtitleDe = "Woran spürst du Liebe im Alltag?",
         subtitleEn = "How do you feel love in everyday life?"
@@ -146,6 +146,7 @@ private fun heartOrHeadVisuals(kind: HarmonyImageChoiceKind): HeartHeadRoundVisu
     else -> error("Unsupported Herz oder Kopf kind: $kind")
 }
 
+@Composable
 private fun heartOrHeadQuestionText(question: String): String = when (question) {
     "Welcher Abend fühlt sich am meisten nach dir an?" -> tr(question, "Which evening feels most like you?")
     "Was bedeutet dir bei einem Geschenk am meisten?" -> tr(question, "What matters most to you in a gift?")
@@ -153,9 +154,10 @@ private fun heartOrHeadQuestionText(question: String): String = when (question) 
     "Was gibt dir in eurer Zukunft am meisten Sicherheit?" -> tr(question, "What gives you the most security in your future together?")
     "Was zeigt Liebe für dich im Alltag am stärksten?" -> tr(question, "What shows love most strongly to you in everyday life?")
     "Wenn du lieben müsstest – worauf vertraust du zuerst?" -> tr(question, "When you love, what do you trust first?")
-    else -> tr(question)
+    else -> tr(question, question)
 }
 
+@Composable
 private fun heartOrHeadOptionText(option: String): String = when (option) {
     "Spontaner Nachtspaziergang" -> tr(option, "Spontaneous night walk")
     "Geplantes Dinner" -> tr(option, "Planned dinner")
@@ -181,7 +183,7 @@ private fun heartOrHeadOptionText(option: String): String = when (option) {
     "Kopf" -> tr(option, "Head")
     "Bauchgefühl" -> tr(option, "Instinct")
     "Balance" -> tr(option, "Balance")
-    else -> tr(option)
+    else -> tr(option, option)
 }
 
 @Composable
@@ -325,6 +327,11 @@ private fun HeartOrHeadCard(
     val exit = remember(animationKey) { Animatable(0f) }
     val density = LocalDensity.current.density
     val shape = RoundedCornerShape(22.dp)
+    val accessibilityState = if (selected) {
+        tr("Ausgewählt", "Selected")
+    } else {
+        tr("Nicht ausgewählt", "Not selected")
+    }
 
     LaunchedEffect(animationKey) {
         reveal.snapTo(0f)
@@ -390,11 +397,7 @@ private fun HeartOrHeadCard(
             )
             .clickable(enabled = inputEnabled && enterProgress > 0.98f, onClick = onClick)
             .semantics {
-                stateDescription = if (selected) {
-                    tr("Ausgewählt", "Selected")
-                } else {
-                    tr("Nicht ausgewählt", "Not selected")
-                }
+                stateDescription = accessibilityState
             }
             .testTag(if (selected) "heart_head_option_${index}_selected" else "heart_head_option_$index")
     ) {
