@@ -7,14 +7,14 @@ import org.junit.Test
 class HeartOrHeadAssetContractTest {
 
     @Test
-    fun `all 24 Herz oder Kopf drawable resources exist`() {
+    fun `Herz oder Kopf source art and finale symbols exist`() {
         val expected = listOf(
-            "heart_head_date_01", "heart_head_date_02", "heart_head_date_03", "heart_head_date_04",
-            "heart_head_gift_01", "heart_head_gift_02", "heart_head_gift_03", "heart_head_gift_04",
-            "heart_head_conflict_01", "heart_head_conflict_02", "heart_head_conflict_03", "heart_head_conflict_04",
-            "heart_head_future_01", "heart_head_future_02", "heart_head_future_03", "heart_head_future_04",
-            "heart_head_love_01", "heart_head_love_02", "heart_head_love_03", "heart_head_love_04",
-            "heart_head_final_01", "heart_head_final_02", "heart_head_final_03", "heart_head_final_04"
+            "heart_head_panda_atlas_01",
+            "heart_head_panda_atlas_02",
+            "heart_head_final_heart",
+            "heart_head_final_head",
+            "heart_head_final_gut",
+            "heart_head_final_balance"
         )
         val actual = R.drawable::class.java.fields.map { it.name }.toSet()
         expected.forEach { name -> assertTrue("missing drawable $name", name in actual) }
