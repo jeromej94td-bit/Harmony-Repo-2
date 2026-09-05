@@ -130,6 +130,18 @@ internal fun AutumnEveningQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind in HEART_OR_HEAD_KINDS) {
+        HeartOrHeadQuestion(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            kind = kind,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     val visuals = autumnEveningVisuals(kind)
     check(options.size == visuals.images.size) {
         "Autumn evening rounds require exactly ${visuals.images.size} options, found ${options.size}"
