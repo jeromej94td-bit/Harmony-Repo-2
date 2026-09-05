@@ -11,7 +11,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], qualifiers = "w390dp-h844dp-xhdpi")
@@ -45,7 +44,9 @@ class HeartOrHeadVisualContractTest {
         (0 until 4).forEach { index ->
             composeRule.onNodeWithTag("heart_head_option_$index", useUnmergedTree = true).assertExists()
         }
-        captureRoboImage(File("build/outputs/roborazzi/heart_or_head_date_preview.png"))
+        composeRule.onNodeWithTag("heart_or_head_question", useUnmergedTree = true).captureRoboImage(
+            filePath = "build/outputs/roborazzi/heart_or_head_date_preview.png"
+        )
     }
 
     @Test
@@ -65,6 +66,8 @@ class HeartOrHeadVisualContractTest {
         composeRule.mainClock.advanceTimeBy(2_000)
         composeRule.waitForIdle()
         composeRule.onNodeWithTag("heart_or_head_question", useUnmergedTree = true).assertExists()
-        captureRoboImage(File("build/outputs/roborazzi/heart_or_head_final_preview.png"))
+        composeRule.onNodeWithTag("heart_or_head_question", useUnmergedTree = true).captureRoboImage(
+            filePath = "build/outputs/roborazzi/heart_or_head_final_preview.png"
+        )
     }
 }
