@@ -49,42 +49,16 @@ jobs:
           fi
 
       - name: Pack contract
-        id: pack
-        continue-on-error: true
         run: gradle :app:testDebugUnitTest --tests 'com.example.data.model.HeartOrHeadPackContractTest' --stacktrace --no-daemon --no-configuration-cache
 
       - name: Routing contract
-        id: routing
-        continue-on-error: true
         run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadImageChoicePolicyTest' --stacktrace --no-daemon --no-configuration-cache
 
       - name: Transition contract
-        id: transition
-        continue-on-error: true
         run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadTransitionPolicyTest' --stacktrace --no-daemon --no-configuration-cache
 
       - name: Asset contract
-        id: assets
-        continue-on-error: true
         run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadAssetContractTest' --stacktrace --no-daemon --no-configuration-cache
 
       - name: Compile debug Kotlin
-        id: compile
-        continue-on-error: true
         run: gradle :app:compileDebugKotlin --stacktrace --no-daemon --no-configuration-cache
-
-      - name: Enforce Herz oder Kopf verification
-        if: always()
-        env:
-          PACK: ${{ steps.pack.outcome }}
-          ROUTING: ${{ steps.routing.outcome }}
-          TRANSITION: ${{ steps.transition.outcome }}
-          ASSETS: ${{ steps.assets.outcome }}
-          COMPILE: ${{ steps.compile.outcome }}
-        run: |
-          echo "pack=$PACK routing=$ROUTING transition=$TRANSITION assets=$ASSETS compile=$COMPILE"
-          test "$PACK" = success
-          test "$ROUTING" = success
-          test "$TRANSITION" = success
-          test "$ASSETS" = success
-          test "$COMPILE" = success
