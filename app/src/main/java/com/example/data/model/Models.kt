@@ -101,6 +101,7 @@ data class QuestionPack(
 object HarmonyPacksData {
 
     private val DEFAULT_CATEGORIES = listOf(
+        Category("weihnachten", "Unser Weihnachten", "❄️", 0xFFFFD978),
         Category("unterbewusstsein", "Tauche ins Unterbewusstsein", "🧙‍♂️", 0xFF9D4EDD),
         Category("wer", "Wer würde eher?", "🤔", 0xFFFF2E63),
         Category("zeich", "Zeichnen", "🎨", 0xFF9E59BD),

@@ -74,6 +74,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.CATALOG_PACKS
 import com.example.data.brain.db.BrainGeneratedContentEntity
 import com.example.data.brain.model.GeneratedGamePayload
@@ -86,6 +88,8 @@ import com.example.ui.components.AuroraProgressBar
 import com.example.ui.components.HarmonyTopicIcon
 import com.example.ui.components.GameCategoryVisual
 import com.example.ui.components.TimerPill
+import com.example.ui.christmas.ChristmasCategoryVisual
+import com.example.ui.christmas.ChristmasExperienceScreen
 import com.example.ui.introspection.IntrospectionPortal
 import com.example.ui.theme.HarmonyGold
 import com.example.ui.theme.HarmonyLine
@@ -119,6 +123,7 @@ fun GamesScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showUnansweredQuestions by remember { mutableStateOf(false) }
+    var isChristmasOpen by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val answerCounts = remember(answers) { answerCountsByPack(answers) }
@@ -421,7 +426,10 @@ fun GamesScreen(
                         }
                         CategoryRailCard(
                             category = displayCategory,
-                            onClick = { onCategoryClick(category.id) }
+                            onClick = {
+                                if (category.id == "weihnachten") isChristmasOpen = true
+                                else onCategoryClick(category.id)
+                            }
                         )
                     }
                 }
@@ -528,6 +536,21 @@ fun GamesScreen(
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 5.dp)
                 )
             }
+        }
+    }
+
+    if (isChristmasOpen) {
+        Dialog(
+            onDismissRequest = { /* ChristmasExperienceScreen owns exit confirmation. */ },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+            ChristmasExperienceScreen(
+                onExit = { isChristmasOpen = false },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 
@@ -716,22 +739,24 @@ private fun UnansweredQuestionsDialog(
 fun CategoryRailCard(category: Category, onClick: () -> Unit) {
     val accent = Color(category.tagColorHex)
     val isPortalCategory = category.id == "unterbewusstsein"
+    val isChristmasCategory = category.id == "weihnachten"
+    val isFeaturedCategory = isPortalCategory || isChristmasCategory
     val transition = rememberInfiniteTransition(label = "category_power_${category.id}")
     val glowAlpha by transition.animateFloat(
-        initialValue = if (isPortalCategory) 0.68f else 0.42f,
-        targetValue = if (isPortalCategory) 1f else 0.72f,
+        initialValue = if (isFeaturedCategory) 0.68f else 0.42f,
+        targetValue = if (isFeaturedCategory) 1f else 0.72f,
         animationSpec = infiniteRepeatable(tween(1900), RepeatMode.Reverse),
         label = "category_glow_${category.id}"
     )
     val breathe by transition.animateFloat(
-        initialValue = if (isPortalCategory) 0.985f else 1f,
-        targetValue = if (isPortalCategory) 1.025f else 1.008f,
+        initialValue = if (isFeaturedCategory) 0.985f else 1f,
+        targetValue = if (isFeaturedCategory) 1.025f else 1.008f,
         animationSpec = infiniteRepeatable(tween(2300), RepeatMode.Reverse),
         label = "category_breathe_${category.id}"
     )
     Box(
         modifier = Modifier
-            .size(width = 124.dp, height = if (isPortalCategory) 154.dp else 136.dp)
+            .size(width = 124.dp, height = if (isFeaturedCategory) 154.dp else 136.dp)
             .graphicsLayer {
                 scaleX = breathe
                 scaleY = breathe
@@ -740,14 +765,14 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
             .background(
                 Brush.linearGradient(
                     listOf(
-                        accent.copy(alpha = if (isPortalCategory) 0.48f else 0.32f),
+                        accent.copy(alpha = if (isFeaturedCategory) 0.48f else 0.32f),
                         HarmonyPurple.copy(alpha = 0.22f),
                         HarmonySurface2.copy(alpha = 0.94f)
                     )
                 )
             )
             .border(
-                width = if (isPortalCategory) 2.dp else 1.dp,
+                width = if (isChristmasCategory) 0.dp else if (isPortalCategory) 2.dp else 1.dp,
                 brush = Brush.sweepGradient(
                     listOf(
                         accent.copy(alpha = glowAlpha),
@@ -776,7 +801,12 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            if (isPortalCategory) {
+            if (isChristmasCategory) {
+                ChristmasCategoryVisual(
+                    accent = accent,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).size(64.dp)
+                )
+            } else if (isPortalCategory) {
                 IntrospectionPortal(
                     size = 64.dp,
                     isRevelation = true,
@@ -791,10 +821,10 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
             }
             Text(
                 text = category.name,
-                fontSize = if (isPortalCategory) 11.5.sp else 12.sp,
+                fontSize = if (isFeaturedCategory) 11.5.sp else 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = HarmonyText,
-                lineHeight = if (isPortalCategory) 14.sp else 15.sp,
+                lineHeight = if (isFeaturedCategory) 14.sp else 15.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
