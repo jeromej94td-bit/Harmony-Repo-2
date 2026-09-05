@@ -2,6 +2,7 @@ package com.example.data
 
 import com.example.data.model.InteractionPromptPolicy
 import com.example.data.model.LoveBalanceQuestionPolicy
+import com.example.data.model.QuestionPack
 
 /**
  * Vereinigt den bisherigen generierten Harmony-Content mit zusätzlichen
@@ -25,6 +26,17 @@ object GeneratedContentRegistry {
             .distinctBy { it.id }
     }
 
+    private fun normalizeOutdoorAreaPairs(
+        pairs: List<Pair<String, String>>
+    ): List<Pair<String, String>> = pairs.map { pair ->
+        when (pair) {
+            "Großer Außenpool" to "Outdoor-Whirlpool",
+            "Großer Außenpool" to "Whirlpool",
+            "Außenpool" to "Outdoor-Whirlpool" -> "Außenpool" to "Whirlpool"
+            else -> pair
+        }
+    }
+
     /**
      * The original generated outdoor pack used labels that were longer than the rest of the
      * image-card catalog. Keep the stable pack ID and choices, but normalize the visible labels
@@ -32,15 +44,13 @@ object GeneratedContentRegistry {
      */
     private fun normalizeOutdoorAreaPack(pack: GenPack): GenPack {
         if (pack.id != "aussen") return pack
+        val normalizedPairs = normalizeOutdoorAreaPairs(pack.pairs)
+        return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
+    }
 
-        val normalizedPairs = pack.pairs.map { pair ->
-            when (pair) {
-                "Großer Außenpool" to "Outdoor-Whirlpool",
-                "Großer Außenpool" to "Whirlpool",
-                "Außenpool" to "Outdoor-Whirlpool" -> "Außenpool" to "Whirlpool"
-                else -> pair
-            }
-        }
+    private fun normalizeOutdoorAreaPack(pack: QuestionPack): QuestionPack {
+        if (pack.id != "aussen") return pack
+        val normalizedPairs = normalizeOutdoorAreaPairs(pack.pairs)
         return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
     }
 
