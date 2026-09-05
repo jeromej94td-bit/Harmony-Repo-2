@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,15 +27,6 @@ import com.example.R
  * Only the prompt shown to the player, the short card label and the artwork are presentation data.
  */
 internal const val FINE_DINING_VISUAL_RANKING_PACK_ID = "h500_104_fine_dining_ranking"
-
-private val FINE_DINING_ATLAS_RAW_RESOURCES = listOf(
-    R.raw.fine_dining_ranking_atlas_01,
-    R.raw.fine_dining_ranking_atlas_02,
-    R.raw.fine_dining_ranking_atlas_03,
-    R.raw.fine_dining_ranking_atlas_04,
-    R.raw.fine_dining_ranking_atlas_05,
-    R.raw.fine_dining_ranking_atlas_06
-)
 
 internal data class FineDiningVisualCard(
     val row: Int,
@@ -108,15 +98,10 @@ private fun rememberFineDiningRankingAtlas(): ImageBitmap? {
     val context = LocalContext.current
     return remember(context) {
         runCatching {
-            val encoded = buildString {
-                FINE_DINING_ATLAS_RAW_RESOURCES.forEach { resourceId ->
-                    context.resources.openRawResource(resourceId).bufferedReader().use { reader ->
-                        append(reader.readText())
-                    }
-                }
-            }
-            val bytes = Base64.decode(encoded, Base64.DEFAULT)
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+            BitmapFactory.decodeResource(
+                context.resources,
+                R.drawable.fine_dining_ranking_atlas
+            )?.asImageBitmap()
         }.getOrNull()
     }
 }
