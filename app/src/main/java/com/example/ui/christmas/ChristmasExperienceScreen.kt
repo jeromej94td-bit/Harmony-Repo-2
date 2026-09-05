@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -73,7 +74,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -313,7 +313,12 @@ private fun ChristmasRoundPlayer(
     var tournamentOpponent by remember(round.id) { mutableIntStateOf(1) }
     val haptics = LocalHapticFeedback.current
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 17.dp, vertical = 19.dp)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .padding(horizontal = 17.dp, vertical = 19.dp)
+    ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             SmallRoundButton("‹", onBack)
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -474,13 +479,27 @@ private fun ChristmasOptionCard(
         horizontalArrangement = Arrangement.Center,
     ) {
         if (hidden) {
-            ChristmasMysteryArt(accent, Modifier.size(if (compact) 54.dp else 88.dp))
-            if (compact) Spacer(Modifier.width(10.dp))
-            Text("Antippen & aufdecken", color = ChristmasMuted, fontSize = if (compact) 13.sp else 11.sp, textAlign = TextAlign.Center)
+            ChristmasMysteryArt(accent, Modifier.size(if (compact) 54.dp else 64.dp))
+            Spacer(Modifier.width(if (compact) 10.dp else 7.dp))
+            Text(
+                "Antippen & aufdecken",
+                color = ChristmasMuted,
+                fontSize = if (compact) 13.sp else 11.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f),
+            )
         } else {
-            ChristmasOptionArt(option.emoji, accent, Modifier.size(if (compact) 57.dp else 92.dp))
-            if (compact) Spacer(Modifier.width(11.dp)) else Spacer(Modifier.height(7.dp))
-            Text(option.label, color = Color.White, fontSize = if (compact) 15.sp else 13.5.sp, lineHeight = 17.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            ChristmasOptionArt(option.emoji, accent, Modifier.size(if (compact) 57.dp else 64.dp))
+            Spacer(Modifier.width(if (compact) 11.dp else 7.dp))
+            Text(
+                option.label,
+                color = Color.White,
+                fontSize = if (compact) 15.sp else 12.5.sp,
+                lineHeight = if (compact) 17.sp else 15.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
