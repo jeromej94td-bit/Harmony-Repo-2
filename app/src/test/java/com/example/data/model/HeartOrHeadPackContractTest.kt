@@ -1,5 +1,6 @@
 package com.example.data.model
 
+import com.example.data.GeneratedContentRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -8,7 +9,7 @@ class HeartOrHeadPackContractTest {
 
     @Test
     fun `herz oder kopf pack has six four-option rounds`() {
-        val pack = HarmonyPacksData.DEFAULT_PACKS.firstOrNull { it.id == "herz_oder_kopf" }
+        val pack = GeneratedContentRegistry.PACKS.firstOrNull { it.id == "herz_oder_kopf" }
         assertNotNull("herz_oder_kopf pack must exist", pack)
         pack!!
 
