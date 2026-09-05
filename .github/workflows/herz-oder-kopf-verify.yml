@@ -48,20 +48,17 @@ jobs:
             cp .env.example .env
           fi
 
-      - name: Pack contract
-        run: gradle :app:testDebugUnitTest --tests 'com.example.data.model.HeartOrHeadPackContractTest' --stacktrace --no-daemon --no-configuration-cache
-
-      - name: Routing contract
-        run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadImageChoicePolicyTest' --stacktrace --no-daemon --no-configuration-cache
-
-      - name: Transition contract
-        run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadTransitionPolicyTest' --stacktrace --no-daemon --no-configuration-cache
-
-      - name: Asset contract
-        run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadAssetContractTest' --stacktrace --no-daemon --no-configuration-cache
-
-      - name: Visual contract
-        run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadVisualContractTest' --stacktrace --no-daemon --no-configuration-cache
+      - name: Run focused contracts and visual preview
+        run: >-
+          gradle :app:testDebugUnitTest
+          --tests 'com.example.data.model.HeartOrHeadPackContractTest'
+          --tests 'com.example.ui.screens.HeartOrHeadImageChoicePolicyTest'
+          --tests 'com.example.ui.screens.HeartOrHeadTransitionPolicyTest'
+          --tests 'com.example.ui.screens.HeartOrHeadAssetContractTest'
+          --tests 'com.example.ui.screens.HeartOrHeadVisualContractTest'
+          --stacktrace
+          --no-daemon
+          --no-configuration-cache
 
       - name: Upload visual previews
         if: always()
