@@ -48,13 +48,23 @@ jobs:
             cp .env.example .env
           fi
 
-      - name: Run focused contracts and visual preview
+      - name: Core contracts
         run: >-
           gradle :app:testDebugUnitTest
           --tests 'com.example.data.model.HeartOrHeadPackContractTest'
           --tests 'com.example.ui.screens.HeartOrHeadImageChoicePolicyTest'
           --tests 'com.example.ui.screens.HeartOrHeadTransitionPolicyTest'
           --tests 'com.example.ui.screens.HeartOrHeadAssetContractTest'
+          --stacktrace
+          --no-daemon
+          --no-configuration-cache
+
+      - name: Compile debug Kotlin
+        run: gradle :app:compileDebugKotlin --stacktrace --no-daemon --no-configuration-cache
+
+      - name: Visual preview contract
+        run: >-
+          gradle :app:testDebugUnitTest
           --tests 'com.example.ui.screens.HeartOrHeadVisualContractTest'
           --stacktrace
           --no-daemon
@@ -68,5 +78,5 @@ jobs:
           path: build/outputs/roborazzi/heart_or_head_*_preview.png
           if-no-files-found: ignore
 
-      - name: Compile debug Kotlin
-        run: gradle :app:compileDebugKotlin --stacktrace --no-daemon --no-configuration-cache
+      - name: Assemble debug APK
+        run: gradle :app:assembleDebug --stacktrace --no-daemon --no-configuration-cache
