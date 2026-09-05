@@ -178,6 +178,7 @@ fun LiveChangeHud(
                 Text("LIVE CHANGE", color = HarmonyGold, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold)
                 Text("$changeCount Änderung(en)", color = HarmonyMuted, fontSize = 9.sp)
             }
+            DeveloperReviewQuickNote()
             if (hasActiveItem) {
                 TextButton(onClick = onEditCurrent) {
                     Text("Bearbeiten", color = HarmonyPurpleLight, fontSize = 11.sp)
@@ -716,25 +717,5 @@ private fun ActionButton(
         border = BorderStroke(1.dp, if (danger) HarmonyPink else HarmonyLine)
     ) {
         Text(label, color = if (danger) HarmonyPink else HarmonyText, fontWeight = FontWeight.Medium)
-    }
-}
-
-@Composable
-private fun TypeButton(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) HarmonyPurple else HarmonySurface
-        ),
-        shape = RoundedCornerShape(12.dp),
-        border = if (selected) null else BorderStroke(1.dp, HarmonyLine)
-    ) {
-        Text(label, color = if (selected) Color.White else HarmonyMuted, fontSize = 12.sp)
     }
 }
