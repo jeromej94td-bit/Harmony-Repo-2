@@ -313,6 +313,12 @@ private fun ChristmasRoundPlayer(
     var tournamentOpponent by remember(round.id) { mutableIntStateOf(1) }
     val haptics = LocalHapticFeedback.current
 
+    fun advanceAfterSelection(option: ChristmasOption) {
+        selected = option
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        if (roundIndex == part.rounds.lastIndex) onComplete() else roundIndex++
+    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -331,40 +337,53 @@ private fun ChristmasRoundPlayer(
         }
         Spacer(Modifier.height(8.dp))
         ChristmasProgress((roundIndex + 1) / 15f, part.accent)
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(10.dp))
 
-        AnimatedContent(round.id, label = "christmas_round_content") {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(round.title.uppercase(), color = part.accent, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.8.sp)
-                Spacer(Modifier.height(7.dp))
-                Text(round.prompt, color = Color.White, fontSize = 24.sp, lineHeight = 29.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(17.dp))
+        AnimatedContent(
+            targetState = round.id,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            label = "christmas_round_content",
+        ) {
+            Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(round.title.uppercase(), color = part.accent, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.8.sp)
+                    Spacer(Modifier.height(7.dp))
+                    Text(round.prompt, color = Color.White, fontSize = 24.sp, lineHeight = 29.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+                }
 
                 when (round.kind) {
                     ChristmasRoundKind.TOURNAMENT -> {
                         val left = tournamentWinner ?: round.options.first()
                         val right = round.options[tournamentOpponent]
-                        Text("DUELL ${tournamentOpponent} VON 3", color = ChristmasMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-                            listOf(left, right).forEachIndexed { index, option ->
-                                ChristmasOptionCard(
-                                    option = option,
-                                    index = index,
-                                    accent = part.accent,
-                                    selected = selected == option,
-                                    hidden = false,
-                                    onRevealSound = { audio.playCardFlip() },
-                                    onClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        if (tournamentOpponent < round.options.lastIndex) {
-                                            tournamentWinner = option
-                                            tournamentOpponent++
-                                            audio.playCardFlip()
-                                        } else selected = option
-                                    },
-                                    modifier = Modifier.weight(1f).aspectRatio(.73f),
-                                )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("DUELL ${tournamentOpponent} VON 3", color = ChristmasMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.height(8.dp))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(11.dp)) {
+                                listOf(left, right).forEachIndexed { index, option ->
+                                    ChristmasOptionCard(
+                                        option = option,
+                                        index = index,
+                                        accent = part.accent,
+                                        selected = selected == option,
+                                        hidden = false,
+                                        onRevealSound = { audio.playCardFlip() },
+                                        onClick = {
+                                            if (tournamentOpponent < round.options.lastIndex) {
+                                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                tournamentWinner = option
+                                                tournamentOpponent++
+                                                audio.playCardFlip()
+                                            } else {
+                                                advanceAfterSelection(option)
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f).aspectRatio(.73f),
+                                    )
+                                }
                             }
                         }
                     }
@@ -373,7 +392,7 @@ private fun ChristmasRoundPlayer(
                             round.options.forEachIndexed { index, option ->
                                 ChristmasOptionCard(
                                     option, index, part.accent, selected == option, false, { audio.playCardFlip() },
-                                    onClick = { selected = option; haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    onClick = { advanceAfterSelection(option) },
                                     modifier = Modifier.fillMaxWidth().height(86.dp),
                                     compact = true,
                                 )
@@ -397,36 +416,16 @@ private fun ChristmasRoundPlayer(
                                                 revealed = revealed + index
                                                 audio.playCardFlip()
                                             } else {
-                                                selected = option
-                                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                advanceAfterSelection(option)
                                             }
                                         },
                                         modifier = Modifier.weight(1f).aspectRatio(.91f),
                                     )
                                 }
                             }
-                            if (row == 0) Spacer(Modifier.height(10.dp))
                         }
                     }
                 }
-            }
-        }
-
-        Spacer(Modifier.weight(1f))
-        AnimatedVisibility(selected != null, enter = fadeIn(tween(250)) + slideInVertically { it / 2 }) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(Brush.horizontalGradient(listOf(part.accent, part.secondaryAccent)))
-                    .clickable {
-                        if (roundIndex == part.rounds.lastIndex) onComplete() else roundIndex++
-                    }
-                    .padding(vertical = 15.dp)
-                    .testTag("christmas_next_round"),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(if (roundIndex == 14) "Teil abschließen ✨" else "Nächste Runde", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
     }
