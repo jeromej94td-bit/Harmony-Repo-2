@@ -6,9 +6,10 @@ on:
       - main
     paths:
       - 'app/src/main/java/com/example/data/GeneratedHarmonyContent.kt'
+      - 'app/src/main/java/com/example/data/GeneratedContentRegistry.kt'
       - 'app/src/main/java/com/example/data/DriveTotAssetInstaller.kt'
-      - 'app/src/main/assets/outdoor_aussenpool.b64'
-      - 'app/src/main/assets/outdoor_whirlpool.b64'
+      - 'app/src/main/assets/outdoor_aussenpool.webp'
+      - 'app/src/main/assets/outdoor_whirlpool.webp'
       - 'app/src/test/java/com/example/OutdoorAreaImageContractTest.kt'
       - '.github/workflows/outdoor-area-image-verify.yml'
   workflow_dispatch:
