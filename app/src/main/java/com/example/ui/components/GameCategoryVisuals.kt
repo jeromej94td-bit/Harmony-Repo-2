@@ -55,7 +55,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.R
-import com.example.ui.christmas.ChristmasCategoryVisual
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPurple
 import kotlinx.coroutines.delay
@@ -70,8 +69,6 @@ fun GameCategoryVisual(
     modifier: Modifier = Modifier
 ) {
     when (categoryId) {
-        "weihnachten" -> ChristmasCategoryVisual(accent = accent, modifier = modifier.size(64.dp))
-
         "wer" -> PandaArtworkIcon(
             drawableRes = R.drawable.panda_thinking_harmony,
             accent = accent,
