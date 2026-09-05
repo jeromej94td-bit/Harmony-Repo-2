@@ -25,9 +25,30 @@ object GeneratedContentRegistry {
             .distinctBy { it.id }
     }
 
+    /**
+     * The original generated outdoor pack used labels that were longer than the rest of the
+     * image-card catalog. Keep the stable pack ID and choices, but normalize the visible labels
+     * so they also match the keys used by the bundled Drive images.
+     */
+    private fun normalizeOutdoorAreaPack(pack: GenPack): GenPack {
+        if (pack.id != "aussen") return pack
+
+        val normalizedPairs = pack.pairs.map { pair ->
+            when (pair) {
+                "Großer Außenpool" to "Outdoor-Whirlpool",
+                "Großer Außenpool" to "Whirlpool",
+                "Außenpool" to "Outdoor-Whirlpool" -> "Außenpool" to "Whirlpool"
+                else -> pair
+            }
+        }
+        return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
+    }
+
     private fun runtimePack(pack: GenPack): GenPack {
-        var result = Harmony360SectionTopicSorting.apply(
-            GeneratedContentRepairPolicy.repair(pack)
+        var result = normalizeOutdoorAreaPack(
+            Harmony360SectionTopicSorting.apply(
+                GeneratedContentRepairPolicy.repair(pack)
+            )
         )
 
         // Deep Talk owns a dedicated full-screen, two-person reveal flow. The legacy
@@ -63,9 +84,10 @@ object GeneratedContentRegistry {
     private fun normalizeLoadedCustomPacks() {
         val customPacks = DeveloperDataManager._customPacks
         for (index in customPacks.indices) {
-            val retopiced = Harmony360SectionTopicSorting.apply(customPacks[index])
-            if (retopiced != customPacks[index]) {
-                customPacks[index] = retopiced
+            var normalized = Harmony360SectionTopicSorting.apply(customPacks[index])
+            normalized = normalizeOutdoorAreaPack(normalized)
+            if (normalized != customPacks[index]) {
+                customPacks[index] = normalized
             }
 
             val pack = customPacks[index]
