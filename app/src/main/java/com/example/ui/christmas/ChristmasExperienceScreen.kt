@@ -89,6 +89,36 @@ import kotlin.random.Random
 private enum class ChristmasPage { PARTS, ROUND, COMPLETE }
 
 @Composable
+fun ChristmasCategoryVisual(
+    accent: Color,
+    modifier: Modifier = Modifier,
+) {
+    val transition = rememberInfiniteTransition(label = "christmas_category_snowflake")
+    val pulse by transition.animateFloat(.94f, 1.06f, infiniteRepeatable(tween(1700, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "snowflake_pulse")
+    val glow by transition.animateFloat(.54f, 1f, infiniteRepeatable(tween(2100), RepeatMode.Reverse), label = "snowflake_glow")
+    Canvas(modifier.scale(pulse)) {
+        val center = Offset(size.width / 2, size.height / 2)
+        val radius = size.minDimension * .33f
+        drawCircle(Brush.radialGradient(listOf(accent.copy(.30f * glow), Color(0xFFB96CFF).copy(.16f), Color.Transparent), center, radius * 1.65f), radius * 1.65f, center)
+        repeat(6) { arm ->
+            val angle = arm * PI.toFloat() / 3f
+            val end = Offset(center.x + cos(angle) * radius, center.y + sin(angle) * radius)
+            drawLine(accent.copy(.20f * glow), center, end, 9f, StrokeCap.Round)
+            drawLine(Color.White.copy(.92f), center, end, 2.1f, StrokeCap.Round)
+            listOf(.52f, .76f).forEach { point ->
+                val root = Offset(center.x + cos(angle) * radius * point, center.y + sin(angle) * radius * point)
+                listOf(-.64f, .64f).forEach { branch ->
+                    val branchAngle = angle + PI.toFloat() + branch
+                    val branchEnd = Offset(root.x + cos(branchAngle) * radius * .22f, root.y + sin(branchAngle) * radius * .22f)
+                    drawLine(Color.White.copy(.82f), root, branchEnd, 1.7f, StrokeCap.Round)
+                }
+            }
+        }
+        drawCircle(Color.White.copy(.95f), 3.2f, center)
+    }
+}
+
+@Composable
 fun ChristmasExperienceScreen(onExit: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
