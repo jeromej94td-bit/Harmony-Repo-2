@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import java.io.File
-import java.util.Base64
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -23,8 +22,9 @@ class FineDiningVisualRankingContractTest {
 
         assertTrue(visualPolicy.contains("h500_104_fine_dining_ranking"))
         assertTrue(visualPolicy.contains("FineDiningRankingThumbnail"))
-        assertTrue(visualPolicy.contains("fine_dining_ranking_atlas_01"))
-        assertTrue(visualPolicy.contains("fine_dining_ranking_atlas_06"))
+        assertTrue(visualPolicy.contains("R.drawable.fine_dining_ranking_atlas"))
+        assertFalse(visualPolicy.contains("R.raw.fine_dining_ranking_atlas"))
+        assertFalse(visualPolicy.contains("Base64"))
         assertTrue(rankingBoard.contains("fineDiningVisualPrompt"))
         assertTrue(rankingBoard.contains("fineDiningRankingCard"))
     }
@@ -44,17 +44,11 @@ class FineDiningVisualRankingContractTest {
     }
 
     @Test
-    fun `fine dining atlas chunks decode into real webp artwork`() {
-        val chunkPaths = (1..6).map { index ->
-            "app/src/main/res/raw/fine_dining_ranking_atlas_%02d.b64".format(index)
-        }
-        chunkPaths.forEach { path ->
-            assertTrue("Missing Fine Dining artwork chunk: $path", resolve(path).exists())
-        }
+    fun `fine dining drawable is real webp artwork`() {
+        val atlas = resolve("app/src/main/res/drawable/fine_dining_ranking_atlas.webp")
+        assertTrue("Missing Fine Dining artwork atlas", atlas.exists())
 
-        val encoded = chunkPaths.joinToString(separator = "") { path -> source(path).trim() }
-        val bytes = Base64.getDecoder().decode(encoded)
-
+        val bytes = atlas.readBytes()
         assertTrue("Fine Dining visual atlas is too small: ${bytes.size} bytes", bytes.size > 50_000)
         assertTrue("Fine Dining visual atlas unexpectedly large: ${bytes.size} bytes", bytes.size < 1_000_000)
         assertTrue("Fine Dining atlas header is incomplete", bytes.size >= 12)
