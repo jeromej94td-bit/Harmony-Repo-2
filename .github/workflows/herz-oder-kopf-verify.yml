@@ -60,5 +60,16 @@ jobs:
       - name: Asset contract
         run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadAssetContractTest' --stacktrace --no-daemon --no-configuration-cache
 
+      - name: Visual contract
+        run: gradle :app:testDebugUnitTest --tests 'com.example.ui.screens.HeartOrHeadVisualContractTest' --stacktrace --no-daemon --no-configuration-cache
+
+      - name: Upload visual previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heart-or-head-previews
+          path: build/outputs/roborazzi/heart_or_head_*_preview.png
+          if-no-files-found: ignore
+
       - name: Compile debug Kotlin
         run: gradle :app:compileDebugKotlin --stacktrace --no-daemon --no-configuration-cache
