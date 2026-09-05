@@ -1,0 +1,58 @@
+name: Fine Dining Reconstruct TEMP
+
+on:
+  push:
+    branches:
+      - feature/fine-dining-visual-ranking
+    paths:
+      - '.github/workflows/fine-dining-reconstruct-temp.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fine-dining-reconstruct-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full branch history
+        uses: actions/checkout@v4
+        with:
+          ref: feature/fine-dining-visual-ranking
+          fetch-depth: 0
+
+      - name: Reconstruct production atlas from verified historical chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_commit='e6c2ce7dffc5f5453b04ae6dc0e0a9b90f11b165'
+          : > /tmp/fine_dining_atlas.b64
+          for index in 01 02 03 04 05 06; do
+            git show "${source_commit}:app/src/main/res/raw/fine_dining_ranking_atlas_${index}.b64" >> /tmp/fine_dining_atlas.b64
+          done
+          tr -d '\n\r\t ' < /tmp/fine_dining_atlas.b64 | base64 --decode > app/src/main/res/drawable/fine_dining_ranking_atlas.webp
+
+          size=$(wc -c < app/src/main/res/drawable/fine_dining_ranking_atlas.webp)
+          test "$size" -gt 50000
+          test "$size" -lt 1000000
+          test "$(head -c 4 app/src/main/res/drawable/fine_dining_ranking_atlas.webp)" = 'RIFF'
+          test "$(dd if=app/src/main/res/drawable/fine_dining_ranking_atlas.webp bs=1 skip=8 count=4 status=none)" = 'WEBP'
+          echo "Fine Dining atlas reconstructed: ${size} bytes"
+
+      - name: Commit real binary atlas
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- app/src/main/res/drawable/fine_dining_ranking_atlas.webp; then
+            echo 'Atlas already matches reconstructed artwork'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/src/main/res/drawable/fine_dining_ranking_atlas.webp
+          git commit -m 'fix: restore real Fine Dining artwork atlas'
+          git push origin HEAD:feature/fine-dining-visual-ranking
