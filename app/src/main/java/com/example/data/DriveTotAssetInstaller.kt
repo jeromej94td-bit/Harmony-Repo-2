@@ -40,7 +40,7 @@ object DriveTotAssetInstaller {
     private const val OUTDOOR_WHIRLPOOL_OPTION = "Whirlpool"
     private const val OUTDOOR_WHIRLPOOL_FILE = "outdoor_whirlpool.webp"
     private const val OUTDOOR_WHIRLPOOL_DRIVE_FILE_ID = "1nFWTw3kEEOmuNefb4N3mSDCK1eabg6_c"
-    private const val OUTDOOR_MIN_BYTES = 50_000L
+    private const val OUTDOOR_MIN_BYTES = 8_000L
 
     private val TOKYO_ASSET_CHUNKS = listOf(
         "travel_tokyo_asset.b64"
