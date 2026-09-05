@@ -44,7 +44,7 @@ jobs:
             cp .env.example .env
           fi
 
-      - name: Inspect Fine Dining atlas before Gradle
+      - name: Inspect real Fine Dining atlas before Gradle
         run: |
           pwd
           ls -l app/src/main/res/drawable/fine_dining_ranking_atlas.webp
