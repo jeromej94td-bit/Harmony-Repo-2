@@ -10,6 +10,14 @@ Harmony Panda is the reusable visual and interaction standard for Harmony relati
 
 Read `STYLE_GUIDE.md` before producing assets or implementing the card renderer.
 
+## Visual references
+Before generating new Harmony Panda artwork, inspect the approved references in `references/`:
+- `references/harmony-panda-reference-01.jpg` — canonical original round/cuddly character look and card styling.
+- `references/harmony-panda-reference-02.jpg` — same approved character language in additional couple situations.
+- `references/README.md` — reference index and usage note.
+
+Treat these images as the visual source of truth for character proportions, warmth, card framing, glow, and overall mood. Do not drift toward the later slimmer panda experiment.
+
 ## When to use
 Use Harmony Panda for romantic or relationship-centered visual choices such as:
 - Herz oder Kopf
@@ -50,4 +58,4 @@ No double taps, no selection during animation, no question text changing in the 
 Use Harmony's dark violet / aubergine base with magenta, pink, rose, soft gold, warm candlelight, subtle particles and glow. Scenes should feel cozy, cinematic, affectionate, emotionally readable, and suitable for a premium global relationship app.
 
 ## Source of truth
-The detailed rules, image-language guidance, animation timing principles, exceptions, and generation prompt template live in `STYLE_GUIDE.md`. When there is a conflict, follow the more specific rule in that guide.
+The approved reference images in `references/` define the visual target. The detailed rules, image-language guidance, animation timing principles, exceptions, and generation prompt template live in `STYLE_GUIDE.md`. When there is a conflict, follow the more specific rule in that guide while preserving the approved reference-image character look.
