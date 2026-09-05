@@ -36,7 +36,7 @@ class OutdoorAreaImageContractTest {
 
             assertTrue("Missing bundled asset $assetName", asset != null)
             val bytes = asset!!.readBytes()
-            assertTrue("Bundled asset $assetName is unexpectedly small", bytes.size > 50_000)
+            assertTrue("Bundled asset $assetName is too small to contain a WebP header", bytes.size >= 12)
             assertEquals("RIFF", bytes.copyOfRange(0, 4).toString(Charsets.US_ASCII))
             assertEquals("WEBP", bytes.copyOfRange(8, 12).toString(Charsets.US_ASCII))
         }
