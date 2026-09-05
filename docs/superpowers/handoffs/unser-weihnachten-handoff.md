@@ -4,7 +4,7 @@ Branch: `feature/unser-weihnachten`
 
 ## Einstieg
 
-`HarmonyPacksData` registriert die Kategorie `weihnachten`. `GamesScreen` zeigt dafür eine hervorgehobene, rahmenlose Kategorie-Karte mit animierter Schneeflocke. `MainActivity` öffnet `ChristmasExperienceScreen` als Fullscreen-Overlay und blendet Harmony Top- und Bottom-Navigation aus.
+`HarmonyPacksData` registriert die Kategorie `weihnachten`. `GamesScreen` zeigt dafür eine hervorgehobene, rahmenlose Kategorie-Karte mit animierter Schneeflocke. Beim Öffnen startet `ChristmasExperienceScreen` in einem fensterfüllenden Dialog (`usePlatformDefaultWidth = false`, `decorFitsSystemWindows = false`). Dadurch bleiben die Harmony Top- und Bottom-Navigation vollständig verdeckt; `MainActivity` bleibt unverändert.
 
 ## Spielumfang
 
