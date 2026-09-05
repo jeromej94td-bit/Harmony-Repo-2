@@ -44,6 +44,12 @@ jobs:
             cp .env.example .env
           fi
 
+      - name: Inspect Fine Dining atlas before Gradle
+        run: |
+          pwd
+          ls -l app/src/main/res/drawable/fine_dining_ranking_atlas.webp
+          wc -c app/src/main/res/drawable/fine_dining_ranking_atlas.webp
+
       - name: Verify Fine Dining visual ranking contract
         run: >-
           gradle :app:testDebugUnitTest
@@ -51,3 +57,9 @@ jobs:
           --stacktrace
           --no-daemon
           --no-configuration-cache
+
+      - name: Show focused test diagnostics
+        if: failure()
+        run: |
+          find app/build/test-results/testDebugUnitTest -maxdepth 1 -type f -print || true
+          cat app/build/test-results/testDebugUnitTest/TEST-com.example.ui.screens.FineDiningVisualRankingContractTest.xml || true
