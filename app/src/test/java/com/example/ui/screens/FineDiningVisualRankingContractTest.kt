@@ -1,6 +1,8 @@
 package com.example.ui.screens
 
 import java.io.File
+import java.util.Base64
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -20,8 +22,9 @@ class FineDiningVisualRankingContractTest {
         assertTrue(visualPolicy.contains("Morgen früh – was soll dir davon noch im Kopf sein?"))
 
         assertTrue(visualPolicy.contains("h500_104_fine_dining_ranking"))
-        assertTrue(visualPolicy.contains("fineDiningRankingImageRes"))
         assertTrue(visualPolicy.contains("FineDiningRankingThumbnail"))
+        assertTrue(visualPolicy.contains("fine_dining_ranking_atlas_01"))
+        assertTrue(visualPolicy.contains("fine_dining_ranking_atlas_06"))
         assertTrue(rankingBoard.contains("fineDiningVisualPrompt"))
         assertTrue(rankingBoard.contains("fineDiningRankingCard"))
     }
@@ -41,26 +44,22 @@ class FineDiningVisualRankingContractTest {
     }
 
     @Test
-    fun `fine dining atlas exists and contains real artwork bytes`() {
-        val atlasPath = "app/src/main/res/drawable/fine_dining_ranking_atlas.webp"
-        val candidateModule = File(atlasPath.removePrefix("app/"))
-        val candidateRepo = File(atlasPath)
-        val atlas = resolve(atlasPath)
-        val diagnostics = buildString {
-            appendLine("user.dir=${System.getProperty("user.dir")}")
-            appendLine("candidateModule=${candidateModule.absolutePath} exists=${candidateModule.exists()} length=${candidateModule.length()}")
-            appendLine("candidateRepo=${candidateRepo.absolutePath} exists=${candidateRepo.exists()} length=${candidateRepo.length()}")
-            appendLine("resolved=${atlas.absolutePath} exists=${atlas.exists()} length=${atlas.length()}")
+    fun `fine dining atlas chunks decode into real webp artwork`() {
+        val chunkPaths = (1..6).map { index ->
+            "app/src/main/res/raw/fine_dining_ranking_atlas_%02d.b64".format(index)
         }
-        println("FINE_DINING_ATLAS_DIAGNOSTICS\n$diagnostics")
+        chunkPaths.forEach { path ->
+            assertTrue("Missing Fine Dining artwork chunk: $path", resolve(path).exists())
+        }
 
-        assertTrue("Missing Fine Dining visual atlas\n$diagnostics", atlas.exists())
-        if (atlas.exists()) {
-            assertTrue("Fine Dining visual atlas is too small\n$diagnostics", atlas.length() > 50_000L)
-            val header = atlas.inputStream().use { stream -> ByteArray(12).also(stream::read) }
-            assertTrue(String(header.copyOfRange(0, 4), Charsets.US_ASCII) == "RIFF")
-            assertTrue(String(header.copyOfRange(8, 12), Charsets.US_ASCII) == "WEBP")
-        }
+        val encoded = chunkPaths.joinToString(separator = "") { path -> source(path).trim() }
+        val bytes = Base64.getDecoder().decode(encoded)
+
+        assertTrue("Fine Dining visual atlas is too small: ${bytes.size} bytes", bytes.size > 50_000)
+        assertTrue("Fine Dining visual atlas unexpectedly large: ${bytes.size} bytes", bytes.size < 1_000_000)
+        assertTrue("Fine Dining atlas header is incomplete", bytes.size >= 12)
+        assertEquals("RIFF", String(bytes.copyOfRange(0, 4), Charsets.US_ASCII))
+        assertEquals("WEBP", String(bytes.copyOfRange(8, 12), Charsets.US_ASCII))
     }
 
     @Test
