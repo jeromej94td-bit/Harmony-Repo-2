@@ -1,9 +1,8 @@
 package com.example.ui.screens
 
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertExists
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -19,7 +18,7 @@ import java.io.File
 class HeartOrHeadVisualContractTest {
 
     @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
+    val composeRule = createComposeRule()
 
     @Test
     fun `date round renders four Harmony Panda cards`() {
