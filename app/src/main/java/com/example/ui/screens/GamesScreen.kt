@@ -74,6 +74,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.CATALOG_PACKS
 import com.example.data.brain.db.BrainGeneratedContentEntity
 import com.example.data.brain.model.GeneratedGamePayload
@@ -86,6 +88,8 @@ import com.example.ui.components.AuroraProgressBar
 import com.example.ui.components.HarmonyTopicIcon
 import com.example.ui.components.GameCategoryVisual
 import com.example.ui.components.TimerPill
+import com.example.ui.christmas.ChristmasCategoryVisual
+import com.example.ui.christmas.ChristmasExperienceScreen
 import com.example.ui.introspection.IntrospectionPortal
 import com.example.ui.theme.HarmonyGold
 import com.example.ui.theme.HarmonyLine
@@ -119,6 +123,7 @@ fun GamesScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showUnansweredQuestions by remember { mutableStateOf(false) }
+    var isChristmasOpen by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val answerCounts = remember(answers) { answerCountsByPack(answers) }
@@ -421,7 +426,10 @@ fun GamesScreen(
                         }
                         CategoryRailCard(
                             category = displayCategory,
-                            onClick = { onCategoryClick(category.id) }
+                            onClick = {
+                                if (category.id == "weihnachten") isChristmasOpen = true
+                                else onCategoryClick(category.id)
+                            }
                         )
                     }
                 }
@@ -528,6 +536,21 @@ fun GamesScreen(
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 5.dp)
                 )
             }
+        }
+    }
+
+    if (isChristmasOpen) {
+        Dialog(
+            onDismissRequest = { /* ChristmasExperienceScreen owns exit confirmation. */ },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+            ChristmasExperienceScreen(
+                onExit = { isChristmasOpen = false },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 
@@ -778,7 +801,12 @@ fun CategoryRailCard(category: Category, onClick: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            if (isPortalCategory) {
+            if (isChristmasCategory) {
+                ChristmasCategoryVisual(
+                    accent = accent,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).size(64.dp)
+                )
+            } else if (isPortalCategory) {
                 IntrospectionPortal(
                     size = 64.dp,
                     isRevelation = true,
