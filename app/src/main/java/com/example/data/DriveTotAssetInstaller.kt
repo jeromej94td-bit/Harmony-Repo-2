@@ -30,6 +30,18 @@ object DriveTotAssetInstaller {
     private const val TOKYO_DRIVE_FILE_ID = "1ehJCs9FJ3Htwl3MqBIwOYtSgC3vynNxZ"
     private const val TOKYO_MIN_BYTES = 1_024L
 
+    // Targeted repair for Traumhaus Außenbereich. These are optimized copies of the
+    // exact images selected from Harmony Brain > Von ChatGPT generierte Bilder > Haus Außen 2
+    // (22. August). A dedicated marker makes the assets appear on already-installed apps too.
+    private const val OUTDOOR_REPAIR_MARKER = ".outdoor-area-images-v1"
+    private const val OUTDOOR_POOL_OPTION = "Außenpool"
+    private const val OUTDOOR_POOL_FILE = "outdoor_aussenpool.webp"
+    private const val OUTDOOR_POOL_DRIVE_FILE_ID = "1rMZ3LgbcxLQX55Sp0cbsmO76ISuq9vH-"
+    private const val OUTDOOR_WHIRLPOOL_OPTION = "Whirlpool"
+    private const val OUTDOOR_WHIRLPOOL_FILE = "outdoor_whirlpool.webp"
+    private const val OUTDOOR_WHIRLPOOL_DRIVE_FILE_ID = "1nFWTw3kEEOmuNefb4N3mSDCK1eabg6_c"
+    private const val OUTDOOR_MIN_BYTES = 50_000L
+
     private val TOKYO_ASSET_CHUNKS = listOf(
         "travel_tokyo_asset.b64"
     )
@@ -105,7 +117,9 @@ object DriveTotAssetInstaller {
         "Kopenhagen, Dänemark" to "travel_kopenhagen.webp",
         "Prag, Tschechien" to "travel_prag.webp",
         "Budapest, Ungarn" to "travel_budapest.webp",
-        TOKYO_OPTION to TOKYO_FILE
+        TOKYO_OPTION to TOKYO_FILE,
+        OUTDOOR_POOL_OPTION to OUTDOOR_POOL_FILE,
+        OUTDOOR_WHIRLPOOL_OPTION to OUTDOOR_WHIRLPOOL_FILE
     )
 
     private val brandOptionToFile = linkedMapOf(
@@ -188,6 +202,11 @@ object DriveTotAssetInstaller {
         "Statement-Ring"
     )
 
+    private val forceBundledOutdoorOptions = setOf(
+        OUTDOOR_POOL_OPTION,
+        OUTDOOR_WHIRLPOOL_OPTION
+    )
+
     private fun applyEngagementRingPack() {
         val current = HarmonyPacksData.PACKS
         val ringPack = current.firstOrNull { it.id == "ringe" } ?: return
@@ -244,6 +263,34 @@ object DriveTotAssetInstaller {
         }
     }
 
+    private fun repairOutdoorAreaImages(context: Context, outputDir: File) {
+        val marker = File(outputDir, OUTDOOR_REPAIR_MARKER)
+        val poolTarget = File(outputDir, OUTDOOR_POOL_FILE)
+        val whirlpoolTarget = File(outputDir, OUTDOOR_WHIRLPOOL_FILE)
+        if (
+            marker.isFile &&
+            poolTarget.isFile && poolTarget.length() >= OUTDOOR_MIN_BYTES &&
+            whirlpoolTarget.isFile && whirlpoolTarget.length() >= OUTDOOR_MIN_BYTES
+        ) {
+            return
+        }
+
+        fun copyBundledAsset(assetName: String, target: File): Boolean = runCatching {
+            context.assets.open(assetName).use { input ->
+                target.outputStream().buffered().use { output -> input.copyTo(output) }
+            }
+            target.isFile && target.length() >= OUTDOOR_MIN_BYTES
+        }.getOrDefault(false)
+
+        val poolReady = copyBundledAsset(OUTDOOR_POOL_FILE, poolTarget)
+        val whirlpoolReady = copyBundledAsset(OUTDOOR_WHIRLPOOL_FILE, whirlpoolTarget)
+        if (poolReady && whirlpoolReady) {
+            marker.writeText(
+                "drive:$OUTDOOR_POOL_DRIVE_FILE_ID,$OUTDOOR_WHIRLPOOL_DRIVE_FILE_ID"
+            )
+        }
+    }
+
     fun install(context: Context): Map<String, String> {
         CuisinePackInstaller.install(context)
         applyEngagementRingPack()
@@ -266,12 +313,15 @@ object DriveTotAssetInstaller {
             installMarker.writeText("1")
         }
 
-        // Always check the dedicated Tokyo repair marker after the general install.
-        // This makes the selected Drive image appear for both fresh and upgraded users.
+        // Always check dedicated repair markers after the general install. This keeps the
+        // exact selected Drive assets available on both clean installs and app upgrades.
         repairTokyoImage(context, outputDir)
+        repairOutdoorAreaImages(context, outputDir)
 
         // Developer/exported images are installed before this legacy bundle. Do not
         // overwrite them afterwards just because an option has the same display name.
+        // The two explicitly selected outdoor images are an exception: they are the
+        // curated project assets for these stable keys and must replace stale remote fallbacks.
         val generatedOptionKeys = DeveloperDataManager.getGeneratedImages().keys
         val result = LinkedHashMap<String, String>()
 
@@ -280,7 +330,10 @@ object DriveTotAssetInstaller {
             if (
                 file.isFile &&
                 file.length() > 0L &&
-                TotImageSourcePolicy.shouldUseBundledInstallerImage(option, generatedOptionKeys)
+                (
+                    option in forceBundledOutdoorOptions ||
+                        TotImageSourcePolicy.shouldUseBundledInstallerImage(option, generatedOptionKeys)
+                    )
             ) {
                 result[option] = file.absolutePath
             }
