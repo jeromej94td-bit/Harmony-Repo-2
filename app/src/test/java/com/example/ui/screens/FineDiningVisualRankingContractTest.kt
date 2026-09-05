@@ -42,10 +42,20 @@ class FineDiningVisualRankingContractTest {
 
     @Test
     fun `fine dining atlas exists and contains real artwork bytes`() {
-        val atlas = resolve("app/src/main/res/drawable/fine_dining_ranking_atlas.webp")
-        assertTrue("Missing Fine Dining visual atlas", atlas.exists())
+        val atlasPath = "app/src/main/res/drawable/fine_dining_ranking_atlas.webp"
+        val candidateModule = File(atlasPath.removePrefix("app/"))
+        val candidateRepo = File(atlasPath)
+        val atlas = resolve(atlasPath)
+        val diagnostics = buildString {
+            appendLine("user.dir=${System.getProperty("user.dir")}")
+            appendLine("candidateModule=${candidateModule.absolutePath} exists=${candidateModule.exists()} length=${candidateModule.length()}")
+            appendLine("candidateRepo=${candidateRepo.absolutePath} exists=${candidateRepo.exists()} length=${candidateRepo.length()}")
+            appendLine("resolved=${atlas.absolutePath} exists=${atlas.exists()} length=${atlas.length()}")
+        }
+
+        assertTrue("Missing Fine Dining visual atlas\n$diagnostics", atlas.exists())
         if (atlas.exists()) {
-            assertTrue("Fine Dining visual atlas is too small", atlas.length() > 50_000L)
+            assertTrue("Fine Dining visual atlas is too small\n$diagnostics", atlas.length() > 50_000L)
             val header = atlas.inputStream().use { stream -> ByteArray(12).also(stream::read) }
             assertTrue(String(header.copyOfRange(0, 4), Charsets.US_ASCII) == "RIFF")
             assertTrue(String(header.copyOfRange(8, 12), Charsets.US_ASCII) == "WEBP")
