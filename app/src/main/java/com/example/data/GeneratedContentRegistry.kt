@@ -2,7 +2,6 @@ package com.example.data
 
 import com.example.data.model.InteractionPromptPolicy
 import com.example.data.model.LoveBalanceQuestionPolicy
-import com.example.data.model.QuestionPack
 
 /**
  * Vereinigt den bisherigen generierten Harmony-Content mit zusätzlichen
@@ -43,12 +42,6 @@ object GeneratedContentRegistry {
      * so they also match the keys used by the bundled Drive images.
      */
     private fun normalizeOutdoorAreaPack(pack: GenPack): GenPack {
-        if (pack.id != "aussen") return pack
-        val normalizedPairs = normalizeOutdoorAreaPairs(pack.pairs)
-        return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
-    }
-
-    private fun normalizeOutdoorAreaPack(pack: QuestionPack): QuestionPack {
         if (pack.id != "aussen") return pack
         val normalizedPairs = normalizeOutdoorAreaPairs(pack.pairs)
         return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
