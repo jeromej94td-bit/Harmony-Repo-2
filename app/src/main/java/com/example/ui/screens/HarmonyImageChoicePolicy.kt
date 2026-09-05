@@ -53,7 +53,7 @@ private const val STEAK_PROMPT = "Wie willst du dein Steak?"
 private const val TRAVEL_PROMPT = "Wie sieht deine Traumreise aus?"
 private const val PROPOSAL_LOCATION_PROMPT = "Welche Umgebung würdest du dir für einen Antrag wünschen?"
 
-internal val AUTUMN_EVENING_KINDS = listOf(
+private val AUTUMN_EVENING_ROUND_KINDS = listOf(
     HarmonyImageChoiceKind.AUTUMN_STORY,
     HarmonyImageChoiceKind.AUTUMN_DRINK,
     HarmonyImageChoiceKind.AUTUMN_SNACK,
@@ -70,6 +70,9 @@ internal val HEART_OR_HEAD_KINDS = listOf(
     HarmonyImageChoiceKind.HEART_HEAD_LOVE,
     HarmonyImageChoiceKind.HEART_HEAD_FINAL
 )
+
+/** Legacy special-2x2 router sentinel used by HarmonyImageChoiceQuestion. */
+internal val AUTUMN_EVENING_KINDS = AUTUMN_EVENING_ROUND_KINDS + HEART_OR_HEAD_KINDS
 
 internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
 
@@ -119,7 +122,7 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
 
 internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): HarmonyImageChoiceKind? {
     if (pack.id == "herbstabend") {
-        return AUTUMN_EVENING_KINDS.getOrNull(questionIndex)
+        return AUTUMN_EVENING_ROUND_KINDS.getOrNull(questionIndex)
     }
     if (pack.id == "herz_oder_kopf") {
         return HEART_OR_HEAD_KINDS.getOrNull(questionIndex)
