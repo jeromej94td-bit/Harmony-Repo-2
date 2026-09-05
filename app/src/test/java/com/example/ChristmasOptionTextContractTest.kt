@@ -15,7 +15,7 @@ class ChristmasOptionTextContractTest {
 
         assertFalse(optionCard.contains("TextOverflow.Ellipsis"))
         assertFalse(optionCard.contains("maxLines = 2"))
-        assertTrue(optionCard.contains("if (compact)"))
-        assertTrue(optionCard.contains("Column("))
+        assertTrue(optionCard.contains("Spacer(Modifier.width(if (compact) 11.dp else 7.dp))"))
+        assertTrue(optionCard.contains("modifier = Modifier.weight(1f)"))
     }
 }
