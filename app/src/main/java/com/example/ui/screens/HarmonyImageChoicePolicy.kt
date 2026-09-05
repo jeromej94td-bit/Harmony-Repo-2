@@ -21,6 +21,12 @@ internal enum class HarmonyImageChoiceKind {
     AUTUMN_NOOK,
     AUTUMN_SOUND,
     AUTUMN_SCENT,
+    HEART_HEAD_DATE,
+    HEART_HEAD_GIFT,
+    HEART_HEAD_CONFLICT,
+    HEART_HEAD_FUTURE,
+    HEART_HEAD_LOVE,
+    HEART_HEAD_FINAL,
     PROPOSAL_LOCATION,
     HAPPY_COUPLE,
     RANK_ORDER,
@@ -39,6 +45,8 @@ internal enum class HarmonyImageChoiceKind {
 }
 
 internal const val HAPPY_COUPLE_REVEAL_DURATION_MILLIS = 620
+private const val HEART_OR_HEAD_CARD_FLIP_DURATION_MILLIS = 420L
+private const val HEART_OR_HEAD_CARD_STAGGER_MILLIS = 120L
 
 private const val EGG_PROMPT = "Wie möchtest du dein Ei am liebsten?"
 private const val STEAK_PROMPT = "Wie willst du dein Steak?"
@@ -54,7 +62,26 @@ internal val AUTUMN_EVENING_KINDS = listOf(
     HarmonyImageChoiceKind.AUTUMN_SCENT
 )
 
+internal val HEART_OR_HEAD_KINDS = listOf(
+    HarmonyImageChoiceKind.HEART_HEAD_DATE,
+    HarmonyImageChoiceKind.HEART_HEAD_GIFT,
+    HarmonyImageChoiceKind.HEART_HEAD_CONFLICT,
+    HarmonyImageChoiceKind.HEART_HEAD_FUTURE,
+    HarmonyImageChoiceKind.HEART_HEAD_LOVE,
+    HarmonyImageChoiceKind.HEART_HEAD_FINAL
+)
+
 internal fun happyCoupleRevealDelayMillis(index: Int): Long = index.coerceAtLeast(0) * 700L
+
+internal fun heartOrHeadCardDelayMillis(index: Int): Long =
+    index.coerceAtLeast(0) * HEART_OR_HEAD_CARD_STAGGER_MILLIS
+
+internal fun heartOrHeadCardFlipDurationMillis(): Long = HEART_OR_HEAD_CARD_FLIP_DURATION_MILLIS
+
+internal fun heartOrHeadCardsTransitionDurationMillis(cardCount: Int): Long {
+    if (cardCount <= 0) return 0L
+    return heartOrHeadCardDelayMillis(cardCount - 1) + heartOrHeadCardFlipDurationMillis()
+}
 
 internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): HarmonyImageChoiceKind? {
     val qPack = HarmonyContentRepository.getPacks().firstOrNull { it.id == packId }
@@ -84,6 +111,7 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
         return HarmonyImageChoiceKind.MEMORY_MATCH
     }
     return when {
+        packId == "herz_oder_kopf" -> HEART_OR_HEAD_KINDS.getOrNull(questionIndex)
         packId == "aussen" -> HarmonyImageChoiceKind.TRAUMHAUS
         else -> null
     }
@@ -92,6 +120,9 @@ internal fun harmonyImageChoiceKind(packId: String, questionIndex: Int): Harmony
 internal fun harmonyImageChoiceKind(pack: QuestionPack, questionIndex: Int): HarmonyImageChoiceKind? {
     if (pack.id == "herbstabend") {
         return AUTUMN_EVENING_KINDS.getOrNull(questionIndex)
+    }
+    if (pack.id == "herz_oder_kopf") {
+        return HEART_OR_HEAD_KINDS.getOrNull(questionIndex)
     }
 
     val q = pack.questions.getOrNull(questionIndex)
