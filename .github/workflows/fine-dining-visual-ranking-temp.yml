@@ -8,7 +8,7 @@ on:
       - 'app/src/main/java/com/example/data/Harmony360FoodSectionCuration.kt'
       - 'app/src/main/java/com/example/ui/screens/FineDiningVisualRanking.kt'
       - 'app/src/main/java/com/example/ui/screens/RankingSlotBoard.kt'
-      - 'app/src/main/res/drawable/fine_dining_rank_*.webp'
+      - 'app/src/main/res/drawable/fine_dining_ranking_atlas.webp'
       - 'app/src/test/java/com/example/ui/screens/FineDiningVisualRankingContractTest.kt'
       - '.github/workflows/fine-dining-visual-ranking-temp.yml'
 
