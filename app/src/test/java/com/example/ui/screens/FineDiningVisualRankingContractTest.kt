@@ -9,21 +9,21 @@ class FineDiningVisualRankingContractTest {
 
     @Test
     fun `fine dining ranking is visual for exactly six rounds`() {
-        val curation = source("app/src/main/java/com/example/data/Harmony360FoodSectionCuration.kt")
         val visualPolicy = sourceOrEmpty("app/src/main/java/com/example/ui/screens/FineDiningVisualRanking.kt")
         val rankingBoard = source("app/src/main/java/com/example/ui/screens/RankingSlotBoard.kt")
 
-        assertTrue(curation.contains("Euer besonderer Abend beginnt – was muss zuerst stimmen?"))
-        assertTrue(curation.contains("Hier darf der Abend Luxus sein – wo ist er dir das Geld wert?"))
-        assertTrue(curation.contains("Ihr sitzt drei Stunden hier – was macht daraus einen richtig guten Abend?"))
-        assertTrue(curation.contains("Der Küchenchef lässt euch die Richtung bestimmen."))
-        assertTrue(curation.contains("Der Abend kippt – was nervt dich am schnellsten?"))
-        assertTrue(curation.contains("Morgen früh – was soll dir davon noch im Kopf sein?"))
+        assertTrue(visualPolicy.contains("Euer besonderer Abend beginnt – was muss zuerst stimmen?"))
+        assertTrue(visualPolicy.contains("Hier darf der Abend Luxus sein – wo ist er dir das Geld wert?"))
+        assertTrue(visualPolicy.contains("Ihr sitzt drei Stunden hier – was macht daraus einen richtig guten Abend?"))
+        assertTrue(visualPolicy.contains("Der Küchenchef lässt euch die Richtung bestimmen."))
+        assertTrue(visualPolicy.contains("Der Abend kippt – was nervt dich am schnellsten?"))
+        assertTrue(visualPolicy.contains("Morgen früh – was soll dir davon noch im Kopf sein?"))
 
         assertTrue(visualPolicy.contains("h500_104_fine_dining_ranking"))
         assertTrue(visualPolicy.contains("fineDiningRankingImageRes"))
-        assertTrue(rankingBoard.contains("imageResFor"))
-        assertTrue(rankingBoard.contains("painterResource"))
+        assertTrue(visualPolicy.contains("FineDiningRankingThumbnail"))
+        assertTrue(rankingBoard.contains("fineDiningVisualPrompt"))
+        assertTrue(rankingBoard.contains("fineDiningRankingCard"))
     }
 
     @Test
@@ -41,40 +41,14 @@ class FineDiningVisualRankingContractTest {
     }
 
     @Test
-    fun `all twenty four fine dining card artworks exist as webp assets`() {
-        val assets = listOf(
-            "fine_dining_rank_q01_geschmack.webp",
-            "fine_dining_rank_q01_menufolge.webp",
-            "fine_dining_rank_q01_service.webp",
-            "fine_dining_rank_q01_atmosphaere.webp",
-            "fine_dining_rank_q02_aussergewoehnliche_zutaten.webp",
-            "fine_dining_rank_q02_kreative_zubereitung.webp",
-            "fine_dining_rank_q02_perfekter_service.webp",
-            "fine_dining_rank_q02_besondere_location.webp",
-            "fine_dining_rank_q03_ueberraschende_gaenge.webp",
-            "fine_dining_rank_q03_passende_portionsgroesse.webp",
-            "fine_dining_rank_q03_gutes_tempo.webp",
-            "fine_dining_rank_q03_zeit_zum_reden.webp",
-            "fine_dining_rank_q04_regional.webp",
-            "fine_dining_rank_q04_saisonal.webp",
-            "fine_dining_rank_q04_experimentell.webp",
-            "fine_dining_rank_q04_klassisch_perfektioniert.webp",
-            "fine_dining_rank_q05_steif.webp",
-            "fine_dining_rank_q05_zu_laut.webp",
-            "fine_dining_rank_q05_zu_langsam.webp",
-            "fine_dining_rank_q05_show_statt_geschmack.webp",
-            "fine_dining_rank_q06_neues_lieblingsgericht.webp",
-            "fine_dining_rank_q06_ueberraschende_kombination.webp",
-            "fine_dining_rank_q06_schoene_erinnerung.webp",
-            "fine_dining_rank_q06_neue_geschmacksidee.webp"
-        )
-
-        assets.forEach { name ->
-            val file = resolve("app/src/main/res/drawable/$name")
-            assertTrue("Missing visual asset: $name", file.exists())
-            if (file.exists()) {
-                assertTrue("Asset too small: $name", file.length() > 128L)
-            }
+    fun `fine dining atlas exists and contains real artwork bytes`() {
+        val atlas = resolve("app/src/main/res/drawable/fine_dining_ranking_atlas.webp")
+        assertTrue("Missing Fine Dining visual atlas", atlas.exists())
+        if (atlas.exists()) {
+            assertTrue("Fine Dining visual atlas is too small", atlas.length() > 50_000L)
+            val header = atlas.inputStream().use { stream -> ByteArray(12).also(stream::read) }
+            assertTrue(String(header.copyOfRange(0, 4), Charsets.US_ASCII) == "RIFF")
+            assertTrue(String(header.copyOfRange(8, 12), Charsets.US_ASCII) == "WEBP")
         }
     }
 
