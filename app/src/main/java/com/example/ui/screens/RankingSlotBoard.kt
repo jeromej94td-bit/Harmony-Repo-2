@@ -88,7 +88,7 @@ internal fun RankingSlotBoard(
     val boardHeight = (screenHeight - reservedChrome).coerceIn(360, 720).dp
     val hitSlop = with(LocalDensity.current) { 22.dp.toPx() }
     val items = mechanicOptions(options, profile)
-    val prompt = mechanicPrompt(question, items, profile)
+    val prompt = fineDiningVisualPrompt(question) ?: mechanicPrompt(question, items, profile)
     val labels = items.associate { it.raw to it.label }
 
     val restored = remember(question, selectedAnswer, options) {
@@ -174,6 +174,7 @@ internal fun RankingSlotBoard(
                             position = slotIndex,
                             raw = slots[slotIndex],
                             label = slots[slotIndex]?.let { labels[it] },
+                            visual = slots[slotIndex]?.let { fineDiningRankingCard(question, it) },
                             highlighted = hoveredSlot == slotIndex,
                             onBounds = { slotBounds[slotIndex] = it },
                             resolveSlot = ::resolveSlot,
@@ -216,6 +217,7 @@ internal fun RankingSlotBoard(
                         RankingDraggableCard(
                             raw = raw,
                             label = labels[raw] ?: raw,
+                            visual = fineDiningRankingCard(question, raw),
                             fromSlot = null,
                             resolveSlot = ::resolveSlot,
                             onHover = { hoveredSlot = it },
@@ -262,6 +264,7 @@ private fun RankingDropSlot(
     position: Int,
     raw: String?,
     label: String?,
+    visual: FineDiningVisualCard?,
     highlighted: Boolean,
     onBounds: (DropRect) -> Unit,
     resolveSlot: (Offset?) -> Int?,
@@ -344,6 +347,7 @@ private fun RankingDropSlot(
                 RankingDraggableCard(
                     raw = raw,
                     label = label ?: raw,
+                    visual = visual,
                     fromSlot = position,
                     resolveSlot = resolveSlot,
                     onHover = onHover,
@@ -360,6 +364,7 @@ private fun RankingDropSlot(
 private fun RankingDraggableCard(
     raw: String,
     label: String,
+    visual: FineDiningVisualCard? = null,
     fromSlot: Int?,
     resolveSlot: (Offset?) -> Int?,
     onHover: (Int?) -> Unit,
@@ -454,8 +459,13 @@ private fun RankingDraggableCard(
 
         Spacer(Modifier.width(if (compact) 7.dp else 10.dp))
 
+        if (visual != null) {
+            FineDiningRankingThumbnail(card = visual)
+            Spacer(Modifier.width(if (compact) 7.dp else 10.dp))
+        }
+
         Text(
-            text = label,
+            text = visual?.displayLabel ?: label,
             color = HarmonyText,
             fontSize = if (compact) 14.sp else 16.sp,
             lineHeight = if (compact) 17.sp else 20.sp,
