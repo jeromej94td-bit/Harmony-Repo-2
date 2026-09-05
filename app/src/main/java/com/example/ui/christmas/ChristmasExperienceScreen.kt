@@ -349,7 +349,7 @@ private fun ChristmasRoundPlayer(
                                     accent = part.accent,
                                     selected = selected == option,
                                     hidden = false,
-                                    onRevealSound = audio::playCardFlip,
+                                    onRevealSound = { audio.playCardFlip() },
                                     onClick = {
                                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                         if (tournamentOpponent < round.options.lastIndex) {
@@ -367,7 +367,7 @@ private fun ChristmasRoundPlayer(
                         Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                             round.options.forEachIndexed { index, option ->
                                 ChristmasOptionCard(
-                                    option, index, part.accent, selected == option, false, audio::playCardFlip,
+                                    option, index, part.accent, selected == option, false, { audio.playCardFlip() },
                                     onClick = { selected = option; haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
                                     modifier = Modifier.fillMaxWidth().height(86.dp),
                                     compact = true,
@@ -386,7 +386,7 @@ private fun ChristmasRoundPlayer(
                                         accent = part.accent,
                                         selected = selected == option,
                                         hidden = round.kind == ChristmasRoundKind.REVEAL && index !in revealed,
-                                        onRevealSound = audio::playCardFlip,
+                                        onRevealSound = { audio.playCardFlip() },
                                         onClick = {
                                             if (round.kind == ChristmasRoundKind.REVEAL && index !in revealed) {
                                                 revealed = revealed + index
