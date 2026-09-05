@@ -1,6 +1,5 @@
 package com.example
 
-import android.util.Base64
 import com.example.data.DriveTotAssetInstaller
 import com.example.data.GeneratedContentRegistry
 import org.junit.Assert.assertEquals
@@ -27,8 +26,8 @@ class OutdoorAreaImageContractTest {
     @Test
     fun exactDriveOutdoorImagesAreBundledAsValidWebpPayloads() {
         listOf(
-            "outdoor_aussenpool.b64",
-            "outdoor_whirlpool.b64"
+            "outdoor_aussenpool.webp",
+            "outdoor_whirlpool.webp"
         ).forEach { assetName ->
             val asset = sequenceOf(
                 File("app/src/main/assets/$assetName"),
@@ -36,7 +35,7 @@ class OutdoorAreaImageContractTest {
             ).firstOrNull { it.isFile }
 
             assertTrue("Missing bundled asset $assetName", asset != null)
-            val bytes = Base64.decode(asset!!.readText(), Base64.DEFAULT)
+            val bytes = asset!!.readBytes()
             assertTrue("Bundled asset $assetName is unexpectedly small", bytes.size > 50_000)
             assertEquals("RIFF", bytes.copyOfRange(0, 4).toString(Charsets.US_ASCII))
             assertEquals("WEBP", bytes.copyOfRange(8, 12).toString(Charsets.US_ASCII))
