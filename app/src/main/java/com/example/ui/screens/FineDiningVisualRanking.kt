@@ -1,18 +1,21 @@
 package com.example.ui.screens
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -25,6 +28,15 @@ import com.example.R
  * Only the prompt shown to the player, the short card label and the artwork are presentation data.
  */
 internal const val FINE_DINING_VISUAL_RANKING_PACK_ID = "h500_104_fine_dining_ranking"
+
+private val FINE_DINING_ATLAS_RAW_RESOURCES = listOf(
+    R.raw.fine_dining_ranking_atlas_01,
+    R.raw.fine_dining_ranking_atlas_02,
+    R.raw.fine_dining_ranking_atlas_03,
+    R.raw.fine_dining_ranking_atlas_04,
+    R.raw.fine_dining_ranking_atlas_05,
+    R.raw.fine_dining_ranking_atlas_06
+)
 
 internal data class FineDiningVisualCard(
     val row: Int,
@@ -47,9 +59,6 @@ internal fun fineDiningVisualPrompt(question: String): String? = when (question)
         "Morgen früh – was soll dir davon noch im Kopf sein?"
     else -> null
 }
-
-internal fun fineDiningRankingImageRes(question: String, option: String): Int? =
-    fineDiningRankingCard(question, option)?.let { R.drawable.fine_dining_ranking_atlas }
 
 internal fun fineDiningRankingCard(question: String, option: String): FineDiningVisualCard? {
     val row = when (question) {
@@ -94,15 +103,35 @@ internal fun fineDiningRankingCard(question: String, option: String): FineDining
     return FineDiningVisualCard(row = row, column = column, displayLabel = shortLabel)
 }
 
-/** One atlas keeps the 24 card artworks compact in the APK while each card is rendered separately. */
+@Composable
+private fun rememberFineDiningRankingAtlas(): ImageBitmap? {
+    val context = LocalContext.current
+    return remember(context) {
+        runCatching {
+            val encoded = buildString {
+                FINE_DINING_ATLAS_RAW_RESOURCES.forEach { resourceId ->
+                    context.resources.openRawResource(resourceId).bufferedReader().use { reader ->
+                        append(reader.readText())
+                    }
+                }
+            }
+            val bytes = Base64.decode(encoded, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+        }.getOrNull()
+    }
+}
+
+/** One 4x6 atlas keeps all 24 visual answer cards compact while each card is rendered separately. */
 @Composable
 internal fun FineDiningRankingThumbnail(
     card: FineDiningVisualCard,
     modifier: Modifier = Modifier
 ) {
-    val atlas = ImageBitmap.imageResource(R.drawable.fine_dining_ranking_atlas)
+    val atlas = rememberFineDiningRankingAtlas() ?: return
     val cellWidth = atlas.width / 4
     val cellHeight = atlas.height / 6
+    if (cellWidth <= 0 || cellHeight <= 0) return
+
     val srcOffset = IntOffset(card.column * cellWidth, card.row * cellHeight)
     val srcSize = IntSize(cellWidth, cellHeight)
 
