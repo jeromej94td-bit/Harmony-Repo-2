@@ -1,11 +1,17 @@
 package com.example
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.example.data.model.ExperiencePartnerPredictionRound
+import com.example.data.model.ExperiencePartnerPredictionSelection
 import com.example.data.model.FullscreenGameMechanicKind
+import com.example.data.model.PredictionAnswerCodec
 import com.example.data.model.ProfileEntity
+import com.example.ui.screens.ExperiencePartnerPredictionBoard
 import com.example.ui.screens.FullscreenQuestionMechanicBoard
 import com.example.ui.screens.PartnerPredictionRevealBoard
 import com.example.ui.screens.SecretChoiceRevealBoard
@@ -53,6 +59,68 @@ class PairRevealFlowContractTest {
         composeTestRule.onNodeWithTag("prediction_reveal_button").performClick()
         composeTestRule.onNodeWithTag("prediction_result_guess").fetchSemanticsNode()
         composeTestRule.onNodeWithTag("prediction_result_actual").fetchSemanticsNode()
+    }
+
+    @Test
+    fun harmony360PartnerPredictionStoresBothChoicesAndContinuesWithoutQuestionReveal() {
+        var picked: ExperiencePartnerPredictionSelection? = null
+        val round = ExperiencePartnerPredictionRound(
+            id = "feedback",
+            prompt = "Wie hört Alex kritisches Feedback am liebsten?",
+            options = options
+        )
+
+        composeTestRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                ExperiencePartnerPredictionBoard(
+                    round = round,
+                    selectedSelection = null,
+                    profile = profile,
+                    onPick = { picked = it }
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithTag("prediction_option_0").performClick()
+        composeTestRule.onNodeWithTag("prediction_handoff_ready").performClick()
+        composeTestRule.onNodeWithTag("prediction_actual_option_1").performClick()
+
+        assertEquals(
+            ExperiencePartnerPredictionSelection(prediction = "A", actual = "B"),
+            picked
+        )
+        composeTestRule.onAllNodesWithTag("prediction_reveal_ready").assertCountEquals(0)
+        composeTestRule.onAllNodesWithTag("prediction_result_guess").assertCountEquals(0)
+        composeTestRule.onAllNodesWithTag("prediction_result_actual").assertCountEquals(0)
+    }
+
+    @Test
+    fun harmony360FullscreenPartnerPredictionSubmitsAndSkipsQuestionReveal() {
+        var picked: String? = null
+
+        composeTestRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                FullscreenQuestionMechanicBoard(
+                    kind = FullscreenGameMechanicKind.PARTNER_PREDICTION,
+                    question = "Wie hört Alex kritisches Feedback am liebsten?",
+                    options = options,
+                    selectedAnswer = null,
+                    profile = profile,
+                    onPick = { picked = it }
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithTag("prediction_option_0").performClick()
+        composeTestRule.onNodeWithTag("prediction_handoff_ready").performClick()
+        composeTestRule.onNodeWithTag("prediction_actual_option_1").performClick()
+
+        val decoded = picked?.let(PredictionAnswerCodec::decode)
+        assertEquals("A", decoded?.prediction)
+        assertEquals("B", decoded?.actual)
+        composeTestRule.onAllNodesWithTag("prediction_reveal_ready").assertCountEquals(0)
+        composeTestRule.onAllNodesWithTag("prediction_result_guess").assertCountEquals(0)
+        composeTestRule.onAllNodesWithTag("prediction_result_actual").assertCountEquals(0)
     }
 
     @Test

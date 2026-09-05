@@ -7,6 +7,7 @@ on:
     paths:
       - 'app/src/main/java/com/example/ui/screens/FullscreenPairMechanics.kt'
       - 'app/src/main/java/com/example/ui/screens/PrivatePairRevealBoards.kt'
+      - 'app/src/main/java/com/example/ui/screens/PartnerPredictionCollectionBoard.kt'
       - 'app/src/main/java/com/example/ui/screens/ScaleWhoWouldReworkBoards.kt'
       - 'app/src/main/java/com/example/ui/screens/WhoWouldLayoutPolicy.kt'
       - 'app/src/main/java/com/example/ui/screens/ExperiencePartnerPredictionBoard.kt'
@@ -15,6 +16,7 @@ on:
       - 'app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt'
       - 'app/src/test/java/com/example/PairRevealFlowContractTest.kt'
       - 'app/src/test/java/com/example/PairPredictionProgressTest.kt'
+      - 'scripts/verify_harmony360_final_reveal_only.py'
       - '.github/workflows/pair-mechanics-verify.yml'
   workflow_dispatch:
 
@@ -32,6 +34,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Verify Harmony 360 has no per-question result reveal
+        run: python3 scripts/verify_harmony360_final_reveal_only.py
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
