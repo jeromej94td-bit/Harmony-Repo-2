@@ -66,7 +66,6 @@ import com.example.ui.screens.DevStudioScreen
 import com.example.ui.screens.GamesScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.IntrospectionExperienceScreen
-import com.example.ui.christmas.ChristmasExperienceScreen
 import com.example.ui.screens.LiveChangeEditor
 import com.example.ui.screens.LiveChangeHud
 import com.example.ui.screens.LiveChangeLauncher
@@ -242,7 +241,6 @@ fun HarmonyApp(
     val memoryViewModel: MemoryViewModel = composeViewModel(factory = memoryFactory)
     val memoryState by memoryViewModel.uiState.collectAsStateWithLifecycle()
     var isIntrospectionOpen by rememberSaveable { mutableStateOf(false) }
-    var isChristmasOpen by rememberSaveable { mutableStateOf(false) }
     var isPandaEitherOrOpen by rememberSaveable { mutableStateOf(false) }
     var isPandaExitConfirmOpen by rememberSaveable { mutableStateOf(false) }
     var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
@@ -332,7 +330,7 @@ fun HarmonyApp(
     val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive || isAccountOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
-    val canHandleBack = isResultsOpen || isIntrospectionOpen || isChristmasOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
+    val canHandleBack = isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
@@ -352,9 +350,6 @@ fun HarmonyApp(
             }
             isIntrospectionOpen -> {
                 // IntrospectionExperienceScreen handles back so it can show its own leave dialog.
-            }
-            isChristmasOpen -> {
-                // ChristmasExperienceScreen owns its back flow and exit confirmation.
             }
             isPandaEitherOrOpen -> {
                 isPandaExitConfirmOpen = true
@@ -412,7 +407,7 @@ fun HarmonyApp(
                 ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isChristmasOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
                     HarmonyTopBar(
                         userName = displayProfile.userName,
                         partnerName = displayProfile.partnerName,
@@ -425,7 +420,7 @@ fun HarmonyApp(
                 }
             },
             bottomBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isChristmasOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
+                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
                         6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
@@ -468,8 +463,6 @@ fun HarmonyApp(
                         onCategoryClick = { catId ->
                             if (catId == "unterbewusstsein") {
                                 isIntrospectionOpen = true
-                            } else if (catId == "weihnachten") {
-                                isChristmasOpen = true
                             } else {
                                 viewModel.openCategory(catId)
                             }
@@ -880,12 +873,6 @@ fun HarmonyApp(
                     IntrospectionExperienceScreen(
                         appLanguage = uiState.appLanguage,
                         onExit = { isIntrospectionOpen = false }
-                    )
-                }
-
-                if (isChristmasOpen) {
-                    ChristmasExperienceScreen(
-                        onExit = { isChristmasOpen = false }
                     )
                 }
 
