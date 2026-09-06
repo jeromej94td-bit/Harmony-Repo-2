@@ -82,6 +82,7 @@ import com.example.ui.screens.QuizRunnerScreen
 import com.example.ui.screens.RunnerSkipButton
 import com.example.ui.screens.hasCompletePackResults
 import com.example.ui.screens.liveChangeLongPressObserver
+import com.example.ui.session.questionDisplayProfile
 import com.example.ui.theme.HarmonyTheme
 import com.example.widget.MemoryWidgetDatabaseObserver
 import com.example.widget.MemoryWidgetOpenRequest
@@ -208,10 +209,7 @@ fun HarmonyApp(
     val isDemoMode = sessionState.phase == com.example.ui.session.SessionPhase.DEMO
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val displayProfile = uiState.profile.copy(
-        userName = appSession.profile.displayName,
-        partnerName = appSession.partner?.displayName ?: "Partner"
-    )
+    val displayProfile = appSession.questionDisplayProfile(uiState.profile)
 
     LaunchedEffect(sessionState.phase, appSession.userId) {
         when (sessionState.phase) {
@@ -286,7 +284,7 @@ fun HarmonyApp(
                 isPandaEitherOrOpen = true
                 isPandaExitConfirmOpen = false
             }
-            ProposalExperienceEntryPolicy.handlesPack(packId) -> {
+            ProposalExperienceEntryPolicy.opensFullscreenExperience(packId) -> {
                 isProposalExperienceOpen = true
             }
             freshRun -> {
@@ -304,7 +302,7 @@ fun HarmonyApp(
     }
 
     fun openPack(packId: String) {
-        if (packId == PANDA_EITHER_OR_PACK_ID || ProposalExperienceEntryPolicy.handlesPack(packId)) {
+        if (packId == PANDA_EITHER_OR_PACK_ID || ProposalExperienceEntryPolicy.opensFullscreenExperience(packId)) {
             openPackForPlay(packId)
             return
         }
