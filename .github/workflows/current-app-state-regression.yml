@@ -14,7 +14,6 @@ on:
       - 'app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt'
       - 'app/src/main/java/com/example/ui/screens/HomeScreen.kt'
       - 'app/src/main/java/com/example/ui/screens/GamesScreen.kt'
-      - 'app/src/main/java/com/example/ui/components/TotImageProvider.kt'
       - 'app/src/main/java/com/example/data/model/Models.kt'
       - 'app/src/main/java/com/example/data/model/RemovedGameCatalogPolicy.kt'
       - 'app/src/main/java/com/example/**/KidGenerator*.kt'
@@ -22,7 +21,6 @@ on:
       - 'app/src/test/java/com/example/CurrentAppStateContractTest.kt'
       - 'app/src/test/java/com/example/EureMischungRemovalContractTest.kt'
       - 'app/src/test/java/com/example/RealUserProfileAndBrainRemovalContractTest.kt'
-      - 'app/src/test/java/com/example/DrivePlaceholderAssetsContractTest.kt'
       - '.github/workflows/current-app-state-regression.yml'
   push:
     branches:
@@ -37,7 +35,6 @@ on:
       - 'app/src/main/java/com/example/ui/screens/ChatScreenLegacyBridge.kt'
       - 'app/src/main/java/com/example/ui/screens/HomeScreen.kt'
       - 'app/src/main/java/com/example/ui/screens/GamesScreen.kt'
-      - 'app/src/main/java/com/example/ui/components/TotImageProvider.kt'
       - 'app/src/main/java/com/example/data/model/Models.kt'
       - 'app/src/main/java/com/example/data/model/RemovedGameCatalogPolicy.kt'
       - 'app/src/main/java/com/example/**/KidGenerator*.kt'
@@ -45,7 +42,6 @@ on:
       - 'app/src/test/java/com/example/CurrentAppStateContractTest.kt'
       - 'app/src/test/java/com/example/EureMischungRemovalContractTest.kt'
       - 'app/src/test/java/com/example/RealUserProfileAndBrainRemovalContractTest.kt'
-      - 'app/src/test/java/com/example/DrivePlaceholderAssetsContractTest.kt'
       - '.github/workflows/current-app-state-regression.yml'
   workflow_dispatch:
 
@@ -87,7 +83,6 @@ jobs:
           --tests 'com.example.CurrentAppStateContractTest'
           --tests 'com.example.EureMischungRemovalContractTest'
           --tests 'com.example.RealUserProfileAndBrainRemovalContractTest'
-          --tests 'com.example.DrivePlaceholderAssetsContractTest'
           --stacktrace
           --no-daemon
           --no-configuration-cache
