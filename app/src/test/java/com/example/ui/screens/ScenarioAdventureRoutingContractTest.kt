@@ -7,12 +7,20 @@ import org.junit.Test
 
 class ScenarioAdventureRoutingContractTest {
 
+    private fun repoFile(path: String): File {
+        val start = File(System.getProperty("user.dir"))
+        return generateSequence(start) { it.parentFile }
+            .map { root -> File(root, path) }
+            .firstOrNull(File::exists)
+            ?: File(start, path)
+    }
+
     @Test
     fun `scenario renderer uses resumable adventure board`() {
-        val renderer = File(
+        val renderer = repoFile(
             "app/src/main/java/com/example/ui/screens/FullscreenQuestionMechanicBoard.kt"
         ).readText()
-        val board = File(
+        val board = repoFile(
             "app/src/main/java/com/example/ui/screens/ScenarioAdventureBoard.kt"
         )
 
@@ -29,10 +37,10 @@ class ScenarioAdventureRoutingContractTest {
 
     @Test
     fun `generic runner skip is hidden while adventure is mounted`() {
-        val board = File(
+        val board = repoFile(
             "app/src/main/java/com/example/ui/screens/ScenarioAdventureBoard.kt"
         ).readText()
-        val skip = File(
+        val skip = repoFile(
             "app/src/main/java/com/example/ui/screens/RunnerSkipButton.kt"
         ).readText()
 
