@@ -2,6 +2,7 @@ package com.example.data
 
 import com.example.data.model.InteractionPromptPolicy
 import com.example.data.model.LoveBalanceQuestionPolicy
+import com.example.data.model.QuestionPack
 
 /**
  * Vereinigt den bisherigen generierten Harmony-Content mit zusätzlichen
@@ -25,9 +26,43 @@ object GeneratedContentRegistry {
             .distinctBy { it.id }
     }
 
+    private fun normalizeOutdoorAreaPairs(
+        pairs: List<Pair<String, String>>
+    ): List<Pair<String, String>> = pairs.map { pair ->
+        when (pair) {
+            "Großer Außenpool" to "Outdoor-Whirlpool",
+            "Großer Außenpool" to "Whirlpool",
+            "Außenpool" to "Outdoor-Whirlpool" -> "Außenpool" to "Whirlpool"
+            else -> pair
+        }
+    }
+
+    /**
+     * The original generated outdoor pack used labels that were longer than the rest of the
+     * image-card catalog. Keep the stable pack ID and choices, but normalize the visible labels
+     * so they also match the keys used by the bundled Drive images.
+     */
+    private fun normalizeGeneratedOutdoorAreaPack(pack: GenPack): GenPack {
+        if (pack.id != "aussen") return pack
+        val normalizedPairs = normalizeOutdoorAreaPairs(pack.pairs)
+        return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
+    }
+
+    /**
+     * CUSTOM Dev-Studio packs use QuestionPack rather than GenPack. Keep this path separate
+     * so Kotlin cannot pick the wrong overload while repairing an existing saved outdoor pack.
+     */
+    private fun normalizeCustomOutdoorAreaPack(pack: QuestionPack): QuestionPack {
+        if (pack.id != "aussen") return pack
+        val normalizedPairs = normalizeOutdoorAreaPairs(pack.pairs)
+        return if (normalizedPairs == pack.pairs) pack else pack.copy(pairs = normalizedPairs)
+    }
+
     private fun runtimePack(pack: GenPack): GenPack {
-        var result = Harmony360SectionTopicSorting.apply(
-            GeneratedContentRepairPolicy.repair(pack)
+        var result = normalizeGeneratedOutdoorAreaPack(
+            Harmony360SectionTopicSorting.apply(
+                GeneratedContentRepairPolicy.repair(pack)
+            )
         )
 
         // Deep Talk owns a dedicated full-screen, two-person reveal flow. The legacy
@@ -63,9 +98,10 @@ object GeneratedContentRegistry {
     private fun normalizeLoadedCustomPacks() {
         val customPacks = DeveloperDataManager._customPacks
         for (index in customPacks.indices) {
-            val retopiced = Harmony360SectionTopicSorting.apply(customPacks[index])
-            if (retopiced != customPacks[index]) {
-                customPacks[index] = retopiced
+            var normalized: QuestionPack = Harmony360SectionTopicSorting.apply(customPacks[index])
+            normalized = normalizeCustomOutdoorAreaPack(normalized)
+            if (normalized != customPacks[index]) {
+                customPacks[index] = normalized
             }
 
             val pack = customPacks[index]
