@@ -25,7 +25,7 @@ Emoji werden nur beim Normalisieren alter Werte akzeptiert. In der neuen Oberfla
 
 ## Auswahl der zwei Motive
 
-Beim Start des Packs baut `WeekendEchoSelector` aus der lokalen `BrainAnswerHistoryEntity`-Historie einen Sitzungspool:
+Beim Start des Packs baut `WeekendEchoSelector` aus der lokalen `AnswerEntity`-Historie einen Sitzungspool. Fuer `entweder_oder_panda` wird der gespeicherte `EitherOrAnswerCodec`-Wert dekodiert, sodass die getrennten Wahlen beider Personen erhalten bleiben. Diese Quelle ist auch aktiv, wenn die optionale Harmony-Brain-Generierung deaktiviert ist:
 
 1. Nur echte Antworten aus Auswahlspielen werden gelesen.
 2. Eine Antwort muss exakt auf eines der acht normalisierten Katalogmotive passen.
@@ -91,7 +91,7 @@ Die acht Bildmotive werden vorab als lokale, optimierte WebP-Assets erstellt. Pr
 - `RotatingEchoSeal`: besitzt die einzige anklickbare Flaeche und alle Auswahl-, Sperr- und Reveal-Zustaende.
 - `WeekendSplitScene`: kombiniert zwei lokale Motive, Aurora-Trennlinie und die linke Panda-Ebene.
 
-Die bestehende Antwortpersistenz bleibt die Quelle der Wahrheit. Das neue Board erhaelt einen vorberechneten, rein lesenden historischen Kontext. Es schreibt erst nach abgeschlossenem Reveal die neue aktuelle Antwort ueber den vorhandenen `onPick`-Pfad. Authentifizierung, Supabase, andere Packs und globale Navigation werden nicht veraendert.
+Die bestehende `AnswerEntity`-Persistenz bleibt die Quelle der Wahrheit. Das neue Board erhaelt einen vorberechneten, rein lesenden historischen Kontext. Es schreibt erst nach abgeschlossenem Reveal die neue aktuelle Antwort ueber den vorhandenen `onPick`-Pfad. Authentifizierung, Supabase, Harmony-Brain-Generierung, andere Packs und globale Navigation werden nicht veraendert.
 
 ## Fehler- und Datenschutzregeln
 
