@@ -88,7 +88,7 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.SCENARIO -> ScenarioBoard(
+        FullscreenGameMechanicKind.SCENARIO -> ScenarioAdventureBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,
