@@ -4,6 +4,9 @@ object ProposalExperienceEntryPolicy {
     const val LEGACY_PACK_ID = "antrag"
 
     fun handlesPack(packId: String): Boolean = packId == LEGACY_PACK_ID
+
+    /** The proposal is a complete fullscreen experience, never a fallback quiz. */
+    fun opensFullscreenExperience(packId: String): Boolean = handlesPack(packId)
 }
 
 data class ProposalRunnerPosition(
