@@ -59,7 +59,6 @@ import com.example.data.repository.RoomMemoryRepository
 import com.example.ui.LocalAppLanguage
 import com.example.ui.components.VoiceInputButton
 import com.example.ui.theme.HarmonyBg
-import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPinkSoft
@@ -121,6 +120,10 @@ internal fun MemoryMatchBoard(
     val memoryRepository = remember(context.applicationContext) {
         RoomMemoryRepository(HarmonyDatabase.getInstance(context.applicationContext))
     }
+    val sharedMemoryDescription = tr(
+        "Gemeinsame Erinnerung von ${profile.userName} & ${profile.partnerName}",
+        "Shared memory by ${profile.userName} & ${profile.partnerName}"
+    )
 
     val firstImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -258,10 +261,7 @@ internal fun MemoryMatchBoard(
                                                 partnerText,
                                                 partnerImagePath
                                             ),
-                                            previewDescription = tr(
-                                                "Gemeinsame Erinnerung von ${profile.userName} & ${profile.partnerName}",
-                                                "Shared memory by ${profile.userName} & ${profile.partnerName}"
-                                            ),
+                                            previewDescription = sharedMemoryDescription,
                                             previewImageUrl = (firstImagePath ?: partnerImagePath)?.let { "file://$it" },
                                             createdAt = now,
                                             updatedAt = now
