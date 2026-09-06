@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.BuildConfig
@@ -59,6 +60,7 @@ fun DeveloperReviewQuickNote(
     val harmonyState by harmonyViewModel.uiState.collectAsStateWithLifecycle()
 
     var dialogOpen by remember { mutableStateOf(false) }
+    var inboxOpen by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf("") }
     var inviteCode by remember { mutableStateOf("") }
     var feedbackType by remember { mutableStateOf(DeveloperFeedbackType.CHANGE) }
@@ -97,6 +99,15 @@ fun DeveloperReviewQuickNote(
         modifier = modifier,
     ) {
         Text("🛠 Notiz", color = HarmonyGold, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+    }
+
+    if (inboxOpen) {
+        Dialog(
+            onDismissRequest = { inboxOpen = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            DeveloperReviewInboxScreen(onClose = { inboxOpen = false })
+        }
     }
 
     if (!dialogOpen) return
@@ -152,6 +163,17 @@ fun DeveloperReviewQuickNote(
                     }
 
                     else -> {
+                        TextButton(
+                            onClick = {
+                                dialogOpen = false
+                                inboxOpen = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("📥 Developer Inbox öffnen", color = HarmonyGold, fontWeight = FontWeight.Bold)
+                        }
+
+                        Spacer(Modifier.height(4.dp))
                         Text("Was soll hier geändert werden?", color = HarmonyText, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(6.dp))
                         OutlinedTextField(
