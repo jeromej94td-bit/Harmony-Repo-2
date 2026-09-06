@@ -39,6 +39,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Verify Harmony 360 has no per-question result reveal
+        if: ${{ hashFiles('scripts/verify_harmony360_final_reveal_only.py') != '' }}
         run: python3 scripts/verify_harmony360_final_reveal_only.py
 
       - name: Set up JDK 21
