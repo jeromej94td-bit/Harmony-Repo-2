@@ -1,0 +1,55 @@
+name: Materialize Drive Placeholder Assets
+
+on:
+  push:
+    branches:
+      - feature/drive-placeholder-assets-tdd
+    paths:
+      - 'scripts/materialize_drive_tot_assets.py'
+      - 'scripts/verify_drive_placeholder_assets.py'
+      - '.github/workflows/materialize-drive-placeholder-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-drive-placeholder-assets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install image tooling
+        run: python3 -m pip install --disable-pip-version-check pillow
+
+      - name: Download, optimize and wire approved Drive artwork
+        run: python3 scripts/materialize_drive_tot_assets.py
+
+      - name: Verify local image contract
+        run: python3 scripts/verify_drive_placeholder_assets.py
+
+      - name: Commit generated local assets
+        run: |
+          set -euo pipefail
+          git add \
+            app/src/main/java/com/example/ui/components/TotImageProvider.kt \
+            app/src/main/res/drawable-nodpi/drive_*.webp
+
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+
+          git config user.name "Harmony Asset Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Feat: Drive-TOT-Assets lokal einbinden"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
