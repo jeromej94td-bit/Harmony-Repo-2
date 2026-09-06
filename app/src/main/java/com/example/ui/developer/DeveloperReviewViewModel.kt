@@ -81,6 +81,7 @@ class DeveloperReviewViewModel(
         buildNumber: String,
         gitCommit: String,
         device: Map<String, String>,
+        screenshotBytes: ByteArray? = null,
         onSaved: () -> Unit = {},
     ) {
         if (_state.value.isBusy || draft.note.isBlank()) return
@@ -94,6 +95,7 @@ class DeveloperReviewViewModel(
                     buildNumber = buildNumber,
                     gitCommit = gitCommit,
                     device = device,
+                    screenshotBytes = screenshotBytes,
                 )
             }.onSuccess {
                 _state.value = _state.value.copy(
