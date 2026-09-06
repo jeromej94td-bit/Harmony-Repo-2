@@ -94,8 +94,8 @@ jobs:
             -validity 10000 \
             -dname "CN=Harmony PR Debug,O=Harmony,C=DE"
 
-      - name: Build Harmony debug APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon --no-configuration-cache
+      - name: Test and build Harmony debug APK
+        run: gradle :app:testDebugUnitTest :app:assembleDebug --stacktrace --no-daemon --no-configuration-cache
 
       - name: Verify installable APK signing certificate
         if: github.event_name != 'pull_request'
