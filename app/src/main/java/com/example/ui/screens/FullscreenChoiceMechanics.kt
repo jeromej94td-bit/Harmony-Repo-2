@@ -77,7 +77,8 @@ internal fun WhoWouldBoard(
             "Tippe direkt auf die Person – oder auf euch beide in der Mitte.",
             "Tap the person directly – or both of you in the middle."
         ),
-        modifier = modifier.testTag("who_would_board")
+        modifier = modifier.testTag("who_would_board"),
+        headerVisual = { PandaQuestionSceneBanner(question = prompt) }
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

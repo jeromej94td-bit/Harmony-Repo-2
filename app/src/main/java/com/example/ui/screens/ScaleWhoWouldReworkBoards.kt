@@ -593,7 +593,8 @@ internal fun WhoWouldConfirmBoard(
             "Tippe auf die Person, die eher passt. Erst mit Bestätigen geht es weiter.",
             "Tap the person who fits best. Continue only after confirming."
         ),
-        modifier = modifier.testTag("who_would_board")
+        modifier = modifier.testTag("who_would_board"),
+        headerVisual = { PandaQuestionSceneBanner(question = prompt) }
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

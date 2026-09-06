@@ -92,6 +92,7 @@ internal fun FullscreenMechanicShell(
     question: String,
     instruction: String,
     modifier: Modifier = Modifier,
+    headerVisual: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val configuration = LocalConfiguration.current
@@ -144,6 +145,10 @@ internal fun FullscreenMechanicShell(
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center
         )
+        headerVisual?.let { visual ->
+            Spacer(Modifier.height((chromeMetrics.headerGapDp / 2).dp))
+            visual()
+        }
         Spacer(Modifier.height(chromeMetrics.headerGapDp.dp))
         Text(
             text = question,
