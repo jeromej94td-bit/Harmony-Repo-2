@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Wait for required checks, merge, and dispatch main build
+      - name: Wait for required checks, merge, and dispatch main verification
         uses: actions/github-script@v7
         with:
           script: |
@@ -71,10 +71,10 @@ jobs:
                 await github.rest.actions.createWorkflowDispatch({
                   owner,
                   repo,
-                  workflow_id: 'android-apk-build.yml',
+                  workflow_id: 'android-main-verify.yml',
                   ref: 'main',
                 });
-                core.info(`Merged verified agent PR #${pr.number} at ${sha} and dispatched the main Android build.`);
+                core.info(`Merged verified agent PR #${pr.number} at ${sha} and dispatched the merged-main compile verification.`);
                 return;
               }
 
