@@ -20,6 +20,8 @@ jobs:
           session_vm = Path('app/src/main/java/com/example/ui/session/AppSessionViewModel.kt').read_text()
           main = Path('app/src/main/java/com/example/MainActivity.kt').read_text()
           who = Path('app/src/main/java/com/example/ui/screens/ScaleWhoWouldReworkBoards.kt').read_text()
+          profile_sheet = Path('app/src/main/java/com/example/ui/screens/ProfileSheet.kt').read_text()
+          presentation = Path('app/src/main/java/com/example/ui/session/SessionProfilePresentation.kt').read_text()
 
           required_repo = [
               'storage/v1/object/harmony-avatars',
@@ -34,5 +36,11 @@ jobs:
           assert 'sessionViewModel.updateProfileAvatar(uri)' in main, 'MainActivity still routes real avatar edits only to local Room profile'
           assert 'avatarPath = profile.userAvatarPath' in who, 'WhoWould user card lost real profile avatar'
           assert 'avatarPath = profile.partnerAvatarPath' in who, 'WhoWould partner card lost linked partner avatar'
+
+          # Real accounts must never be visually overridden by a stale local Room avatar.
+          assert 'userAvatarModel: Any? = if (isDemoMode)' in profile_sheet, 'Profile sheet still prioritizes local user avatar for real accounts'
+          assert 'useLocalAvatarFallback: Boolean' in presentation, 'Session profile presentation cannot distinguish demo/local fallback from real account avatars'
+          assert 'questionDisplayProfile(uiState.profile, useLocalAvatarFallback = isDemoMode)' in main, 'MainActivity does not disable legacy avatar fallback for real accounts'
+
           print('Profile avatar Supabase contract: PASS')
           PY
