@@ -1,20 +1,25 @@
 package com.example.ui.session
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.SupabaseConfig
 import com.example.data.session.AccountCacheBoundary
 import com.example.data.session.AppSession
 import com.example.data.session.AppSessionRepository
+import com.example.data.session.HarmonySessionException
 import com.example.data.session.PartnerInvite
 import com.example.data.session.UserProfile
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 enum class SessionPhase {
     LOADING,
@@ -107,6 +112,19 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
                     errorMessage = "Demo-Modus konnte nicht gestartet werden."
                 )
             }
+        }
+    }
+
+    fun updateProfileAvatar(uri: Uri) {
+        runReadyAction { current ->
+            val session = requireNotNull(current.session)
+            val payload = readAvatarUpload(uri)
+            val updatedSession = repository.updateAvatar(
+                userId = session.userId,
+                bytes = payload.bytes,
+                contentType = payload.contentType
+            )
+            current.copy(session = updatedSession)
         }
     }
 
@@ -223,6 +241,36 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    private suspend fun readAvatarUpload(uri: Uri): AvatarUploadPayload =
+        withContext(Dispatchers.IO) {
+            val resolver = getApplication<Application>().contentResolver
+            val contentType = resolver.getType(uri)?.lowercase()
+                ?: throw HarmonySessionException("avatar_invalid_type")
+            if (contentType !in ALLOWED_AVATAR_TYPES) {
+                throw HarmonySessionException("avatar_invalid_type")
+            }
+
+            val input = resolver.openInputStream(uri)
+                ?: throw HarmonySessionException("avatar_unreadable")
+            val output = ByteArrayOutputStream()
+            input.use { stream ->
+                val buffer = ByteArray(16 * 1024)
+                var total = 0
+                while (true) {
+                    val read = stream.read(buffer)
+                    if (read < 0) break
+                    total += read
+                    if (total > MAX_AVATAR_BYTES) {
+                        throw HarmonySessionException("avatar_too_large")
+                    }
+                    output.write(buffer, 0, read)
+                }
+            }
+            val bytes = output.toByteArray()
+            if (bytes.isEmpty()) throw HarmonySessionException("avatar_empty")
+            AvatarUploadPayload(bytes = bytes, contentType = contentType)
+        }
+
     private fun runReadyAction(
         action: suspend (AppSessionUiState) -> AppSessionUiState
     ) {
@@ -248,7 +296,14 @@ class AppSessionViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    private data class AvatarUploadPayload(
+        val bytes: ByteArray,
+        val contentType: String
+    )
+
     private companion object {
+        const val MAX_AVATAR_BYTES = 5 * 1024 * 1024
+        val ALLOWED_AVATAR_TYPES = setOf("image/jpeg", "image/png", "image/webp")
         const val DEMO_USER_ID = "local-demo-session"
         const val DEMO_PARTNER_ID = "local-demo-partner"
         const val DEMO_COUPLE_ID = "local-demo-couple"
