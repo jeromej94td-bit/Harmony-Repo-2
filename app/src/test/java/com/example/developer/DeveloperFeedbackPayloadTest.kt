@@ -5,6 +5,7 @@ import com.example.data.developer.DeveloperFeedbackPriority
 import com.example.data.developer.DeveloperFeedbackType
 import com.example.data.developer.DeveloperReviewContext
 import com.example.data.developer.ExecutionMode
+import com.example.data.developer.toRequestJson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
