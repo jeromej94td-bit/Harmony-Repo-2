@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import com.example.data.model.AnswerEntity
 import com.example.data.model.EitherOrAnswerCodec
@@ -16,6 +17,7 @@ import com.example.data.model.WeekendEchoSelector
 import com.example.ui.screens.WeekendEchoBoard
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -84,6 +86,21 @@ class WeekendEchoBoardTest {
 
         assertEquals("couch_blanket", WeekendEchoAnswerCodec.decode(saved.orEmpty())?.firstMotifKey)
         assertEquals("cinema", WeekendEchoAnswerCodec.decode(saved.orEmpty())?.secondMotifKey)
+    }
+
+    @Test
+    fun `revealed split scene keeps the approved visual hierarchy`() {
+        setBoard()
+        composeRule.onNodeWithTag("weekend_echo_left_seal").performClick()
+        composeRule.onNodeWithTag("weekend_echo_handoff").performClick()
+        composeRule.onNodeWithTag("weekend_echo_right_seal").performClick()
+        composeRule.onNodeWithTag("weekend_echo_reveal").performClick()
+
+        composeRule.onNodeWithTag("weekend_echo_background").assertHasNoClickAction()
+        composeRule.onNodeWithTag("weekend_echo_pandas").assertHasNoClickAction()
+        composeRule.onRoot().captureRoboImage(
+            filePath = "build/weekend-echo-preview/revealed.png"
+        )
     }
 
     private fun assertMotifsHidden() {

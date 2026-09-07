@@ -111,9 +111,9 @@ internal fun WeekendSplitScene(
 
         WalkingPandaPair(
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 24.dp, top = 112.dp)
-                .size(width = 126.dp, height = 104.dp)
+                .align(Alignment.CenterStart)
+                .padding(start = 4.dp, bottom = 76.dp)
+                .size(width = 176.dp, height = 184.dp)
                 .testTag("weekend_echo_pandas")
         )
 
@@ -168,33 +168,12 @@ private fun SceneHalf(motif: WeekendEchoMotif, modifier: Modifier = Modifier) {
 
 @Composable
 private fun WalkingPandaPair(modifier: Modifier = Modifier) {
-    Canvas(modifier) {
-        fun panda(centerX: Float, scale: Float) {
-            val black = Color(0xFF15131D)
-            val white = Color(0xFFF4ECF3)
-            val bodyY = size.height * 0.60f
-            drawCircle(black, size.width * 0.105f * scale, androidx.compose.ui.geometry.Offset(centerX - size.width * 0.075f, size.height * 0.22f))
-            drawCircle(black, size.width * 0.105f * scale, androidx.compose.ui.geometry.Offset(centerX + size.width * 0.075f, size.height * 0.22f))
-            drawOval(
-                white,
-                topLeft = androidx.compose.ui.geometry.Offset(centerX - size.width * 0.13f * scale, size.height * 0.16f),
-                size = androidx.compose.ui.geometry.Size(size.width * 0.26f * scale, size.height * 0.31f * scale)
-            )
-            drawOval(
-                black,
-                topLeft = androidx.compose.ui.geometry.Offset(centerX - size.width * 0.16f * scale, bodyY - size.height * 0.16f),
-                size = androidx.compose.ui.geometry.Size(size.width * 0.32f * scale, size.height * 0.40f * scale)
-            )
-            drawOval(
-                white,
-                topLeft = androidx.compose.ui.geometry.Offset(centerX - size.width * 0.11f * scale, bodyY - size.height * 0.13f),
-                size = androidx.compose.ui.geometry.Size(size.width * 0.22f * scale, size.height * 0.27f * scale)
-            )
-            drawCircle(white, size.width * 0.035f * scale, androidx.compose.ui.geometry.Offset(centerX, bodyY + size.height * 0.05f))
-        }
-        panda(size.width * 0.34f, 0.92f)
-        panda(size.width * 0.68f, 1f)
-    }
+    Image(
+        painter = painterResource(R.drawable.weekend_echo_panda_pair),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+    )
 }
 
 @Composable
