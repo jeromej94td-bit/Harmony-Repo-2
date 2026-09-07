@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
 import android.graphics.BitmapFactory
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,7 +19,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +45,7 @@ import com.example.R
 import com.example.ui.theme.HarmonyPink
 import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonySurface2
+import kotlinx.coroutines.delay
 
 /**
  * First normal-question visual pilot.
@@ -130,6 +139,23 @@ internal fun RestaurantChoiceVisualGrid(
     onSelect: (MechanicOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val revealKey = remember(items, spec) {
+        spec.prompt + "|" + items.joinToString(separator = "\u001f") { it.raw }
+    }
+    var revealedCount by remember(revealKey) { mutableStateOf(0) }
+    var inputLocked by remember(revealKey) { mutableStateOf(true) }
+
+    LaunchedEffect(revealKey) {
+        inputLocked = true
+        revealedCount = 0
+        items.indices.forEach { index ->
+            delay(if (index == 0) 60L else 75L)
+            revealedCount = index + 1
+        }
+        delay(90L)
+        inputLocked = false
+    }
+
     val rows = items.chunked(2)
     Column(
         modifier = modifier.fillMaxSize(),
@@ -142,14 +168,31 @@ internal fun RestaurantChoiceVisualGrid(
             ) {
                 rowItems.forEachIndexed { columnIndex, item ->
                     val visual = spec.cardsByRawAnswer[item.raw] ?: return@forEachIndexed
-                    RestaurantChoiceVisualTile(
-                        item = item,
-                        visual = visual,
-                        selected = selectedRaw == item.raw,
-                        onClick = { onSelect(item) },
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                        testTag = "restaurant_visual_card_${rowIndex * 2 + columnIndex}"
-                    )
+                    val index = rowIndex * 2 + columnIndex
+                    val revealed = index < revealedCount
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                    ) {
+                        AnimatedVisibility(
+                            visible = revealed,
+                            enter = fadeIn(animationSpec = tween(180)) +
+                                scaleIn(initialScale = 0.94f, animationSpec = tween(220)),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            RestaurantChoiceVisualTile(
+                                item = item,
+                                visual = visual,
+                                selected = selectedRaw == item.raw,
+                                enabled = revealed && !inputLocked,
+                                onClick = { onSelect(item) },
+                                modifier = Modifier.fillMaxSize(),
+                                testTag = "restaurant_visual_card_$index"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -161,6 +204,7 @@ private fun RestaurantChoiceVisualTile(
     item: MechanicOption,
     visual: RestaurantChoiceVisualCard,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     testTag: String
@@ -180,7 +224,7 @@ private fun RestaurantChoiceVisualTile(
                 )
             )
             .border(if (selected) 2.dp else 1.2.dp, borderColor, shape)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .testTag(testTag),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
