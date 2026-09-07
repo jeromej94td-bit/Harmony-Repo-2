@@ -6,18 +6,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AuthScreenGoogleOAuthContractTest {
-
     @Test
-    fun `google button uses direct Supabase OAuth and demo stays separate`() {
+    fun `google button uses native coordinator and demo stays separate`() {
         val auth = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
 
         assertTrue(auth.contains("onDemoRequested: () -> Unit"))
-        assertTrue(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertTrue(auth.contains("performHarmonyGoogleSignIn(context)"))
         assertTrue(auth.contains("onClick = onDemoRequested"))
-        assertFalse(auth.contains("CredentialManager"))
-        assertFalse(auth.contains("GetCredentialException"))
-        assertFalse(auth.contains("performResilientGoogleSignIn"))
-        assertFalse(auth.contains("context.findActivity()"))
+        assertFalse(auth.contains("SupabaseConfig.client.auth.signInWith(Google)"))
+        assertFalse(auth.contains("OAUTH_REDIRECT_STARTED"))
     }
 
     private fun source(path: String): String {

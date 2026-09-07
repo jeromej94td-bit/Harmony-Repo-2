@@ -46,10 +46,13 @@ The production Google login is intentionally centralized in:
 
 - **NEVER** replace the Google button in `AuthScreen.kt` with a direct `SupabaseConfig.client.auth.signInWith(Google)` / `auth.signInWith(Google)` call.
 - **NEVER** delete or bypass `GoogleAuthCoordinator.kt` as a cleanup/refactor unless the user explicitly asks to replace the complete Google authentication architecture.
-- The coordinator's required behavior is: Credential Manager / Google ID token first, clear stale credential state and retry once for `[16] Account reauth failed`, then use Supabase browser OAuth only as the fallback.
+- The coordinator's required behavior is native-only: Android Credential Manager with `GetGoogleIdOption`, Google ID token, SHA-256(raw nonce) sent to Google, and the original raw nonce sent to Supabase. Do not add a browser/WebView OAuth fallback for the Google button.
 - Preserve email/password login, password recovery, and demo-mode callbacks independently; changes to those flows must not rewrite the Google auth path.
 - Before merging authentication-related changes, preserve `GoogleAuthRegressionContractTest.kt`. Any deliberate replacement architecture must update that test in the same change.
 - Do not introduce anonymous Supabase sign-in as a Google-login fallback.
+- Post-login account loading is part of the authentication contract: `get_app_session()` must remain callable for an authenticated Google user.
+- In the `get_app_session()` PL/pgSQL body, use `ON CONFLICT ON CONSTRAINT harmony_profiles_pkey` rather than `ON CONFLICT(user_id)` to avoid output-column/variable ambiguity, and cast `auth.users.email` to `text` in `RETURN QUERY`.
+- Preserve `AppSessionRpcMigrationContractTest.kt` when touching session RPC migrations.
 
 ## Android signing identity is protected infrastructure
 
@@ -57,8 +60,9 @@ Installable Harmony APKs from `main` must keep one stable Android signing identi
 
 - **NEVER** generate a fresh keystore for an installable `main` APK.
 - `.github/workflows/android-apk-build.yml` must restore `HARMONY_CI_DEBUG_KEYSTORE_B64` from GitHub Actions secrets and verify the pinned SHA-1 before publishing an APK.
-- The permanent CI signing SHA-1 is `7F:F5:D5:66:BB:0F:6E:AB:BC:B7:03:E8:8F:64:C7:9A:38:3A:BB:89`.
-- The permanent certificate SHA-256 is `24:22:E7:AE:95:80:3A:C9:F6:DF:E0:8D:6C:5F:A0:DB:07:04:28:00:D7:7A:EA:0D:ED:67:22:66:48:4E:21:5D`.
+- The permanent install/update signing SHA-1 is `63:9B:57:CF:60:DE:AC:0C:55:21:FB:9E:DD:79:93:44:4F:F1:3C:6F`.
+- The permanent certificate SHA-256 is `77:9B:7D:D8:B4:86:CD:FE:01:F6:1D:90:F4:CE:9C:7F:73:63:D5:59:15:9B:8F:26:CB:6B:A3:5E:A2:AA:6D:7B`.
+- Before every real-device installation, verify the built APK SHA-1 against the currently installed Harmony package. If it differs, abort; never uninstall Harmony to work around a signing mismatch.
 - A different fingerprint is an explicit signing-key rotation, not a cleanup. Before changing it, update the Android OAuth client for package `com.aistudio.harmony.couples.xqvz` and make the migration explicit.
 - Pull-request-only compile builds may use an ephemeral debug key, but those APKs must not be published as installable Harmony artifacts.
 - If the stable signing secret is unavailable, fail the installable build. Do not silently fall back to a newly generated key.

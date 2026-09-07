@@ -251,6 +251,19 @@ android {
     checkReleaseBuilds = false
   }
 
+  val debugKeystoreOverride = providers.gradleProperty("HARMONY_DEBUG_KEYSTORE_PATH").orNull
+    ?: System.getenv("HARMONY_DEBUG_KEYSTORE_PATH")
+  val stableLocalDebugKeystore = file("${System.getProperty("user.home")}/.harmony-build-tools/signing/harmony-debug.keystore")
+  val repoDebugKeystore = file("${rootDir}/debug.keystore")
+  val localDebugKeystore = when {
+    debugKeystoreOverride != null -> file(debugKeystoreOverride).also {
+      require(it.exists()) { "HARMONY_DEBUG_KEYSTORE_PATH does not exist: $it" }
+    }
+    stableLocalDebugKeystore.exists() -> stableLocalDebugKeystore
+    repoDebugKeystore.exists() -> repoDebugKeystore
+    else -> null
+  }
+
   signingConfigs {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH") ?: (if (file("${rootDir}/my-upload-key.jks").exists()) "${rootDir}/my-upload-key.jks" else "${rootDir}/debug.keystore")
@@ -260,7 +273,7 @@ android {
       keyPassword = System.getenv("KEY_PASSWORD")
     }
     create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
+      localDebugKeystore?.let { storeFile = it }
       storePassword = "android"
       keyAlias = "androiddebugkey"
       keyPassword = "android"
@@ -274,7 +287,11 @@ android {
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
     }
-    debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    debug {
+      if (localDebugKeystore != null) {
+        signingConfig = signingConfigs.getByName("debugConfig")
+      }
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
