@@ -2,9 +2,9 @@ package com.example.data
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import java.io.File
+import com.example.R
+import com.example.data.model.TravelDestinationCatalog
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,24 +16,19 @@ import org.robolectric.annotation.Config
 class TokyoTravelImageRegressionTest {
 
     @Test
-    fun `Tokyo Japan keeps short label and installs a real WebP image`() {
+    fun `Tokyo uses the compiled Drive WebP behind the stable destination key`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val result = DriveTotAssetInstaller.install(context)
 
-        val path = result["Tokyo, Japan"]
-        assertNotNull("Tokyo, Japan must resolve to the bundled Drive image", path)
+        assertEquals(
+            "travel:tokyo",
+            TravelDestinationCatalog.assetKeyForCanonicalLabel("Tokyo, Japan")
+        )
 
-        val image = File(path!!)
-        assertEquals("travel_tokyo.webp", image.name)
-        assertTrue("Tokyo image must be a non-placeholder image", image.isFile && image.length() > 1_024L)
-
-        val header = image.inputStream().use { input ->
-            ByteArray(12).also { bytes ->
-                val read = input.read(bytes)
-                assertEquals(12, read)
-            }
+        val bytes = context.resources.openRawResource(R.drawable.travel_tokyo).use { input ->
+            input.readBytes()
         }
-        assertEquals("RIFF", String(header, 0, 4, Charsets.US_ASCII))
-        assertEquals("WEBP", String(header, 8, 4, Charsets.US_ASCII))
+        assertTrue("Tokyo image must be a real non-placeholder image", bytes.size > 1_024)
+        assertEquals("RIFF", String(bytes, 0, 4, Charsets.US_ASCII))
+        assertEquals("WEBP", String(bytes, 8, 4, Charsets.US_ASCII))
     }
 }

@@ -12,10 +12,6 @@ object GeneratedHarmonyContent {
     val PACKS: List<GenPack> = listOf(
         // DRIVE_TOT_RELEASE_BEGIN
         // Drive catalogue integration. Existing Gourmet-Eis pack is intentionally untouched.
-        GenPack(id="reiseziele", title="Reiseziele", cat="tot", topic="reisen", type="tot", tags=listOf("dasoderdas","reisen"), pairs=listOf(
-            "Paris, Frankreich" to "Rom, Italien", "Bali, Indonesien" to "Santorini, Griechenland", "London, England" to "New York, USA",
-            "Malediven" to "Seychellen", "Tokyo, Japan" to "Dubai, VAE", "Venedig, Italien" to "Amsterdam, Niederlande", "Lappland, Finnland" to "Island",
-            "Miami, USA" to "Bangkok, Thailand", "Chicago, USA" to "Barcelona, Spanien", "Lissabon, Portugal" to "Kopenhagen, Dänemark", "Prag, Tschechien" to "Budapest, Ungarn")),
         GenPack(id="traumhaus", title="Unser Traumhaus", cat="tot", topic="geld", type="tot", tags=listOf("dasoderdas"), pairs=listOf(
             "Altbau mit Charme" to "Neubau mit Smart Home", "Offene Wohnküche" to "Separate Küche", "Prasselnder Kamin" to "Fußbodenheizung", "Großer Garten" to "Sonnige Dachterrasse",
             "Stadtvilla" to "Landhaus", "Glasfassade" to "Natursteinfassade", "Penthouse mit Ausblick" to "Haus am See", "Minimalistisches Interieur" to "Landhausstil",
