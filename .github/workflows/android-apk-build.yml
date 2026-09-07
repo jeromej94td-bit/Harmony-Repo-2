@@ -107,12 +107,14 @@ jobs:
             exit 1
           fi
 
-          ACTUAL_APK_SHA1="$($APKSIGNER verify --print-certs app/build/outputs/apk/debug/app-debug.apk \
-            | sed -n 's/^Signer #1 certificate SHA-1 digest: //p' \
-            | head -n 1 \
-            | tr '[:lower:]' '[:upper:]' \
-            | sed 's/../&:/g;s/:$//')"
+          APKSIGNER_OUTPUT="$("$APKSIGNER" verify --print-certs app/build/outputs/apk/debug/app-debug.apk 2>&1)"
+          printf '%s\n' "$APKSIGNER_OUTPUT"
 
+          ACTUAL_APK_SHA1="$(printf '%s\n' "$APKSIGNER_OUTPUT" \
+            | awk -F': ' '/certificate SHA-1 digest:/ { print $NF; exit }' \
+            | tr '[:lower:]' '[:upper:]' \
+            | tr -d '[:space:]:' \
+            | sed 's/../&:/g;s/:$//')"
           if [ "$ACTUAL_APK_SHA1" != "$HARMONY_CI_SIGNING_SHA1" ]; then
             echo "::error::Built APK certificate mismatch. Expected $HARMONY_CI_SIGNING_SHA1 but got ${ACTUAL_APK_SHA1:-<empty>}."
             exit 1
