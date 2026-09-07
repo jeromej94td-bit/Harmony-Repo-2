@@ -385,23 +385,15 @@ object HarmonyPacksData {
             )
         ),
 
-        // ★ Das oder Das - Reiseziele
+        // Das oder Das - Unsere Reiseziele
         QuestionPack(
-            id = "reiseziele",
-            title = "Reiseziele",
+            id = TravelDestinationCatalog.PACK_ID,
+            title = TravelDestinationCatalog.TITLE,
             tags = listOf("dasoderdas"),
             cat = "tot",
             topic = "reisen",
             type = "tot",
-            pairs = listOf(
-                "Paris, Frankreich" to "Rom, Italien",
-                "Bali, Indonesien" to "Santorini, Griechenland",
-                "London, England" to "New York, USA",
-                "Malediven" to "Seychellen",
-                "Tokyo, Japan" to "Dubai, VAE",
-                "Venedig, Italien" to "Amsterdam, Niederlande",
-                "Lappland, Finnland" to "Island"
-            )
+            pairs = TravelDestinationCatalog.displayPairs
         ),
 
         QuestionPack(

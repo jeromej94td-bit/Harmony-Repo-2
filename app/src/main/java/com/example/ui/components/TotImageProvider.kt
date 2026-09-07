@@ -40,6 +40,30 @@ object TotImageProvider {
 
 
     private val directMap: Map<String, Any> = mapOf(
+        // Translation-safe Reiseziele keys. 17 images come from the user's Drive folder;
+        // five missing Drive motifs keep the existing visual fallback but still use stable ids.
+        "travel:paris" to R.drawable.travel_paris,
+        "travel:rome" to R.drawable.travel_rome,
+        "travel:bali" to R.drawable.travel_bali,
+        "travel:santorini" to "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&auto=format&fit=crop&q=80",
+        "travel:london" to "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&auto=format&fit=crop&q=80",
+        "travel:new_york" to R.drawable.travel_new_york,
+        "travel:maldives" to R.drawable.travel_maldives,
+        "travel:seychelles" to R.drawable.travel_seychelles,
+        "travel:tokyo" to R.drawable.travel_tokyo,
+        "travel:dubai" to R.drawable.travel_dubai,
+        "travel:venice" to "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?w=800&auto=format&fit=crop&q=80",
+        "travel:amsterdam" to R.drawable.travel_amsterdam,
+        "travel:lapland" to "https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?w=800&auto=format&fit=crop&q=80",
+        "travel:iceland" to "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=800&auto=format&fit=crop&q=80",
+        "travel:miami" to R.drawable.travel_miami,
+        "travel:bangkok" to R.drawable.travel_bangkok,
+        "travel:chicago" to R.drawable.travel_chicago,
+        "travel:barcelona" to R.drawable.travel_barcelona,
+        "travel:lisbon" to R.drawable.travel_lisbon,
+        "travel:copenhagen" to R.drawable.travel_copenhagen,
+        "travel:prague" to R.drawable.travel_prague,
+        "travel:budapest" to R.drawable.travel_budapest,
         // DRIVE_TOT_RELEASE_IMAGES_BEGIN
         "Cappuccino" to "https://loremflickr.com/800/600/cappuccino?lock=1",
         "Matcha-Latte" to "https://loremflickr.com/800/600/matcha-latte?lock=2",

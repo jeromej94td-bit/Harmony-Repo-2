@@ -88,6 +88,7 @@ import com.example.data.model.AnswerEntity
 import com.example.data.model.LoveBalanceQuestionPolicy
 import com.example.data.model.QuestionInteractionPolicy
 import com.example.data.model.QuestionPack
+import com.example.data.model.TravelDestinationCatalog
 import com.example.ui.ActivePackRun
 import com.example.ui.contentText
 import com.example.ui.tr
@@ -838,6 +839,7 @@ fun QuizRunnerScreen(
                             TotCardPairView(
                                 firstText = pair.first,
                                 secondText = pair.second,
+                                packId = pack.id,
                                 packPairs = pack.pairs,
                                 selectedAns = selectedAns,
                                 onPick = { chosen -> onPickTot(chosen) },
@@ -1591,6 +1593,7 @@ fun QuizOptionButton(
 fun TotCardPairView(
     firstText: String,
     secondText: String,
+    packId: String,
     packPairs: List<Pair<String, String>>,
     selectedAns: String?,
     onPick: (String) -> Unit,
@@ -1696,7 +1699,7 @@ fun TotCardPairView(
         ) {
             TotStyledCard(
                 text = contentText(firstText),
-                assetKey = topShuffleKey,
+                assetKey = TravelDestinationCatalog.assetKeyFor(packId, topShuffleKey) ?: topShuffleKey,
                 tagAlignment = Alignment.TopStart,
                 isSelected = selectedAns == firstText,
                 rotationAngle = -3.2f + topTilt.value,
@@ -1712,7 +1715,7 @@ fun TotCardPairView(
 
             TotStyledCard(
                 text = contentText(secondText),
-                assetKey = bottomShuffleKey,
+                assetKey = TravelDestinationCatalog.assetKeyFor(packId, bottomShuffleKey) ?: bottomShuffleKey,
                 tagAlignment = Alignment.BottomStart,
                 isSelected = selectedAns == secondText,
                 rotationAngle = 3.2f + bottomTilt.value,
@@ -1981,7 +1984,7 @@ fun TotResultsView(
                         ) {
                             SideBySideTotCard(
                                 text = contentText(pair.first),
-                                assetKey = pair.first,
+                                assetKey = TravelDestinationCatalog.assetKeyFor(pack.id, pair.first) ?: pair.first,
                                 isSelected = myAns == pair.first,
                                 modifier = Modifier
                                     .weight(1f)
@@ -1990,7 +1993,7 @@ fun TotResultsView(
 
                             SideBySideTotCard(
                                 text = contentText(pair.second),
-                                assetKey = pair.second,
+                                assetKey = TravelDestinationCatalog.assetKeyFor(pack.id, pair.second) ?: pair.second,
                                 isSelected = myAns == pair.second,
                                 modifier = Modifier
                                     .weight(1f)

@@ -6,6 +6,7 @@ import com.example.data.model.Category
 import com.example.data.model.HarmonyPacksData
 import com.example.data.model.Question
 import com.example.data.model.QuestionPack
+import com.example.data.model.TravelDestinationCatalog
 import com.example.ui.components.TotImageProvider
 import org.json.JSONArray
 import org.json.JSONObject
@@ -75,8 +76,8 @@ object DeveloperDataManager {
 
     private fun rawOwnPacksById(): LinkedHashMap<String, QuestionPack> {
         val byId = LinkedHashMap<String, QuestionPack>()
-        generatedPacks.forEach { byId[it.id] = it }
-        customPacks.forEach { byId[it.id] = it }
+        generatedPacks.filterNot { it.id == TravelDestinationCatalog.PACK_ID }.forEach { byId[it.id] = it }
+        customPacks.filterNot { it.id == TravelDestinationCatalog.PACK_ID }.forEach { byId[it.id] = it }
         return byId
     }
 
