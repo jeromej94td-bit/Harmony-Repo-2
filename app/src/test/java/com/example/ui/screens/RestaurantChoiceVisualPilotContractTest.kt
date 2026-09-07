@@ -26,6 +26,18 @@ class RestaurantChoiceVisualPilotContractTest {
     }
 
     @Test
+    fun `visual cards reveal staggered and ignore taps until reveal is complete`() {
+        val visualPolicy = sourceOrEmpty("app/src/main/java/com/example/ui/screens/RestaurantChoiceVisualPilot.kt")
+
+        assertTrue(visualPolicy.contains("LaunchedEffect"))
+        assertTrue(visualPolicy.contains("delay("))
+        assertTrue(visualPolicy.contains("revealedCount"))
+        assertTrue(visualPolicy.contains("inputLocked"))
+        assertTrue(visualPolicy.contains("AnimatedVisibility"))
+        assertTrue(visualPolicy.contains("enabled = revealed && !inputLocked"))
+    }
+
+    @Test
     fun `stored restaurant answer values stay stable`() {
         val curation = source("app/src/main/java/com/example/data/Harmony360FoodSectionCuration.kt")
         listOf("Essen enttäuscht", "Schlechter Service", "Zu laut", "Preis passt nicht").forEach { value ->
