@@ -11,17 +11,25 @@ class ProfileAvatarSupabaseSyncContractTest {
         val repository = source("app/src/main/java/com/example/data/session/AppSessionRepository.kt")
         val sessionViewModel = source("app/src/main/java/com/example/ui/session/AppSessionViewModel.kt")
         val mainActivity = source("app/src/main/java/com/example/MainActivity.kt")
+        val profileSheet = source("app/src/main/java/com/example/ui/screens/ProfileSheet.kt")
+        val presentation = source("app/src/main/java/com/example/ui/session/SessionProfilePresentation.kt")
         val whoWould = source("app/src/main/java/com/example/ui/screens/ScaleWhoWouldReworkBoards.kt")
 
         assertTrue(repository.contains("storage/v1/object/harmony-avatars"))
+        assertTrue(repository.contains("storage/v1/object/sign/harmony-avatars"))
         assertTrue(repository.contains("update_harmony_avatar"))
         assertTrue(repository.contains("harmony-avatar:"))
         assertTrue(repository.contains("x-upsert"))
         assertTrue(sessionViewModel.contains("fun updateProfileAvatar(uri: Uri)"))
         assertTrue(mainActivity.contains("sessionViewModel.updateProfileAvatar(uri)"))
 
-        // The existing person-choice mechanic must keep using the linked real profiles,
-        // never switch the persisted answer values to display-only avatar data.
+        // Production must use the cloud-linked avatars; local Room image paths are demo fallback only.
+        assertTrue(profileSheet.contains("userAvatarModel: Any? = if (isDemoMode)"))
+        assertTrue(presentation.contains("useLocalAvatarFallback: Boolean = true"))
+        assertTrue(mainActivity.contains("questionDisplayProfile(uiState.profile, useLocalAvatarFallback = isDemoMode)"))
+
+        // The existing person-choice mechanic consumes the display profile only.
+        // Raw persisted answer values therefore stay independent from avatar URLs.
         assertTrue(whoWould.contains("avatarPath = profile.userAvatarPath"))
         assertTrue(whoWould.contains("avatarPath = profile.partnerAvatarPath"))
     }
