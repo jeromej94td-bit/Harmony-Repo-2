@@ -604,7 +604,13 @@ fun HarmonyApp(
                         onOpenEditProfile = { viewModel.openEditProfile() },
                         onCloseEditProfile = { viewModel.closeEditProfile() },
                         onSaveEditProfile = { u, p, s -> viewModel.saveEditProfile(u, p, s) },
-                        onUpdateAvatar = { uri, isUser -> viewModel.updateProfileAvatar(uri, isUser) },
+                        onUpdateAvatar = { uri, isUser ->
+                            if (isDemoMode) {
+                                viewModel.updateProfileAvatar(uri, isUser)
+                            } else if (isUser) {
+                                sessionViewModel.updateProfileAvatar(uri)
+                            }
+                        },
                         onOpenDevStudio = { viewModel.selectTab(5) },
                         onOpenPartnerConnection = {
                             viewModel.closeProfileSheet()
