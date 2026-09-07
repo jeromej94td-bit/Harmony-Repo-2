@@ -284,7 +284,7 @@ fun HarmonyApp(
                 isPandaEitherOrOpen = true
                 isPandaExitConfirmOpen = false
             }
-            ProposalExperienceEntryPolicy.handlesPack(packId) -> {
+            ProposalExperienceEntryPolicy.opensFullscreenExperience(packId) -> {
                 isProposalExperienceOpen = true
             }
             freshRun -> {
@@ -302,7 +302,7 @@ fun HarmonyApp(
     }
 
     fun openPack(packId: String) {
-        if (packId == PANDA_EITHER_OR_PACK_ID || ProposalExperienceEntryPolicy.handlesPack(packId)) {
+        if (packId == PANDA_EITHER_OR_PACK_ID || ProposalExperienceEntryPolicy.opensFullscreenExperience(packId)) {
             openPackForPlay(packId)
             return
         }

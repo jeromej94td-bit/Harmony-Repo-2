@@ -12,10 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
- data class DeveloperReviewUiState(
+data class DeveloperReviewUiState(
     val accessChecked: Boolean = false,
     val isAdmin: Boolean = false,
     val isBusy: Boolean = false,
+    val isRefreshingInbox: Boolean = false,
     val feedbackItems: List<DeveloperFeedbackItem> = emptyList(),
     val message: String? = null,
     val error: String? = null,
@@ -110,16 +111,19 @@ class DeveloperReviewViewModel(
     }
 
     fun refreshInbox() {
-        if (_state.value.isBusy || !_state.value.isAdmin) return
+        if (_state.value.isRefreshingInbox || !_state.value.isAdmin) return
         viewModelScope.launch {
-            _state.value = _state.value.copy(isBusy = true, error = null)
+            _state.value = _state.value.copy(isRefreshingInbox = true, error = null)
             runCatching { repository.loadFeedback() }
                 .onSuccess { items ->
-                    _state.value = _state.value.copy(isBusy = false, feedbackItems = items)
+                    _state.value = _state.value.copy(
+                        isRefreshingInbox = false,
+                        feedbackItems = items,
+                    )
                 }
                 .onFailure { error ->
                     _state.value = _state.value.copy(
-                        isBusy = false,
+                        isRefreshingInbox = false,
                         error = error.message ?: "Inbox konnte nicht geladen werden",
                     )
                 }

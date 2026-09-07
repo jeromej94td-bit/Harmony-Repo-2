@@ -26,6 +26,8 @@ fun RunnerSkipButton(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (ScenarioAdventurePresence.isActive) return
+
     Row(
         modifier = modifier
             .navigationBarsPadding()
