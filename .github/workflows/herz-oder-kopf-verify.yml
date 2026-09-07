@@ -84,7 +84,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: heart-or-head-previews
-          path: build/outputs/roborazzi/heart_or_head_*_preview.png
+          path: |
+            build/outputs/roborazzi/heart_or_head_*_preview.png
+            app/build/outputs/roborazzi/heart_or_head_*_preview.png
           if-no-files-found: ignore
 
       - name: Create ephemeral PR debug keystore
