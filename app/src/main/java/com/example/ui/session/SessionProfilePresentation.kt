@@ -5,7 +5,7 @@ import com.example.data.session.AppSession
 
 internal fun AppSession.questionDisplayProfile(
     localProfile: ProfileEntity,
-    useLocalAvatarFallback: Boolean
+    useLocalAvatarFallback: Boolean = true
 ): ProfileEntity = localProfile.copy(
     userName = profile.displayName,
     partnerName = partner?.displayName ?: localProfile.partnerName,
