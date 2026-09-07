@@ -558,7 +558,7 @@ internal fun SecretChoiceRevealBoard(
 }
 
 @Composable
-private fun PairPrivateHandoffPane(
+internal fun PairPrivateHandoffPane(
     name: String,
     title: String,
     body: String,

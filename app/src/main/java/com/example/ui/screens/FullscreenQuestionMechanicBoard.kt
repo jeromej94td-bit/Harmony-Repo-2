@@ -6,6 +6,7 @@ import com.example.data.model.AnswerEntity
 import com.example.data.model.FullscreenGameMechanicKind
 import com.example.data.model.ProfileEntity
 import com.example.data.model.QuestionInteractionKind
+import com.example.data.model.SecretPlanCatalog
 import com.example.data.model.WeekendEchoSelector
 
 /**
@@ -26,6 +27,20 @@ internal fun FullscreenQuestionMechanicBoard(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind == FullscreenGameMechanicKind.SECRET_CHOICE && packId == SecretPlanCatalog.PACK_ID) {
+        SecretPlanBoard(
+            question = question,
+            options = options,
+            questionIndex = questionIndex,
+            historicalAnswers = historicalAnswers,
+            selectedAnswer = selectedAnswer,
+            profile = profile,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     if (kind == FullscreenGameMechanicKind.SCENARIO && packId == WeekendEchoSelector.PACK_ID) {
         WeekendEchoBoard(
             question = question,
