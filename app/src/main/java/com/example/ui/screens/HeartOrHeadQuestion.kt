@@ -82,23 +82,26 @@ private fun a1(x: Int, y: Int, width: Int = 256, height: Int = 320) =
 private fun a2(x: Int, y: Int, width: Int = 256, height: Int = 320) =
     HeartHeadVisual.Atlas(AtlasCrop(R.drawable.heart_head_panda_atlas_02, x, y, width, height))
 
+private fun a3(x: Int, y: Int, width: Int = 120, height: Int = 150) =
+    HeartHeadVisual.Atlas(AtlasCrop(R.drawable.heart_head_panda_atlas_03, x, y, width, height))
+
 private fun heartOrHeadVisuals(kind: HarmonyImageChoiceKind): HeartHeadRoundVisuals = when (kind) {
     HarmonyImageChoiceKind.HEART_HEAD_DATE -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a1(128, 615),
-            a1(516, 185),
-            a2(128, 615),
-            a1(128, 185)
+            a3(0, 0),
+            a3(120, 0),
+            a3(0, 150),
+            a3(120, 150)
         ),
         subtitleDe = "Welcher Moment zieht dich spontan an?",
         subtitleEn = "Which moment pulls you in first?"
     )
     HarmonyImageChoiceKind.HEART_HEAD_GIFT -> HeartHeadRoundVisuals(
         visuals = listOf(
-            a2(174, 185),
-            a2(516, 185),
-            a2(548, 205, 224, 280),
-            a2(128, 615)
+            a3(0, 300),
+            a3(120, 300),
+            a3(0, 450),
+            a3(120, 450)
         ),
         subtitleDe = "Welche Geste fühlt sich für dich besonders an?",
         subtitleEn = "Which gesture feels most meaningful to you?"
