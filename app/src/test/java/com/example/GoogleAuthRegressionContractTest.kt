@@ -7,34 +7,33 @@ import org.junit.Test
 
 class GoogleAuthRegressionContractTest {
     @Test
-    fun `auth screen cannot bypass resilient google coordinator`() {
+    fun `google button stays on native credential manager id token flow`() {
         val authScreen = source("app/src/main/java/com/example/ui/screens/AuthScreen.kt")
-        val recovery = source("app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt")
+        val coordinator = source("app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt")
 
         assertTrue(authScreen.contains("performHarmonyGoogleSignIn("))
-        assertFalse(
-            "AuthScreen must never route the Google button directly through OAuth again",
-            authScreen.contains("auth.signInWith(Google)") ||
-                authScreen.contains("client.auth.signInWith(Google)")
-        )
+        assertFalse(authScreen.contains("auth.signInWith(Google)"))
+        assertFalse(authScreen.contains("OAUTH_REDIRECT_STARTED"))
 
-        assertTrue(recovery.contains("GetSignInWithGoogleOption"))
-        assertTrue(recovery.contains("GoogleIdTokenCredential"))
-        assertTrue(recovery.contains("clearCredentialState"))
-        assertTrue(recovery.contains("Account reauth failed"))
-        assertTrue(recovery.contains("signInWith(IDToken)"))
-        assertTrue(recovery.contains("signInWith(Google)"))
-        assertFalse(recovery.contains("signInAnonymously"))
-        assertFalse(recovery.contains("/auth/v1/signup"))
+        assertTrue(coordinator.contains("GetGoogleIdOption"))
+        assertTrue(coordinator.contains("GoogleIdTokenCredential"))
+        assertTrue(coordinator.contains("generateRawNonce"))
+        assertTrue(coordinator.contains("setNonce(GoogleNativeAuthConfig.sha256Hex(rawNonce))"))
+        assertTrue(coordinator.contains("signInWith(IDToken)"))
+        assertTrue(coordinator.contains("nonce = rawNonce"))
+        assertTrue(coordinator.contains("clearCredentialState"))
+        assertFalse(coordinator.contains("signInWith(Google)"))
+        assertFalse(coordinator.contains("OAUTH_REDIRECT_STARTED"))
+        assertFalse(coordinator.contains("signInAnonymously"))
+        assertFalse(coordinator.contains("/auth/v1/signup"))
     }
 
     @Test
-    fun `missing native Google credentials fall back to browser oauth`() {
-        val recovery = source("app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt")
+    fun `native google failure never silently switches to browser oauth`() {
+        val coordinator = source("app/src/main/java/com/example/ui/auth/GoogleAuthCoordinator.kt")
 
-        assertTrue(recovery.contains("catch (exception: Exception)"))
-        assertTrue(recovery.contains("Native Google credential failed (possibly SHA-1 mismatch or unavailable); using OAuth fallback"))
-        assertTrue(recovery.contains("GoogleSignInOutcome.OAUTH_REDIRECT_STARTED"))
+        assertFalse(coordinator.contains("startGoogleOAuthFallback"))
+        assertFalse(coordinator.contains("using OAuth fallback"))
     }
 
     private fun source(path: String): String =

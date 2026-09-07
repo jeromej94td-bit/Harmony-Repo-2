@@ -21,7 +21,7 @@ env:
   # Private key material MUST live only in repository secret HARMONY_CI_DEBUG_KEYSTORE_B64.
   # Changing this fingerprint is an explicit signing-key rotation and requires updating
   # the Android OAuth client for package com.aistudio.harmony.couples.xqvz first.
-  HARMONY_CI_SIGNING_SHA1: 7F:F5:D5:66:BB:0F:6E:AB:BC:B7:03:E8:8F:64:C7:9A:38:3A:BB:89
+  HARMONY_CI_SIGNING_SHA1: 63:9B:57:CF:60:DE:AC:0C:55:21:FB:9E:DD:79:93:44:4F:F1:3C:6F
 
 jobs:
   build-debug-apk:

@@ -7,114 +7,96 @@ import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.example.data.SupabaseConfig
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 
 enum class GoogleSignInOutcome {
-    SESSION_CREATED,
-    OAUTH_REDIRECT_STARTED
+    SESSION_CREATED
 }
 
 /**
- * Canonical Google authentication entry point for Harmony.
+ * Canonical native Google authentication entry point for Harmony.
  *
- * Credential Manager is the preferred path because it creates the Supabase
- * session immediately from Google's ID token. Some Android / Google Play
- * Services states can nevertheless report that no native credential is
- * available even though Google OAuth itself is usable. In that case Harmony
- * falls back to Supabase browser OAuth instead of leaving the Google button
- * dead. A stale [16] re-auth state is cleared and retried once first.
+ * Google receives only SHA-256(rawNonce). Supabase receives the Google ID
+ * token together with the original raw nonce and keeps nonce validation on.
+ * Browser OAuth is intentionally not used as a fallback for the Google button.
  */
 suspend fun performHarmonyGoogleSignIn(context: Context): GoogleSignInOutcome {
     val activity = context.findActivity()
         ?: throw IllegalStateException("Activity Context nicht gefunden")
-    val credentialManager = CredentialManager.create(context)
-    return performResilientGoogleSignIn(
+    return performNativeGoogleSignIn(
         activity = activity,
-        credentialManager = credentialManager
+        credentialManager = CredentialManager.create(context)
     )
 }
 
-private suspend fun performResilientGoogleSignIn(
+private suspend fun performNativeGoogleSignIn(
     activity: Activity,
     credentialManager: CredentialManager,
     retryAfterCredentialReset: Boolean = true
 ): GoogleSignInOutcome {
     return try {
-        val googleSignInOption = GetSignInWithGoogleOption.Builder(
-            serverClientId = SupabaseConfig.GOOGLE_WEB_CLIENT_ID
-        ).build()
-
+        val rawNonce = GoogleNativeAuthConfig.generateRawNonce()
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setServerClientId(GoogleNativeAuthConfig.WEB_CLIENT_ID)
+            .setNonce(GoogleNativeAuthConfig.sha256Hex(rawNonce))
+            .build()
         val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleSignInOption)
+            .addCredentialOption(googleIdOption)
             .build()
 
         val result = credentialManager.getCredential(
             context = activity,
             request = request
         )
-
         val credential = result.credential
         if (credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             throw IllegalStateException("Unerwarteter Anmeldetyp: ${credential.type}")
         }
 
-        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+        val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
         SupabaseConfig.client.auth.signInWith(IDToken) {
-            idToken = googleIdTokenCredential.idToken
+            idToken = googleCredential.idToken
             provider = Google
+            nonce = rawNonce
         }
         GoogleSignInOutcome.SESSION_CREATED
     } catch (exception: Exception) {
         val accountReauthFailure = isGoogleAccountReauthFailure(exception)
-
         if (accountReauthFailure && retryAfterCredentialReset) {
-            try {
+            runCatching {
                 credentialManager.clearCredentialState(ClearCredentialStateRequest())
-            } catch (clearError: Exception) {
+            }.onFailure { clearError ->
                 Log.w(
                     "HarmonyGoogleAuth",
-                    "Google credential state could not be cleared before retry",
+                    "Google credential state could not be cleared before native retry",
                     clearError
                 )
             }
-            return performResilientGoogleSignIn(
+            return performNativeGoogleSignIn(
                 activity = activity,
                 credentialManager = credentialManager,
                 retryAfterCredentialReset = false
             )
         }
 
-        if (accountReauthFailure) {
-            Log.w(
-                "HarmonyGoogleAuth",
-                "Google native sign-in still reports [16] Account reauth failed; using OAuth fallback",
-                exception
-            )
-            return startGoogleOAuthFallback()
-        }
-
-        if (exception is androidx.credentials.exceptions.GetCredentialCancellationException) {
+        if (exception is GetCredentialCancellationException) {
             throw exception
         }
 
-        Log.w(
+        Log.e(
             "HarmonyGoogleAuth",
-            "Native Google credential failed (possibly SHA-1 mismatch or unavailable); using OAuth fallback",
+            "Native Google sign-in failed; browser OAuth fallback is disabled",
             exception
         )
-        return startGoogleOAuthFallback()
+        throw exception
     }
-}
-
-private suspend fun startGoogleOAuthFallback(): GoogleSignInOutcome {
-    SupabaseConfig.client.auth.signInWith(Google)
-    return GoogleSignInOutcome.OAUTH_REDIRECT_STARTED
 }
 
 private fun isGoogleAccountReauthFailure(error: Throwable): Boolean {

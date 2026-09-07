@@ -12,7 +12,7 @@ class CiSigningIdentityContractTest {
         val workflow = source(".github/workflows/android-apk-build.yml")
 
         assertTrue(workflow.contains("HARMONY_CI_DEBUG_KEYSTORE_B64"))
-        assertTrue(workflow.contains("73:85:7C:7D:A2:C1:0A:29:79:14:6C:20:15:0C:AE:4E:7A:77:B3:92"))
+        assertTrue(workflow.contains("63:9B:57:CF:60:DE:AC:0C:55:21:FB:9E:DD:79:93:44:4F:F1:3C:6F"))
         assertTrue(workflow.contains("Restore stable Harmony CI signing key"))
         assertTrue(workflow.contains("Verify installable APK signing certificate"))
         assertTrue(workflow.contains("if: github.event_name != 'pull_request'"))

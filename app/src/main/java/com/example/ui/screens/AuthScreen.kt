@@ -65,7 +65,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.SupabaseConfig
-import com.example.ui.auth.GoogleSignInOutcome
 import com.example.ui.auth.performHarmonyGoogleSignIn
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
@@ -404,13 +403,8 @@ fun AuthScreen(
                             }
                             isLoading = false
                             if (res.isSuccess) {
-                                when (res.getOrThrow()) {
-                                    GoogleSignInOutcome.SESSION_CREATED -> onAuthSuccess()
-                                    GoogleSignInOutcome.OAUTH_REDIRECT_STARTED -> {
-                                        successMessage =
-                                            "Google-Anmeldung wurde geöffnet. Bitte schließe sie dort ab."
-                                    }
-                                }
+                                res.getOrThrow()
+                                onAuthSuccess()
                             } else {
                                 errorMessage = res.exceptionOrNull()?.message
                                     ?: "Google-Anmeldung konnte nicht gestartet werden."
