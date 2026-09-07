@@ -84,6 +84,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.data.LinkEngine
 import com.example.data.model.ProfileEntity
+import com.example.data.model.AnswerEntity
 import com.example.data.model.LoveBalanceQuestionPolicy
 import com.example.data.model.QuestionInteractionPolicy
 import com.example.data.model.QuestionPack
@@ -579,6 +580,7 @@ private fun CinematicSandMaterialize(
 fun QuizRunnerScreen(
     activeRun: ActivePackRun,
     profile: ProfileEntity,
+    answerHistory: List<AnswerEntity> = emptyList(),
     isExitConfirmOpen: Boolean,
     isOwnAnswerDialogOpen: Boolean,
     appLanguage: String,
@@ -1032,6 +1034,9 @@ fun QuizRunnerScreen(
                         if (fullscreenMechanic != null && q != null) {
                             FullscreenQuestionMechanicBoard(
                                 kind = fullscreenMechanic,
+                                packId = pack.id,
+                                questionIndex = activeRun.currentIndex,
+                                historicalAnswers = answerHistory,
                                 question = q.q,
                                 options = q.options,
                                 selectedAnswer = selectedAns,
