@@ -11,6 +11,7 @@ class HeartOrHeadAssetContractTest {
         val expected = listOf(
             "heart_head_panda_atlas_01",
             "heart_head_panda_atlas_02",
+            "heart_head_panda_atlas_03",
             "heart_head_final_heart",
             "heart_head_final_head",
             "heart_head_final_gut",
