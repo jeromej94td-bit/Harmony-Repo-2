@@ -176,26 +176,49 @@ internal fun RestaurantChoiceVisualGrid(
                             .weight(1f)
                             .fillMaxSize()
                     ) {
-                        AnimatedVisibility(
+                        RestaurantChoiceAnimatedTile(
                             visible = revealed,
-                            enter = fadeIn(animationSpec = tween(180)) +
-                                scaleIn(initialScale = 0.94f, animationSpec = tween(220)),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            RestaurantChoiceVisualTile(
-                                item = item,
-                                visual = visual,
-                                selected = selectedRaw == item.raw,
-                                enabled = revealed && !inputLocked,
-                                onClick = { onSelect(item) },
-                                modifier = Modifier.fillMaxSize(),
-                                testTag = "restaurant_visual_card_$index"
-                            )
-                        }
+                            item = item,
+                            visual = visual,
+                            selected = selectedRaw == item.raw,
+                            enabled = revealed && !inputLocked,
+                            onClick = { onSelect(item) },
+                            modifier = Modifier.fillMaxSize(),
+                            testTag = "restaurant_visual_card_$index"
+                        )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RestaurantChoiceAnimatedTile(
+    visible: Boolean,
+    item: MechanicOption,
+    visual: RestaurantChoiceVisualCard,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    testTag: String
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(180)) +
+            scaleIn(initialScale = 0.94f, animationSpec = tween(220)),
+        modifier = modifier
+    ) {
+        RestaurantChoiceVisualTile(
+            item = item,
+            visual = visual,
+            selected = selected,
+            enabled = enabled,
+            onClick = onClick,
+            modifier = Modifier.fillMaxSize(),
+            testTag = testTag
+        )
     }
 }
 
