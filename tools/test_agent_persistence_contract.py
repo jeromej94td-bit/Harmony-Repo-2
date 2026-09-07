@@ -20,6 +20,7 @@ def main() -> None:
     script = read("scripts/agent_persistence.ps1")
     read(".github/workflows/agent-persistence-gate.yml")
     automerge = read(".github/workflows/agent-verified-automerge.yml")
+    main_verify = read(".github/workflows/android-main-verify.yml")
 
     require(agents, ".agents/skills/repo-install-persistence/SKILL.md", "AGENTS.md")
     require(agents, "Local-only fixes are not completion.", "AGENTS.md")
@@ -46,10 +47,19 @@ def main() -> None:
         "merge_method: 'squash'",
         "actions: write",
         "createWorkflowDispatch",
-        "workflow_id: 'android-apk-build.yml'",
+        "workflow_id: 'android-main-verify.yml'",
         "ref: 'main'",
     ):
         require(automerge, needle, ".github/workflows/agent-verified-automerge.yml")
+
+    for needle in (
+        "workflow_dispatch",
+        "keytool -genkeypair",
+        "gradle :app:assembleDebug",
+    ):
+        require(main_verify, needle, ".github/workflows/android-main-verify.yml")
+    assert "secrets." not in main_verify, "main verification must not require signing secrets"
+    assert "upload-artifact" not in main_verify, "main verification must not publish an installable APK"
 
     print("Agent persistence contract: OK")
 
