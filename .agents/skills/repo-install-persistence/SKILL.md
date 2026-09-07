@@ -9,7 +9,7 @@ description: Use when Harmony Repo-2 work mentions installation, update, APK, AD
 
 **Local-only fixes are not completion.** The durable product state is GitHub `main`, not a working tree, worktree, local commit, APK, patch, or phone installation.
 
-Repository: `jeromej94td-bit/Harmony-Repo-2`  
+Repository: `jeromej94td-bit/Harmony-Repo-2`
 Package: `com.aistudio.harmony.couples.xqvz`
 
 ## Mandatory flow
