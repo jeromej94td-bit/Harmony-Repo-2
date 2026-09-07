@@ -11,6 +11,7 @@ Repo-specific workflows must be kept as separate skills so new rules can be adde
 
 ## Available Repo Skills
 
+- `repo-install-persistence` — mandatory for Harmony Repo-2 install/update/APK/ADB/build/debug/test/fix/PR work where an agent change could otherwise remain only local.
 - `repo-sorting` — use for verschieben, sortieren, umsortieren, einsortieren, Kategorie ändern, or moving games/questions/packs between visible Harmony areas.
 - `video-repo-skill` — **Video Repo Skill**; use for adding, replacing, wiring, debugging, or changing Harmony intro videos, fullscreen videos, video assets, or video-triggered experience flows.
 

@@ -6,6 +6,18 @@ Repository-specific reusable workflows are indexed in:
 
 `.agents/skills/repo-skills/SKILL.md`
 
+## Persistent repo/install workflow is mandatory
+
+When a user mentions Harmony, Harmony Repo-2, repository work, `main`, an APK, ADB, installation/update, debugging, testing, building, fixing, pushing, or a PR in connection with this app, you MUST read and follow:
+
+`.agents/skills/repo-install-persistence/SKILL.md`
+
+**Local-only fixes are not completion.** A code or test fix discovered while debugging/building/installing is not finished while it exists only in a working tree, worktree, APK, patch, or local commit.
+
+The user has granted standing authorization for agent-created fixes that were successfully relevant-tested and, when applicable, successfully installed/launch-checked: create/update the PR, merge it into `main` without asking again, verify the merge on remote `main`, and use the merged `main` as the durable source of truth.
+
+Never report repository/install work as complete until every intended agent change is either on `main` or explicitly reported as blocked. Never commit secrets, `.env`, signing keys/keystores, local SDK configuration, generated APKs, or unrelated local files.
+
 ## Sorting and reclassification
 
 When a user asks to **verschieben**, **sortieren**, **umsortieren**, **einsortieren**, move a game/question/pack to another category, or reorganize visible Harmony areas, you MUST read and follow:
