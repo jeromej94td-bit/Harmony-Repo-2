@@ -1,6 +1,26 @@
 package com.example.data.model
 
 /** Additional non-image packs that extend Harmony without touching existing visual Das-oder-Das content. */
+object SecretPlanCatalog {
+    const val PACK_ID = "geheimer_plan"
+    const val CUSTOM_OPTION = "Eigene Idee …"
+
+    val CHAPTERS = listOf(
+        Question(
+            "Wofür nehmt ihr euch spontan einen freien Tag?",
+            listOf("Kleiner Roadtrip", "Zeit nur für uns", "Etwas Neues erleben", "Ein Herzensprojekt starten", CUSTOM_OPTION)
+        ),
+        Question(
+            "Welche Überraschung würde euch wirklich freuen?",
+            listOf("Ein geplanter Abend", "Ein spontaner Ausflug", "Eine persönliche Geste", "Ein gemeinsames Upgrade", CUSTOM_OPTION)
+        ),
+        Question(
+            "Welche gemeinsame Idee sollte endlich passieren?",
+            listOf("Unser nächster Kurztrip", "Ein neues Ritual", "Ein Projekt zu zweit", "Ein mutiger erster Schritt", CUSTOM_OPTION)
+        )
+    )
+}
+
 object HarmonyExpansionPacks {
     val PACKS: List<QuestionPack> = listOf(
         QuestionPack(
@@ -145,6 +165,16 @@ object HarmonyExpansionPacks {
                 Question("Wem fällt es am schwersten loszulassen, wenn die Kinder erwachsen sind?", listOf("{user}", "{partner}", "Beide", "Keiner")),
                 Question("Wer ist wohl eher derjenige, der den Kindern das Autofahren beibringt?", listOf("{user}", "{partner}", "Beide", "Keiner"))
             )
+        ),
+        QuestionPack(
+            id = SecretPlanCatalog.PACK_ID,
+            title = "Der geheime Plan",
+            tags = listOf("zukunft", "planung", "geheime-wahl", "mechanik_geheime_wahl"),
+            cat = "reden",
+            topic = "beziehung",
+            type = "quiz",
+            emoji = "🗺️",
+            questions = SecretPlanCatalog.CHAPTERS
         )
     )
 }
