@@ -13,6 +13,14 @@ internal fun sessionErrorCopy(rawReason: String?): String {
             "Bitte melde dich erneut mit deinem Harmony-Konto an."
         "couple_disconnect_failed" in reason ->
             "Die Partner-Verbindung konnte vor dem Löschen nicht sauber getrennt werden."
+        "avatar_invalid_type" in reason ->
+            "Bitte wähle ein JPG-, PNG- oder WebP-Profilbild."
+        "avatar_too_large" in reason ->
+            "Dein Profilbild darf höchstens 5 MB groß sein."
+        "avatar_unreadable" in reason || "avatar_empty" in reason ->
+            "Das Profilbild konnte nicht gelesen werden. Bitte wähle ein anderes Bild."
+        "avatar_storage" in reason || "avatar_sign_failed" in reason ->
+            "Dein Profilbild konnte gerade nicht gespeichert werden. Bitte versuche es erneut."
         "avatar_cleanup_failed" in reason || "account_deletion_failed" in reason ->
             "Dein Konto konnte gerade nicht gelöscht werden. Bitte versuche es erneut."
         "server_not_configured" in reason ->

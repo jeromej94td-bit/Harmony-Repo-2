@@ -209,7 +209,7 @@ fun HarmonyApp(
     val isDemoMode = sessionState.phase == com.example.ui.session.SessionPhase.DEMO
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val displayProfile = appSession.questionDisplayProfile(uiState.profile)
+    val displayProfile = appSession.questionDisplayProfile(uiState.profile, useLocalAvatarFallback = isDemoMode)
 
     LaunchedEffect(sessionState.phase, appSession.userId) {
         when (sessionState.phase) {
@@ -604,7 +604,13 @@ fun HarmonyApp(
                         onOpenEditProfile = { viewModel.openEditProfile() },
                         onCloseEditProfile = { viewModel.closeEditProfile() },
                         onSaveEditProfile = { u, p, s -> viewModel.saveEditProfile(u, p, s) },
-                        onUpdateAvatar = { uri, isUser -> viewModel.updateProfileAvatar(uri, isUser) },
+                        onUpdateAvatar = { uri, isUser ->
+                            if (isDemoMode) {
+                                viewModel.updateProfileAvatar(uri, isUser)
+                            } else if (isUser) {
+                                sessionViewModel.updateProfileAvatar(uri)
+                            }
+                        },
                         onOpenDevStudio = { viewModel.selectTab(5) },
                         onOpenPartnerConnection = {
                             viewModel.closeProfileSheet()
