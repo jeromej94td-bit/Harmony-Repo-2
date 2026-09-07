@@ -673,6 +673,7 @@ fun HarmonyApp(
                     QuizRunnerScreen(
                         activeRun = activeRun,
                         profile = displayProfile,
+                        answerHistory = uiState.answers,
                         isExitConfirmOpen = uiState.isExitConfirmOpen,
                         isOwnAnswerDialogOpen = uiState.isOwnAnswerDialogOpen,
                         appLanguage = uiState.appLanguage,

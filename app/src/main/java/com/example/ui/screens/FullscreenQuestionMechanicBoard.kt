@@ -2,9 +2,11 @@ package com.example.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.data.model.AnswerEntity
 import com.example.data.model.FullscreenGameMechanicKind
 import com.example.data.model.ProfileEntity
 import com.example.data.model.QuestionInteractionKind
+import com.example.data.model.WeekendEchoSelector
 
 /**
  * Single rendering entry point for question mechanics that own the complete interaction surface.
@@ -14,6 +16,9 @@ import com.example.data.model.QuestionInteractionKind
 @Composable
 internal fun FullscreenQuestionMechanicBoard(
     kind: FullscreenGameMechanicKind,
+    packId: String = "",
+    questionIndex: Int = 0,
+    historicalAnswers: List<AnswerEntity> = emptyList(),
     question: String,
     options: List<String>,
     selectedAnswer: String?,
@@ -88,14 +93,29 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.SCENARIO -> ScenarioAdventureBoard(
-            question = question,
-            options = options,
-            selectedAnswer = selectedAnswer,
-            profile = profile,
-            onPick = onPick,
-            modifier = modifier
-        )
+        FullscreenGameMechanicKind.SCENARIO -> {
+            if (packId == WeekendEchoSelector.PACK_ID) {
+                WeekendEchoBoard(
+                    question = question,
+                    options = options,
+                    questionIndex = questionIndex,
+                    historicalAnswers = historicalAnswers,
+                    selectedAnswer = selectedAnswer,
+                    profile = profile,
+                    onPick = onPick,
+                    modifier = modifier
+                )
+            } else {
+                ScenarioAdventureBoard(
+                    question = question,
+                    options = options,
+                    selectedAnswer = selectedAnswer,
+                    profile = profile,
+                    onPick = onPick,
+                    modifier = modifier
+                )
+            }
+        }
 
         FullscreenGameMechanicKind.PRIORITY_POKER -> DirectPriorityPokerBoard(
             question = question,
