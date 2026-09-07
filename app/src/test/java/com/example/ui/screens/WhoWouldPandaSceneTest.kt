@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -33,10 +32,10 @@ class WhoWouldPandaSceneTest {
             }
         }
 
-        composeTestRule.onNodeWithTag("panda_question_scene_bedtime_routine").assertExists()
-        composeTestRule.onNodeWithTag("who_user").assertExists()
-        composeTestRule.onNodeWithTag("who_partner").assertExists()
-        composeTestRule.onNodeWithText("Jerome").assertExists()
-        composeTestRule.onNodeWithText("Alex").assertExists()
+        composeTestRule.onNodeWithTag("panda_question_scene_bedtime_routine").fetchSemanticsNode()
+        composeTestRule.onNodeWithTag("who_user").fetchSemanticsNode()
+        composeTestRule.onNodeWithTag("who_partner").fetchSemanticsNode()
+        composeTestRule.onNodeWithText("Jerome").fetchSemanticsNode()
+        composeTestRule.onNodeWithText("Alex").fetchSemanticsNode()
     }
 }
