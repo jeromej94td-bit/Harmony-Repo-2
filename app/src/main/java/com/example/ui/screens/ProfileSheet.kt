@@ -108,8 +108,11 @@ fun ProfileSheet(
         if (isDemoMode) uri?.let { onUpdateAvatar(it, false) }
     }
 
-    val userAvatarModel: Any? = profile.userAvatarPath?.let(::File)
-        ?: if (!isDemoMode) session.profile.avatarUrl else null
+    val userAvatarModel: Any? = if (isDemoMode) {
+        profile.userAvatarPath?.let(::File)
+    } else {
+        session.profile.avatarUrl
+    }
     val partnerAvatarModel: Any? = if (isDemoMode) {
         profile.partnerAvatarPath?.let(::File)
     } else {

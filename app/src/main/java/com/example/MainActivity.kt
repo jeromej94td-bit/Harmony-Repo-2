@@ -209,7 +209,7 @@ fun HarmonyApp(
     val isDemoMode = sessionState.phase == com.example.ui.session.SessionPhase.DEMO
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val displayProfile = appSession.questionDisplayProfile(uiState.profile)
+    val displayProfile = appSession.questionDisplayProfile(uiState.profile, useLocalAvatarFallback = isDemoMode)
 
     LaunchedEffect(sessionState.phase, appSession.userId) {
         when (sessionState.phase) {
