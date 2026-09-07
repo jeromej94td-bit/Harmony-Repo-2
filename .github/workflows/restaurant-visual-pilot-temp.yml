@@ -66,6 +66,12 @@ jobs:
               'Preis passt nicht',
               'RestaurantChoiceVisualThumbnail',
               'R.drawable.restaurant_revisit_visual_atlas',
+              'LaunchedEffect',
+              'delay(',
+              'revealedCount',
+              'inputLocked',
+              'AnimatedVisibility',
+              'enabled = revealed && !inputLocked',
           ]
           for token in required_visual:
               assert token in visual, token
