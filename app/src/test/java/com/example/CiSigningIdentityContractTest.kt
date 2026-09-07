@@ -18,6 +18,8 @@ class CiSigningIdentityContractTest {
         assertTrue(workflow.contains("APKSIGNER_OUTPUT="))
         assertTrue(workflow.contains("2>&1"))
         assertTrue(workflow.contains("certificate SHA-1 digest:"))
+        assertTrue(workflow.contains("print \$NF; exit"))
+        assertFalse(workflow.contains("print \$2; exit"))
         assertFalse(workflow.contains("sed -n 's/^Signer #1 certificate SHA-1 digest: //p'"))
         assertTrue(workflow.contains("if: github.event_name != 'pull_request'"))
         assertFalse(workflow.contains("if [ ! -f debug.keystore ]"))

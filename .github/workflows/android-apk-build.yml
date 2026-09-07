@@ -111,7 +111,7 @@ jobs:
           printf '%s\n' "$APKSIGNER_OUTPUT"
 
           ACTUAL_APK_SHA1="$(printf '%s\n' "$APKSIGNER_OUTPUT" \
-            | awk -F': ' '/certificate SHA-1 digest:/ { print $2; exit }' \
+            | awk -F': ' '/certificate SHA-1 digest:/ { print $NF; exit }' \
             | tr '[:lower:]' '[:upper:]' \
             | tr -d '[:space:]:' \
             | sed 's/../&:/g;s/:$//')"
