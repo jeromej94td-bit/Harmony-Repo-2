@@ -5,16 +5,17 @@ import java.util.Locale
 enum class WeekendEchoMotif(
     val key: String,
     val displayText: String,
+    val symbol: String,
     internal val chapterWeights: List<Int>
 ) {
-    COUCH_BLANKET("couch_blanket", "Couch & Decke", listOf(1, 2, 1, 10, 8, 4, 9, 6)),
-    CINEMA("cinema", "Kino", listOf(4, 4, 3, 9, 4, 7, 5, 5)),
-    CITY("city", "Stadt", listOf(10, 7, 5, 6, 5, 7, 4, 6)),
-    COUNTRY("country", "Land", listOf(10, 6, 6, 7, 6, 5, 6, 7)),
-    ROADTRIP("roadtrip", "Roadtrip", listOf(8, 8, 5, 7, 7, 6, 8, 8)),
-    TRAIN("train", "Zug", listOf(6, 5, 8, 6, 6, 5, 10, 5)),
-    CAMPING("camping", "Camping", listOf(5, 8, 10, 6, 5, 4, 5, 9)),
-    HOTEL("hotel", "5-Sterne-Hotel", listOf(6, 8, 10, 9, 8, 5, 8, 7));
+    COUCH_BLANKET("couch_blanket", "Couch & Decke", "🛋️", listOf(1, 2, 1, 10, 8, 4, 9, 6)),
+    CINEMA("cinema", "Kino", "🎬", listOf(4, 4, 3, 9, 4, 7, 5, 5)),
+    CITY("city", "Stadt", "🌆", listOf(10, 7, 5, 6, 5, 7, 4, 6)),
+    COUNTRY("country", "Land", "🌳", listOf(10, 6, 6, 7, 6, 5, 6, 7)),
+    ROADTRIP("roadtrip", "Roadtrip", "🚗", listOf(8, 8, 5, 7, 7, 6, 8, 8)),
+    TRAIN("train", "Zug", "🚆", listOf(6, 5, 8, 6, 6, 5, 10, 5)),
+    CAMPING("camping", "Camping", "⛺", listOf(5, 8, 10, 6, 5, 4, 5, 9)),
+    HOTEL("hotel", "5-Sterne-Hotel", "🏨", listOf(6, 8, 10, 9, 8, 5, 8, 7));
 
     companion object {
         private val normalizedCatalog = entries.associateBy { normalize(it.displayText) }
