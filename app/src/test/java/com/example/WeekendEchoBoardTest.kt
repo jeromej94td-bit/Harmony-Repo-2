@@ -55,6 +55,25 @@ class WeekendEchoBoardTest {
     }
 
     @Test
+    fun `missing personal history returns to the standard scenario adventure`() {
+        composeRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                WeekendEchoBoard(
+                    question = "Dauerregen zerstört euren Plan. Was macht ihr?",
+                    options = listOf("Wir improvisieren", "Wir bleiben drin"),
+                    questionIndex = 3,
+                    historicalAnswers = emptyList(),
+                    selectedAnswer = null,
+                    profile = ProfileEntity(userName = "Jerome", partnerName = "Alex"),
+                    onPick = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("scenario_adventure_intro").assertExists()
+    }
+
+    @Test
     fun `both private choices stay hidden until explicit reveal`() {
         setBoard()
 

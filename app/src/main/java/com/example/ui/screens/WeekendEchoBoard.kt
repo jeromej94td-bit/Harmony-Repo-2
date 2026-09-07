@@ -56,7 +56,7 @@ internal fun WeekendEchoBoard(
         WeekendEchoSelector.select(historicalAnswers, questionIndex)
     }
     if (duel == null) {
-        ScenarioBoard(
+        ScenarioAdventureBoard(
             question = question,
             options = options,
             selectedAnswer = selectedAnswer,

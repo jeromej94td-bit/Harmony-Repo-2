@@ -26,6 +26,20 @@ internal fun FullscreenQuestionMechanicBoard(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind == FullscreenGameMechanicKind.SCENARIO && packId == WeekendEchoSelector.PACK_ID) {
+        WeekendEchoBoard(
+            question = question,
+            options = options,
+            questionIndex = questionIndex,
+            historicalAnswers = historicalAnswers,
+            selectedAnswer = selectedAnswer,
+            profile = profile,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     when (kind) {
         FullscreenGameMechanicKind.RANK_ORDER -> QuestionInteractionBoard(
             kind = QuestionInteractionKind.RANK_ORDER,
@@ -93,29 +107,14 @@ internal fun FullscreenQuestionMechanicBoard(
             modifier = modifier
         )
 
-        FullscreenGameMechanicKind.SCENARIO -> {
-            if (packId == WeekendEchoSelector.PACK_ID) {
-                WeekendEchoBoard(
-                    question = question,
-                    options = options,
-                    questionIndex = questionIndex,
-                    historicalAnswers = historicalAnswers,
-                    selectedAnswer = selectedAnswer,
-                    profile = profile,
-                    onPick = onPick,
-                    modifier = modifier
-                )
-            } else {
-                ScenarioAdventureBoard(
-                    question = question,
-                    options = options,
-                    selectedAnswer = selectedAnswer,
-                    profile = profile,
-                    onPick = onPick,
-                    modifier = modifier
-                )
-            }
-        }
+        FullscreenGameMechanicKind.SCENARIO -> ScenarioAdventureBoard(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            profile = profile,
+            onPick = onPick,
+            modifier = modifier
+        )
 
         FullscreenGameMechanicKind.PRIORITY_POKER -> DirectPriorityPokerBoard(
             question = question,

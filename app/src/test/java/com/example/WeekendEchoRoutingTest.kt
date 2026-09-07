@@ -41,10 +41,10 @@ class WeekendEchoRoutingTest {
     }
 
     @Test
-    fun `another scenario pack keeps the established scenario board`() {
+    fun `another scenario pack keeps the established adventure intro`() {
         setScenario("another_scenario")
 
-        composeRule.onNodeWithTag("scenario_board").assertExists()
+        composeRule.onNodeWithTag("scenario_adventure_intro").assertExists()
     }
 
     private fun setScenario(packId: String) {
