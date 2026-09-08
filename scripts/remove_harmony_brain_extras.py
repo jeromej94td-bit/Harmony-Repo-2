@@ -100,19 +100,28 @@ games = remove_composable_function(games, "fun GeneratedGameCard(")
 write(games_rel, games)
 
 
-# Remove the Brain-only rich suggestion renderer from the shared voice file.
+# BrainSuggestionCard is the final, Brain-only block in VoiceComponents. Cutting from its
+# documentation marker to EOF is safer than trying to parse nested lambdas/strings inside it.
 voice_rel = "app/src/main/java/com/example/ui/components/VoiceComponents.kt"
 voice = read(voice_rel)
 voice = re.sub(r"^import com\.example\.data\.model\.BrainChatSuggestionItem\n", "", voice, flags=re.M)
-voice = remove_composable_function(voice, "fun BrainSuggestionCard(")
+card_marker = "\n/**\n * Rich Suggestion Card with Image URL, Title, Description, and Actions"
+card_pos = voice.find(card_marker)
+if card_pos >= 0:
+    voice = voice[:card_pos].rstrip() + "\n"
+else:
+    voice = remove_composable_function(voice, "fun BrainSuggestionCard(")
 write(voice_rel, voice)
 
 
-# Tests that exclusively target deleted generated-Brain APIs cannot remain active.
+# Tests that exclusively target deleted generated-Brain APIs cannot remain active. The permanent
+# negative regression contract is deliberately preserved even though it names forbidden symbols.
 for root in [TEST, ANDROID_TEST]:
     if not root.exists():
         continue
     for test_file in list(root.rglob("*.kt")):
+        if test_file.name == "ProductionHarmonyBrainRemovalContractTest.kt":
+            continue
         body = test_file.read_text(encoding="utf-8")
         if any(symbol in body for symbol in [
             "GeminiGameGenerator",
