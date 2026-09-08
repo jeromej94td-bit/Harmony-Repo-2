@@ -45,7 +45,7 @@ googleid = "1.2.0"
 secretsGradlePlugin = "2.0.1"
 supabase = "3.0.0"
 ktor = "3.0.0"
-sceneView = "4.33.0"
+sceneView = "4.18.0"
 
 
 [libraries]
