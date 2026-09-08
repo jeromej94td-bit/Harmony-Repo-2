@@ -18,7 +18,9 @@ class ProductionHarmonyBrainRemovalContractTest {
             "com/example/data/brain",
             "com/example/data/HarmonyBrainEngine.kt",
             "com/example/data/SupabaseBrainGateway.kt",
-            "com/example/data/GeminiBrainGateway.kt"
+            "com/example/data/GeminiBrainGateway.kt",
+            "com/example/util/GeminiGameGenerator.kt",
+            "com/example/notifications/HarmonyGameNotifier.kt"
         )
         val existingForbiddenPaths = forbiddenPaths
             .map { File(root, it) }
@@ -37,6 +39,7 @@ class ProductionHarmonyBrainRemovalContractTest {
             "SupabaseBrain",
             "SupabaseHarmonyBrainGateway",
             "ForegroundGameGenerator",
+            "GeminiGameGenerator",
             "HARMONY_BRAIN_ENABLED",
             "brainEnabled",
             "brainInterests",
@@ -45,6 +48,17 @@ class ProductionHarmonyBrainRemovalContractTest {
             "brainMessages",
             "isBrainChatMode",
             "isBrainGenerating",
+            "brainRoomDao",
+            "recordBrain",
+            "BrainChatSuggestion",
+            "BrainGeneratedContentEntity",
+            "GeneratedGamePayload",
+            "GeneratedGameCard",
+            "generatedGames",
+            "onStartGeneratedGame",
+            "HarmonyGameNotifier",
+            "generated_game_id",
+            "harmony_generated_games",
             "com.example.data.brain"
         )
 
