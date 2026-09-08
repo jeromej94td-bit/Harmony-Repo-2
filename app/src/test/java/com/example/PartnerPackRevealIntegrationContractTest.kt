@@ -7,7 +7,7 @@ import org.junit.Test
 class PartnerPackRevealIntegrationContractTest {
     @Test
     fun `pilot migration enforces full pack completion before partner answers can be returned`() {
-        val migration = source("supabase/migrations/20260908181500_partner_pack_reveal_pilot.sql")
+        val migration = source("supabase/migrations/20260908182024_partner_pack_reveal_pilot.sql")
         assertTrue(migration.contains("'aufwaermen1', 'Einander kennenlernen', 10"))
         assertTrue(migration.contains("create or replace function public.complete_partner_pack"))
         assertTrue(migration.contains("create or replace function public.get_partner_pack_results"))
