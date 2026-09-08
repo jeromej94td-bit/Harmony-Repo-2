@@ -1,4 +1,4 @@
-package com.example.ui.screens
+﻿package com.example.ui.screens
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -39,12 +37,12 @@ import com.example.ui.theme.HarmonyPurple
 import com.example.ui.theme.HarmonySurface2
 import com.example.ui.theme.HarmonyText
 
-/**
- * Flexible product-card presentation for reusable image duels.
- *
- * Unlike the cinematic location board, the card row consumes the remaining vertical space. This
- * preserves the original proposal ring proportions across different screen heights.
- */
+internal enum class ExperienceProductImageDuelLayout {
+    SIDE_BY_SIDE,
+    WIDE_STACKED
+}
+
+/** Flexible product-card presentation for reusable image duels. */
 @Composable
 internal fun ExperienceProductImageDuelBoard(
     round: ExperienceImageDuelRound,
@@ -54,7 +52,8 @@ internal fun ExperienceProductImageDuelBoard(
     modifier: Modifier = Modifier,
     kicker: String = "✦  BILD-DUELL",
     rootTestTag: String = "experience_product_image_duel",
-    testTagPrefix: String = "experience_product_image_duel"
+    testTagPrefix: String = "experience_product_image_duel",
+    layout: ExperienceProductImageDuelLayout = ExperienceProductImageDuelLayout.SIDE_BY_SIDE
 ) {
     Column(
         modifier = modifier.testTag(rootTestTag),
@@ -71,26 +70,51 @@ internal fun ExperienceProductImageDuelBoard(
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(18.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ExperienceProductImageDuelCard(
-                option = round.firstOption,
-                imageRes = imageResolver(round.firstOption.imageKey),
-                selected = selectedOptionId == round.firstOption.id,
-                onClick = { onPick(round.firstOption) },
-                modifier = Modifier.weight(1f).fillMaxSize(),
-                testTag = "${testTagPrefix}_first"
-            )
-            ExperienceProductImageDuelCard(
-                option = round.secondOption,
-                imageRes = imageResolver(round.secondOption.imageKey),
-                selected = selectedOptionId == round.secondOption.id,
-                onClick = { onPick(round.secondOption) },
-                modifier = Modifier.weight(1f).fillMaxSize(),
-                testTag = "${testTagPrefix}_second"
-            )
+
+        when (layout) {
+            ExperienceProductImageDuelLayout.SIDE_BY_SIDE -> Row(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExperienceProductImageDuelCard(
+                    option = round.firstOption,
+                    imageRes = imageResolver(round.firstOption.imageKey),
+                    selected = selectedOptionId == round.firstOption.id,
+                    onClick = { onPick(round.firstOption) },
+                    modifier = Modifier.weight(1f).fillMaxSize(),
+                    testTag = "${testTagPrefix}_first"
+                )
+                ExperienceProductImageDuelCard(
+                    option = round.secondOption,
+                    imageRes = imageResolver(round.secondOption.imageKey),
+                    selected = selectedOptionId == round.secondOption.id,
+                    onClick = { onPick(round.secondOption) },
+                    modifier = Modifier.weight(1f).fillMaxSize(),
+                    testTag = "${testTagPrefix}_second"
+                )
+            }
+
+            ExperienceProductImageDuelLayout.WIDE_STACKED -> Column(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExperienceProductImageDuelCard(
+                    option = round.firstOption,
+                    imageRes = imageResolver(round.firstOption.imageKey),
+                    selected = selectedOptionId == round.firstOption.id,
+                    onClick = { onPick(round.firstOption) },
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    testTag = "${testTagPrefix}_first"
+                )
+                ExperienceProductImageDuelCard(
+                    option = round.secondOption,
+                    imageRes = imageResolver(round.secondOption.imageKey),
+                    selected = selectedOptionId == round.secondOption.id,
+                    onClick = { onPick(round.secondOption) },
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    testTag = "${testTagPrefix}_second"
+                )
+            }
         }
     }
 }
@@ -138,7 +162,7 @@ private fun ExperienceProductImageDuelCard(
                 Text("💍", fontSize = 64.sp)
             }
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
             option.label,
             color = HarmonyText,
@@ -146,7 +170,7 @@ private fun ExperienceProductImageDuelCard(
             lineHeight = 19.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
         )
     }
 }

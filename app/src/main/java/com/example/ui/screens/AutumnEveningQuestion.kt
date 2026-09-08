@@ -131,6 +131,7 @@ internal fun AutumnEveningQuestion(
     modifier: Modifier = Modifier
 ) {
     val visuals = autumnEveningVisuals(kind)
+    val imageShadeAlpha = if (kind == HarmonyImageChoiceKind.AUTUMN_STORY) 0.14f else 0.32f
     check(options.size == visuals.images.size) {
         "Autumn evening rounds require exactly ${visuals.images.size} options, found ${options.size}"
     }
@@ -205,6 +206,7 @@ internal fun AutumnEveningQuestion(
                         question = contentText(question),
                         option = contentText(option),
                         imageRes = visuals.images[index],
+                        imageShadeAlpha = imageShadeAlpha,
                         selected = selectedAnswer == option,
                         onClick = { onPick(option) },
                         modifier = Modifier.weight(1f)
@@ -223,6 +225,7 @@ private fun AutumnEveningCard(
     question: String,
     option: String,
     @DrawableRes imageRes: Int,
+    imageShadeAlpha: Float,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -293,7 +296,7 @@ private fun AutumnEveningCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color.Transparent, AutumnBlackberry.copy(alpha = 0.32f))
+                            listOf(Color.Transparent, AutumnBlackberry.copy(alpha = imageShadeAlpha))
                         )
                     )
             )
