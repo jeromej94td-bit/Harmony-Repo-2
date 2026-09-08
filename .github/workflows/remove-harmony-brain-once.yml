@@ -6,6 +6,7 @@ on:
       - fix/remove-harmony-brain-completely
     paths:
       - scripts/remove_harmony_brain_feature.py
+      - scripts/remove_harmony_brain_extras.py
       - .github/workflows/remove-harmony-brain-once.yml
 
 permissions:
@@ -54,123 +55,11 @@ jobs:
           if old not in text:
               raise SystemExit("Expected Home removal rule not found")
           text = text.replace(old, new, 1)
-
           marker = "# 9) Final source guard. Only legacy DROP TABLE tombstones may retain brain_* identifiers."
+          hook = '''# 8b) Execute the hidden-path cleanup pass in the same migration context.\nexec(compile((ROOT / "scripts/remove_harmony_brain_extras.py").read_text(encoding="utf-8"), "scripts/remove_harmony_brain_extras.py", "exec"))\n\n'''
           if marker not in text:
               raise SystemExit("Final source guard marker not found")
-          extra = r'''
-# 8b) Remove hidden Brain-linked production paths outside explicitly Brain-named files.
-def remove_block_from_signature(source: str, signature: str) -> str:
-    pos = source.find(signature)
-    if pos < 0:
-        return source
-    line_start = source.rfind("\n", 0, pos) + 1
-    brace = source.find("{", pos)
-    if brace < 0:
-        raise RuntimeError(f"Missing block brace for {signature}")
-    depth = 0
-    for i in range(brace, len(source)):
-        if source[i] == "{":
-            depth += 1
-        elif source[i] == "}":
-            depth -= 1
-            if depth == 0:
-                end = i + 1
-                if end < len(source) and source[end] == "\n":
-                    end += 1
-                return source[:line_start] + source[end:]
-    raise RuntimeError(f"Unclosed block for {signature}")
-
-
-def remove_composable_function(source: str, signature: str) -> str:
-    pos = source.find(signature)
-    if pos < 0:
-        return source
-    annotation = source.rfind("@Composable", 0, pos)
-    start = annotation if annotation >= 0 and source[pos - annotation < 80 if False else 0:0] == "" else pos
-    # The Brain-only functions have @Composable immediately before their declaration.
-    if annotation >= 0 and source[annotation:pos].strip() == "@Composable":
-        start = annotation
-    else:
-        start = source.rfind("\n", 0, pos) + 1
-    brace = source.find("{", pos)
-    if brace < 0:
-        raise RuntimeError(f"Missing function brace for {signature}")
-    depth = 0
-    for i in range(brace, len(source)):
-        if source[i] == "{":
-            depth += 1
-        elif source[i] == "}":
-            depth -= 1
-            if depth == 0:
-                end = i + 1
-                while end < len(source) and source[end] == "\n":
-                    end += 1
-                return source[:start] + source[end:]
-    raise RuntimeError(f"Unclosed function for {signature}")
-
-# Keep normal skip behavior, remove only the Brain interaction side-channel.
-skip_rel = "app/src/main/java/com/example/ui/HarmonyViewModelSkip.kt"
-skip = read(skip_rel)
-skip = re.sub(r"^import com\.example\.data\.repository\.HarmonyRepository\n", "", skip, flags=re.M)
-skip = skip.replace(" and records the explicit skip\n * as a Harmony Brain interaction.", ".")
-skip = re.sub(r"^\s*HarmonyRepository\(db, app\)\.recordBrainSkip\(packId, questionIndex\)\n", "", skip, flags=re.M)
-write(skip_rel, skip)
-
-# This generator is the hidden Developer-Studio entry point into Harmony Brain.
-delete(MAIN / "util/GeminiGameGenerator.kt")
-dev_rel = "app/src/main/java/com/example/ui/screens/DevStudioScreen.kt"
-dev = read(dev_rel)
-dev = dev.replace(
-    "    val context = LocalContext.current\n    val coroutineScope = rememberCoroutineScope()\n    var isGenerating by remember { mutableStateOf(false) }\n    var searchQuery",
-    "    val context = LocalContext.current\n    var searchQuery",
-    1,
-)
-pattern = re.compile(
-    r"\n        Button\(\n            onClick = \{\n                if \(!isGenerating\) \{.*?\n        \}\n\n        LazyRow\(",
-    re.S,
-)
-dev, count = pattern.subn("\n\n        LazyRow(", dev, count=1)
-if count != 1:
-    raise RuntimeError("Could not remove Developer Studio Brain generator button")
-write(dev_rel, dev)
-
-# Remove generated personal Brain games from the ordinary Games screen.
-games_rel = "app/src/main/java/com/example/ui/screens/GamesScreen.kt"
-games = read(games_rel)
-games = re.sub(r"^import com\.example\.data\.brain\..*\n", "", games, flags=re.M)
-games = re.sub(r"^\s*generatedGames: List<BrainGeneratedContentEntity> = emptyList\(\),\n", "", games, flags=re.M)
-games = re.sub(r"^\s*brainEnabled: Boolean = false,\n", "", games, flags=re.M)
-games = re.sub(r"^\s*onStartGeneratedGame: \(String\) -> Unit = \{\},\n", "", games, flags=re.M)
-games = remove_block_from_signature(games, "if (brainEnabled && generatedGames.isNotEmpty()) {")
-games = remove_composable_function(games, "fun GeneratedGameCard(")
-write(games_rel, games)
-
-# BrainSuggestionCard is a Brain-only rich-result renderer and sits at the end of VoiceComponents.
-voice_rel = "app/src/main/java/com/example/ui/components/VoiceComponents.kt"
-voice = read(voice_rel)
-voice = re.sub(r"^import com\.example\.data\.model\.BrainChatSuggestionItem\n", "", voice, flags=re.M)
-voice = remove_composable_function(voice, "fun BrainSuggestionCard(")
-write(voice_rel, voice)
-
-# Remove tests that exclusively target deleted generated-Brain APIs.
-for root in [TEST, ANDROID_TEST]:
-    if not root.exists():
-        continue
-    for test_file in list(root.rglob("*.kt")):
-        body = test_file.read_text(encoding="utf-8")
-        if any(symbol in body for symbol in [
-            "GeminiGameGenerator", "BrainGeneratedContentEntity", "GeneratedGamePayload",
-            "HarmonyGameNotifier", "BrainSuggestionCard"
-        ]):
-            delete(test_file)
-'''
-          text = text.replace(marker, extra + "\n" + marker, 1)
-          text = text.replace(
-              'forbidden = [\n',
-              'forbidden = [\n    "GeminiGameGenerator", "BrainGeneratedContentEntity", "GeneratedGamePayload",\n    "GeneratedGameCard", "generatedGames", "onStartGeneratedGame",\n',
-              1,
-          )
+          text = text.replace(marker, hook + marker, 1)
           path.write_text(text, encoding="utf-8")
           PY
           python3 scripts/remove_harmony_brain_feature.py
