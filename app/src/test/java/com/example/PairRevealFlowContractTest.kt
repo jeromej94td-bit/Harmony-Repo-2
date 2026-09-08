@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.example.data.couple.PartnerPackRevealPolicy
 import com.example.data.model.ExperiencePartnerPredictionRound
 import com.example.data.model.ExperiencePartnerPredictionSelection
 import com.example.data.model.FullscreenGameMechanicKind
@@ -18,7 +19,9 @@ import com.example.ui.screens.SecretChoiceRevealBoard
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -196,5 +199,31 @@ class PairRevealFlowContractTest {
         assertNull(picked)
         composeTestRule.onNodeWithTag("who_confirm").performClick()
         assertEquals("{user}", picked)
+    }
+
+    @Test
+    fun einanderKennenlernenUsesWholePackRevealOnly() {
+        assertTrue(PartnerPackRevealPolicy.isWholePackRevealEnabled("aufwaermen1"))
+        assertFalse(PartnerPackRevealPolicy.isWholePackRevealEnabled("gelegenheit"))
+        assertFalse(
+            PartnerPackRevealPolicy.canRevealPartnerAnswers(
+                myCompleted = true,
+                partnerCompleted = false
+            )
+        )
+        assertTrue(
+            PartnerPackRevealPolicy.canRevealPartnerAnswers(
+                myCompleted = true,
+                partnerCompleted = true
+            )
+        )
+    }
+
+    @Test
+    fun einanderKennenlernenCompletionNotificationNamesThePartner() {
+        assertEquals(
+            "Einander kennenlernen wurde von Alex ausgefüllt. Antworte jetzt, um die Antworten zu sehen.",
+            PartnerPackRevealPolicy.completionNotificationBody("Alex")
+        )
     }
 }
