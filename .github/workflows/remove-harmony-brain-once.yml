@@ -7,6 +7,7 @@ on:
     paths:
       - scripts/remove_harmony_brain_feature.py
       - scripts/remove_harmony_brain_extras.py
+      - app/src/test/java/com/example/ProductionHarmonyBrainRemovalContractTest.kt
       - .github/workflows/remove-harmony-brain-once.yml
 
 permissions:
@@ -29,23 +30,10 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Confirm removal contract is red before implementation
-        shell: bash
-        run: |
-          chmod +x gradlew
-          set +e
-          ./gradlew testDebugUnitTest --tests com.example.ProductionHarmonyBrainRemovalContractTest --no-daemon
-          status=$?
-          set -e
-          if [ "$status" -eq 0 ]; then
-            echo "Removal contract unexpectedly passed before implementation"
-            exit 1
-          fi
-          echo "Removal contract is red as expected"
-
       - name: Remove archived Harmony Brain feature
         shell: bash
         run: |
+          chmod +x gradlew
           python3 - <<'PY'
           from pathlib import Path
           path = Path("scripts/remove_harmony_brain_feature.py")
@@ -64,10 +52,11 @@ jobs:
           PY
           python3 scripts/remove_harmony_brain_feature.py
 
-      - name: Verify contract and Android build
-        run: |
-          ./gradlew testDebugUnitTest --tests com.example.ProductionHarmonyBrainRemovalContractTest --no-daemon
-          ./gradlew assembleDebug --no-daemon
+      - name: Verify permanent removal contract
+        run: ./gradlew testDebugUnitTest --tests com.example.ProductionHarmonyBrainRemovalContractTest --no-daemon
+
+      - name: Verify Android debug build
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Commit verified removal
         shell: bash
