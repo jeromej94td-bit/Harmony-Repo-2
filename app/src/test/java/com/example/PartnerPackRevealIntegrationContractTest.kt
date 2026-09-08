@@ -37,6 +37,8 @@ class PartnerPackRevealIntegrationContractTest {
         assertTrue(launcher.contains("getPartnerNotifications"))
         assertTrue(launcher.contains("PartnerCompletionNotifier.show"))
         assertTrue(launcher.contains("EXTRA_OPEN_PARTNER_PACK_ID"))
+        assertTrue(launcher.contains("hasCompletePackResults"))
+        assertTrue(launcher.contains("viewModel.finishPack()"))
     }
 
     private fun source(path: String): String {
