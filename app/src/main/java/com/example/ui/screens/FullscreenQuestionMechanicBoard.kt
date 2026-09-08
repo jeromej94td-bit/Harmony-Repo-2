@@ -1,4 +1,4 @@
-﻿package com.example.ui.screens
+package com.example.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -173,4 +173,3 @@ internal fun FullscreenQuestionMechanicBoard(
         )
     }
 }
-
