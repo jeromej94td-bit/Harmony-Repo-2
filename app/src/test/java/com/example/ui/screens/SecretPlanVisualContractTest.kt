@@ -3,8 +3,10 @@ package com.example.ui.screens
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.performTextInput
 import com.example.data.model.ProfileEntity
 import com.example.ui.theme.HarmonyTheme
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
@@ -61,5 +63,51 @@ class SecretPlanVisualContractTest {
         composeRule.onNodeWithTag("secret_plan_first_option_0").assertIsNotEnabled()
         composeRule.onNodeWithTag("secret_plan_first_option_1").assertIsNotEnabled()
         captureScreenRoboImage("build/secret-plan-preview/02-page-turn.png")
+
+        composeRule.mainClock.advanceTimeBy(1_099L)
+        composeRule.onNodeWithTag("secret_plan_handoff").assertDoesNotExist()
+        composeRule.onNodeWithTag("secret_plan_first_option_0").assertIsNotEnabled()
+
+        composeRule.mainClock.advanceTimeBy(117L)
+        composeRule.onNodeWithTag("secret_plan_handoff").assertExists()
+    }
+
+    @Test
+    fun `custom idea becomes the animated selected book page`() {
+        composeRule.mainClock.autoAdvance = false
+        setBoard()
+        composeRule.mainClock.advanceTimeBy(1_000L)
+
+        composeRule.onNodeWithTag("secret_plan_custom_option").performTouchInput { click() }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.onNodeWithTag("secret_plan_custom_input").performTextInput("Lissabon im Frühling")
+        composeRule.onNodeWithTag("secret_plan_custom_save").performTouchInput { click() }
+        composeRule.mainClock.advanceTimeBy(900L)
+
+        composeRule.onNodeWithTag("secret_plan_custom_selected").assertExists().assertIsNotEnabled()
+        composeRule.onNodeWithText("Lissabon im Frühling").assertExists()
+        composeRule.onNodeWithTag("secret_plan_first_option_0").assertDoesNotExist()
+    }
+
+    private fun setBoard() {
+        composeRule.setContent {
+            HarmonyTheme(darkTheme = true) {
+                SecretPlanBoard(
+                    question = "Wofür nehmt ihr euch spontan einen freien Tag?",
+                    options = listOf(
+                        "Kleiner Roadtrip",
+                        "Zeit nur für uns",
+                        "Etwas Neues erleben",
+                        "Ein Herzensprojekt starten",
+                        "Eigene Idee …"
+                    ),
+                    questionIndex = 0,
+                    historicalAnswers = emptyList(),
+                    selectedAnswer = null,
+                    profile = ProfileEntity(userName = "Jerome", partnerName = "Alex"),
+                    onPick = {}
+                )
+            }
+        }
     }
 }

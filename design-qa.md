@@ -18,6 +18,7 @@
 - Beim Auswählen verschwinden die nicht gewählten Optionen sanft. Die gewählte Seite hebt sich, kippt räumlich und bewegt sich zum rotierenden Herzsiegel.
 - Der vollständige Header bleibt während der Animation stabil; der Test-Viewport springt nicht mehr zum fokussierten Element.
 - Während der laufenden Animation sind alle Antwort-Tabs deaktiviert.
+- Eine selbst geschriebene Idee wird nach dem Speichern als eigene ausgewählte Buchseite animiert; die Preset-Tabs verschwinden dabei vollständig.
 - Die Ergebnis- und Versiegelungsansichten verwenden dasselbe Buch-, Gold-, Rosé- und Herzmotiv.
 
 ## Behobene Abweichungen
@@ -26,6 +27,7 @@
 - P1: Ein fokussierter, animierter Antwort-Tab konnte den Screenshot-Viewport nach unten verschieben. Die Buch-Tabs sind nun nicht fokussierbar und bleiben per Touch bedienbar.
 - P2: Nicht gewählte Antworten waren beim Seitenumschlag noch zu präsent und überlagerten die bewegte Seite. Sie blenden jetzt deutlich schneller aus.
 - P2: Das ausgewählte Harmony-Konzept enthielt das Paarmotiv, im Produktionsscreen fehlte es. Das vorhandene Panda-Paar wurde links und rückwärts blickend integriert.
+- P1: Der Pfad „Eigene Idee“ hatte zunächst keine sichtbare ausgewählte Seite. Er besitzt jetzt dieselbe Hebe-, Dreh- und Siegelbewegung wie eine Preset-Antwort und einen Compose-Vertragstest.
 - P3: Die Produktionsfassung verwendet die normale Harmony-Schrift statt der dekorativen Serifenschrift des Konzeptbilds, damit App-Konsistenz und Lesbarkeit erhalten bleiben.
 
 ## Ergebnis

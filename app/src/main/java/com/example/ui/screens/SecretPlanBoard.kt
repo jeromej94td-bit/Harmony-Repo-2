@@ -255,45 +255,58 @@ private fun SecretPlanMagicBook(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val lift = (motionProgress / 0.15f).coerceIn(0f, 1f)
-            options.take(4).forEachIndexed { index, text ->
-                val selected = selectedText == text
-                val otherAlpha = if (!selected) secondaryAlpha else 1f
+            fun Modifier.selectedPageMotion(index: Int): Modifier = graphicsLayer {
+                translationY = (
+                    (-8).dp * lift + bookStageHeight * (0.36f * pageTurn)
+                ).toPx()
+                rotationX = pageTurn * 72f
+                rotationZ = (index - 1.5f) * pageTurn * 3f
+                scaleX = 1f - seal * 0.55f
+                scaleY = 1f - seal * 0.55f
+                alpha = 1f - seal * 0.72f
+                shadowElevation = (10.dp + 18.dp * lift).toPx()
+                cameraDistance = 18f * density
+            }
+
+            val visibleOptions = options.take(4)
+            val customSelected = selectedText != null && selectedText !in visibleOptions
+            if (customSelected) {
                 BookAnswerTab(
-                    text = text,
-                    enabled = inputEnabled,
-                    selected = selected,
+                    text = selectedText.orEmpty(),
+                    enabled = false,
+                    selected = true,
                     modifier = Modifier
-                        .alpha(otherAlpha)
-                        .graphicsLayer {
-                            if (selected) {
-                                translationY = (
-                                    (-8).dp * lift + bookStageHeight * (0.36f * pageTurn)
-                                ).toPx()
-                                rotationX = pageTurn * 72f
-                                rotationZ = (index - 1.5f) * pageTurn * 3f
-                                scaleX = 1f - seal * 0.55f
-                                scaleY = 1f - seal * 0.55f
-                                alpha = 1f - seal * 0.72f
-                                shadowElevation = (10.dp + 18.dp * lift).toPx()
-                                cameraDistance = 18f * density
-                            }
-                        }
-                        .testTag("${tagPrefix}_$index"),
-                    onClick = { onSelect(text) }
+                        .selectedPageMotion(index = 1)
+                        .testTag("secret_plan_custom_selected"),
+                    onClick = {}
+                )
+            } else {
+                visibleOptions.forEachIndexed { index, text ->
+                    val selected = selectedText == text
+                    BookAnswerTab(
+                        text = text,
+                        enabled = inputEnabled,
+                        selected = selected,
+                        modifier = Modifier
+                            .alpha(if (selected) 1f else secondaryAlpha)
+                            .then(if (selected) Modifier.selectedPageMotion(index) else Modifier)
+                            .testTag("${tagPrefix}_$index"),
+                        onClick = { onSelect(text) }
+                    )
+                }
+                Text(
+                    text = "Eigene Idee …",
+                    color = BookInk,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .alpha(secondaryAlpha)
+                        .clip(RoundedCornerShape(18.dp))
+                        .clickable(enabled = inputEnabled, onClick = onCustom)
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                        .testTag("secret_plan_custom_option")
                 )
             }
-            Text(
-                text = "Eigene Idee …",
-                color = BookInk,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .alpha(secondaryAlpha)
-                    .clip(RoundedCornerShape(18.dp))
-                    .clickable(enabled = inputEnabled, onClick = onCustom)
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-                    .testTag("secret_plan_custom_option")
-            )
             Spacer(Modifier.weight(1f))
             HeartSeal(progress = motionProgress)
         }
