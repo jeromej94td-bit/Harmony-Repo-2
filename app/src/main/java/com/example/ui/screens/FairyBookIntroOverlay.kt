@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,6 +67,23 @@ private data class FairyDustParticle(    val phaseOffset: Float,
 
 @Composable
 fun FairyBookIntroOverlay(
+    onFinished: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var useFallback by remember { mutableStateOf(false) }
+    if (useFallback) {
+        FairyBookCanvasFallback(onFinished = onFinished, modifier = modifier)
+    } else {
+        FairyBookFilamentIntro(
+            onFinished = onFinished,
+            onUnavailable = { useFallback = true },
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+fun FairyBookCanvasFallback(
     onFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
