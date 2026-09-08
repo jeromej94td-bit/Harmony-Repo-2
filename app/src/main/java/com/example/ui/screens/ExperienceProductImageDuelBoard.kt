@@ -1,4 +1,4 @@
-package com.example.ui.screens
+﻿package com.example.ui.screens
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -55,12 +55,6 @@ internal fun ExperienceProductImageDuelBoard(
     testTagPrefix: String = "experience_product_image_duel",
     layout: ExperienceProductImageDuelLayout = ExperienceProductImageDuelLayout.SIDE_BY_SIDE
 ) {
-    val effectiveLayout = if (rootTestTag == "proposal_ring_duel") {
-        ExperienceProductImageDuelLayout.WIDE_STACKED
-    } else {
-        layout
-    }
-
     Column(
         modifier = modifier.testTag(rootTestTag),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,53 +71,49 @@ internal fun ExperienceProductImageDuelBoard(
         )
         Spacer(Modifier.height(18.dp))
 
-        when (effectiveLayout) {
-            ExperienceProductImageDuelLayout.SIDE_BY_SIDE -> {
-                Row(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ExperienceProductImageDuelCard(
-                        option = round.firstOption,
-                        imageRes = imageResolver(round.firstOption.imageKey),
-                        selected = selectedOptionId == round.firstOption.id,
-                        onClick = { onPick(round.firstOption) },
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                        testTag = "${testTagPrefix}_first"
-                    )
-                    ExperienceProductImageDuelCard(
-                        option = round.secondOption,
-                        imageRes = imageResolver(round.secondOption.imageKey),
-                        selected = selectedOptionId == round.secondOption.id,
-                        onClick = { onPick(round.secondOption) },
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                        testTag = "${testTagPrefix}_second"
-                    )
-                }
+        when (layout) {
+            ExperienceProductImageDuelLayout.SIDE_BY_SIDE -> Row(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExperienceProductImageDuelCard(
+                    option = round.firstOption,
+                    imageRes = imageResolver(round.firstOption.imageKey),
+                    selected = selectedOptionId == round.firstOption.id,
+                    onClick = { onPick(round.firstOption) },
+                    modifier = Modifier.weight(1f).fillMaxSize(),
+                    testTag = "${testTagPrefix}_first"
+                )
+                ExperienceProductImageDuelCard(
+                    option = round.secondOption,
+                    imageRes = imageResolver(round.secondOption.imageKey),
+                    selected = selectedOptionId == round.secondOption.id,
+                    onClick = { onPick(round.secondOption) },
+                    modifier = Modifier.weight(1f).fillMaxSize(),
+                    testTag = "${testTagPrefix}_second"
+                )
             }
 
-            ExperienceProductImageDuelLayout.WIDE_STACKED -> {
-                Column(
+            ExperienceProductImageDuelLayout.WIDE_STACKED -> Column(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExperienceProductImageDuelCard(
+                    option = round.firstOption,
+                    imageRes = imageResolver(round.firstOption.imageKey),
+                    selected = selectedOptionId == round.firstOption.id,
+                    onClick = { onPick(round.firstOption) },
                     modifier = Modifier.fillMaxWidth().weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    ExperienceProductImageDuelCard(
-                        option = round.firstOption,
-                        imageRes = imageResolver(round.firstOption.imageKey),
-                        selected = selectedOptionId == round.firstOption.id,
-                        onClick = { onPick(round.firstOption) },
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        testTag = "${testTagPrefix}_first"
-                    )
-                    ExperienceProductImageDuelCard(
-                        option = round.secondOption,
-                        imageRes = imageResolver(round.secondOption.imageKey),
-                        selected = selectedOptionId == round.secondOption.id,
-                        onClick = { onPick(round.secondOption) },
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        testTag = "${testTagPrefix}_second"
-                    )
-                }
+                    testTag = "${testTagPrefix}_first"
+                )
+                ExperienceProductImageDuelCard(
+                    option = round.secondOption,
+                    imageRes = imageResolver(round.secondOption.imageKey),
+                    selected = selectedOptionId == round.secondOption.id,
+                    onClick = { onPick(round.secondOption) },
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    testTag = "${testTagPrefix}_second"
+                )
             }
         }
     }
@@ -149,7 +139,7 @@ private fun ExperienceProductImageDuelCard(
                 shape
             )
             .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
-            .padding(9.dp)
+            .padding(10.dp)
             .testTag(testTag),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -180,7 +170,7 @@ private fun ExperienceProductImageDuelCard(
             lineHeight = 19.sp,
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 5.dp)
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
         )
     }
 }

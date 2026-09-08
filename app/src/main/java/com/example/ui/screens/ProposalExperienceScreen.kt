@@ -178,7 +178,8 @@ internal fun ProposalExperienceScreen(
                                 eitherOrSelections = eitherOrSelections + (round.id to choice)
                                 advance()
                             },
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            visualStyle = ExperienceEitherOrVisualStyle.PROPOSAL_GLOW_TILT
                         )
                     }
 
@@ -210,6 +211,7 @@ internal fun ProposalExperienceScreen(
                                 kicker = "💎  RING-DUELL",
                                 testTagPrefix = "proposal_ring",
                                 rootTestTag = "proposal_ring_duel",
+                                layout = ExperienceProductImageDuelLayout.WIDE_STACKED,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
