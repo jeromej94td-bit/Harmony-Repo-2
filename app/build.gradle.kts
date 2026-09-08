@@ -500,6 +500,7 @@ dependencies {
   implementation(libs.supabase.auth)
   implementation(libs.supabase.functions)
   implementation(libs.ktor.client.okhttp)
+  implementation(libs.sceneview)
   // implementation(libs.androidx.datastore.preferences)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)
