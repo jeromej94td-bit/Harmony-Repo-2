@@ -43,4 +43,16 @@ class IslandHoppingBookContractTest {
             assertTrue("Missing curated island-hopping question: $question", curation.contains(question))
         }
     }
+
+    @Test
+    fun `island hopping plays one time magical book intro before questions`() {
+        val intro = source("app/src/main/java/com/example/ui/screens/IslandHoppingBookIntro.kt")
+        val runner = source("app/src/main/java/com/example/ui/screens/QuizRunnerScreen.kt")
+
+        assertTrue(intro.contains("FairyBookIntroOverlay("))
+        assertTrue(runner.contains("IslandHoppingBookPolicy.isEnabled(pack.id)"))
+        assertTrue(runner.contains("remember(pack.id) { mutableStateOf(!isIslandHoppingBook) }"))
+        assertTrue(runner.contains("IslandHoppingBookIntro("))
+        assertTrue(runner.contains("!isIslandHoppingBook || islandBookIntroFinished"))
+    }
 }

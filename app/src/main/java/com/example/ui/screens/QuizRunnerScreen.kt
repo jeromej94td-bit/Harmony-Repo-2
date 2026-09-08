@@ -600,8 +600,10 @@ fun QuizRunnerScreen(
     val pack = activeRun.pack
     val totalLen = if (pack.type == "tot") pack.pairs.size else pack.questions.size
     val isMoralGreyZone = pack.cat == "zust" && pack.topic == "moral"
+    val isIslandHoppingBook = IslandHoppingBookPolicy.isEnabled(pack.id)
     val moralIntroKey = pack.id
     var moralIntroFinished by remember(moralIntroKey) { mutableStateOf(!isMoralGreyZone) }
+    var islandBookIntroFinished by remember(pack.id) { mutableStateOf(!isIslandHoppingBook) }
 
     val category = com.example.data.model.HarmonyPacksData.CATEGORIES.find { it.id == pack.cat }
     val catColor = category?.tagColorHex?.let { Color(it) } ?: HarmonyPink
@@ -629,7 +631,14 @@ fun QuizRunnerScreen(
                 .fillMaxSize()
                 .background(HarmonyBg)
         ) {
-            if (isMoralGreyZone) {
+            if (isIslandHoppingBook && !islandBookIntroFinished) {
+                key(pack.id) {
+                    IslandHoppingBookIntro(
+                        onFinished = { islandBookIntroFinished = true },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            } else if (isMoralGreyZone) {
                 AnimatedVisibility(
                     visible = !moralIntroFinished,
                     enter = fadeIn(tween(durationMillis = 180, easing = FastOutSlowInEasing)),
@@ -661,7 +670,7 @@ fun QuizRunnerScreen(
                 )
             }
 
-            if (!isMoralGreyZone || moralIntroFinished) {
+            if ((!isMoralGreyZone || moralIntroFinished) && (!isIslandHoppingBook || islandBookIntroFinished)) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
