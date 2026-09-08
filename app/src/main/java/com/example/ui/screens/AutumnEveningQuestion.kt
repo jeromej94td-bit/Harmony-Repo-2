@@ -31,8 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -58,6 +60,8 @@ private val AutumnBlackberry = Color(0xFF140F18)
 private val AutumnCopper = Color(0xFFC88862)
 private val AutumnRoseGold = Color(0xFFE2A27D)
 private val AutumnIvory = Color(0xFFFFF4E6)
+private val AutumnStoryWarmLight = Color(0xFFFFD3A0)
+
 internal data class AutumnEveningVisuals(
     val subtitle: String,
     @param:DrawableRes val images: List<Int>
@@ -131,6 +135,8 @@ internal fun AutumnEveningQuestion(
     modifier: Modifier = Modifier
 ) {
     val visuals = autumnEveningVisuals(kind)
+    val storyImageTreatment = kind == HarmonyImageChoiceKind.AUTUMN_STORY
+    val imageShadeAlpha = if (storyImageTreatment) 0.08f else 0.32f
     check(options.size == visuals.images.size) {
         "Autumn evening rounds require exactly ${visuals.images.size} options, found ${options.size}"
     }
@@ -205,6 +211,8 @@ internal fun AutumnEveningQuestion(
                         question = contentText(question),
                         option = contentText(option),
                         imageRes = visuals.images[index],
+                        imageShadeAlpha = imageShadeAlpha,
+                        warmStoryImage = storyImageTreatment,
                         selected = selectedAnswer == option,
                         onClick = { onPick(option) },
                         modifier = Modifier.weight(1f)
@@ -223,6 +231,8 @@ private fun AutumnEveningCard(
     question: String,
     option: String,
     @DrawableRes imageRes: Int,
+    imageShadeAlpha: Float,
+    warmStoryImage: Boolean,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -286,6 +296,14 @@ private fun AutumnEveningCard(
                 painter = painterResource(imageRes),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                colorFilter = if (warmStoryImage) {
+                    ColorFilter.tint(
+                        color = AutumnStoryWarmLight.copy(alpha = 0.16f),
+                        blendMode = BlendMode.Screen
+                    )
+                } else {
+                    null
+                },
                 modifier = Modifier.fillMaxSize()
             )
             Box(
@@ -293,7 +311,7 @@ private fun AutumnEveningCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color.Transparent, AutumnBlackberry.copy(alpha = 0.32f))
+                            listOf(Color.Transparent, AutumnBlackberry.copy(alpha = imageShadeAlpha))
                         )
                     )
             )
