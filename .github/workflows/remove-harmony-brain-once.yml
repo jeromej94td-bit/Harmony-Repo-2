@@ -1,0 +1,64 @@
+name: Remove Harmony Brain once
+
+on:
+  push:
+    branches:
+      - fix/remove-harmony-brain-completely
+    paths:
+      - scripts/remove_harmony_brain_feature.py
+      - .github/workflows/remove-harmony-brain-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout removal branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Confirm removal contract is red before implementation
+        shell: bash
+        run: |
+          chmod +x gradlew
+          set +e
+          ./gradlew testDebugUnitTest --tests com.example.ProductionHarmonyBrainRemovalContractTest --no-daemon
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo "Removal contract unexpectedly passed before implementation"
+            exit 1
+          fi
+          echo "Removal contract is red as expected"
+
+      - name: Remove archived Harmony Brain feature
+        run: python3 scripts/remove_harmony_brain_feature.py
+
+      - name: Verify contract and Android build
+        run: |
+          ./gradlew testDebugUnitTest --tests com.example.ProductionHarmonyBrainRemovalContractTest --no-daemon
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Commit verified removal
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No migration changes to commit"
+            exit 1
+          fi
+          git commit -m "refactor: remove Harmony Brain from Android production"
+          git push origin HEAD:fix/remove-harmony-brain-completely
