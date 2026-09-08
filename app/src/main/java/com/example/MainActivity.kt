@@ -64,6 +64,7 @@ import com.example.ui.screens.ChatScreen
 import com.example.ui.screens.CouplePackRevealScreen
 import com.example.ui.screens.DevStudioScreen
 import com.example.ui.screens.GamesScreen
+import com.example.ui.screens.FairyBookIntroOverlay
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.IntrospectionExperienceScreen
 import com.example.ui.screens.LiveChangeEditor
@@ -89,6 +90,8 @@ import com.example.widget.MemoryWidgetOpenRequest
 import com.example.widget.PicShareWidgetProvider
 import com.example.widget.parseMemoryWidgetOpenRequest
 import kotlinx.coroutines.launch
+
+private const val FAIRY_BOOK_PACK_ID = "cj_disney_quiz"
 
 class MainActivity : ComponentActivity() {
 
@@ -243,6 +246,8 @@ fun HarmonyApp(
     var isPandaExitConfirmOpen by rememberSaveable { mutableStateOf(false) }
     var isSpecialFlowExitConfirmOpen by remember { mutableStateOf(false) }
     var isProposalExperienceOpen by rememberSaveable { mutableStateOf(false) }
+    var pendingFairyBookIntro by rememberSaveable { mutableStateOf(false) }
+    var pendingFairyBookFreshRun by rememberSaveable { mutableStateOf(false) }
     var isLiveChangeMode by remember { mutableStateOf(false) }
     var isLiveChangeEditorOpen by remember { mutableStateOf(false) }
     var isLiveChangeLauncherVisible by remember { mutableStateOf(true) }
@@ -277,8 +282,17 @@ fun HarmonyApp(
         onMemoryWidgetRequestConsumed()
     }
 
-    fun openPackForPlay(packId: String, freshRun: Boolean = false) {
+    fun openPackForPlay(
+        packId: String,
+        freshRun: Boolean = false,
+        skipFairyBookIntro: Boolean = false
+    ) {
         resultsPackId = null
+        if (packId == FAIRY_BOOK_PACK_ID && !skipFairyBookIntro) {
+            pendingFairyBookFreshRun = freshRun
+            pendingFairyBookIntro = true
+            return
+        }
         when {
             packId == PANDA_EITHER_OR_PACK_ID -> {
                 isPandaEitherOrOpen = true
@@ -328,10 +342,14 @@ fun HarmonyApp(
     val isSheetOrDialogActive = uiState.isProfileSheetOpen || uiState.isAddMomentOpen || isMemoryOverlayActive || isAccountOverlayActive
     val isNotHomeTab = uiState.selectedTab != 0
 
-    val canHandleBack = isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
+    val canHandleBack = pendingFairyBookIntro || isResultsOpen || isIntrospectionOpen || isPandaEitherOrOpen || isProposalExperienceOpen || isQuizActive || isSheetOrDialogActive || isNotHomeTab
 
     BackHandler(enabled = canHandleBack || isLiveChangeEditorOpen) {
         when {
+            pendingFairyBookIntro -> {
+                pendingFairyBookIntro = false
+                pendingFairyBookFreshRun = false
+            }
             accountLifecycleModeName != null -> {
                 accountLifecycleModeName = null
             }
@@ -405,7 +423,7 @@ fun HarmonyApp(
                 ),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             topBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
+                if (!pendingFairyBookIntro && !isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
                     HarmonyTopBar(
                         userName = displayProfile.userName,
                         partnerName = displayProfile.partnerName,
@@ -418,7 +436,7 @@ fun HarmonyApp(
                 }
             },
             bottomBar = {
-                if (!isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
+                if (!pendingFairyBookIntro && !isResultsOpen && !isQuizActive && !isIntrospectionOpen && !isPandaEitherOrOpen && !isProposalExperienceOpen) {
                     val navSelectedTab = when (uiState.selectedTab) {
                         6 -> 1 // When inside PackListScreen, highlight Spiele tab
                         else -> uiState.selectedTab
@@ -672,6 +690,21 @@ fun HarmonyApp(
                             }
                         )
                     }
+                }
+
+                if (pendingFairyBookIntro) {
+                    FairyBookIntroOverlay(
+                        onFinished = {
+                            val freshRun = pendingFairyBookFreshRun
+                            pendingFairyBookIntro = false
+                            pendingFairyBookFreshRun = false
+                            openPackForPlay(
+                                packId = FAIRY_BOOK_PACK_ID,
+                                freshRun = freshRun,
+                                skipFairyBookIntro = true
+                            )
+                        }
+                    )
                 }
 
                 // Full-Screen Quiz Runner Overlay
