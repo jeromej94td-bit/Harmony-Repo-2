@@ -1038,6 +1038,7 @@ fun QuizRunnerScreen(
                                 kind = fullscreenMechanic,
                                 packId = pack.id,
                                 questionIndex = activeRun.currentIndex,
+                                totalQuestions = totalLen,
                                 historicalAnswers = answerHistory,
                                 question = q.q,
                                 options = q.options,

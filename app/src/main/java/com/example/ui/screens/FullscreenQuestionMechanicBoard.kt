@@ -19,6 +19,7 @@ internal fun FullscreenQuestionMechanicBoard(
     kind: FullscreenGameMechanicKind,
     packId: String = "",
     questionIndex: Int = 0,
+    totalQuestions: Int = 0,
     historicalAnswers: List<AnswerEntity> = emptyList(),
     question: String,
     options: List<String>,
@@ -61,6 +62,8 @@ internal fun FullscreenQuestionMechanicBoard(
             options = options,
             selectedAnswer = selectedAnswer,
             profile = profile,
+            questionIndex = questionIndex,
+            totalQuestions = totalQuestions,
             onPick = onPick,
             modifier = modifier
         )
