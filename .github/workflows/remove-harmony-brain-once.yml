@@ -43,7 +43,19 @@ jobs:
           echo "Removal contract is red as expected"
 
       - name: Remove archived Harmony Brain feature
-        run: python3 scripts/remove_harmony_brain_feature.py
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/remove_harmony_brain_feature.py")
+          text = path.read_text(encoding="utf-8")
+          old = 'home = remove_if_block_after_marker(home, "// --- HARMONY BRAIN COACH ---", "if (brainEnabled)")'
+          new = 'home = remove_if_block_after_marker(home, "if (brainEnabled) {", "if (brainEnabled)")'
+          if old not in text:
+              raise SystemExit("Expected Home removal rule not found")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+          python3 scripts/remove_harmony_brain_feature.py
 
       - name: Verify contract and Android build
         run: |
