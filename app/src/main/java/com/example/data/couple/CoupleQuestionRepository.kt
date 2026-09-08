@@ -38,6 +38,23 @@ data class CoupleAnswerStatus(
     val readyToReveal: Boolean
 )
 
+data class PartnerPackCompletionStatus(
+    val myCompleted: Boolean,
+    val partnerCompleted: Boolean,
+    val readyToReveal: Boolean,
+    val notificationCreated: Boolean
+)
+
+data class PartnerNotification(
+    val notificationId: String,
+    val packId: String,
+    val body: String,
+    val actorUserId: String?,
+    val actorDisplayName: String?,
+    val actorAvatarUrl: String?,
+    val createdAt: String?
+)
+
 class RapidAnswerSubmissionGuard(
     private val windowMs: Long = 750L,
     private val nowMs: () -> Long = { System.nanoTime() / 1_000_000L }
@@ -72,7 +89,9 @@ data class CouplePackQuestionResult(
     val partnerUserId: String?,
     val partnerDisplayName: String?,
     val partnerAvatarUrl: String?,
-    val partnerAnswerText: String?
+    val partnerAnswerText: String?,
+    val myPackCompleted: Boolean = false,
+    val partnerPackCompleted: Boolean = false
 ) {
     val revealState: CoupleRevealState
         get() = coupleRevealState(
@@ -127,9 +146,27 @@ class CoupleQuestionRepository(
         }
     }
 
+    suspend fun completePartnerPack(packId: String): PartnerPackCompletionStatus {
+        if (!PartnerPackRevealPolicy.isWholePackRevealEnabled(packId)) {
+            throw CoupleQuestionException("partner_pack_not_enabled")
+        }
+        val response = postRpc("complete_partner_pack", JSONObject().put("p_pack_id", packId))
+        val rows = JSONArray(response)
+        if (rows.length() != 1) throw CoupleQuestionException("partner_pack_completion_missing")
+        val row = rows.getJSONObject(0)
+        return PartnerPackCompletionStatus(
+            myCompleted = row.optBoolean("my_completed", false),
+            partnerCompleted = row.optBoolean("partner_completed", false),
+            readyToReveal = row.optBoolean("ready_to_reveal", false),
+            notificationCreated = row.optBoolean("notification_created", false)
+        )
+    }
+
     suspend fun getPackResults(packId: String): List<CouplePackQuestionResult> {
         if (packId.isBlank()) return emptyList()
-        val response = postRpc("get_pack_question_results", JSONObject().put("p_pack_id", packId))
+        val wholePackReveal = PartnerPackRevealPolicy.isWholePackRevealEnabled(packId)
+        val functionName = if (wholePackReveal) "get_partner_pack_results" else "get_pack_question_results"
+        val response = postRpc(functionName, JSONObject().put("p_pack_id", packId))
         val rows = JSONArray(response)
         return buildList {
             for (index in 0 until rows.length()) {
@@ -143,11 +180,43 @@ class CoupleQuestionRepository(
                         partnerUserId = row.nullableString("partner_user_id"),
                         partnerDisplayName = row.nullableString("partner_display_name"),
                         partnerAvatarUrl = row.nullableString("partner_avatar_url"),
-                        partnerAnswerText = row.nullableString("partner_answer_text")
+                        partnerAnswerText = row.nullableString("partner_answer_text"),
+                        myPackCompleted = if (wholePackReveal) row.optBoolean("my_completed", false) else false,
+                        partnerPackCompleted = if (wholePackReveal) row.optBoolean("partner_completed", false) else false
                     )
                 )
             }
         }
+    }
+
+    suspend fun getPartnerNotifications(): List<PartnerNotification> {
+        val response = postRpc("get_partner_notifications", JSONObject())
+        val rows = JSONArray(response)
+        return buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.getJSONObject(index)
+                add(
+                    PartnerNotification(
+                        notificationId = row.getString("notification_id"),
+                        packId = row.getString("pack_id"),
+                        body = row.getString("body"),
+                        actorUserId = row.nullableString("actor_user_id"),
+                        actorDisplayName = row.nullableString("actor_display_name"),
+                        actorAvatarUrl = row.nullableString("actor_avatar_url"),
+                        createdAt = row.nullableString("created_at")
+                    )
+                )
+            }
+        }
+    }
+
+    suspend fun markPartnerNotificationRead(notificationId: String): Boolean {
+        if (notificationId.isBlank()) return false
+        val response = postRpc(
+            "mark_partner_notification_read",
+            JSONObject().put("p_notification_id", notificationId)
+        )
+        return response.trim().equals("true", ignoreCase = true)
     }
 
     private suspend fun postRpc(functionName: String, body: JSONObject): String = withContext(Dispatchers.IO) {
