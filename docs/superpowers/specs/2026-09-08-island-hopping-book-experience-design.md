@@ -1,7 +1,7 @@
 # Island Hopping Magical Book Experience
 
 ## Goal
-Transform only `h500_089_inselhopping_prioritaet` ("Inselhopping – Ehrliche Runde") into a magical book experience without changing its curated question content or persistence semantics.
+Transform only `h500_089_inselhopping_prioritaet` ("Inselhopping â€“ Ehrliche Runde") into a magical book experience without changing its curated question content or persistence semantics.
 
 The player opens the game, sees a cinematic Harmony book arrive and open, then answers the existing six curated questions as successive book pages. Every answer triggers a visible page-turn animation before the existing answer callback advances the runner.
 
@@ -9,17 +9,17 @@ The player opens the game, sees a cinematic Harmony book arrive and open, then a
 The canonical runtime questions remain the six curated overrides in `Harmony360FoodTravelLeisureCultureQualityRework.kt`:
 1. Was ist beim Inselhopping wichtiger?
 2. Was muss auf den Inseln unbedingt passieren?
-3. Worauf würdest du bei engem Budget am wenigsten verzichten?
+3. Worauf wÃ¼rdest du bei engem Budget am wenigsten verzichten?
 4. Was nervt dich beim Inselwechsel am ehesten?
 5. Was soll bei der Route den Ausschlag geben?
-6. Was wäre dein perfekter letzter Inselabend?
+6. Was wÃ¤re dein perfekter letzter Inselabend?
 
 Do not replace these questions with the older generated eight-question source pack.
 ## Runtime flow
 1. `QuizRunnerScreen` detects the exact pack ID and starts a one-time book intro before question 1 becomes interactive.
 2. The intro reuses the existing Filament/SceneView book renderer when its GLB is available, with the current Compose book animation as fallback.
 3. After the intro, the priority-poker question renders through an island-hopping-specific book board instead of the generic `DirectPriorityPokerBoard`.
-4. A card tap locks input, gives selection feedback, and starts the page-turn animation.
+4. A card tap starts the page-turn animation immediately; there is no separate confirmation or pre-turn lock phase.
 5. Only after the turn reaches its commit point does the board call the existing `onPick(answer)` callback.
 6. The ViewModel remains responsible for persistence, paired submission, current-index advancement, finishing, and history.
 7. The newly advanced question enters as the next book page. The same transition repeats through question 6.
@@ -31,11 +31,11 @@ The island theme adds restrained turquoise/ocean light, distant floating-island 
 
 No third-party franchise branding, logos or copyrighted characters are introduced.
 ## Interaction timing
-- Intro target: roughly 2.4–3.6 seconds, skippable only by fallback/unavailability, not by accidental taps.
-- Answer confirmation: 120–220 ms of selected-card glow/scale feedback.
-- Page turn: roughly 650–850 ms with perspective rotation, moving shadow and page-edge highlight.
-- The answer callback fires once, after the page-turn commit point; repeated taps while turning are ignored.
-- Question entrance: short 180–280 ms settle/fade after the runner advances.
+- Intro target: roughly 2.4-3.6 seconds, skippable only by fallback/unavailability, not by accidental taps.
+- Answer touch: the page starts turning immediately on touch; any highlight is part of the turn itself, not a separate confirmation phase.
+- Page turn: roughly 650-850 ms with perspective rotation, moving shadow and page-edge highlight.
+- The answer callback fires once at the page-turn commit point. The visible response to the touch is the page movement itself; there is no waiting or confirmation pause.
+- Question entrance: short 180-280 ms settle/fade after the runner advances.
 
 ## Component boundaries
 - `IslandHoppingBookPolicy`: exact pack-ID feature gate and constants.
@@ -55,7 +55,7 @@ The fallback must not change question order, selected answers, paired submission
 - Use SceneView/Filament only for the short intro; do not keep a heavyweight 3D scene alive behind all six questions.
 - Keep the question/page-turn interaction in Compose for reliable text layout and touch targets.
 - Avoid 4K textures and large particle counts; prefer procedural gradients, geometry and shared PBR materials.
-- Prevent double submits while a page turn is active.
+- The page-turn controller must be idempotent for the same touch gesture so one physical tap produces one answer callback, without adding a visible pre-turn lock state.
 
 ## Protected scope
 Do not modify Google/Supabase authentication, package ID, signing/keystore configuration, locale catalogs, unrelated games, or the curated island-hopping question text.
