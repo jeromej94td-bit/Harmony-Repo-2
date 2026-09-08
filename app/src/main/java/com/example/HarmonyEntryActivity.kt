@@ -23,10 +23,12 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.couple.CoupleQuestionRepository
 import com.example.data.couple.PartnerCompletionNotifier
+import com.example.data.model.HarmonyPacksData
 import com.example.ui.AppLanguage
 import com.example.ui.HarmonyViewModel
 import com.example.ui.LocalAppLanguage
 import com.example.ui.screens.AuthScreenV2
+import com.example.ui.screens.hasCompletePackResults
 import com.example.ui.session.AppSessionViewModel
 import com.example.ui.session.SessionPhase
 import com.example.ui.theme.HarmonyTheme
@@ -109,8 +111,20 @@ class HarmonyEntryActivity : ComponentActivity() {
             LaunchedEffect(sessionState.phase, partnerPackOpenRequest) {
                 val packId = partnerPackOpenRequest ?: return@LaunchedEffect
                 if (sessionState.phase != SessionPhase.READY) return@LaunchedEffect
+
+                // Give the Room-backed answer flow a moment to hydrate after a cold notification launch.
+                // If this user already completed the pack, route straight into the existing finished-run
+                // surface so CouplePackRevealScreen opens instead of restarting question 1.
+                delay(250)
+                val pack = HarmonyPacksData.PACKS.firstOrNull { it.id == packId }
+                val latestAnswers = viewModel.uiState.value.answers
+                val alreadyComplete = pack != null && hasCompletePackResults(pack, latestAnswers)
+
                 viewModel.selectTab(1)
                 viewModel.startPack(packId)
+                if (alreadyComplete) {
+                    viewModel.finishPack()
+                }
                 partnerPackOpenRequest = null
             }
 
