@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,7 @@ import coil.compose.AsyncImage
 import com.example.data.couple.CouplePackQuestionResult
 import com.example.data.couple.CoupleQuestionRepository
 import com.example.data.couple.CoupleRevealState
+import com.example.data.couple.PartnerPackRevealPolicy
 import com.example.data.model.QuestionPack
 import com.example.data.session.AppSession
 import com.example.data.session.UserProfile
@@ -65,41 +67,109 @@ fun CouplePackRevealScreen(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val wholePackReveal = PartnerPackRevealPolicy.isWholePackRevealEnabled(pack.id)
     var results by remember(pack.id, session.coupleId) { mutableStateOf<List<CouplePackQuestionResult>>(emptyList()) }
     var revealedIndexes by remember(pack.id, session.coupleId) { mutableStateOf<Set<Int>>(emptySet()) }
+    var wholePackRevealed by remember(pack.id, session.coupleId) { mutableStateOf(false) }
     var isLoading by remember(pack.id, session.coupleId) { mutableStateOf(true) }
     var errorMessage by remember(pack.id, session.coupleId) { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(pack.id, session.coupleId, answers) {
+    LaunchedEffect(pack.id, session.coupleId, answers, wholePackReveal) {
         if (!session.isPaired) return@LaunchedEffect
-        answers.forEach { (questionIndex, answerText) ->
-            if (answerText.isNotBlank()) {
-                runCatching { repository.submitAnswer(pack.id, questionIndex, answerText) }
-            }
-        }
 
-        while (coroutineContext.isActive) {
-            runCatching { repository.getPackResults(pack.id) }
-                .onSuccess { loaded ->
-                    results = loaded
-                    errorMessage = null
+        if (wholePackReveal) {
+            val initialResults = runCatching { repository.getPackResults(pack.id) }
+                .getOrDefault(emptyList())
+            if (initialResults.isNotEmpty()) {
+                results = initialResults
+                isLoading = false
+            }
+
+            val alreadyCompleted = initialResults.firstOrNull()?.myPackCompleted == true
+            if (!alreadyCompleted) {
+                val totalQuestions = if (pack.type == "tot") pack.pairs.size else pack.questions.size
+                val completeLocalRun = totalQuestions > 0 &&
+                    answers.keys.containsAll(0 until totalQuestions) &&
+                    (0 until totalQuestions).all { !answers[it].isNullOrBlank() }
+
+                if (!completeLocalRun) {
+                    errorMessage = "Beantworte zuerst alle Fragen. Erst danach wird dein Durchlauf für den gemeinsamen Reveal abgeschlossen."
                     isLoading = false
+                    return@LaunchedEffect
                 }
-                .onFailure {
-                    if (results.isEmpty()) {
-                        errorMessage = "Die gemeinsamen Ergebnisse konnten gerade nicht geladen werden."
+
+                for (questionIndex in 0 until totalQuestions) {
+                    val answerText = answers[questionIndex].orEmpty()
+                    runCatching { repository.submitAnswer(pack.id, questionIndex, answerText) }
+                        .onFailure {
+                            errorMessage = "Deine Antworten konnten gerade nicht vollständig synchronisiert werden."
+                            isLoading = false
+                            return@LaunchedEffect
+                        }
+                }
+
+                runCatching { repository.completePartnerPack(pack.id) }
+                    .onFailure {
+                        errorMessage = "Dein fertiger Durchlauf konnte gerade nicht abgeschlossen werden."
+                        isLoading = false
+                        return@LaunchedEffect
+                    }
+            }
+
+            while (coroutineContext.isActive) {
+                runCatching { repository.getPackResults(pack.id) }
+                    .onSuccess { loaded ->
+                        results = loaded
+                        errorMessage = null
                         isLoading = false
                     }
-                }
+                    .onFailure {
+                        if (results.isEmpty()) {
+                            errorMessage = "Die gemeinsamen Ergebnisse konnten gerade nicht geladen werden."
+                            isLoading = false
+                        }
+                    }
 
-            val answeredIndexes = answers.keys
-            val allAnsweredQuestionsReady = answeredIndexes.isNotEmpty() && answeredIndexes.all { index ->
-                results.firstOrNull { it.questionIndex == index }?.readyToReveal == true
+                if (results.firstOrNull()?.readyToReveal == true) break
+                delay(3_000)
             }
-            if (allAnsweredQuestionsReady) break
-            delay(3_000)
+        } else {
+            answers.forEach { (questionIndex, answerText) ->
+                if (answerText.isNotBlank()) {
+                    runCatching { repository.submitAnswer(pack.id, questionIndex, answerText) }
+                }
+            }
+
+            while (coroutineContext.isActive) {
+                runCatching { repository.getPackResults(pack.id) }
+                    .onSuccess { loaded ->
+                        results = loaded
+                        errorMessage = null
+                        isLoading = false
+                    }
+                    .onFailure {
+                        if (results.isEmpty()) {
+                            errorMessage = "Die gemeinsamen Ergebnisse konnten gerade nicht geladen werden."
+                            isLoading = false
+                        }
+                    }
+
+                val answeredIndexes = answers.keys
+                val allAnsweredQuestionsReady = answeredIndexes.isNotEmpty() && answeredIndexes.all { index ->
+                    results.firstOrNull { it.questionIndex == index }?.readyToReveal == true
+                }
+                if (allAnsweredQuestionsReady) break
+                delay(3_000)
+            }
         }
     }
+
+    val myPackCompleted = results.firstOrNull()?.myPackCompleted == true
+    val partnerPackCompleted = results.firstOrNull()?.partnerPackCompleted == true
+    val wholePackReady = PartnerPackRevealPolicy.canRevealPartnerAnswers(
+        myCompleted = myPackCompleted,
+        partnerCompleted = partnerPackCompleted
+    )
 
     Box(
         modifier = modifier.fillMaxSize().background(
@@ -124,7 +194,11 @@ fun CouplePackRevealScreen(
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = "Eure Antworten bleiben getrennt, bis ihr beide dieselbe Frage beantwortet habt.",
+                        text = if (wholePackReveal) {
+                            "Eure Antworten bleiben getrennt, bis ihr beide das ganze Spiel ausgefüllt habt. Danach enthüllt ihr alles gemeinsam."
+                        } else {
+                            "Eure Antworten bleiben getrennt, bis ihr beide dieselbe Frage beantwortet habt."
+                        },
                         color = HarmonyMuted,
                         fontSize = 13.5.sp,
                         textAlign = TextAlign.Center,
@@ -155,24 +229,213 @@ fun CouplePackRevealScreen(
                 }
             }
 
-            val indexes = answers.keys.sorted()
+            if (wholePackReveal && !isLoading && errorMessage.isNullOrBlank()) {
+                item(key = "whole_pack_status") {
+                    WholePackRevealStatusCard(
+                        session = session,
+                        myCompleted = myPackCompleted,
+                        partnerCompleted = partnerPackCompleted,
+                        revealed = wholePackRevealed,
+                        onReveal = { wholePackRevealed = true }
+                    )
+                }
+            }
+
+            val indexes = if (wholePackReveal) {
+                val total = if (pack.type == "tot") pack.pairs.size else pack.questions.size
+                (0 until total).toList()
+            } else {
+                answers.keys.sorted()
+            }
+
             items(indexes, key = { "question_$it" }) { questionIndex ->
                 val result = results.firstOrNull { it.questionIndex == questionIndex }
-                CoupleQuestionRevealCard(
-                    questionNumber = questionIndex + 1,
-                    questionText = questionLabel(pack, questionIndex),
-                    session = session,
-                    myAnswer = answers[questionIndex].orEmpty(),
-                    result = result,
-                    revealed = questionIndex in revealedIndexes,
-                    onReveal = { revealedIndexes = revealedIndexes + questionIndex }
-                )
+                if (wholePackReveal) {
+                    WholePackQuestionRevealCard(
+                        questionNumber = questionIndex + 1,
+                        questionText = questionLabel(pack, questionIndex),
+                        session = session,
+                        myAnswer = result?.myAnswerText ?: answers[questionIndex].orEmpty(),
+                        partnerAnswer = if (wholePackReady && wholePackRevealed) result?.partnerAnswerText else null,
+                        readyToReveal = wholePackReady,
+                        revealed = wholePackRevealed
+                    )
+                } else {
+                    CoupleQuestionRevealCard(
+                        questionNumber = questionIndex + 1,
+                        questionText = questionLabel(pack, questionIndex),
+                        session = session,
+                        myAnswer = answers[questionIndex].orEmpty(),
+                        result = result,
+                        revealed = questionIndex in revealedIndexes,
+                        onReveal = { revealedIndexes = revealedIndexes + questionIndex }
+                    )
+                }
             }
 
             item(key = "close") {
                 Spacer(Modifier.height(8.dp))
                 TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
                     Text("Zurück zu Harmony", color = HarmonyPink, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WholePackRevealStatusCard(
+    session: AppSession,
+    myCompleted: Boolean,
+    partnerCompleted: Boolean,
+    revealed: Boolean,
+    onReveal: () -> Unit
+) {
+    val partner = session.partner ?: return
+    val ready = PartnerPackRevealPolicy.canRevealPartnerAnswers(myCompleted, partnerCompleted)
+    val shape = RoundedCornerShape(24.dp)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        HarmonyPink.copy(alpha = 0.18f),
+                        HarmonyPurple.copy(alpha = 0.17f),
+                        HarmonySurface2.copy(alpha = 0.96f)
+                    )
+                )
+            )
+            .border(1.dp, HarmonyPink.copy(alpha = 0.34f), shape)
+            .padding(17.dp)
+            .testTag("whole_pack_reveal_status")
+    ) {
+        when {
+            ready && !revealed -> {
+                Text(
+                    "Ihr seid beide fertig 💞",
+                    color = HarmonyText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    "Alle Antworten sind bereit. Enthüllt jetzt das komplette Spiel gemeinsam.",
+                    color = HarmonyMuted,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp
+                )
+                Spacer(Modifier.height(14.dp))
+                Button(
+                    onClick = onReveal,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp)
+                        .testTag("whole_pack_reveal_button"),
+                    shape = RoundedCornerShape(17.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = HarmonyPink)
+                ) {
+                    Text("Antworten enthüllen", color = Color.White, fontWeight = FontWeight.ExtraBold)
+                }
+            }
+            ready && revealed -> {
+                Text(
+                    "Eure Antworten sind enthüllt ✨",
+                    color = HarmonyText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    "Vergleicht jetzt Frage für Frage eure Auswahl.",
+                    color = HarmonyMuted,
+                    fontSize = 13.sp
+                )
+            }
+            myCompleted -> {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CoupleRemoteAvatar(session.profile, 42)
+                    Column(Modifier.padding(start = 11.dp).weight(1f)) {
+                        Text(
+                            "Dein Durchlauf ist gespeichert ✓",
+                            color = HarmonyText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "Warte auf ${partner.displayName}. Bis dahin bleiben alle Partnerantworten verborgen.",
+                            color = HarmonyMuted,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp
+                        )
+                    }
+                }
+            }
+            else -> {
+                Text(
+                    "Dein Durchlauf wird abgeschlossen …",
+                    color = HarmonyMuted,
+                    fontSize = 13.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WholePackQuestionRevealCard(
+    questionNumber: Int,
+    questionText: String,
+    session: AppSession,
+    myAnswer: String,
+    partnerAnswer: String?,
+    readyToReveal: Boolean,
+    revealed: Boolean
+) {
+    val partner = session.partner ?: return
+    val shape = RoundedCornerShape(22.dp)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(HarmonySurface2.copy(alpha = 0.92f))
+            .border(1.dp, HarmonyLine, shape)
+            .padding(16.dp)
+            .testTag("whole_pack_question_$questionNumber")
+    ) {
+        Text("Frage $questionNumber", color = HarmonyPink, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+        Spacer(Modifier.height(5.dp))
+        Text(questionText, color = HarmonyText, fontSize = 15.5.sp, fontWeight = FontWeight.Bold, lineHeight = 21.sp)
+        Spacer(Modifier.height(14.dp))
+
+        CoupleAnswerRow(session.profile, myAnswer, HarmonyPink)
+        Spacer(Modifier.height(9.dp))
+
+        if (readyToReveal && revealed && !partnerAnswer.isNullOrBlank()) {
+            CoupleAnswerRow(partner, partnerAnswer, HarmonyPurple)
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(HarmonyPurple.copy(alpha = 0.08f))
+                    .border(1.dp, HarmonyPurple.copy(alpha = 0.20f), RoundedCornerShape(16.dp))
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CoupleRemoteAvatar(partner, 42)
+                Column(Modifier.padding(start = 10.dp).weight(1f)) {
+                    Text(partner.displayName, color = HarmonyMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        if (readyToReveal) "Bereit zum gemeinsamen Enthüllen 🔒" else "Antwort bleibt noch verborgen 🔒",
+                        color = HarmonyMuted,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
