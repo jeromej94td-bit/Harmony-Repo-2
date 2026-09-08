@@ -30,12 +30,13 @@ class PartnerPackRevealIntegrationContractTest {
     fun `pilot reveal is one shared reveal and notifications deep link into the pack`() {
         val reveal = source("app/src/main/java/com/example/ui/screens/CouplePackRevealScreen.kt")
         val notifier = source("app/src/main/java/com/example/data/couple/PartnerCompletionNotifier.kt")
-        val activity = source("app/src/main/java/com/example/MainActivity.kt")
+        val launcher = source("app/src/main/java/com/example/HarmonyEntryActivity.kt")
         assertTrue(reveal.contains("Antworten enthüllen"))
         assertTrue(reveal.contains("wholePackReveal"))
         assertTrue(notifier.contains("open_partner_pack_id"))
-        assertTrue(activity.contains("getPartnerNotifications"))
-        assertTrue(activity.contains("PartnerCompletionNotifier.show"))
+        assertTrue(launcher.contains("getPartnerNotifications"))
+        assertTrue(launcher.contains("PartnerCompletionNotifier.show"))
+        assertTrue(launcher.contains("EXTRA_OPEN_PARTNER_PACK_ID"))
     }
 
     private fun source(path: String): String {
