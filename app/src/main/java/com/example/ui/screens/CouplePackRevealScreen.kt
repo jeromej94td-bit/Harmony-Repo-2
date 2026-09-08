@@ -89,7 +89,6 @@ fun CouplePackRevealScreen(
             if (!alreadyCompleted) {
                 val totalQuestions = if (pack.type == "tot") pack.pairs.size else pack.questions.size
                 val completeLocalRun = totalQuestions > 0 &&
-                    answers.keys.containsAll(0 until totalQuestions) &&
                     (0 until totalQuestions).all { !answers[it].isNullOrBlank() }
 
                 if (!completeLocalRun) {
