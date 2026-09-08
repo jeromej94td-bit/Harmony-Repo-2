@@ -114,6 +114,25 @@ else:
 write(voice_rel, voice)
 
 
+# The old production-isolation task assumed archived Brain code must stay compiled with a false
+# feature flag. Full removal is stricter and safer, so retire only those two obsolete assertions;
+# all other source-isolation/Mischung guards remain unchanged.
+gradle_rel = "app/build.gradle.kts"
+gradle = read(gradle_rel)
+obsolete_guard = '''    if (!homeScreen.contains("brainEnabled: Boolean = false")) {
+      violations += "HomeScreen.kt lost the fail-closed archived Brain default"
+    }
+    if (!gamesScreen.contains("brainEnabled: Boolean = false")) {
+      violations += "GamesScreen.kt lost the fail-closed archived Brain default"
+    }
+
+'''
+if obsolete_guard not in gradle:
+    raise RuntimeError("Could not locate obsolete fail-closed Brain Gradle guard")
+gradle = gradle.replace(obsolete_guard, "", 1)
+write(gradle_rel, gradle)
+
+
 # Tests that exclusively target deleted generated-Brain APIs cannot remain active. The permanent
 # negative regression contract is deliberately preserved even though it names forbidden symbols.
 for root in [TEST, ANDROID_TEST]:
@@ -150,4 +169,4 @@ for source_file in MAIN.rglob("*.kt"):
 if extra_leaks:
     raise SystemExit("Remaining hidden generated-Brain references:\n" + "\n".join(extra_leaks))
 
-print("Hidden Brain developer/game paths removed.")
+print("Hidden Brain developer/game paths removed and obsolete fail-closed Brain build guard retired.")
