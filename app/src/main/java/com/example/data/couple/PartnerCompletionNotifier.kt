@@ -11,7 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.example.MainActivity
+import com.example.HarmonyEntryActivity
 import com.example.R
 
 object PartnerCompletionNotifier {
@@ -27,7 +27,7 @@ object PartnerCompletionNotifier {
         }
 
         ensureChannel(context)
-        val openIntent = Intent(context, MainActivity::class.java).apply {
+        val openIntent = Intent(context, HarmonyEntryActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra(EXTRA_OPEN_PARTNER_PACK_ID, notification.packId)
         }
