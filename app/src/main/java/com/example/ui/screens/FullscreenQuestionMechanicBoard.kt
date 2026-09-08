@@ -1,4 +1,4 @@
-package com.example.ui.screens
+﻿package com.example.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -55,6 +55,17 @@ internal fun FullscreenQuestionMechanicBoard(
         return
     }
 
+    if (kind == FullscreenGameMechanicKind.PRIORITY_POKER && IslandHoppingBookPolicy.isEnabled(packId)) {
+        IslandHoppingBookBoard(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            profile = profile,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
     when (kind) {
         FullscreenGameMechanicKind.RANK_ORDER -> QuestionInteractionBoard(
             kind = QuestionInteractionKind.RANK_ORDER,
@@ -159,3 +170,4 @@ internal fun FullscreenQuestionMechanicBoard(
         )
     }
 }
+
