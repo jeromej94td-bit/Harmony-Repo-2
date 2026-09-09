@@ -19,6 +19,7 @@ internal fun FullscreenQuestionMechanicBoard(
     kind: FullscreenGameMechanicKind,
     packId: String = "",
     questionIndex: Int = 0,
+    totalQuestions: Int = 0,
     historicalAnswers: List<AnswerEntity> = emptyList(),
     question: String,
     options: List<String>,
@@ -55,6 +56,19 @@ internal fun FullscreenQuestionMechanicBoard(
         return
     }
 
+    if (kind == FullscreenGameMechanicKind.PRIORITY_POKER && IslandHoppingBookPolicy.isEnabled(packId)) {
+        IslandHoppingBookBoard(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            profile = profile,
+            questionIndex = questionIndex,
+            totalQuestions = totalQuestions,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
     when (kind) {
         FullscreenGameMechanicKind.RANK_ORDER -> QuestionInteractionBoard(
             kind = QuestionInteractionKind.RANK_ORDER,
