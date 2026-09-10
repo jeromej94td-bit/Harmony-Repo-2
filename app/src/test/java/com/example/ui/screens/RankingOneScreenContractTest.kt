@@ -20,8 +20,10 @@ class RankingOneScreenContractTest {
     fun `ranking continue action only appears after every slot is filled`() {
         val source = source("app/src/main/java/com/example/ui/screens/RankingSlotBoard.kt")
         val normalized = source.replace(Regex("\\s+"), " ")
+        val completeGuard = normalized.indexOf("if (complete) {")
+        val continueButton = normalized.indexOf("PrimaryMechanicButton(", startIndex = completeGuard.coerceAtLeast(0))
 
-        assertTrue(normalized.contains("if (complete) { PrimaryMechanicButton("))
+        assertTrue(completeGuard >= 0 && continueButton > completeGuard)
         assertFalse(source.contains("Belege alle Rangplätze"))
     }
 
