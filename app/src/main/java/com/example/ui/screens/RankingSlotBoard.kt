@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -38,7 +39,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -63,9 +63,8 @@ import com.example.ui.tr
 import com.example.ui.util.triggerMiniVibration
 
 /**
- * Ranking questions use one compact vertical board: numbered drop lanes first, then the
- * full-width card pool. This keeps long answer labels readable on phone screens while retaining
- * the existing drag/drop and answer-encoding behavior.
+ * Ranking questions use the runner's real remaining height. Four-choice text rankings use a
+ * stable 2x2 pool so every choice stays on screen; larger or visual rankings keep wide cards.
  */
 @Composable
 internal fun RankingSlotBoard(
@@ -77,19 +76,16 @@ internal fun RankingSlotBoard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp
-    val compactScreen = screenHeight < 700
-    val reservedChrome = when {
-        screenHeight < 600 -> 92
-        compactScreen -> 110
-        else -> 132
-    }
-    val boardHeight = (screenHeight - reservedChrome).coerceIn(360, 720).dp
     val hitSlop = with(LocalDensity.current) { 22.dp.toPx() }
     val items = mechanicOptions(options, profile)
-    val prompt = fineDiningVisualPrompt(question) ?: mechanicPrompt(question, items, profile)
+    val fineDiningPrompt = fineDiningVisualPrompt(question)
+    val prompt = fineDiningPrompt ?: mechanicPrompt(question, items, profile)
     val labels = items.associate { it.raw to it.label }
+
+    DisposableEffect(Unit) {
+        RankingMechanicPresence.isActive = true
+        onDispose { RankingMechanicPresence.isActive = false }
+    }
 
     val restored = remember(question, selectedAnswer, options) {
         selectedAnswer?.let { RankingAnswerCodec.decode(it, options) }
@@ -105,6 +101,8 @@ internal fun RankingSlotBoard(
     val unassigned = options.filter { option -> slots.none { it == option } }
     val complete = options.isNotEmpty() && slots.all { it != null } &&
         slots.filterNotNull().distinct().size == options.size
+    val poolCells = options.map { option -> option.takeIf { it in unassigned } }
+    val useCompactGrid = options.size == 4 && fineDiningPrompt == null
 
     fun resolveSlot(pointer: Offset?): Int? {
         if (pointer == null) return null
@@ -131,15 +129,14 @@ internal fun RankingSlotBoard(
 
     BoxWithConstraints(
         modifier = modifier
-            .fillMaxWidth()
-            .height(boardHeight)
+            .fillMaxSize()
             .testTag("ranking_slot_board")
     ) {
-        val compactHeight = maxHeight < 620.dp
-        val questionSize = if (compactHeight) 21.sp else 24.sp
-        val questionLineHeight = if (compactHeight) 26.sp else 30.sp
-        val sectionGap = if (compactHeight) 8.dp else 11.dp
-        val rowGap = if (compactHeight) 6.dp else 8.dp
+        val compactHeight = maxHeight < 560.dp
+        val questionSize = if (compactHeight) 19.sp else 22.sp
+        val questionLineHeight = if (compactHeight) 23.sp else 27.sp
+        val sectionGap = if (compactHeight) 5.dp else 8.dp
+        val rowGap = if (compactHeight) 4.dp else 6.dp
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -156,7 +153,7 @@ internal fun RankingSlotBoard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = if (compactHeight) 2.dp else 6.dp)
+                    .padding(horizontal = 4.dp, vertical = if (compactHeight) 1.dp else 3.dp)
                     .testTag("ranking_question")
             )
 
@@ -165,7 +162,7 @@ internal fun RankingSlotBoard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.88f),
+                    .weight(if (complete) 1.18f else 1.05f),
                 verticalArrangement = Arrangement.spacedBy(rowGap)
             ) {
                 slots.indices.forEach { slotIndex ->
@@ -206,55 +203,99 @@ internal fun RankingSlotBoard(
 
             Spacer(Modifier.height(sectionGap))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1.08f),
-                verticalArrangement = Arrangement.spacedBy(rowGap)
-            ) {
-                unassigned.forEach { raw ->
-                    key("pool_$raw") {
-                        RankingDraggableCard(
-                            raw = raw,
-                            label = labels[raw] ?: raw,
-                            visual = fineDiningRankingCard(question, raw),
-                            fromSlot = null,
-                            resolveSlot = ::resolveSlot,
-                            onHover = { hoveredSlot = it },
-                            onDrop = { target -> placeCard(raw, null, target) },
-                            modifier = Modifier.weight(1f)
+            if (useCompactGrid) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(if (complete) 0.22f else 0.72f),
+                    verticalArrangement = Arrangement.spacedBy(rowGap)
+                ) {
+                    poolCells.chunked(2).forEachIndexed { rowIndex, rowCells ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .testTag("ranking_pool_row_$rowIndex"),
+                            horizontalArrangement = Arrangement.spacedBy(rowGap)
+                        ) {
+                            rowCells.forEachIndexed { columnIndex, raw ->
+                                if (raw != null) {
+                                    RankingDraggableCard(
+                                        raw = raw,
+                                        label = labels[raw] ?: raw,
+                                        visual = null,
+                                        fromSlot = null,
+                                        resolveSlot = ::resolveSlot,
+                                        onHover = { hoveredSlot = it },
+                                        onDrop = { target -> placeCard(raw, null, target) },
+                                        compact = true,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
+                                    )
+                                } else {
+                                    Spacer(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
+                                            .testTag("ranking_pool_empty_${rowIndex}_$columnIndex")
+                                    )
+                                }
+                            }
+                            if (rowCells.size < 2) {
+                                Spacer(Modifier.weight(1f).fillMaxHeight())
+                            }
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(if (complete) 0.22f else 1.08f),
+                    verticalArrangement = Arrangement.spacedBy(rowGap)
+                ) {
+                    unassigned.forEach { raw ->
+                        key("pool_$raw") {
+                            RankingDraggableCard(
+                                raw = raw,
+                                label = labels[raw] ?: raw,
+                                visual = fineDiningRankingCard(question, raw),
+                                fromSlot = null,
+                                resolveSlot = ::resolveSlot,
+                                onHover = { hoveredSlot = it },
+                                onDrop = { target -> placeCard(raw, null, target) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    repeat((options.size - unassigned.size).coerceAtLeast(0)) { index ->
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .testTag("ranking_pool_spacer_$index")
                         )
                     }
                 }
-
-                repeat((options.size - unassigned.size).coerceAtLeast(0)) { index ->
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .testTag("ranking_pool_spacer_$index")
-                    )
-                }
             }
 
-            Spacer(Modifier.height(if (compactHeight) 8.dp else 12.dp))
-
-            PrimaryMechanicButton(
-                text = if (complete) {
-                    tr("Rangliste speichern & weiter", "Save ranking & continue")
-                } else {
-                    tr("Belege alle Rangplätze", "Fill every ranking slot")
-                },
-                enabled = complete,
-                onClick = {
-                    val order = slots.filterNotNull()
-                    if (order.size == options.size && order.distinct().size == options.size) {
-                        triggerMiniVibration(context, 52L)
-                        onPick(RankingAnswerCodec.encode(order))
-                    }
-                },
-                testTag = "ranking_submit"
-            )
+            if (complete) {
+                Spacer(Modifier.height(if (compactHeight) 6.dp else 9.dp))
+                PrimaryMechanicButton(
+                    text = tr("Weiter", "Continue"),
+                    enabled = true,
+                    onClick = {
+                        val order = slots.filterNotNull()
+                        if (order.size == options.size && order.distinct().size == options.size) {
+                            triggerMiniVibration(context, 52L)
+                            onPick(RankingAnswerCodec.encode(order))
+                        }
+                    },
+                    testTag = "ranking_submit"
+                )
+            }
         }
     }
 }
@@ -278,13 +319,13 @@ private fun RankingDropSlot(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 50.dp)
+            .heightIn(min = 44.dp)
             .testTag("ranking_slot_$position"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .background(
                     Brush.linearGradient(
@@ -308,18 +349,18 @@ private fun RankingDropSlot(
             Text(
                 text = "${position + 1}",
                 color = Color.White,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Black
             )
         }
 
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(8.dp))
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .heightIn(min = 50.dp)
+                .heightIn(min = 44.dp)
                 .background(
                     Brush.horizontalGradient(
                         listOf(
