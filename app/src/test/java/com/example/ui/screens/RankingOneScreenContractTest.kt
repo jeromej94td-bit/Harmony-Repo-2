@@ -27,10 +27,12 @@ class RankingOneScreenContractTest {
 
     @Test
     fun `global skip does not cover ranking controls`() {
-        val source = source("app/src/main/java/com/example/MainActivity.kt")
+        val board = source("app/src/main/java/com/example/ui/screens/RankingSlotBoard.kt")
+        val skip = source("app/src/main/java/com/example/ui/screens/RunnerSkipButton.kt")
 
-        assertTrue(source.contains("val isRankingQuestion ="))
-        assertTrue(source.contains("!isRankingQuestion &&"))
+        assertTrue(board.contains("RankingMechanicPresence.isActive = true"))
+        assertTrue(board.contains("RankingMechanicPresence.isActive = false"))
+        assertTrue(skip.contains("RankingMechanicPresence.isActive"))
     }
 
     private fun source(path: String): String {
