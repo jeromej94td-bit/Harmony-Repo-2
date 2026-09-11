@@ -130,6 +130,18 @@ internal fun AutumnEveningQuestion(
     onPick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (kind in HEART_OR_HEAD_KINDS) {
+        HeartOrHeadQuestion(
+            question = question,
+            options = options,
+            selectedAnswer = selectedAnswer,
+            kind = kind,
+            onPick = onPick,
+            modifier = modifier
+        )
+        return
+    }
+
     val visuals = autumnEveningVisuals(kind)
     val imageShadeAlpha = if (kind == HarmonyImageChoiceKind.AUTUMN_STORY) 0.14f else 0.32f
     check(options.size == visuals.images.size) {

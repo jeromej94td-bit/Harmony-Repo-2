@@ -18,6 +18,7 @@ object GeneratedContentRegistry {
             GeneratedHarmonyNewPicGame.VERSION xor
             GeneratedHarmonyAdrenaline360.VERSION xor
             GeneratedHarmonyHappyCouple.VERSION xor
+            GeneratedHarmonyHeartOrHead.VERSION xor
             GeneratedHarmonySexIntimacyRework.VERSION
 
     val CATEGORIES: List<GenCategory> by lazy {
@@ -88,6 +89,7 @@ object GeneratedContentRegistry {
         GeneratedHarmonyNewPicGame.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyAdrenaline360.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyHappyCouple.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
+        GeneratedHarmonyHeartOrHead.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         // Curated reworks come last so their stable pack IDs intentionally override
         // older generated/default variants at runtime without touching Models.kt.
         GeneratedHarmonySexIntimacyRework.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
