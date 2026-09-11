@@ -19,10 +19,11 @@ Dieser Vertrag gilt ausschließlich für **Beziehungen → Liebe im Gleichgewich
 ## Visuelles Verhalten
 
 - Im Happy-Couple-Fragebereich steht sichtbar die Pille **„Frage 1 von 11“**.
-- Darunter steht groß **„Welches Paar ist GLÜCKLICH?“**.
-- Der Untertext lautet: **„Wähle das Paar, das für dich am glücklichsten wirkt.“**
-- Die vier Karten haben einen Harmony-Neonrahmen.
-- Bei Auswahl erhält die komplette Karte einen verstärkten Rahmen und pinken Glow; der Nummern-Pin wird ebenfalls hervorgehoben.
+- Darunter steht kompakt **„Welches Paar ist GLÜCKLICH?“**.
+- Es gibt keinen wiederholenden Untertext unter der Frage.
+- Die vier Karten nutzen den gewonnenen Platz größer und haben weiterhin einen Harmony-Neonrahmen.
+- Es werden keine sichtbaren Nummern-Pins auf den Bildern dargestellt.
+- Bei Auswahl erhält die komplette Karte weiterhin einen verstärkten Rahmen und pinken Glow.
 - Die Karten erscheinen nacheinander: `index × 700 ms`.
 - Die Karten-Flip-Animation dauert `620 ms`.
 
