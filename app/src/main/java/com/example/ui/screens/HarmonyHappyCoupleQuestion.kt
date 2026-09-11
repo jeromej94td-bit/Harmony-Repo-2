@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -88,7 +87,7 @@ internal fun HarmonyHappyCoupleQuestion(
                 )
             )
             .border(1.2.dp, HarmonyPink.copy(alpha = 0.42f), containerShape)
-            .padding(horizontal = 10.dp, vertical = 18.dp)
+            .padding(horizontal = 6.dp, vertical = 14.dp)
             .testTag("harmony_happy_couple_question"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -108,35 +107,22 @@ internal fun HarmonyHappyCoupleQuestion(
                 fontWeight = FontWeight.SemiBold
             )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = displayQuestion,
             color = HarmonyText,
-            fontSize = 27.sp,
+            fontSize = 23.sp,
             fontWeight = FontWeight.ExtraBold,
-            lineHeight = 31.sp,
+            lineHeight = 27.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 10.dp)
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = tr(
-                "Wähle das Paar, das für dich am glücklichsten wirkt.",
-                "Choose the couple that looks happiest to you."
-            ),
-            color = Color(0xFFFFB8DB),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            lineHeight = 19.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 10.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         answerOptions.chunked(2).forEachIndexed { rowIndex, rowOptions ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowOptions.forEachIndexed { columnIndex, option ->
                     val index = rowIndex * 2 + columnIndex
@@ -151,7 +137,7 @@ internal fun HarmonyHappyCoupleQuestion(
                     )
                 }
             }
-            if (rowIndex == 0) Spacer(modifier = Modifier.height(10.dp))
+            if (rowIndex == 0) Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -185,7 +171,7 @@ private fun HarmonyHappyCoupleCard(
     val progress = reveal.value.coerceIn(0f, 1f)
     Box(
         modifier = modifier
-            .aspectRatio(0.85f)
+            .aspectRatio(0.82f)
             .graphicsLayer {
                 alpha = progress
                 rotationY = -82f * (1f - progress)
@@ -239,32 +225,6 @@ private fun HarmonyHappyCoupleCard(
                     )
                 )
         )
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 10.dp)
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(
-                    if (selected) HarmonyPink.copy(alpha = 0.94f)
-                    else HarmonyBg.copy(alpha = 0.88f)
-                )
-                .border(
-                    width = if (selected) 2.dp else 1.4.dp,
-                    color = if (selected) Color.White else HarmonyPink.copy(alpha = 0.90f),
-                    shape = CircleShape
-                )
-                .testTag("happy_couple_number_$option"),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = option,
-                color = Color.White,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-        }
 
         if (selected) {
             Box(

@@ -30,7 +30,7 @@ class HappyCoupleNumberPickRegressionTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun `happy couple exposes four numbered clickable cards and returns one through four`() {
+    fun `happy couple exposes four clean clickable cards and returns one through four`() {
         val question = HarmonyPacksData.DEFAULT_PACKS
             .first { it.id == "liebegleichgewicht" }
             .questions.first()
@@ -55,7 +55,7 @@ class HappyCoupleNumberPickRegressionTest {
         composeRule.mainClock.advanceTimeBy(3_000L)
 
         (1..4).forEach { number ->
-            composeRule.onNodeWithTag("happy_couple_number_$number").assertExists()
+            composeRule.onNodeWithTag("happy_couple_number_$number").assertDoesNotExist()
         }
 
         (0..3).forEach { index ->

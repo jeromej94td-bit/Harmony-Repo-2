@@ -47,9 +47,10 @@ class HappyCoupleVisualContractTest {
         composeRule.onNodeWithText("Frage 1 von 11", substring = true).assertExists()
         composeRule.onNodeWithText("Welches Paar ist GLÜCKLICH?").assertExists()
         composeRule.onNodeWithText("Remote content changed this prompt").assertDoesNotExist()
+        composeRule.onNodeWithText("Wähle das Paar, das für dich am glücklichsten wirkt.").assertDoesNotExist()
 
         (1..4).forEach { number ->
-            composeRule.onNodeWithText(number.toString()).assertExists()
+            composeRule.onNodeWithText(number.toString()).assertDoesNotExist()
         }
 
         composeRule.onNodeWithTag("harmony_happy_couple_question").captureRoboImage(
