@@ -464,10 +464,7 @@ internal fun ScenarioBoard(
         instruction = if (showJourneyResult) {
             tr("Acht Entscheidungen ergeben euren Spieltyp.", "Eight decisions reveal your play style.")
         } else {
-            tr(
-                "Entscheidet euch – die Geschichte geht mit eurer Wahl weiter.",
-                "Choose – the story continues with your decision."
-            )
+            ""
         },
         modifier = modifier.testTag("scenario_board")
     ) {
@@ -589,7 +586,8 @@ internal fun ScenarioBoard(
                         selected = item.raw
                     },
                     modifier = Modifier.weight(1f),
-                    tagPrefix = "scenario_option"
+                    tagPrefix = "scenario_option",
+                    emphasizeLabels = true
                 )
                 Spacer(Modifier.height(playMetrics.gapDp.dp))
                 PrimaryMechanicButton(

@@ -20,6 +20,17 @@ class ScenarioShortLandscapeSourceContractTest {
     }
 
     @Test
+    fun `scenario play prioritizes readable answers over helper chrome`() {
+        val scenarioSource = File("src/main/java/com/example/ui/screens/FullscreenChoiceMechanics.kt").readText()
+        val commonSource = File("src/main/java/com/example/ui/screens/FullscreenMechanicCommon.kt").readText()
+
+        assertFalse(scenarioSource.contains("Entscheidet euch – die Geschichte geht mit eurer Wahl weiter."))
+        assertTrue(scenarioSource.contains("emphasizeLabels = true"))
+        assertTrue(commonSource.contains("instruction.isNotBlank()"))
+        assertTrue(commonSource.contains("emphasizeLabel = emphasizeLabels"))
+    }
+
+    @Test
     fun `large option cards derive padding from their actual constrained height`() {
         val source = File("src/main/java/com/example/ui/screens/FullscreenMechanicCommon.kt").readText()
 
