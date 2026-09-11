@@ -293,7 +293,6 @@ fun HarmonyApp(
                     ?: return
                 runnerScope.launch {
                     appDb.answerDao().deleteAnswersForPack(packId)
-                    appDb.brainRoomDao().clearFinishedPack(packId)
                     viewModel.startPackForTest(pack, currentIndex = 0)
                 }
             }
@@ -311,13 +310,7 @@ fun HarmonyApp(
             resultsPackId = packId
             return
         }
-        runnerScope.launch {
-            if (appDb.brainRoomDao().hasFinishedPack(packId)) {
-                resultsPackId = packId
-            } else {
-                openPackForPlay(packId)
-            }
-        }
+        openPackForPlay(packId)
     }
 
     val isQuizActive = uiState.activeRun != null

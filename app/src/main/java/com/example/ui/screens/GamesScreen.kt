@@ -77,8 +77,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.CATALOG_PACKS
-import com.example.data.brain.db.BrainGeneratedContentEntity
-import com.example.data.brain.model.GeneratedGamePayload
 import com.example.data.model.AnswerEntity
 import com.example.data.model.Category
 import com.example.data.model.HarmonyPacksData
@@ -110,14 +108,11 @@ import kotlin.math.sin
 fun GamesScreen(
     answers: List<AnswerEntity>,
     packFilter: String,
-    generatedGames: List<BrainGeneratedContentEntity> = emptyList(),
-    brainEnabled: Boolean = false,
     appLanguage: String = "de",
     onSetFilter: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
     onTopicClick: (String) -> Unit,
     onStartPack: (String) -> Unit,
-    onStartGeneratedGame: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
@@ -439,74 +434,6 @@ fun GamesScreen(
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
-            if (brainEnabled && generatedGames.isNotEmpty()) {
-                item(key = "generated_games_section") {
-                    Column {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 18.dp, vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("🧠", fontSize = 18.sp)
-                                Spacer(modifier = Modifier.width(7.dp))
-                                Text(
-                                    text = LanguageManager.tr("Persönliche Spiele von Harmony", appLanguage),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = HarmonyText
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color(0xFFE056FD).copy(alpha = 0.2f))
-                                    .border(1.dp, Color(0xFFE056FD).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
-                            ) {
-                                Text(
-                                    text = "${generatedGames.size} Neu",
-                                    color = Color(0xFFE056FD),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 18.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(generatedGames, key = { it.id }) { gameEntity ->
-                                val payload = remember(gameEntity.payloadJson) {
-                                    runCatching {
-                                        Json { ignoreUnknownKeys = true }.decodeFromString(
-                                            GeneratedGamePayload.serializer(),
-                                            gameEntity.payloadJson
-                                        )
-                                    }.getOrNull()
-                                }
-                                val emoji = payload?.emoji ?: "✨"
-                                val title = payload?.title ?: gameEntity.title ?: "Neues Spiel"
-                                val questionCount = payload?.questions?.size ?: 7
-                                val isOpened = gameEntity.playedCount > 0 || gameEntity.firstShownAt != null
-
-                                GeneratedGameCard(
-                                    title = title,
-                                    emoji = emoji,
-                                    questionCount = questionCount,
-                                    isOpened = isOpened,
-                                    appLanguage = appLanguage,
-                                    onClick = { onStartGeneratedGame(gameEntity.id) }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
 
             item(key = "topics_header") {
                 Spacer(modifier = Modifier.height(20.dp))
@@ -994,112 +921,3 @@ fun TopicProgressCard(
     }
 }
 
-@Composable
-fun GeneratedGameCard(
-    title: String,
-    emoji: String,
-    questionCount: Int,
-    isOpened: Boolean,
-    appLanguage: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .width(220.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFFE056FD).copy(alpha = 0.22f),
-                        HarmonyPurple.copy(alpha = 0.28f),
-                        HarmonySurface2
-                    )
-                )
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    listOf(Color(0xFFE056FD).copy(alpha = 0.7f), HarmonyPurpleLight.copy(alpha = 0.3f))
-                ),
-                shape = RoundedCornerShape(20.dp)
-            )
-            .clickable { onClick() }
-            .padding(16.dp)
-            .testTag("generated_game_card")
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE056FD).copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = emoji, fontSize = 22.sp)
-            }
-
-            if (!isOpened) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFFE056FD))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text("NEU", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = title,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = HarmonyText,
-            maxLines = 2
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "$questionCount " + LanguageManager.tr("Fragen", appLanguage),
-                fontSize = 12.sp,
-                color = HarmonyPurpleLight,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text("•", color = HarmonyMuted, fontSize = 10.sp)
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "Persönlich",
-                fontSize = 11.5.sp,
-                color = HarmonyMuted
-            )
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Brush.horizontalGradient(listOf(Color(0xFFE056FD), HarmonyPurple)))
-                .padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = LanguageManager.tr("Jetzt spielen", appLanguage),
-                color = Color.White,
-                fontSize = 12.5.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}

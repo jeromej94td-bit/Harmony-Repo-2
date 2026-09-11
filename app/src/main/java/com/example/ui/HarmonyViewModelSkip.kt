@@ -3,14 +3,12 @@ package com.example.ui
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.example.data.db.HarmonyDatabase
-import com.example.data.repository.HarmonyRepository
 import com.example.data.repository.deleteAnswerForSkip
 import kotlinx.coroutines.launch
 
 /**
- * Advances the current runner without inventing an answer and records the explicit skip
- * as a Harmony Brain interaction. Keeping this separate from nextStep() prevents technical
- * navigation from being misclassified as a user skip.
+ * Advances the current runner without inventing an answer. Keeping this separate from
+ * nextStep() preserves skip semantics without any removed personalization side-channel.
  */
 @Suppress("UNCHECKED_CAST")
 fun HarmonyViewModel.skipCurrentQuestion() {
@@ -32,7 +30,6 @@ fun HarmonyViewModel.skipCurrentQuestion() {
     val db = HarmonyDatabase.getInstance(app)
     viewModelScope.launch {
         db.deleteAnswerForSkip(packId, questionIndex)
-        HarmonyRepository(db, app).recordBrainSkip(packId, questionIndex)
     }
 
     nextStep()

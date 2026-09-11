@@ -130,7 +130,7 @@ home = re.sub(
     home,
     flags=re.S,
 )
-home = remove_if_block_after_marker(home, "// --- HARMONY BRAIN COACH ---", "if (brainEnabled)")
+home = remove_if_block_after_marker(home, "if (brainEnabled) {", "if (brainEnabled)")
 write(home_rel, home)
 
 # 3) Remove the shared Brain suggestion UI from VoiceComponents.
@@ -367,6 +367,9 @@ write(main_rel, main)
 for path in list(MAIN.rglob("*.kt")):
     if "brain" in path.name.lower():
         delete(path)
+
+# 8b) Execute the hidden-path cleanup pass in the same migration context.
+exec(compile((ROOT / "scripts/remove_harmony_brain_extras.py").read_text(encoding="utf-8"), "scripts/remove_harmony_brain_extras.py", "exec"))
 
 # 9) Final source guard. Only legacy DROP TABLE tombstones may retain brain_* identifiers.
 forbidden = [

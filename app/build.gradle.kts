@@ -409,13 +409,6 @@ abstract class VerifyProductionSourceIsolationTask : DefaultTask() {
       }
     }
 
-    if (!homeScreen.contains("brainEnabled: Boolean = false")) {
-      violations += "HomeScreen.kt lost the fail-closed archived Brain default"
-    }
-    if (!gamesScreen.contains("brainEnabled: Boolean = false")) {
-      violations += "GamesScreen.kt lost the fail-closed archived Brain default"
-    }
-
     val legacyBridge = File(sourceRoot, "com/example/ui/screens/ChatScreenLegacyBridge.kt")
     if (legacyBridge.exists()) {
       violations += "ChatScreenLegacyBridge.kt must stay removed; production chat is ChatScreen.kt only"
