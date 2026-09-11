@@ -23,27 +23,27 @@ class ScenarioPlayLayoutPolicyTest {
         val short = ScenarioPlayLayoutPolicy.metrics(screenHeightDp = 520, fontScale = 1f)
         assertTrue(short.showScene)
         assertFalse(short.showChapterLabel)
-        assertEquals(56, short.sceneHeightDp)
-        assertEquals(32, short.sceneEmojiSp)
-        assertEquals(6, short.gapDp)
+        assertEquals(42, short.sceneHeightDp)
+        assertEquals(24, short.sceneEmojiSp)
+        assertEquals(5, short.gapDp)
 
         val compact = ScenarioPlayLayoutPolicy.metrics(screenHeightDp = 640, fontScale = 1f)
         assertTrue(compact.showScene)
         assertTrue(compact.showChapterLabel)
-        assertEquals(84, compact.sceneHeightDp)
-        assertEquals(44, compact.sceneEmojiSp)
-        assertEquals(8, compact.gapDp)
+        assertEquals(50, compact.sceneHeightDp)
+        assertEquals(26, compact.sceneEmojiSp)
+        assertEquals(6, compact.gapDp)
     }
 
     @Test
-    fun `normal portrait keeps current visual proportions`() {
+    fun `normal portrait keeps the scene compact to prioritize answer readability`() {
         val metrics = ScenarioPlayLayoutPolicy.metrics(screenHeightDp = 800, fontScale = 1f)
 
         assertTrue(metrics.showScene)
         assertTrue(metrics.showChapterLabel)
-        assertEquals(112, metrics.sceneHeightDp)
-        assertEquals(60, metrics.sceneEmojiSp)
-        assertEquals(12, metrics.gapDp)
+        assertEquals(58, metrics.sceneHeightDp)
+        assertEquals(28, metrics.sceneEmojiSp)
+        assertEquals(8, metrics.gapDp)
     }
 
     @Test
@@ -52,7 +52,7 @@ class ScenarioPlayLayoutPolicyTest {
 
         assertTrue(metrics.showScene)
         assertFalse(metrics.showChapterLabel)
-        assertEquals(56, metrics.sceneHeightDp)
-        assertEquals(32, metrics.sceneEmojiSp)
+        assertEquals(42, metrics.sceneHeightDp)
+        assertEquals(24, metrics.sceneEmojiSp)
     }
 }

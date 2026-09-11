@@ -31,23 +31,23 @@ internal object ScenarioPlayLayoutPolicy {
             veryCompact -> ScenarioPlayLayoutMetrics(
                 showScene = true,
                 showChapterLabel = false,
-                sceneHeightDp = 56,
-                sceneEmojiSp = 32,
-                gapDp = 6
+                sceneHeightDp = 42,
+                sceneEmojiSp = 24,
+                gapDp = 5
             )
             compact -> ScenarioPlayLayoutMetrics(
                 showScene = true,
                 showChapterLabel = true,
-                sceneHeightDp = 84,
-                sceneEmojiSp = 44,
-                gapDp = 8
+                sceneHeightDp = 50,
+                sceneEmojiSp = 26,
+                gapDp = 6
             )
             else -> ScenarioPlayLayoutMetrics(
                 showScene = true,
                 showChapterLabel = true,
-                sceneHeightDp = 112,
-                sceneEmojiSp = 60,
-                gapDp = 12
+                sceneHeightDp = 58,
+                sceneEmojiSp = 28,
+                gapDp = 8
             )
         }
     }

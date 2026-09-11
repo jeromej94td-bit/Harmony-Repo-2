@@ -158,7 +158,7 @@ internal fun FullscreenMechanicShell(
             fontWeight = FontWeight.ExtraBold,
             textAlign = TextAlign.Center
         )
-        if (chromeMetrics.showInstruction) {
+        if (chromeMetrics.showInstruction && instruction.isNotBlank()) {
             Spacer(Modifier.height(chromeMetrics.headerGapDp.dp))
             Text(
                 text = instruction,
@@ -181,7 +181,8 @@ internal fun LargeOptionCard(
     modifier: Modifier = Modifier,
     testTag: String? = null,
     badge: String? = null,
-    accent: Color = HarmonyPink
+    accent: Color = HarmonyPink,
+    emphasizeLabel: Boolean = false
 ) {
     val scale by animateFloatAsState(
         targetValue = if (selected) 1.018f else 1f,
@@ -247,14 +248,26 @@ internal fun LargeOptionCard(
         ) {
             val compactCard = maxHeight < 145.dp
             val cardMetrics = LargeOptionCardLayoutPolicy.metrics(maxHeight.value.toInt())
-            val labelSize = when {
-                compactCard && item.label.length > 78 -> 12.sp
-                compactCard && item.label.length > 55 -> 13.sp
-                compactCard && item.label.length > 36 -> 14.sp
-                compactCard -> 15.sp
-                item.label.length > 78 -> 14.sp
-                item.label.length > 55 -> 15.sp
-                else -> 17.sp
+            val labelSize = if (emphasizeLabel) {
+                when {
+                    compactCard && item.label.length > 78 -> 13.sp
+                    compactCard && item.label.length > 55 -> 15.sp
+                    compactCard && item.label.length > 36 -> 16.sp
+                    compactCard -> 17.sp
+                    item.label.length > 78 -> 15.sp
+                    item.label.length > 55 -> 16.sp
+                    else -> 18.sp
+                }
+            } else {
+                when {
+                    compactCard && item.label.length > 78 -> 12.sp
+                    compactCard && item.label.length > 55 -> 13.sp
+                    compactCard && item.label.length > 36 -> 14.sp
+                    compactCard -> 15.sp
+                    item.label.length > 78 -> 14.sp
+                    item.label.length > 55 -> 15.sp
+                    else -> 17.sp
+                }
             }
             val labelLineHeight = (labelSize.value + 4f).sp
 
@@ -294,7 +307,8 @@ internal fun LargeOptionGrid(
     selectedRaw: String?,
     onSelect: (MechanicOption) -> Unit,
     modifier: Modifier = Modifier,
-    tagPrefix: String = "mechanic_option"
+    tagPrefix: String = "mechanic_option",
+    emphasizeLabels: Boolean = false
 ) {
     val configuration = LocalConfiguration.current
     val gap = if (configuration.screenHeightDp < 700) 8.dp else 12.dp
@@ -332,7 +346,8 @@ internal fun LargeOptionGrid(
                                 onClick = { onSelect(item) },
                                 modifier = Modifier.weight(1f).fillMaxSize(),
                                 testTag = "${tagPrefix}_$index",
-                                accent = accents[index % accents.size]
+                                accent = accents[index % accents.size],
+                                emphasizeLabel = emphasizeLabels
                             )
                         }
                         if (itemsInRow.size == 1) Spacer(Modifier.weight(1f))
@@ -357,7 +372,8 @@ internal fun LargeOptionGrid(
                                 onClick = { onSelect(item) },
                                 modifier = Modifier.weight(1f).fillMaxSize(),
                                 testTag = "${tagPrefix}_$index",
-                                accent = accents[index % accents.size]
+                                accent = accents[index % accents.size],
+                                emphasizeLabel = emphasizeLabels
                             )
                         }
                         if (itemsInRow.size == 1) Spacer(Modifier.weight(1f))
