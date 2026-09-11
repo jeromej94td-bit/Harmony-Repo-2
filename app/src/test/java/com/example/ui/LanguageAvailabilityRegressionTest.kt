@@ -24,4 +24,43 @@ class LanguageAvailabilityRegressionTest {
             AppLanguage.entries.all(TranslationCatalog::hasCompletePack)
         )
     }
+
+    @Test
+    fun japaneseHasFullCustomerTranslationCoverage() {
+        assertTrue(
+            "Japanese must translate every current customer-facing catalog key",
+            TranslationCatalog.hasFullCustomerCoverage(AppLanguage.JAPANESE)
+        )
+    }
+
+    @Test
+    fun japaneseCriticalUiCopyNeverFallsBackToGermanOrEnglish() {
+        val keys = listOf(
+            "Merken",
+            "Das müssen wir uns merken",
+            "Gemeinsam sammeln. Nie vergessen.",
+            "Aktuell",
+            "Erledigte Notizen",
+            "Filme",
+            "Serien",
+            "Ideen",
+            "Orte",
+            "Sonstiges",
+            "Reise beginnen",
+            "Handy weitergeben",
+            "Privater Paar-Chat",
+            "Unbeantwortete Fragen",
+            "Schließen"
+        )
+
+        keys.forEach { german ->
+            val translated = TranslationCatalog.translate(german, AppLanguage.JAPANESE)
+            assertTrue("Missing Japanese translation for: $german", !translated.isNullOrBlank())
+            assertTrue("German leaked into Japanese for: $german", translated != german)
+            val english = TranslationCatalog.translate(german, AppLanguage.ENGLISH)
+            if (!english.isNullOrBlank() && english != german) {
+                assertTrue("English leaked into Japanese for: $german", translated != english)
+            }
+        }
+    }
 }

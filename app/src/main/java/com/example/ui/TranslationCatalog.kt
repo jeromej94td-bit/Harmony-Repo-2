@@ -119,6 +119,7 @@ object TranslationCatalog {
         }
 
         if (language == AppLanguage.JAPANESE) {
+            JAPANESE_COMPLETION_CONTENT[german]?.let { return it }
             LOCALIZATION_UPDATES_JAPANESE[german]?.let { return it }
         }
 
