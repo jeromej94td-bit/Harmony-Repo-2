@@ -23,21 +23,35 @@ internal fun DirectPriorityPokerBoard(
 ) {
     val context = LocalContext.current
     val items = mechanicOptions(options, profile)
-    val prompt = mechanicPrompt(question, items, profile)
+    val visualSpec = restaurantChoiceVisualSpec(question, items)
+    val prompt = visualSpec?.prompt ?: mechanicPrompt(question, items, profile)
 
     QuestionOnlyMechanicShell(
         question = prompt,
         modifier = modifier.testTag("priority_poker_board")
     ) {
-        LargeOptionGrid(
-            items = items,
-            selectedRaw = selectedAnswer,
-            onSelect = { item ->
-                triggerMiniVibration(context, 34L)
-                onPick(item.raw)
-            },
-            modifier = Modifier.fillMaxSize(),
-            tagPrefix = "poker_card"
-        )
+        if (visualSpec != null) {
+            RestaurantChoiceVisualGrid(
+                items = items,
+                spec = visualSpec,
+                selectedRaw = selectedAnswer,
+                onSelect = { item ->
+                    triggerMiniVibration(context, 34L)
+                    onPick(item.raw)
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            LargeOptionGrid(
+                items = items,
+                selectedRaw = selectedAnswer,
+                onSelect = { item ->
+                    triggerMiniVibration(context, 34L)
+                    onPick(item.raw)
+                },
+                modifier = Modifier.fillMaxSize(),
+                tagPrefix = "poker_card"
+            )
+        }
     }
 }
