@@ -25,6 +25,7 @@ class DeveloperFeedbackRepository(
     },
 ) {
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
+    private val jpegMediaType = "image/jpeg".toMediaType()
 
     suspend fun isCurrentUserAdmin(): Boolean = withContext(Dispatchers.IO) {
         val body = request(
@@ -53,28 +54,46 @@ class DeveloperFeedbackRepository(
         buildNumber: String,
         gitCommit: String,
         device: Map<String, String>,
+        screenshotBytes: ByteArray? = null,
         clientFeedbackId: UUID = UUID.randomUUID(),
     ): String = withContext(Dispatchers.IO) {
         if (draft.note.isBlank()) throw DeveloperFeedbackException("note_required")
-        val payload = draft.toRequestJson(
-            clientFeedbackId = clientFeedbackId,
-            context = context,
-            appVersion = appVersion,
-            buildNumber = buildNumber,
-            gitCommit = gitCommit,
-            device = device,
-        )
-        val response = request(
-            method = "POST",
-            url = "${SupabaseConfig.SUPABASE_URL}/functions/v1/harmony-developer-feedback",
-            body = payload,
-        )
-        val json = JSONObject(response)
-        if (!json.optBoolean("ok")) {
-            throw DeveloperFeedbackException(json.optString("error", "feedback_write_failed"))
+
+        val screenshotPath = screenshotBytes?.let { bytes ->
+            uploadScreenshot(clientFeedbackId, bytes)
         }
-        json.optString("id").takeIf { it.isNotBlank() }
-            ?: clientFeedbackId.toString()
+        val draftWithAttachment = if (screenshotPath != null) {
+            draft.copy(screenshotPath = screenshotPath)
+        } else {
+            draft
+        }
+
+        try {
+            val payload = draftWithAttachment.toRequestJson(
+                clientFeedbackId = clientFeedbackId,
+                context = context,
+                appVersion = appVersion,
+                buildNumber = buildNumber,
+                gitCommit = gitCommit,
+                device = device,
+            )
+            val response = request(
+                method = "POST",
+                url = "${SupabaseConfig.SUPABASE_URL}/functions/v1/harmony-developer-feedback",
+                body = payload,
+            )
+            val json = JSONObject(response)
+            if (!json.optBoolean("ok")) {
+                throw DeveloperFeedbackException(json.optString("error", "feedback_write_failed"))
+            }
+            json.optString("id").takeIf { it.isNotBlank() }
+                ?: clientFeedbackId.toString()
+        } catch (error: Throwable) {
+            screenshotPath?.let { path ->
+                runCatching { deleteScreenshot(path) }
+            }
+            throw error
+        }
     }
 
     suspend fun loadFeedback(limit: Int = 100): List<DeveloperFeedbackItem> = withContext(Dispatchers.IO) {
@@ -101,6 +120,48 @@ class DeveloperFeedbackRepository(
             prefer = "return=minimal",
         )
         Unit
+    }
+
+    private suspend fun uploadScreenshot(
+        clientFeedbackId: UUID,
+        bytes: ByteArray,
+    ): String = withContext(Dispatchers.IO) {
+        if (!DeveloperFeedbackScreenshotPolicy.isUploadable(bytes)) {
+            throw DeveloperFeedbackException("invalid_screenshot")
+        }
+        val path = DeveloperFeedbackScreenshotPolicy.objectPath(clientFeedbackId)
+        val accessToken = accessTokenProvider()
+        val request = Request.Builder()
+            .url("${SupabaseConfig.SUPABASE_URL}/storage/v1/object/developer-feedback/$path")
+            .header("apikey", SupabaseConfig.SUPABASE_PUBLISHABLE_KEY)
+            .header("Authorization", "Bearer $accessToken")
+            .header("Accept", "application/json")
+            .header("x-upsert", "false")
+            .post(bytes.toRequestBody(jpegMediaType))
+            .build()
+
+        httpClient.newCall(request).execute().use { response ->
+            val responseBody = response.body?.string().orEmpty()
+            if (!response.isSuccessful) {
+                throw DeveloperFeedbackException(storageError(responseBody, response.code))
+            }
+        }
+        path
+    }
+
+    private suspend fun deleteScreenshot(path: String) = withContext(Dispatchers.IO) {
+        val accessToken = accessTokenProvider()
+        val request = Request.Builder()
+            .url("${SupabaseConfig.SUPABASE_URL}/storage/v1/object/developer-feedback/$path")
+            .header("apikey", SupabaseConfig.SUPABASE_PUBLISHABLE_KEY)
+            .header("Authorization", "Bearer $accessToken")
+            .delete()
+            .build()
+        httpClient.newCall(request).execute().use { response ->
+            if (!response.isSuccessful && response.code != 404) {
+                throw DeveloperFeedbackException("screenshot_cleanup_${response.code}")
+            }
+        }
     }
 
     private suspend fun request(
@@ -136,6 +197,11 @@ class DeveloperFeedbackRepository(
             responseBody
         }
     }
+
+    private fun storageError(responseBody: String, statusCode: Int): String = runCatching {
+        JSONObject(responseBody).optString("error")
+            .ifBlank { JSONObject(responseBody).optString("message") }
+    }.getOrNull().orEmpty().ifBlank { "developer_screenshot_$statusCode" }
 
     private fun JSONObject.toFeedbackItem(): DeveloperFeedbackItem = DeveloperFeedbackItem(
         id = getString("id"),
