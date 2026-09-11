@@ -8,6 +8,8 @@ on:
       - scripts/remove_harmony_brain_feature.py
       - scripts/remove_harmony_brain_extras.py
       - app/src/test/java/com/example/ProductionHarmonyBrainRemovalContractTest.kt
+      - app/src/test/java/com/example/data/repository/HarmonyRepositoryAnswerPersistenceTest.kt
+      - app/src/test/java/com/example/ui/PackResultsAndSkipFlowTest.kt
       - .github/workflows/remove-harmony-brain-once.yml
 
 permissions:
