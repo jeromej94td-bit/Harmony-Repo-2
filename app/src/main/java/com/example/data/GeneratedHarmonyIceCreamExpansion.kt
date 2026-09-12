@@ -7,7 +7,7 @@ package com.example.data
  * zusammengehörige Bildpaare aus dem kuratierten Eiscreme-Ordner ergänzt.
  */
 object GeneratedHarmonyIceCreamExpansion {
-    const val VERSION: Long = 1789248000000L
+    const val VERSION: Long = 1789249000000L
 
     val PACKS: List<GenPack> = listOf(
         GenPack(
@@ -35,5 +35,21 @@ object GeneratedHarmonyIceCreamExpansion {
             ),
             questions = emptyList()
         )
+    )
+
+    /**
+     * Die Bilder liegen bereits als optimierte WebP-Ressourcen im APK. Der spezielle
+     * @drawable/-Wert wird beim Generated-Content-Install in eine interne Arbeitskopie
+     * überführt, sodass TotImageProvider dieselbe Pipeline wie bei anderen Bildern nutzt.
+     */
+    val IMAGES: Map<String, String> = mapOf(
+        "Triple Chocolate Brownie Fudge – Premium Pint" to "@drawable/ice_triple_brownie_pint",
+        "Triple Chocolate Brownie Fudge im Dessertglas" to "@drawable/ice_triple_brownie_glass",
+        "Peanut Butter Chocolate Crunch im Dessertglas" to "@drawable/ice_peanut_butter_crunch_glass",
+        "Peanut Butter Chocolate Crunch – zweite Variante" to "@drawable/ice_peanut_butter_crunch_alt",
+        "Mint Chocolate Chip im Dessertglas" to "@drawable/ice_mint_choc_chip_glass",
+        "Mint Chocolate Chip – zweite Variante" to "@drawable/ice_mint_choc_chip_alt",
+        "Mocha Tiramisu Eis im Dessertglas" to "@drawable/ice_mocha_tiramisu_glass",
+        "Mocha Tiramisu Eis – zweite Variante" to "@drawable/ice_mocha_tiramisu_alt"
     )
 }
