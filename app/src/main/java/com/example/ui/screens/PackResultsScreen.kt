@@ -125,6 +125,7 @@ fun PackResultsScreen(
             session = session,
             answers = answers.associate { it.questionIndex to it.answerText },
             repository = repository,
+            onReplay = onReplay,
             onClose = onClose,
             modifier = modifier
         )

@@ -110,6 +110,15 @@ private fun isLegacyImageChoice(kind: HarmonyImageChoiceKind): Boolean = kind in
     HarmonyImageChoiceKind.TRAUMHAUS
 )
 
+@DrawableRes
+internal fun legacyImageChoiceResultImageRes(kind: HarmonyImageChoiceKind, optionIndex: Int): Int? = when (kind) {
+    HarmonyImageChoiceKind.EGG -> eggChoiceImages.getOrNull(optionIndex)
+    HarmonyImageChoiceKind.STEAK -> steakChoiceImages.getOrNull(optionIndex)
+    HarmonyImageChoiceKind.TRAVEL -> travelChoiceImages.getOrNull(optionIndex)
+    HarmonyImageChoiceKind.TRAUMHAUS -> traumhausChoiceImages.getOrNull(optionIndex)
+    else -> null
+}
+
 @Composable
 private fun harmonyImageChoiceVisuals(kind: HarmonyImageChoiceKind): HarmonyImageChoiceVisuals = when (kind) {
     HarmonyImageChoiceKind.EGG -> HarmonyImageChoiceVisuals(

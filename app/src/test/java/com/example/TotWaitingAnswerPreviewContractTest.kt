@@ -19,11 +19,13 @@ class TotWaitingAnswerPreviewContractTest {
         assertTrue(source.contains("TotImageProvider.getImageUrl("))
         assertTrue(revealCard.contains("showOwnTotPreview"))
         assertTrue(revealCard.contains("state != CoupleRevealState.NEEDS_OWN_ANSWER"))
-        assertTrue(revealCard.contains("!(state == CoupleRevealState.READY && revealed)"))
+        assertTrue(revealCard.contains("state != CoupleRevealState.READY"))
 
         val revealedBranch = revealCard
-            .substringAfter("state == CoupleRevealState.READY && revealed ->")
+            .substringAfter("state == CoupleRevealState.READY ->")
             .substringBefore("state == CoupleRevealState.NEEDS_OWN_ANSWER")
-        assertTrue(revealedBranch.contains("result?.partnerAnswerText.orEmpty()"))
+        assertTrue(revealedBranch.contains("visible = ownVisible"))
+        assertTrue(revealedBranch.contains("visible = partnerVisible"))
+        assertTrue(revealCard.contains("val resolvedPartnerAnswer = result?.partnerAnswerText.orEmpty()"))
     }
 }
