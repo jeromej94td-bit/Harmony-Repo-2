@@ -116,6 +116,7 @@ object GeneratedContentRegistry {
     val IMAGES: Map<String, String> by lazy {
         LinkedHashMap<String, String>().apply {
             putAll(GeneratedHarmonyContent.IMAGES)
+            putAll(GeneratedHarmonyIceCreamExpansion.IMAGES)
             putAll(GeneratedHarmonyNewPicGame.IMAGES)
         }
     }
