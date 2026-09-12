@@ -42,23 +42,28 @@ class RapidAnswerSubmissionGuard(
     private val windowMs: Long = 750L,
     private val nowMs: () -> Long = { System.nanoTime() / 1_000_000L }
 ) {
-    private data class Recent(val timestampMs: Long, val status: CoupleAnswerStatus)
+    private data class Recent(
+        val answerText: String,
+        val timestampMs: Long,
+        val status: CoupleAnswerStatus
+    )
     private val recentByQuestion = mutableMapOf<String, Recent>()
 
     @Synchronized
-    fun recent(packId: String, questionIndex: Int): CoupleAnswerStatus? {
+    fun recent(packId: String, questionIndex: Int, answerText: String): CoupleAnswerStatus? {
         val key = key(packId, questionIndex)
         val item = recentByQuestion[key] ?: return null
         if (nowMs() - item.timestampMs >= windowMs) {
             recentByQuestion.remove(key)
             return null
         }
+        if (item.answerText != normalizeCoupleAnswerText(answerText)) return null
         return item.status
     }
 
     @Synchronized
-    fun record(packId: String, questionIndex: Int, status: CoupleAnswerStatus) {
-        recentByQuestion[key(packId, questionIndex)] = Recent(nowMs(), status)
+    fun record(packId: String, questionIndex: Int, answerText: String, status: CoupleAnswerStatus) {
+        recentByQuestion[key(packId, questionIndex)] = Recent(normalizeCoupleAnswerText(answerText), nowMs(), status)
     }
 
     private fun key(packId: String, questionIndex: Int): String = "$packId#$questionIndex"
@@ -82,6 +87,12 @@ data class CouplePackQuestionResult(
         )
 }
 
+data class CouplePackAttemptStatus(
+    val attemptId: String,
+    val sequence: Int,
+    val createdNew: Boolean
+)
+
 class CoupleQuestionRepository(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -96,20 +107,39 @@ class CoupleQuestionRepository(
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
     private val submitMutex = Mutex()
 
+    suspend fun startPackAttempt(packId: String): CouplePackAttemptStatus {
+        val normalizedPackId = packId.trim()
+        if (normalizedPackId.isBlank()) throw CoupleQuestionException("invalid_pack_id")
+
+        val response = postRpc(
+            functionName = "start_pack_attempt",
+            body = JSONObject().put("p_pack_id", normalizedPackId)
+        )
+        val rows = JSONArray(response)
+        if (rows.length() != 1) throw CoupleQuestionException("pack_attempt_missing")
+        val row = rows.getJSONObject(0)
+        return CouplePackAttemptStatus(
+            attemptId = row.getString("attempt_id"),
+            sequence = row.getInt("attempt_sequence"),
+            createdNew = row.optBoolean("created_new", false)
+        )
+    }
+
     suspend fun submitAnswer(packId: String, questionIndex: Int, answerText: String): CoupleAnswerStatus {
         if (packId.isBlank() || questionIndex < 0 || answerText.isBlank()) {
             throw CoupleQuestionException("invalid_answer_payload")
         }
 
+        val normalizedAnswer = normalizeCoupleAnswerText(answerText)
         submitMutex.lock()
         try {
-            submissionGuard.recent(packId, questionIndex)?.let { return it }
+            submissionGuard.recent(packId, questionIndex, normalizedAnswer)?.let { return it }
             val response = postRpc(
                 functionName = "submit_question_answer",
                 body = JSONObject()
                     .put("p_pack_id", packId)
                     .put("p_question_index", questionIndex)
-                    .put("p_answer_text", answerText.trim())
+                    .put("p_answer_text", normalizedAnswer)
             )
             val rows = JSONArray(response)
             if (rows.length() != 1) throw CoupleQuestionException("answer_status_missing")
@@ -120,7 +150,11 @@ class CoupleQuestionRepository(
                 partnerAnswered = row.optBoolean("partner_answered", false),
                 readyToReveal = row.optBoolean("ready_to_reveal", false)
             )
-            submissionGuard.record(packId, questionIndex, status)
+            // The RPC creates/locates the shared round. Persist the selected value again
+            // through the row's authenticated UPDATE path so a changed choice always
+            // replaces the previous value instead of leaving the first answer visible.
+            replaceRoundAnswer(status.roundId, normalizedAnswer)
+            submissionGuard.record(packId, questionIndex, normalizedAnswer, status)
             return status
         } finally {
             submitMutex.unlock()
@@ -147,6 +181,33 @@ class CoupleQuestionRepository(
                     )
                 )
             }
+        }
+    }
+
+    private suspend fun replaceRoundAnswer(roundId: String, answerText: String) = withContext(Dispatchers.IO) {
+        val accessToken = accessTokenProvider()
+        val request = Request.Builder()
+            .url("${SupabaseConfig.SUPABASE_URL}/rest/v1/harmony_question_answers?round_id=eq.$roundId")
+            .patch(JSONObject().put("answer_text", answerText).toString().toRequestBody(jsonMediaType))
+            .header("apikey", SupabaseConfig.SUPABASE_PUBLISHABLE_KEY)
+            .header("Authorization", "Bearer $accessToken")
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/json")
+            .header("Prefer", "return=representation")
+            .build()
+
+        httpClient.newCall(request).execute().use { response ->
+            val responseBody = response.body?.string().orEmpty()
+            if (!response.isSuccessful) {
+                val serverCode = runCatching { JSONObject(responseBody).optString("message") }
+                    .getOrNull().orEmpty().ifBlank { "answer_replace_${response.code}" }
+                throw CoupleQuestionException(serverCode)
+            }
+            val rows = JSONArray(responseBody.ifBlank { "[]" })
+            val synced = (0 until rows.length()).any { index ->
+                rows.getJSONObject(index).optString("answer_text") == answerText
+            }
+            if (!synced) throw CoupleQuestionException("latest_answer_not_synced")
         }
     }
 
