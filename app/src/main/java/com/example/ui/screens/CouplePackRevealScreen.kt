@@ -42,9 +42,12 @@ import com.example.data.couple.CouplePackQuestionResult
 import com.example.data.couple.CoupleQuestionRepository
 import com.example.data.couple.CoupleRevealState
 import com.example.data.model.QuestionPack
+import com.example.data.model.TravelDestinationCatalog
 import com.example.data.session.AppSession
 import com.example.data.session.UserProfile
+import com.example.ui.components.TotImageProvider
 import com.example.ui.contentText
+import com.example.ui.tr
 import com.example.ui.theme.HarmonyBg
 import com.example.ui.theme.HarmonyLine
 import com.example.ui.theme.HarmonyMuted
@@ -159,6 +162,7 @@ fun CouplePackRevealScreen(
             items(indexes, key = { "question_$it" }) { questionIndex ->
                 val result = results.firstOrNull { it.questionIndex == questionIndex }
                 CoupleQuestionRevealCard(
+                    pack = pack,
                     questionNumber = questionIndex + 1,
                     questionText = questionLabel(pack, questionIndex),
                     session = session,
@@ -198,6 +202,7 @@ private fun CoupleHeaderProfiles(session: AppSession) {
 
 @Composable
 private fun CoupleQuestionRevealCard(
+    pack: QuestionPack,
     questionNumber: Int,
     questionText: String,
     session: AppSession,
@@ -209,6 +214,10 @@ private fun CoupleQuestionRevealCard(
     val partner = session.partner ?: return
     val state = result?.revealState ?: CoupleRevealState.WAITING_FOR_PARTNER
     val shape = RoundedCornerShape(22.dp)
+    val showOwnTotPreview = pack.type == "tot" &&
+        myAnswer.isNotBlank() &&
+        state != CoupleRevealState.NEEDS_OWN_ANSWER &&
+        !(state == CoupleRevealState.READY && revealed)
 
     Column(
         modifier = Modifier
@@ -221,6 +230,10 @@ private fun CoupleQuestionRevealCard(
         Text("Frage $questionNumber", color = HarmonyPink, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(5.dp))
         Text(questionText, color = HarmonyText, fontSize = 15.5.sp, fontWeight = FontWeight.Bold, lineHeight = 21.sp)
+        if (showOwnTotPreview) {
+            Spacer(Modifier.height(14.dp))
+            TotOwnAnswerPreview(pack = pack, myAnswer = myAnswer)
+        }
         Spacer(Modifier.height(14.dp))
 
         when {
@@ -269,6 +282,62 @@ private fun CoupleQuestionRevealCard(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TotOwnAnswerPreview(
+    pack: QuestionPack,
+    myAnswer: String
+) {
+    val assetKey = remember(pack.id, myAnswer) {
+        TravelDestinationCatalog.assetKeyFor(pack.id, myAnswer) ?: myAnswer
+    }
+    val imageModel = remember(assetKey, myAnswer, TotImageProvider.version) {
+        TotImageProvider.getImageUrl(
+            assetKey = assetKey,
+            legacyAssetKey = myAnswer
+        )
+    }
+    val shape = RoundedCornerShape(16.dp)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(HarmonyPink.copy(alpha = 0.10f))
+            .border(1.dp, HarmonyPink.copy(alpha = 0.28f), shape)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            model = imageModel,
+            contentDescription = contentText(myAnswer),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(68.dp)
+                .clip(RoundedCornerShape(13.dp))
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .weight(1f)
+        ) {
+            Text(
+                text = tr("Deine Auswahl", "Your choice"),
+                color = HarmonyPink,
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = contentText(myAnswer),
+                color = HarmonyText,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 19.sp
+            )
         }
     }
 }
