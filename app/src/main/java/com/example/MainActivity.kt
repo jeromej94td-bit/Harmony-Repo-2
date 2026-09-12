@@ -287,7 +287,7 @@ fun HarmonyApp(
         freshRun: Boolean = false,
         skipFairyBookIntro: Boolean = false
     ) {
-        resultsPackId = null
+        if (!freshRun) resultsPackId = null
         if (packId == FAIRY_BOOK_PACK_ID && !skipFairyBookIntro) {
             pendingFairyBookFreshRun = freshRun
             pendingFairyBookIntro = true
@@ -295,10 +295,12 @@ fun HarmonyApp(
         }
         when {
             packId == PANDA_EITHER_OR_PACK_ID -> {
+                resultsPackId = null
                 isPandaEitherOrOpen = true
                 isPandaExitConfirmOpen = false
             }
             ProposalExperienceEntryPolicy.opensFullscreenExperience(packId) -> {
+                resultsPackId = null
                 isProposalExperienceOpen = true
             }
             freshRun -> {
@@ -306,6 +308,17 @@ fun HarmonyApp(
                     ?.let { com.example.data.model.LoveBalanceQuestionPolicy.ensureHappyCoupleFirst(it) }
                     ?: return
                 runnerScope.launch {
+                    if (!isDemoMode && appSession.isPaired) {
+                        try {
+                            coupleQuestionRepository.startPackAttempt(packId)
+                        } catch (error: kotlinx.coroutines.CancellationException) {
+                            throw error
+                        } catch (error: Throwable) {
+                            viewModel.showToast("Neuer Spieldurchlauf konnte nicht gestartet werden. Bitte erneut versuchen.")
+                            return@launch
+                        }
+                    }
+                    resultsPackId = null
                     appDb.answerDao().deleteAnswersForPack(packId)
                     appDb.brainRoomDao().clearFinishedPack(packId)
                     viewModel.startPackForTest(pack, currentIndex = 0)
@@ -828,6 +841,9 @@ fun HarmonyApp(
                             session = appSession,
                             answers = activeRun.currentAnswers,
                             repository = coupleQuestionRepository,
+                            onReplay = {
+                                openPackForPlay(activeRun.pack.id, freshRun = true)
+                            },
                             onClose = { viewModel.closeRunner() }
                         )
                     }
@@ -841,7 +857,6 @@ fun HarmonyApp(
                             profile = displayProfile,
                             appLanguage = uiState.appLanguage,
                             onReplay = {
-                                resultsPackId = null
                                 openPackForPlay(packId, freshRun = true)
                             },
                             onClose = { resultsPackId = null }

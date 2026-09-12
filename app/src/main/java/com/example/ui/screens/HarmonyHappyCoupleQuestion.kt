@@ -51,11 +51,17 @@ import com.example.ui.tr
 import kotlinx.coroutines.delay
 
 private val happyCoupleImages = listOf(
-    R.drawable.happy_couple_01,
-    R.drawable.happy_couple_02,
-    R.drawable.happy_couple_03,
-    R.drawable.happy_couple_04
+    R.drawable.love_balance_happy_green_20260912,
+    R.drawable.love_balance_happy_yellow_20260912,
+    R.drawable.love_balance_happy_red_20260912,
+    R.drawable.love_balance_happy_blue_20260912
 )
+
+@DrawableRes
+internal fun happyCoupleImageResForAnswer(answer: String): Int? {
+    val index = answer.trim().toIntOrNull()?.minus(1) ?: return null
+    return happyCoupleImages.getOrNull(index)
+}
 
 private val happyCoupleFallbackOptions = listOf("1", "2", "3", "4")
 
@@ -87,7 +93,7 @@ internal fun HarmonyHappyCoupleQuestion(
                 )
             )
             .border(1.2.dp, HarmonyPink.copy(alpha = 0.42f), containerShape)
-            .padding(horizontal = 6.dp, vertical = 14.dp)
+            .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("harmony_happy_couple_question"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -103,26 +109,26 @@ internal fun HarmonyHappyCoupleQuestion(
             Text(
                 text = "✦ ${tr("Frage 1 von 11", "Question 1 of 11")}",
                 color = HarmonyText,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = displayQuestion,
             color = HarmonyText,
-            fontSize = 23.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.ExtraBold,
-            lineHeight = 27.sp,
+            lineHeight = 23.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 6.dp)
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         answerOptions.chunked(2).forEachIndexed { rowIndex, rowOptions ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 rowOptions.forEachIndexed { columnIndex, option ->
                     val index = rowIndex * 2 + columnIndex
@@ -137,7 +143,7 @@ internal fun HarmonyHappyCoupleQuestion(
                     )
                 }
             }
-            if (rowIndex == 0) Spacer(modifier = Modifier.height(8.dp))
+            if (rowIndex == 0) Spacer(modifier = Modifier.height(6.dp))
         }
     }
 }
@@ -171,7 +177,7 @@ private fun HarmonyHappyCoupleCard(
     val progress = reveal.value.coerceIn(0f, 1f)
     Box(
         modifier = modifier
-            .aspectRatio(0.82f)
+            .aspectRatio(0.76f)
             .graphicsLayer {
                 alpha = progress
                 rotationY = -82f * (1f - progress)
