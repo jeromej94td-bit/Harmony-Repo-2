@@ -301,9 +301,18 @@ object DevAssetStore {
 
     fun writeBase64(context: Context, key: String, base64: String): String? {
         return try {
-            val bytes = Base64.decode(base64, Base64.DEFAULT)
             val target = fileFor(context, key)
-            FileOutputStream(target).use { it.write(bytes) }
+            if (base64.startsWith("@drawable/")) {
+                val resourceName = base64.removePrefix("@drawable/").trim()
+                val resourceId = context.resources.getIdentifier(resourceName, "drawable", context.packageName)
+                if (resourceId == 0) return null
+                context.resources.openRawResource(resourceId).use { input ->
+                    FileOutputStream(target).use { output -> input.copyTo(output) }
+                }
+            } else {
+                val bytes = Base64.decode(base64, Base64.DEFAULT)
+                FileOutputStream(target).use { it.write(bytes) }
+            }
             target.absolutePath
         } catch (e: Exception) {
             e.printStackTrace()
