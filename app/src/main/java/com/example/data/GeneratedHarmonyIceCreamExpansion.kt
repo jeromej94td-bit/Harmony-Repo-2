@@ -36,17 +36,4 @@ object GeneratedHarmonyIceCreamExpansion {
             questions = emptyList()
         )
     )
-
-    val IMAGES: Map<String, String> by lazy {
-        linkedMapOf(
-            "Triple Chocolate Brownie Fudge – Premium Pint" to iceCreamExpansionImage0(),
-            "Triple Chocolate Brownie Fudge im Dessertglas" to iceCreamExpansionImage1(),
-            "Peanut Butter Chocolate Crunch im Dessertglas" to iceCreamExpansionImage2(),
-            "Peanut Butter Chocolate Crunch – zweite Variante" to iceCreamExpansionImage3(),
-            "Mint Chocolate Chip im Dessertglas" to iceCreamExpansionImage4(),
-            "Mint Chocolate Chip – zweite Variante" to iceCreamExpansionImage5(),
-            "Mocha Tiramisu Eis im Dessertglas" to iceCreamExpansionImage6(),
-            "Mocha Tiramisu Eis – zweite Variante" to iceCreamExpansionImage7()
-        )
-    }
 }
