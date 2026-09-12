@@ -59,7 +59,8 @@ class GeneratedHarmonyIceCreamExpansionTest {
         )
 
         assertNotNull(path)
+        val installedPath = requireNotNull(path)
         assertTrue(DevAssetStore.hasImage(context, key))
-        assertNotNull(BitmapFactory.decodeFile(path))
+        assertNotNull(BitmapFactory.decodeFile(installedPath))
     }
 }
