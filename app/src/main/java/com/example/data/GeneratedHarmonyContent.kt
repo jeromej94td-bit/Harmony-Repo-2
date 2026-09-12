@@ -13,13 +13,13 @@ object GeneratedHarmonyContent {
         // DRIVE_TOT_RELEASE_BEGIN
         // Drive catalogue integration. Existing Gourmet-Eis pack is intentionally untouched.
         GenPack(id="traumhaus", title="Unser Traumhaus", cat="tot", topic="geld", type="tot", tags=listOf("dasoderdas"), pairs=listOf(
-            "Altbau mit Charme" to "Neubau mit Smart Home", "Offene Wohnküche" to "Separate Küche", "Prasselnder Kamin" to "Fußbodenheizung", "Großer Garten" to "Sonnige Dachterrasse",
-            "Stadtvilla" to "Landhaus", "Glasfassade" to "Natursteinfassade", "Penthouse mit Ausblick" to "Haus am See", "Minimalistisches Interieur" to "Landhausstil",
-            "Bibliothek" to "Heimkino", "Innenpool" to "Wellnessbad", "Große Fensterfront" to "Privater Innenhof", "Tiny House" to "Mehrgenerationenhaus")),
+            "Altbau mit Charme" to "Neubau mit Smart Home", "Offene Wohnküche" to "Separate Küche", "Stadtvilla" to "Landhaus", "Glasfassade" to "Natursteinfassade",
+            "Penthouse mit Ausblick" to "Haus am See", "Minimalistisches Interieur" to "Landhausstil", "Bibliothek" to "Heimkino", "Innenpool" to "Wellnessbad",
+            "Große Fensterfront" to "Privater Innenhof", "Tiny House" to "Mehrgenerationenhaus")),
         GenPack(id="aussen", title="Traumhaus Außenbereich", cat="tot", topic="geld", type="tot", tags=listOf("dasoderdas"), pairs=listOf(
-            "Großer Außenpool" to "Outdoor-Whirlpool", "Moderne Grillstation" to "Gemütliche Feuerstelle", "Eigenes Gemüsebeet" to "Bunte Blumenwiese", "Entspannte Hängematte" to "Stilvolles Outdoor-Sofa",
-            "Infinity-Pool" to "Naturteich", "Outdoor-Küche" to "Pizzaofen", "Pergola mit Lounge" to "Wintergarten", "Kräuterbeet" to "Obstgarten", "Dachgarten mit Lounge" to "Mediterraner Innenhof",
-            "Feuerstelle" to "Außenkamin", "Spielbereich für Kinder" to "Sportplatz", "Gewächshaus" to "Saunahaus")),
+            "Großer Außenpool" to "Outdoor-Whirlpool", "Eigenes Gemüsebeet" to "Bunte Blumenwiese", "Entspannte Hängematte" to "Stilvolles Outdoor-Sofa",
+            "Infinity-Pool" to "Naturteich", "Outdoor-Küche" to "Pizzaofen", "Pergola mit Lounge" to "Wintergarten", "Dachgarten mit Lounge" to "Mediterraner Innenhof",
+            "Feuerstelle" to "Außenkamin", "Gewächshaus" to "Saunahaus")),
         GenPack(id="aktivitaeten", title="Aktivitäten & Hobbys", cat="tot", topic="hobbys", type="tot", tags=listOf("dasoderdas","hobbys"), pairs=listOf(
             "Wandern" to "Strandtag", "Konzert" to "Kino", "Kochkurs" to "Restaurant", "Museum" to "Freizeitpark",
             "Töpfern" to "Klavier spielen", "Malen" to "Zeichnen", "Badminton" to "Mountainbike", "Bowling" to "Holzwerken", "Gitarre spielen" to "Tennis", "Brettspiele" to "Darts")),

@@ -97,10 +97,10 @@ private val travelChoiceImages = listOf(
 )
 
 private val traumhausChoiceImages = listOf(
-    R.drawable.traumhaus_altbau, R.drawable.traumhaus_bibliothek, R.drawable.traumhaus_dachterrasse,
-    R.drawable.traumhaus_fensterfront, R.drawable.traumhaus_fussbodenheizung, R.drawable.traumhaus_garten,
-    R.drawable.traumhaus_glasfassade, R.drawable.traumhaus_heimkino, R.drawable.traumhaus_innenhof,
-    R.drawable.traumhaus_innenpool, R.drawable.traumhaus_kamin, R.drawable.traumhaus_landhaus
+    R.drawable.traumhaus_altbau, R.drawable.traumhaus_smart_home, R.drawable.traumhaus_wohnkueche,
+    R.drawable.traumhaus_separate_kueche, R.drawable.traumhaus_stadtvilla, R.drawable.traumhaus_landhaus,
+    R.drawable.traumhaus_glasfassade, R.drawable.traumhaus_naturstein, R.drawable.traumhaus_penthouse,
+    R.drawable.traumhaus_see, R.drawable.traumhaus_minimal, R.drawable.traumhaus_landhausstil
 )
 
 private fun isLegacyImageChoice(kind: HarmonyImageChoiceKind): Boolean = kind in setOf(

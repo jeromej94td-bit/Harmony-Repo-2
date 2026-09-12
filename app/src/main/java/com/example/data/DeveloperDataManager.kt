@@ -67,8 +67,19 @@ object DeveloperDataManager {
     }
 
     private fun migrateRefreshedChoicePacks() {
-        val refreshedIds = setOf("traumhaus", "aussen", "ringe")
-        customPacks.removeAll { it.id in refreshedIds && it.pairs.size < 12 }
+        customPacks.removeAll { pack ->
+            when (pack.id) {
+                "traumhaus" ->
+                    ("Prasselnder Kamin" to "Fußbodenheizung") in pack.pairs ||
+                        ("Großer Garten" to "Sonnige Dachterrasse") in pack.pairs
+                "aussen" ->
+                    ("Moderne Grillstation" to "Gemütliche Feuerstelle") in pack.pairs ||
+                        ("Kräuterbeet" to "Obstgarten") in pack.pairs ||
+                        ("Spielbereich für Kinder" to "Sportplatz") in pack.pairs
+                "ringe" -> pack.pairs.size < 12
+                else -> false
+            }
+        }
     }
 
     private fun prefs(context: Context) =

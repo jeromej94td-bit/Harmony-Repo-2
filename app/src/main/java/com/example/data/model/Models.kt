@@ -406,8 +406,6 @@ object HarmonyPacksData {
             pairs = listOf(
                 "Altbau mit Charme" to "Neubau mit Smart Home",
                 "Offene Wohnküche" to "Separate Küche",
-                "Prasselnder Kamin" to "Fußbodenheizung",
-                "Großer Garten" to "Sonnige Dachterrasse",
                 "Stadtvilla" to "Landhaus",
                 "Glasfassade" to "Natursteinfassade",
                 "Penthouse mit Ausblick" to "Haus am See",
@@ -428,20 +426,16 @@ object HarmonyPacksData {
             type = "tot",
             pairs = listOf(
                 "Großer Außenpool" to "Outdoor-Whirlpool",
-                "Moderne Grillstation" to "Gemütliche Feuerstelle",
                 "Eigenes Gemüsebeet" to "Bunte Blumenwiese",
                 "Entspannte Hängematte" to "Stilvolles Outdoor-Sofa",
                 "Infinity-Pool" to "Naturteich",
                 "Outdoor-Küche" to "Pizzaofen",
                 "Pergola mit Lounge" to "Wintergarten",
-                "Kräuterbeet" to "Obstgarten",
                 "Dachgarten mit Lounge" to "Mediterraner Innenhof",
                 "Feuerstelle" to "Außenkamin",
-                "Spielbereich für Kinder" to "Sportplatz",
                 "Gewächshaus" to "Saunahaus"
             )
         ),
-
         QuestionPack(
             id = "aktivitaeten",
             title = "Aktivitäten",
