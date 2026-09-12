@@ -15,6 +15,7 @@ import com.example.data.model.LoveBalanceQuestionPolicy
 object GeneratedContentRegistry {
     val VERSION: Long =
         (GeneratedHarmonyContent.VERSION * 31L) xor
+            GeneratedHarmonyIceCreamExpansion.VERSION xor
             GeneratedHarmonyNewPicGame.VERSION xor
             GeneratedHarmonyAdrenaline360.VERSION xor
             GeneratedHarmonyHappyCouple.VERSION xor
@@ -85,6 +86,9 @@ object GeneratedContentRegistry {
     private val cachedPacks: List<GenPack> by lazy {
         val byId = LinkedHashMap<String, GenPack>()
         GeneratedHarmonyContent.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
+        // The curated ice-cream expansion deliberately reuses the stable pack id so it
+        // replaces only Gourmet Eis-Sorten while preserving the original seven rounds.
+        GeneratedHarmonyIceCreamExpansion.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyNewPicGame.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyAdrenaline360.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
         GeneratedHarmonyHappyCouple.PACKS.forEach { pack -> runtimePack(pack).also { byId[it.id] = it } }
@@ -112,6 +116,7 @@ object GeneratedContentRegistry {
     val IMAGES: Map<String, String> by lazy {
         LinkedHashMap<String, String>().apply {
             putAll(GeneratedHarmonyContent.IMAGES)
+            putAll(GeneratedHarmonyIceCreamExpansion.IMAGES)
             putAll(GeneratedHarmonyNewPicGame.IMAGES)
         }
     }
