@@ -1,0 +1,74 @@
+name: Remove Harmony Brain once
+
+on:
+  push:
+    branches:
+      - fix/remove-harmony-brain-completely
+    paths:
+      - scripts/remove_harmony_brain_feature.py
+      - scripts/remove_harmony_brain_extras.py
+      - app/src/test/java/com/example/ProductionHarmonyBrainRemovalContractTest.kt
+      - app/src/test/java/com/example/data/repository/HarmonyRepositoryAnswerPersistenceTest.kt
+      - app/src/test/java/com/example/ui/PackResultsAndSkipFlowTest.kt
+      - .github/workflows/remove-harmony-brain-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout removal branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Remove archived Harmony Brain feature
+        shell: bash
+        run: |
+          chmod +x gradlew
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/remove_harmony_brain_feature.py")
+          text = path.read_text(encoding="utf-8")
+          old = 'home = remove_if_block_after_marker(home, "// --- HARMONY BRAIN COACH ---", "if (brainEnabled)")'
+          new = 'home = remove_if_block_after_marker(home, "if (brainEnabled) {", "if (brainEnabled)")'
+          if old not in text:
+              raise SystemExit("Expected Home removal rule not found")
+          text = text.replace(old, new, 1)
+          marker = "# 9) Final source guard. Only legacy DROP TABLE tombstones may retain brain_* identifiers."
+          hook = '''# 8b) Execute the hidden-path cleanup pass in the same migration context.\nexec(compile((ROOT / "scripts/remove_harmony_brain_extras.py").read_text(encoding="utf-8"), "scripts/remove_harmony_brain_extras.py", "exec"))\n\n'''
+          if marker not in text:
+              raise SystemExit("Final source guard marker not found")
+          text = text.replace(marker, hook + marker, 1)
+          path.write_text(text, encoding="utf-8")
+          PY
+          python3 scripts/remove_harmony_brain_feature.py
+
+      - name: Verify permanent removal contract
+        run: ./gradlew testDebugUnitTest --tests com.example.ProductionHarmonyBrainRemovalContractTest --no-daemon
+
+      - name: Verify Android debug build
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Commit verified removal
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No migration changes to commit"
+            exit 1
+          fi
+          git commit -m "refactor: remove Harmony Brain from Android production"
+          git push origin HEAD:fix/remove-harmony-brain-completely

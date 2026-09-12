@@ -2,7 +2,6 @@ package com.example.ui
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
-import com.example.data.brain.db.BrainInteractionEntity
 import com.example.data.db.HarmonyDatabase
 import com.example.data.model.AnswerEntity
 import com.example.data.model.EitherOrAnswerCodec
@@ -87,30 +86,4 @@ class PackResultsAndSkipFlowTest {
         assertTrue(activeRunFlow.value?.currentAnswers?.isEmpty() == true)
     }
 
-    @Test
-    fun `finished marker survives skipped questions and replay reset clears current result state`() = runTest {
-        val app = ApplicationProvider.getApplicationContext<Application>()
-        val db = HarmonyDatabase.getInstance(app)
-        val packId = "results_replay_reset_test"
-
-        db.answerDao().deleteAnswersForPack(packId)
-        db.brainRoomDao().clearFinishedPack(packId)
-        db.answerDao().insertAnswer(AnswerEntity(packId, 0, "A"))
-        db.brainRoomDao().insertInteraction(
-            BrainInteractionEntity(
-                contentId = packId,
-                contentType = "PACK",
-                action = "FINISHED_PACK"
-            )
-        )
-
-        assertTrue(db.brainRoomDao().hasFinishedPack(packId))
-        assertTrue(db.answerDao().getAllAnswersDirect().any { it.packId == packId })
-
-        db.answerDao().deleteAnswersForPack(packId)
-        db.brainRoomDao().clearFinishedPack(packId)
-
-        assertFalse(db.brainRoomDao().hasFinishedPack(packId))
-        assertFalse(db.answerDao().getAllAnswersDirect().any { it.packId == packId })
-    }
 }
