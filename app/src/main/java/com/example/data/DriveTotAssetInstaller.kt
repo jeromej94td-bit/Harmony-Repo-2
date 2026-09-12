@@ -74,6 +74,14 @@ object DriveTotAssetInstaller {
         "Budapest, Ungarn" to "travel_budapest.webp",
     )
 
+    private val refreshedCompiledDriveOptions = setOf(
+        "Cappuccino", "Matcha-Latte", "Heiße Schokolade", "Eistee",
+        "Minzlimonade", "Fruchtpunsch", "Bier", "Rote-Bete-Saft",
+        "Coca-Cola", "Fanta", "Orangensaft", "Apfelsaft", "Kaffee", "Tee",
+        "Töpfern", "Klavier spielen", "Malen", "Zeichnen", "Badminton", "Mountainbike",
+        "Bowling", "Holzwerken", "Gitarre spielen", "Tennis", "Brettspiele", "Darts"
+    )
+
     private val brandOptionToFile = linkedMapOf(
         "McDonald’s" to "brand_mcdonalds.webp",
         "Burger King" to "brand_burger_king.webp",
@@ -226,7 +234,11 @@ object DriveTotAssetInstaller {
             if (
                 file.isFile &&
                 file.length() > 0L &&
-                TotImageSourcePolicy.shouldUseBundledInstallerImage(option, generatedOptionKeys)
+                TotImageSourcePolicy.shouldUseBundledInstallerImage(
+                    option = option,
+                    generatedOptionKeys = generatedOptionKeys,
+                    preferCompiledResource = option in refreshedCompiledDriveOptions
+                )
             ) {
                 result[option] = file.absolutePath
             }
