@@ -1709,7 +1709,8 @@ fun TotCardPairView(
         ) {
             TotStyledCard(
                 text = contentText(firstText),
-                assetKey = TravelDestinationCatalog.assetKeyFor(packId, topShuffleKey) ?: topShuffleKey,
+                assetKey = TravelDestinationCatalog.assetKeyFor(packId, topShuffleKey)
+                    ?: TotImageProvider.totAssetKey(packId, topShuffleKey),
                 tagAlignment = Alignment.TopStart,
                 isSelected = selectedAns == firstText,
                 rotationAngle = -3.2f + topTilt.value,
@@ -1725,7 +1726,8 @@ fun TotCardPairView(
 
             TotStyledCard(
                 text = contentText(secondText),
-                assetKey = TravelDestinationCatalog.assetKeyFor(packId, bottomShuffleKey) ?: bottomShuffleKey,
+                assetKey = TravelDestinationCatalog.assetKeyFor(packId, bottomShuffleKey)
+                    ?: TotImageProvider.totAssetKey(packId, bottomShuffleKey),
                 tagAlignment = Alignment.BottomStart,
                 isSelected = selectedAns == secondText,
                 rotationAngle = 3.2f + bottomTilt.value,

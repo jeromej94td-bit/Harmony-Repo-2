@@ -946,7 +946,11 @@ private fun EditPackSheet(
         scope.launch {
             busyText = "Bild wird übernommen…"
             withContext(Dispatchers.IO) {
-                DeveloperDataManager.setImageFromUri(context, target, uri)
+                if (type == "tot") {
+                    DeveloperDataManager.setTotImageFromUri(context, pack.id, target, uri)
+                } else {
+                    DeveloperDataManager.setImageFromUri(context, target, uri)
+                }
             }
             busyText = null
             imageVersion++
@@ -982,7 +986,11 @@ private fun EditPackSheet(
                 var done = 0
                 namesAndUris.forEach { (label, uri) ->
                     if (uri != null) {
-                        DeveloperDataManager.setImageFromUri(context, label, uri)
+                        if (type == "tot") {
+                            DeveloperDataManager.setTotImageFromUri(context, pack.id, label, uri)
+                        } else {
+                            DeveloperDataManager.setImageFromUri(context, label, uri)
+                        }
                     }
                     done++
                     busyText = "Speichere Bild $done von ${namesAndUris.size}…"
@@ -1146,6 +1154,7 @@ private fun EditPackSheet(
                         }
                         itemsIndexed(pairs) { index, pair ->
                             PairEditor(
+                                packId = pack.id,
                                 index = index,
                                 pair = pair,
                                 imageVersion = imageVersion,
@@ -1249,6 +1258,7 @@ private fun EditPackSheet(
 
 @Composable
 private fun PairEditor(
+    packId: String,
     index: Int,
     pair: Pair<String, String>,
     imageVersion: Int,
@@ -1286,6 +1296,7 @@ private fun PairEditor(
             OptionSlot(
                 slotId = leftSlot,
                 text = pair.first,
+                assetKey = TotImageProvider.totAssetKey(packId, pair.first),
                 imageVersion = imageVersion,
                 isDragging = draggingSlot == leftSlot,
                 onSlotBounds = onSlotBounds,
@@ -1304,6 +1315,7 @@ private fun PairEditor(
             OptionSlot(
                 slotId = rightSlot,
                 text = pair.second,
+                assetKey = TotImageProvider.totAssetKey(packId, pair.second),
                 imageVersion = imageVersion,
                 isDragging = draggingSlot == rightSlot,
                 onSlotBounds = onSlotBounds,
@@ -1327,6 +1339,7 @@ private fun PairEditor(
 private fun OptionSlot(
     slotId: String,
     text: String,
+    assetKey: String,
     imageVersion: Int,
     isDragging: Boolean,
     onSlotBounds: (String, Rect) -> Unit,
@@ -1376,8 +1389,8 @@ private fun OptionSlot(
         ) {
             if (text.isNotBlank()) {
                 AsyncImage(
-                    model = remember(text, imageVersion, TotImageProvider.version) {
-                        TotImageProvider.getImageUrl(text)
+                    model = remember(text, assetKey, imageVersion, TotImageProvider.version) {
+                        TotImageProvider.getImageUrl(assetKey = assetKey, legacyAssetKey = text)
                     },
                     contentDescription = text,
                     contentScale = ContentScale.Crop,

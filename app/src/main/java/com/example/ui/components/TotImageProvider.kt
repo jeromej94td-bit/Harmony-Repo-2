@@ -450,15 +450,18 @@ object TotImageProvider {
         generatedOverrides[trimmed]?.let { return resolve(it) }
         generatedOverrides[lower]?.let { return resolve(it) }
 
+        // Exact bundled mappings must win before any fuzzy flavor heuristic.
+        // Otherwise labels such as "Heiße Schokolade" are misclassified as the
+        // generic ice-cream flavor "Schokolade" and can display dessert artwork.
+        directMap[trimmed]?.let { return it }
+        directMap[lower]?.let { return it }
+
         iceCreamImageKey(trimmed)?.let { key ->
             generatedOverrides[key]?.let { return resolve(it) }
             generatedOverrides[key.lowercase()]?.let { return resolve(it) }
             directMap[key]?.let { return it }
             directMap[key.lowercase()]?.let { return it }
         }
-
-        directMap[trimmed]?.let { return it }
-        directMap[lower]?.let { return it }
 
         if (canonical.isNotEmpty() && !canonical.equals(trimmed, ignoreCase = true)) {
             userOverrides[canonical]?.let { return resolve(it) }
@@ -470,6 +473,27 @@ object TotImageProvider {
         }
 
         return null
+    }
+
+    /** Stable per-pack key for This-or-That artwork.
+     *
+     * Using a scoped key prevents equal/similar labels in other packs (for example
+     * chocolate ice cream vs. hot chocolate) from stealing an image through a
+     * heuristic or a shared label mapping. Existing label mappings remain the
+     * fallback so old packs keep working unchanged.
+     */
+    fun totAssetKey(packId: String, optionText: String): String {
+        val pack = packId.trim().lowercase()
+        val option = optionText.trim()
+        return if (pack.isEmpty() || option.isEmpty()) option else "tot:$pack:$option"
+    }
+
+    fun setTotCustomImage(packId: String, optionText: String, imageUriOrUrl: Any) {
+        setCustomImage(totAssetKey(packId, optionText), imageUriOrUrl)
+    }
+
+    fun removeTotCustomImage(packId: String, optionText: String) {
+        removeCustomImage(totAssetKey(packId, optionText))
     }
 
     fun setAlias(aliasText: String, sourceText: String) {

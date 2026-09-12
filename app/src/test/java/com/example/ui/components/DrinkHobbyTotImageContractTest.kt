@@ -1,5 +1,7 @@
 package com.example.ui.components
 
+import com.example.R
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
@@ -19,6 +21,38 @@ class DrinkHobbyTotImageContractTest {
                 TotImageProvider.getBundledImageResId(option)
             )
         }
+    }
+
+    @Test
+    fun `hot chocolate resolves to the dedicated cocoa drawable`() {
+        assertEquals(
+            "Heiße Schokolade must not be captured by the generic chocolate ice-cream heuristic",
+            R.drawable.tot_drink_hot_chocolate,
+            TotImageProvider.getBundledImageResId("Heiße Schokolade")
+        )
+    }
+
+    @Test
+    fun `pack scoped image override wins and can be replaced independently`() {
+        val packId = "getraenke"
+        val option = "Heiße Schokolade"
+        val scopedKey = TotImageProvider.totAssetKey(packId, option)
+        val replacement = "file:///replacement/hot-cocoa.webp"
+
+        try {
+            TotImageProvider.setTotCustomImage(packId, option, replacement)
+            assertEquals(
+                replacement,
+                TotImageProvider.getImageUrl(assetKey = scopedKey, legacyAssetKey = option)
+            )
+        } finally {
+            TotImageProvider.removeTotCustomImage(packId, option)
+        }
+
+        assertEquals(
+            R.drawable.tot_drink_hot_chocolate,
+            TotImageProvider.getBundledImageResId(option)
+        )
     }
 
     @Test

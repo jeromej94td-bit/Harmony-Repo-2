@@ -257,14 +257,16 @@ private fun CoupleQuestionRevealCard(
     val myImageModel = remember(pack.id, resolvedMyAnswer, myPresentation.localImagePath, TotImageProvider.version) {
         localResultImageModel(myPresentation.localImagePath)
             ?: if (pack.type == "tot" && resolvedMyAnswer.isNotBlank()) {
-                val assetKey = TravelDestinationCatalog.assetKeyFor(pack.id, resolvedMyAnswer) ?: resolvedMyAnswer
+                val assetKey = TravelDestinationCatalog.assetKeyFor(pack.id, resolvedMyAnswer)
+                    ?: TotImageProvider.totAssetKey(pack.id, resolvedMyAnswer)
                 TotImageProvider.getImageUrl(assetKey = assetKey, legacyAssetKey = resolvedMyAnswer)
             } else null
     }
     val partnerImageModel = remember(pack.id, resolvedPartnerAnswer, partnerPresentation.localImagePath, TotImageProvider.version) {
         localResultImageModel(partnerPresentation.localImagePath)
             ?: if (pack.type == "tot" && resolvedPartnerAnswer.isNotBlank()) {
-                val assetKey = TravelDestinationCatalog.assetKeyFor(pack.id, resolvedPartnerAnswer) ?: resolvedPartnerAnswer
+                val assetKey = TravelDestinationCatalog.assetKeyFor(pack.id, resolvedPartnerAnswer)
+                    ?: TotImageProvider.totAssetKey(pack.id, resolvedPartnerAnswer)
                 TotImageProvider.getImageUrl(assetKey = assetKey, legacyAssetKey = resolvedPartnerAnswer)
             } else null
     }
@@ -389,7 +391,8 @@ private fun TotOwnAnswerPreview(
     myAnswer: String
 ) {
     val assetKey = remember(pack.id, myAnswer) {
-        TravelDestinationCatalog.assetKeyFor(pack.id, myAnswer) ?: myAnswer
+        TravelDestinationCatalog.assetKeyFor(pack.id, myAnswer)
+            ?: TotImageProvider.totAssetKey(pack.id, myAnswer)
     }
     val imageModel = remember(assetKey, myAnswer, TotImageProvider.version) {
         TotImageProvider.getImageUrl(

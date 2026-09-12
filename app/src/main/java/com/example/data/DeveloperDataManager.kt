@@ -534,11 +534,19 @@ object DeveloperDataManager {
         saveData(context)
     }
 
+    fun setTotImageOverride(context: Context, packId: String, optionName: String, urlOrPath: String) {
+        setImageOverride(context, TotImageProvider.totAssetKey(packId, optionName), urlOrPath)
+    }
+
     fun setImageOverride(context: Context, optionName: String, urlOrPath: String) {
         if (optionName.isNotBlank() && urlOrPath.isNotBlank()) {
             imageOverrides[optionName.trim()] = urlOrPath.trim()
             saveData(context)
         }
+    }
+
+    fun deleteTotImageOverride(context: Context, packId: String, optionName: String) {
+        deleteImageOverride(context, TotImageProvider.totAssetKey(packId, optionName))
     }
 
     fun deleteImageOverride(context: Context, optionName: String) {
@@ -547,6 +555,10 @@ object DeveloperDataManager {
         TotImageProvider.removeCustomImage(key)
         DevAssetStore.deleteImage(context, key)
         saveData(context)
+    }
+
+    fun setTotImageFromUri(context: Context, packId: String, optionName: String, uri: Uri): String? {
+        return setImageFromUri(context, TotImageProvider.totAssetKey(packId, optionName), uri)
     }
 
     fun setImageFromUri(context: Context, optionName: String, uri: Uri): String? {
