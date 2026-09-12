@@ -1,0 +1,35 @@
+name: Drive Placeholder Assets
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'app/src/main/java/com/example/ui/components/TotImageProvider.kt'
+      - 'app/src/main/drive-assets/**'
+      - 'app/build.gradle.kts'
+      - 'scripts/verify_drive_placeholder_assets.py'
+      - '.github/workflows/drive-placeholder-assets.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/src/main/java/com/example/ui/components/TotImageProvider.kt'
+      - 'app/src/main/drive-assets/**'
+      - 'app/build.gradle.kts'
+      - 'scripts/verify_drive_placeholder_assets.py'
+      - '.github/workflows/drive-placeholder-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify Drive-backed local image mappings
+        run: python3 scripts/verify_drive_placeholder_assets.py
